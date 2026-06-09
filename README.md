@@ -30,7 +30,7 @@ rdk-course-demos/
 │   ├── 10_codec/                 # 第 10 课：编解码使用
 │   ├── 11_40pin_gpio_pwm/        # 第 11 课：40pin 使用（1）
 │   ├── 12_40pin_uart_i2c/        # 第 12 课：40pin 使用（2）
-│   ├── 13_40pin_spi/             # 第 13 课：40pin 使用（3）
+│   ├── 13_40pin_spi/             # 第 13 课：SPI 驱动屏幕（含点亮与动画 Demo）
 │   └── 14_can/                   # 第 14 课：CAN 口使用
 ├── 02_modelzoo/            # 进阶篇：ModelZoo 开发指南
 └── 03_tros/                # 进阶篇：TROS 开发指南

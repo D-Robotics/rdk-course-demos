@@ -1,4 +1,4 @@
-# 第 12 课配套 Demo：SPI 屏幕点亮与动画显示
+# 第 13 课配套 Demo：SPI 屏幕点亮与动画显示
 
 > **课程定位：** 40pin 外设实战 — 在掌握 GPIO / UART / I2C 基础后，通过 SPI 驱动 ST7789 屏幕，完成「接线 → 点亮 → 动画刷新」完整链路。  
 > **适用硬件：** RDK X5 + 2.0 寸 240×320 SPI LCD（驱动 IC：ST7789）  
@@ -179,7 +179,7 @@ pip3 install spidev
 
 ```bash
 git clone https://github.com/D-Robotics/rdk-course-demos.git
-cd rdk-course-demos/01_beginner/12_40pin_uart_i2c/code
+cd rdk-course-demos/01_beginner/13_40pin_spi/code
 ```
 
 ### 5.4 权限说明
@@ -191,7 +191,7 @@ cd rdk-course-demos/01_beginner/12_40pin_uart_i2c/code
 ## 6. 代码结构
 
 ```text
-12_40pin_uart_i2c/
+13_40pin_spi/
 ├── README.md                  # 本讲义
 └── code/
     ├── rdk_x5_lcd_st7789.py   # 核心驱动：ST7789 + spidev + GPIO
@@ -212,7 +212,7 @@ cd rdk-course-demos/01_beginner/12_40pin_uart_i2c/code
 **目标：** 验证接线、SPI 通信、ST7789 初始化是否正常。
 
 ```bash
-cd rdk-course-demos/01_beginner/12_40pin_uart_i2c/code
+cd rdk-course-demos/01_beginner/13_40pin_spi/code
 sudo python3 rdk_x5_lcd_st7789.py --hold
 ```
 
@@ -247,7 +247,7 @@ sudo python3 rdk_x5_lcd_st7789.py --rgb --hold
 **目标：** 在点亮基础上，理解帧循环刷新机制。
 
 ```bash
-cd rdk-course-demos/01_beginner/12_40pin_uart_i2c/code
+cd rdk-course-demos/01_beginner/13_40pin_spi/code
 sudo python3 lcd_animate.py
 ```
 
@@ -345,8 +345,7 @@ show(image)   ->  PIL RGB888 -> RGB565 -> SPI 分块写入
 | 已学内容            | 本课关联                    |
 | --------------- | ----------------------- |
 | 第 11 课 GPIO/PWM | DC/RST/BL 本质是 GPIO 输出   |
-| 第 12 课 UART/I2C | 对比 SPI 的高速批量传输特性        |
-| 第 13 课 SPI 深入   | 本 Demo 即为 SPI 驱动屏幕的实战入口 |
+| 第 12 课 UART/I2C | 可与 SPI 对比，理解不同总线适用场景 |
 
 
 **官方参考示例：**
