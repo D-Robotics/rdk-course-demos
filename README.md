@@ -17,18 +17,21 @@
 
 ```text
 rdk-course-demos/
-├── 01_beginner/            # 入门篇：RDK 的基础使用
-│   ├── 01_community_ecosystem/
-│   ├── 02_product_intro/
-│   ├── 03_flash_system/
-│   ├── 04_boot_troubleshooting/
-│   ├── 05_remote_connection/
-│   ├── 06_camera/
-│   ├── 07_audio/
-│   ├── 08_display/
-│   ├── 09_40pin/
-│   ├── 10_codec/
-│   └── 11_can/
+├── 01_beginner/            # 入门篇：RDK 的基础使用（共 14 课）
+│   ├── 01_community_ecosystem/   # 第 1 课：社区与生态入门
+│   ├── 02_product_intro/         # 第 2 课：RDK 产品简介
+│   ├── 03_rdk_studio/            # 第 3 课：RDK Studio 介绍
+│   ├── 04_flash_system/          # 第 4 课：烧录说明
+│   ├── 05_boot_troubleshooting/  # 第 5 课：启动说明与问题排查
+│   ├── 06_remote_connection/     # 第 6 课：远程连接
+│   ├── 07_camera/                # 第 7 课：Camera 使用
+│   ├── 08_audio/                 # 第 8 课：音频使用
+│   ├── 09_display/               # 第 9 课：显示模块使用
+│   ├── 10_codec/                 # 第 10 课：编解码使用
+│   ├── 11_40pin_gpio_pwm/        # 第 11 课：40pin 使用（1）
+│   ├── 12_40pin_uart_i2c/        # 第 12 课：40pin 使用（2）
+│   ├── 13_40pin_spi/             # 第 13 课：40pin 使用（3）
+│   └── 14_can/                   # 第 14 课：CAN 口使用
 ├── 02_modelzoo/            # 进阶篇：ModelZoo 开发指南
 └── 03_tros/                # 进阶篇：TROS 开发指南
 ```
