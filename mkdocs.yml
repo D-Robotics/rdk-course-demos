@@ -1,0 +1,127 @@
+site_name: RDK Classroom
+site_description: Developer tutorials and hands-on learning for D-Robotics RDK platforms.
+site_url: https://d-robotics.github.io/rdk-course-demos/
+repo_url: https://github.com/D-Robotics/rdk-course-demos
+repo_name: D-Robotics/rdk-course-demos
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  language: en
+  logo: assets/images/d-robotics-logo.png
+  favicon: assets/images/d-robotics-logo.png
+  features:
+    - navigation.tracking
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.action.edit
+    - content.action.view
+    - toc.follow
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: deep orange
+      accent: amber
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: deep orange
+      accent: amber
+      toggle:
+        icon: material/weather-night
+        name: Switch to light mode
+  font:
+    text: Inter
+    code: Roboto Mono
+  icon:
+    repo: fontawesome/brands/github
+
+extra_css:
+  - assets/stylesheets/brand.css
+
+plugins:
+  - search
+  - i18n:
+      docs_structure: suffix
+      reconfigure_material: true
+      languages:
+        - locale: en
+          default: true
+          name: English
+          build: true
+        - locale: zh
+          name: 简体中文
+          build: true
+          site_description: 面向 D-Robotics RDK 开发者的教程与实战课程。
+          nav_translations:
+            Home: 首页
+            01 · Fundamentals: 01 · 基础入门
+            Course outline: 课程大纲
+            Common foundation: 通用基础
+            Community & ecosystem: 社区与生态
+            RDK X5: RDK X5
+            RDK S100: RDK S100
+            Flash a system image: 烧录系统镜像
+            Boot troubleshooting: 启动问题排查
+            SPI display demo: SPI 显示屏示例
+            02 · ModelZoo & RoboGo: 02 · ModelZoo 与 RoboGo
+            Course overview: 课程介绍
+            03 · TROS: 03 · TROS
+            04 · System & drivers: 04 · 系统与驱动
+            05 · LLMs & embodied AI: 05 · 大模型与具身智能
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - 01 · Fundamentals:
+      - Course outline: beginner/index.md
+      - Common foundation:
+          - Community & ecosystem: beginner/01-community-ecosystem.md
+      - RDK X5:
+          - Flash a system image: beginner/04-flash-system-x5.md
+          - Boot troubleshooting: beginner/05-boot-troubleshooting-x5.md
+          - SPI display demo: hardware/spi-display.md
+      - RDK S100:
+          - Flash a system image: beginner/04-flash-system-s100.md
+          - Boot troubleshooting: beginner/05-boot-troubleshooting-s100.md
+  - 02 · ModelZoo & RoboGo:
+      - Course overview: modelzoo/index.md
+  - 03 · TROS:
+      - Course overview: tros/index.md
+  - 04 · System & drivers:
+      - Course overview: system-drivers/index.md
+  - 05 · LLMs & embodied AI:
+      - Course overview: embodied-ai/index.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/D-Robotics/rdk-course-demos
+      name: RDK Classroom on GitHub
+  generator: false
+
+copyright: Copyright &copy; D-Robotics
