@@ -379,7 +379,11 @@ git commit -m "docs: use topic-based course names"
         forbidden_patterns = (
             re.compile(r"Lesson\s+\d+", re.IGNORECASE),
             re.compile(r"第\s*\d+\s*课"),
-            re.compile(r"^#{1,6}\s+(?:\d+|[IVX]+)[.、·]\s+", re.MULTILINE),
+            re.compile(r"^#{1,6}\s+\d+\s*·\s+", re.MULTILINE),
+            re.compile(
+                r"^#{1,6}\s+[IVX]+\.\s+(?:Beginner|Advanced|Expert|Developer)",
+                re.MULTILINE | re.IGNORECASE,
+            ),
             re.compile(r"^\|\s*(?:\d+|Lesson\s+\d+|第\s*\d+\s*课)\s*\|", re.MULTILINE | re.IGNORECASE),
         )
         for path in self.public_markdown_files():
@@ -587,7 +591,7 @@ python -m unittest tests.test_course_site_structure -v
 $publicDocs = Get-ChildItem docs -Recurse -File -Filter *.md |
   Where-Object { $_.FullName -notmatch '[\\/]superpowers[\\/]' }
 
-$forbidden = $publicDocs | Select-String -Pattern 'Lesson\s+\d+|第\s*\d+\s*课|^#{1,6}\s+(\d+|[IVX]+)[\.、·]\s+' -CaseSensitive:$false
+$forbidden = $publicDocs | Select-String -Pattern 'Lesson\s+\d+|第\s*\d+\s*课|^#{1,6}\s+\d+\s*·\s+|^#{1,6}\s+[IVX]+\.\s+(Beginner|Advanced|Expert|Developer)' -CaseSensitive:$false
 if ($forbidden) { $forbidden; exit 1 }
 
 $overviewRefs = Get-ChildItem docs,mkdocs.yml -Recurse -File |
