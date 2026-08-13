@@ -1,4 +1,4 @@
-# 02 · ModelZoo & RoboGo
+# ModelZoo & RoboGo
 
 This course line connects model preparation with board-side inference examples and RoboGo application workflows.
 

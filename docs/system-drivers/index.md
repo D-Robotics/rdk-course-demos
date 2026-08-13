@@ -1,4 +1,4 @@
-# 04 · System & drivers
+# System & drivers
 
 This course line focuses on the RDK software stack below the application layer: system architecture, BSP components, peripheral drivers, debugging tools, and board-level integration.
 

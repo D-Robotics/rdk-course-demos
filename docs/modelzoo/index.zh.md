@@ -1,4 +1,4 @@
-# 02 · ModelZoo 与 RoboGo
+# ModelZoo 与 RoboGo
 
 这一部分把模型准备、板端推理和 RoboGo 应用串在一起。
 

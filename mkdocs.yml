@@ -4,6 +4,8 @@ site_url: https://d-robotics.github.io/rdk-course-demos/
 repo_url: https://github.com/D-Robotics/rdk-course-demos
 repo_name: D-Robotics/rdk-course-demos
 edit_uri: edit/develop/docs/
+exclude_docs: |
+  superpowers/**
 
 theme:
   name: material
@@ -62,21 +64,21 @@ plugins:
           nav_translations:
             Home: 首页
             Course introduction: 课程介绍
-            01 · Fundamentals: 01 · 基础入门
-            Course outline: 课程大纲
+            Fundamentals: 基础入门
+            Course routes: 课程路径
             Common foundation: 通用基础
             Community & ecosystem: 社区与生态
             RDK Studio: RDK Studio
             RDK X5: RDK X5
             RDK S100: RDK S100
-            Flash a system image: 烧录系统镜像
-            Boot troubleshooting: 启动问题排查
-            SPI display demo: SPI 显示屏示例
-            02 · ModelZoo & RoboGo: 02 · ModelZoo 与 RoboGo
+            System flashing: 系统烧录
+            Boot & troubleshooting: 启动与问题排查
+            SPI display: SPI 显示屏
+            ModelZoo & RoboGo: ModelZoo 与 RoboGo
             Course overview: 课程介绍
-            03 · TROS: 03 · TROS
-            04 · System & drivers: 04 · 系统与驱动
-            05 · LLMs & embodied AI: 05 · 大模型与具身智能
+            TROS: TROS
+            System & drivers: 系统与驱动
+            LLMs & embodied AI: 大模型与具身智能
 
 markdown_extensions:
   - admonition
@@ -99,26 +101,25 @@ markdown_extensions:
 
 nav:
   - Home: index.md
-  - Course introduction: course-overview.md
-  - 01 · Fundamentals:
-      - Course outline: beginner/index.md
+  - Fundamentals:
+      - Course routes: beginner/index.md
       - Common foundation:
           - Community & ecosystem: beginner/01-community-ecosystem.md
           - RDK Studio: beginner/03-rdk-studio.md
       - RDK X5:
-          - Flash a system image: beginner/04-flash-system-x5.md
-          - Boot troubleshooting: beginner/05-boot-troubleshooting-x5.md
-          - SPI display demo: hardware/spi-display.md
+          - System flashing: beginner/04-flash-system-x5.md
+          - Boot & troubleshooting: beginner/05-boot-troubleshooting-x5.md
+          - SPI display: hardware/spi-display.md
       - RDK S100:
-          - Flash a system image: beginner/04-flash-system-s100.md
-          - Boot troubleshooting: beginner/05-boot-troubleshooting-s100.md
-  - 02 · ModelZoo & RoboGo:
+          - System flashing: beginner/04-flash-system-s100.md
+          - Boot & troubleshooting: beginner/05-boot-troubleshooting-s100.md
+  - ModelZoo & RoboGo:
       - Course overview: modelzoo/index.md
-  - 03 · TROS:
+  - TROS:
       - Course overview: tros/index.md
-  - 04 · System & drivers:
+  - System & drivers:
       - Course overview: system-drivers/index.md
-  - 05 · LLMs & embodied AI:
+  - LLMs & embodied AI:
       - Course overview: embodied-ai/index.md
 
 extra:

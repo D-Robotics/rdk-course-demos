@@ -21,5 +21,5 @@ If `DOWNLOAD` is off but the system does not start normally, open the [RDK S100 
 
 ## Resources
 
-- [Course code and materials](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/04_flash_system)
+- [Course code and materials](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/04_flash_system)
 - [Official RDK S100 documentation](https://developer.d-robotics.cc/rdk_doc/rdk_s/Quick_start/)

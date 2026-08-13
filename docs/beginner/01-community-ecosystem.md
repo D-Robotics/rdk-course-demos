@@ -1,4 +1,4 @@
-# RDK Lesson 1: Community and Ecosystem Introduction
+# RDK Community and Ecosystem
 
 RDK resources extend beyond board manuals. They also include source repositories, model examples, robotics documentation, development tools, application cases, and technical communities.
 
@@ -61,7 +61,7 @@ Choose an entry point according to the problem you need to solve:
 | Open-source projects and implementation details | D-Robotics GitHub | Repositories, README files, source code, Issues |
 | BPU model deployment examples | RDK Model Zoo | Board branches, model directories, README files |
 | ROS 2 / TROS robotics development | TROS manual and GitHub | Usage paths, packages, source code, Issues |
-| A development workspace for RDK devices | RDK Studio | Device-development entry point; covered in Lesson 3 |
+| A development workspace for RDK devices | RDK Studio | Device-development entry point; covered in the RDK Studio course |
 | Existing solutions and application scenarios | NodeHub | Additional application-case entry point |
 | Questions, problem reports, and experience sharing | D-Robotics Forum | Technical discussions, support questions, and shared experience |
 
@@ -169,7 +169,7 @@ This lesson does not install TROS, run nodes, or teach package development.
 
 ### 8.1 RDK Studio
 
-[RDK Studio](https://d-robotics.github.io/rdk_studio_doc/en/category/1-product-intro/) is an AI-native development workspace for RDK devices and can serve as an entry point for device development. Lesson 3 covers how to use it.
+[RDK Studio](https://d-robotics.github.io/rdk_studio_doc/en/category/1-product-intro/) is an AI-native development workspace for RDK devices and can serve as an entry point for device development. The RDK Studio course covers how to use it.
 
 ### 8.2 NodeHub
 
@@ -251,7 +251,7 @@ The most important result of this lesson is not a list of URLs, but a lookup seq
 4. **Use supplementary entries at the right depth**: RDK Studio is a device-development entry point, while NodeHub introduces application cases;
 5. **Report problems with complete information**: board, version, steps, expected result, actual result, logs, and previous troubleshooting.
 
-The next lesson is **RDK Product Overview**, which introduces the positioning of different RDK products and how to choose between them.
+Continue with **RDK Product Overview** to learn the positioning of different RDK products and how to choose between them.
 
 ## 13. Further Practice
 

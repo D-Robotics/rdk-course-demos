@@ -43,6 +43,6 @@ J16 会提供 Main 域和 MCU 域 Debug 通道，因此主机上出现多个串�
 
 ## 相关资料
 
-- [课程代码与素材](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/05_boot_troubleshooting)
+- [课程代码与素材](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/05_boot_troubleshooting)
 - [RDK S100 硬件文档](https://developer.d-robotics.cc/rdk_doc/rdk_s/Quick_start/hardware_introduction/rdk_s100/)
 - [RDK 常见问题](https://developer.d-robotics.cc/rdk_doc/FAQ)

@@ -38,6 +38,6 @@ RDK X5 使用接口 4 的 Micro USB Debug 串口。
 
 ## 相关资料
 
-- [课程代码与素材](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/05_boot_troubleshooting)
+- [课程代码与素材](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/05_boot_troubleshooting)
 - [RDK X5 硬件文档](https://developer.d-robotics.cc/rdk_doc/Quick_start/hardware_introduction/rdk_x5/)
 - [RDK 常见问题](https://developer.d-robotics.cc/rdk_doc/FAQ)

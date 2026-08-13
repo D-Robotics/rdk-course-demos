@@ -1,6 +1,6 @@
 # SPI 显示屏示例
 
-仓库中的 SPI 课程使用 RDK X5 驱动 ST7789 显示屏。可运行代码位于 [`01_beginner/13_40pin_spi`](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/13_40pin_spi)。
+仓库中的 SPI 课程使用 RDK X5 驱动 ST7789 显示屏。可运行代码位于 [`01_beginner/13_40pin_spi`](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/13_40pin_spi)。
 
 ## 示例内容
 

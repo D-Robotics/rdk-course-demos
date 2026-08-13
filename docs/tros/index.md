@@ -1,4 +1,4 @@
-# 03 · TROS
+# TROS
 
 This course line builds from a working RDK system toward complete robotics applications.
 

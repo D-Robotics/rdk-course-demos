@@ -1,4 +1,4 @@
-# RDK 第三课：RDK Studio 入门
+# RDK Studio 入门
 
 > 课程版本：本课程基于 RDK Studio v1.3.3；后续界面与功能变化以后续版本为准
 >

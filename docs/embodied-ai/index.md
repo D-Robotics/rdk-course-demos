@@ -1,4 +1,4 @@
-# 05 · LLMs & embodied AI
+# LLMs & embodied AI
 
 This course line explores large language models, multimodal interaction, agent workflows, and embodied intelligence on RDK platforms.
 

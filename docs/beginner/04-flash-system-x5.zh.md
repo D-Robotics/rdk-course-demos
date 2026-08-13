@@ -21,5 +21,5 @@
 
 ## 相关资料
 
-- [课程代码与素材](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/04_flash_system)
+- [课程代码与素材](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/04_flash_system)
 - [RDK X5 官方文档](https://developer.d-robotics.cc/rdk_doc/Quick_start/)
