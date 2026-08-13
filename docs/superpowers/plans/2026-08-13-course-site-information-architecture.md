@@ -594,7 +594,7 @@ $publicDocs = Get-ChildItem docs -Recurse -File -Filter *.md |
 $forbidden = $publicDocs | Select-String -Pattern 'Lesson\s+\d+|第\s*\d+\s*课|^#{1,6}\s+\d+\s*·\s+|^#{1,6}\s+[IVX]+\.\s+(Beginner|Advanced|Expert|Developer)' -CaseSensitive:$false
 if ($forbidden) { $forbidden; exit 1 }
 
-$overviewRefs = Get-ChildItem docs,mkdocs.yml -Recurse -File |
+$overviewRefs = @($publicDocs) + (Get-Item mkdocs.yml) |
   Select-String -SimpleMatch 'course-overview.md'
 if ($overviewRefs) { $overviewRefs; exit 1 }
 ```
