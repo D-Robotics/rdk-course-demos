@@ -142,6 +142,29 @@ class CourseSiteStructureTests(unittest.TestCase):
             for topic in board_topics_zh:
                 self.assertGreaterEqual(text.count(topic), 2, topic)
 
+    def test_bilingual_route_structure_matches(self) -> None:
+        english_home = self.read("docs/index.md")
+        chinese_home = self.read("docs/index.zh.md")
+        english_routes = self.read("docs/beginner/index.md")
+        chinese_routes = self.read("docs/beginner/index.zh.md")
+
+        pairs = (
+            ("Common foundation", "通用基础"),
+            ("RDK X5", "RDK X5"),
+            ("RDK S100", "RDK S100"),
+            ("ModelZoo and RoboGo", "ModelZoo 与 RoboGo"),
+            ("TROS Development Guide", "TROS 开发指南"),
+            ("System and Driver Development Guide", "系统驱动开发指南"),
+            ("Developer Cases", "开发者案例"),
+        )
+        for english_label, chinese_label in pairs:
+            self.assertIn(english_label, english_home)
+            self.assertIn(chinese_label, chinese_home)
+
+        for english_label, chinese_label in pairs[:3]:
+            self.assertIn(english_label, english_routes)
+            self.assertIn(chinese_label, chinese_routes)
+
     def test_public_docs_do_not_expose_lesson_ordinals(self) -> None:
         for path in self.public_markdown_files():
             text = path.read_text(encoding="utf-8")
