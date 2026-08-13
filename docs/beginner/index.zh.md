@@ -14,7 +14,7 @@
 | --- | --- | --- |
 | 课程介绍 | [RDK 小课堂课程结构与学习方式](../course-overview.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/00_course_overview) |
 | 01 | [RDK 社区与生态](01-community-ecosystem.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/01_community_ecosystem) |
-| 02 | RDK 产品介绍与 Roadmap | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/02_product_intro) |
+| 02 | [RDK 硬件全家桶](02-product-intro.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/02_product_intro) |
 | 03 | [RDK Studio 介绍](03-rdk-studio.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/03_rdk_studio) |
 
 ## 2. RDK X5 课程

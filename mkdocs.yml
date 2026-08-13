@@ -66,6 +66,7 @@ plugins:
             Course outline: 课程大纲
             Common foundation: 通用基础
             Community & ecosystem: 社区与生态
+            RDK hardware portfolio: RDK 硬件全家桶
             RDK Studio: RDK Studio
             RDK X5: RDK X5
             RDK S100: RDK S100
@@ -104,6 +105,7 @@ nav:
       - Course outline: beginner/index.md
       - Common foundation:
           - Community & ecosystem: beginner/01-community-ecosystem.md
+          - RDK hardware portfolio: beginner/02-product-intro.md
           - RDK Studio: beginner/03-rdk-studio.md
       - RDK X5:
           - Flash a system image: beginner/04-flash-system-x5.md
