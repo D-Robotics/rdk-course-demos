@@ -136,53 +136,76 @@ If you already know Linux, ROS, or AI model deployment, you can go directly to t
 
 # Curriculum
 
-## I. Beginner: RDK Basics
+## Beginner: RDK Basics
 
 This module is designed for new RDK users and focuses on how to boot the board, connect to it, verify peripherals, and run basic functions.
 
 After completing this module, you should be able to use an RDK board independently, validate common peripherals, and troubleshoot basic issues.
 
-| No. | Lesson | Main Video Topics | Materials |
-|---|---|---|---|
-| Lesson 1 | RDK Community and Ecosystem Introduction | RDK community, documentation entry points, NodeHub as an additional application-case entry, and forum guidelines | Video / Handbook |
-| Lesson 2 | RDK Product Overview | Product families, hardware capabilities, roadmap, and typical use cases | Video / Handbook |
-| Lesson 3 | Getting Started with RDK Studio | Meet the AI-native development workspace for RDK devices; use Moss for a read-only X5 health check and BPU YOLO real-time detection, and discover the terminal, files, code-server, remote desktop, system flashing, and on-device agents | Video / Handbook |
-| Lesson 4 | RDK Lesson 4: System Flashing | System image flashing, MiniBoot updates, and post-flash checks | Video / Handbook |
-| Lesson 5 | RDK Boot Process and Troubleshooting | Boot process, indicator status, boot logs, and typical boot issues | Video / Handbook |
-| Lesson 6 | Remote Connection to RDK | Serial connection, SSH, networking, VNC, and remote development | Video / Handbook |
-| Lesson 7 | Using Cameras with RDK | USB cameras, MIPI cameras, C/Python access, and quick TROS use | Video / Handbook / Demo |
-| Lesson 8 | RDK Lesson 8: Audio | Onboard earphone interface, audio boards, and USB audio-device validation | Video / Handbook / Demo |
-| Lesson 9 | Using Display Modules with RDK | HDMI and DSI display modules, display configuration, and result validation | Video / Handbook / Demo |
-| Lesson 10 | RDK Lesson 10: Codec Usage | Encoding, decoding, BSP interfaces, RTSP streaming, and decoding | Video / Handbook / Demo |
-| Lesson 11 | RDK 40pin Usage (1) | GPIO and PWM basics, LED control, and servo-control demos | Video / Handbook / Demo |
-| Lesson 12 | RDK 40pin Usage (2) | UART basics, UART send/receive demos, I2C basics, and an I2C temperature-and-humidity sensor demo | Video / Handbook / Demo |
-| Lesson 13 | RDK 40pin Usage (3) | SPI basics and an SPI display-driving demo | Video / Handbook / Demo |
-| Lesson 14 | Using the RDK CAN Interface | CAN FD basics, can-utils, CAN loopback testing, CAN motor-control demos, and a CAN logic-analyzer demo | Video / Handbook / Demo |
+### Common foundation
+
+| Topic | Focus | Materials |
+|---|---|---|
+| [Community and Ecosystem](beginner/01-community-ecosystem.md) | RDK community, documentation entry points, NodeHub as an additional application-case entry, and forum guidelines | Video / Handbook / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/01_community_ecosystem) |
+| Product Overview | Product families, hardware capabilities, roadmap, and typical use cases | Video / Handbook / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/02_product_intro) |
+| [RDK Studio](beginner/03-rdk-studio.md) | Meet the AI-native development workspace for RDK devices; use Moss for a read-only X5 health check and BPU YOLO real-time detection, and discover the terminal, files, code-server, remote desktop, system flashing, and on-device agents | Video / Handbook / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/03_rdk_studio) |
+
+### RDK X5
+
+| Topic | Focus | Materials |
+|---|---|---|
+| [System Flashing](beginner/04-flash-system-x5.md) | System image flashing, MiniBoot updates, and post-flash checks | Video / Handbook / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/04_flash_system) |
+| [Boot and Troubleshooting](beginner/05-boot-troubleshooting-x5.md) | Boot process, indicator status, boot logs, and typical boot issues | Video / Handbook / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/05_boot_troubleshooting) |
+| Remote Connection | Serial connection, SSH, networking, VNC, and remote development | Video / Handbook / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/06_remote_connection) |
+| Camera | USB cameras, MIPI cameras, C/Python access, and quick TROS use | Video / Handbook / Demo / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/07_camera) |
+| Audio | Onboard earphone interface, audio boards, and USB audio-device validation | Video / Handbook / Demo / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/08_audio) |
+| Display | HDMI and DSI display modules, display configuration, and result validation | Video / Handbook / Demo / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/09_display) |
+| Video Codec | Encoding, decoding, BSP interfaces, RTSP streaming, and decoding | Video / Handbook / Demo / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/10_codec) |
+| GPIO and PWM | GPIO and PWM basics, LED control, and servo-control demos | Video / Handbook / Demo / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/11_40pin_gpio_pwm) |
+| UART and I2C | UART basics, UART send/receive demos, I2C basics, and an I2C temperature-and-humidity sensor demo | Video / Handbook / Demo / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/12_40pin_uart_i2c) |
+| [SPI](hardware/spi-display.md) | SPI basics and an SPI display-driving demo | Video / Handbook / Demo / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/13_40pin_spi) |
+| CAN | CAN FD basics, can-utils, CAN loopback testing, CAN motor-control demos, and a CAN logic-analyzer demo | Video / Handbook / Demo / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/14_can) |
+
+### RDK S100
+
+| Topic | Focus | Materials |
+|---|---|---|
+| [System Flashing](beginner/04-flash-system-s100.md) | System image flashing, MiniBoot updates, and post-flash checks | Video / Handbook / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/04_flash_system) |
+| [Boot and Troubleshooting](beginner/05-boot-troubleshooting-s100.md) | Boot process, indicator status, boot logs, and typical boot issues | Video / Handbook / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/05_boot_troubleshooting) |
+| Remote Connection | Serial connection, SSH, networking, VNC, and remote development | Video / Handbook / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/06_remote_connection) |
+| Camera | USB cameras, MIPI cameras, C/Python access, and quick TROS use | Video / Handbook / Demo / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/07_camera) |
+| Audio | Onboard earphone interface, audio boards, and USB audio-device validation | Video / Handbook / Demo / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/08_audio) |
+| Display | HDMI and DSI display modules, display configuration, and result validation | Video / Handbook / Demo / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/09_display) |
+| Video Codec | Encoding, decoding, BSP interfaces, RTSP streaming, and decoding | Video / Handbook / Demo / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/10_codec) |
+| GPIO and PWM | GPIO and PWM basics, LED control, and servo-control demos | Video / Handbook / Demo / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/11_40pin_gpio_pwm) |
+| UART and I2C | UART basics, UART send/receive demos, I2C basics, and an I2C temperature-and-humidity sensor demo | Video / Handbook / Demo / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/12_40pin_uart_i2c) |
+| SPI | SPI basics and an SPI display-driving demo | Video / Handbook / Demo / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/13_40pin_spi) |
+| CAN | CAN FD basics, can-utils, CAN loopback testing, CAN motor-control demos, and a CAN logic-analyzer demo | Video / Handbook / Demo / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/14_can) |
 
 ---
 
-## II. Advanced: ModelZoo && Robogo Development Guide
+## Advanced: ModelZoo and RoboGo Development Guide
 
 This module is designed for developers who want to run AI models on RDK. It covers model preparation, conversion, deployment, and representative vision-task demos, together with model training and conversion on the Robogo cloud platform.
 
 After completing this module, you should understand the basic structure of RDK Model Zoo, be able to run model-inference experiments from existing demos, and use the Robogo cloud platform for cloud-based model training and conversion.
 
-| No. | Lesson | Problem Addressed | Materials |
-|---|---|---|---|
-| Lesson 1 | ModelZoo Usage Guide | Understand the official Model Zoo repository, supported models, branch information, and how to run an existing sample quickly | Video / Handbook / GitHub Code |
-| Lesson 2 | ModelZoo Sample Structure | Understand the purpose of directories such as conversion, model, runtime, evaluator, and test_data in a typical sample | Video / Handbook |
-| Lesson 3 | Algorithm Toolchain and Quantization Environment | Use the local toolchain, Docker environment, and RoboGo cloud desktop, cloud host, or online quantization environment | Video / Handbook |
-| Lesson 4 | ResNet Classification Training and Quantization | Train, export, quantize, validate, and run on-device inference for a ResNet classification model using cloud and local environments | Video / Handbook / GitHub Code |
-| Lesson 5 | YOLO Detection Training and Quantization | Train a YOLO model, export ONNX, quantize, validate, and verify on-device inference using cloud and local environments | Video / Handbook / GitHub Code |
-| Lesson 6 | Featuremap Model Quantization | Configure Featuremap-based models and understand their use cases and common issues in cloud and local environments | Video / Handbook |
-| Lesson 7 | On-device Python Runtime Inference | Load a model with hbm_runtime, construct inputs, run inference, parse outputs, and visualize results | Video / Handbook / GitHub Code |
-| Lesson 8 | On-device C/C++ Runtime Inference | Use C/C++ inference interfaces, model loading, preprocessing, BPU inference, post-processing, compilation, and execution | Video / Handbook / GitHub Code |
-| Lesson 9 | YOLO Post-processing and Demo Adaptation | Parse detection boxes, configure thresholds and NMS, map classes, and adapt a YOLO Runtime demo to a custom model | Video / Handbook / GitHub Code |
-| Lesson 10 | ModelZoo Collaborative Development | Follow the directory, naming, README, test-data, run-script, and submission requirements for a new sample | Video / Handbook |
+| Topic | Problem Addressed | Materials |
+|---|---|---|
+| ModelZoo Usage Guide | Understand the official Model Zoo repository, supported models, branch information, and how to run an existing sample quickly | Video / Handbook / GitHub Code |
+| ModelZoo Sample Structure | Understand the purpose of directories such as conversion, model, runtime, evaluator, and test_data in a typical sample | Video / Handbook |
+| Algorithm Toolchain and Quantization Environment | Use the local toolchain, Docker environment, and RoboGo cloud desktop, cloud host, or online quantization environment | Video / Handbook |
+| ResNet Classification Training and Quantization | Train, export, quantize, validate, and run on-device inference for a ResNet classification model using cloud and local environments | Video / Handbook / GitHub Code |
+| YOLO Detection Training and Quantization | Train a YOLO model, export ONNX, quantize, validate, and verify on-device inference using cloud and local environments | Video / Handbook / GitHub Code |
+| Featuremap Model Quantization | Configure Featuremap-based models and understand their use cases and common issues in cloud and local environments | Video / Handbook |
+| On-device Python Runtime Inference | Load a model with hbm_runtime, construct inputs, run inference, parse outputs, and visualize results | Video / Handbook / GitHub Code |
+| On-device C/C++ Runtime Inference | Use C/C++ inference interfaces, model loading, preprocessing, BPU inference, post-processing, compilation, and execution | Video / Handbook / GitHub Code |
+| YOLO Post-processing and Demo Adaptation | Parse detection boxes, configure thresholds and NMS, map classes, and adapt a YOLO Runtime demo to a custom model | Video / Handbook / GitHub Code |
+| ModelZoo Collaborative Development | Follow the directory, naming, README, test-data, run-script, and submission requirements for a new sample | Video / Handbook |
 
 ---
 
-## III. Advanced: TROS Development Guide
+## Advanced: TROS Development Guide
 
 This module is designed for ROS / TROS developers and focuses on the robotics application-development workflow on RDK.
 
@@ -190,7 +213,7 @@ After completing it, you should be able to run TROS examples, understand the bas
 
 ---
 
-## IV. Advanced: System and Driver Development Guide
+## Advanced: System and Driver Development Guide
 
 This module is designed for developers working on peripheral adaptation, low-level debugging, and system integration.
 
@@ -198,7 +221,7 @@ After completing it, you should understand how common RDK interfaces are used at
 
 ---
 
-## V. Expert: Large Language Models and Embodied Intelligence
+## Large Language Models and Embodied Intelligence
 
 This module is designed for developers building agents, voice interaction, robot perception, and robot-control applications on RDK.
 
@@ -206,7 +229,7 @@ After completing it, you should understand the role of RDK in embodied-intellige
 
 ---
 
-## VI. Developer Cases
+## Developer Cases
 
 This module collects real projects, community work, and representative application solutions.
 

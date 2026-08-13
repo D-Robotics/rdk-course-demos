@@ -76,6 +76,72 @@ class CourseSiteStructureTests(unittest.TestCase):
         ):
             self.assertIn(required, config)
 
+    def test_fundamentals_have_common_x5_and_s100_groups(self) -> None:
+        english_files = [self.read("docs/index.md"), self.read("docs/beginner/index.md")]
+        chinese_files = [self.read("docs/index.zh.md"), self.read("docs/beginner/index.zh.md")]
+
+        for text in english_files:
+            for heading in ("Common foundation", "RDK X5", "RDK S100"):
+                self.assertIn(heading, text)
+            for topic in ("Community and Ecosystem", "Product Overview", "RDK Studio"):
+                self.assertIn(topic, text)
+
+        for text in chinese_files:
+            for heading in ("通用基础", "RDK X5", "RDK S100"):
+                self.assertIn(heading, text)
+            for topic in ("社区与生态", "产品介绍", "RDK Studio"):
+                self.assertIn(topic, text)
+
+        board_topics_en = (
+            "System Flashing",
+            "Boot and Troubleshooting",
+            "Remote Connection",
+            "Camera",
+            "Audio",
+            "Display",
+            "Video Codec",
+            "GPIO and PWM",
+            "UART and I2C",
+            "SPI",
+            "CAN",
+        )
+        board_topics_zh = (
+            "系统烧录",
+            "启动与问题排查",
+            "远程连接",
+            "Camera",
+            "Audio",
+            "显示",
+            "编解码",
+            "GPIO 与 PWM",
+            "UART 与 I2C",
+            "SPI",
+            "CAN",
+        )
+
+        for text in english_files:
+            for topic in board_topics_en:
+                self.assertGreaterEqual(text.count(topic), 2, topic)
+        for text in chinese_files:
+            for topic in board_topics_zh:
+                self.assertGreaterEqual(text.count(topic), 2, topic)
+
+    def test_public_docs_do_not_expose_lesson_ordinals(self) -> None:
+        forbidden_patterns = (
+            re.compile(r"Lesson\s+\d+", re.IGNORECASE),
+            re.compile(r"第\s*\d+\s*课"),
+            re.compile(r"^#{1,6}\s+\d+\s*·\s+", re.MULTILINE),
+            re.compile(
+                r"^#{1,6}\s+[IVX]+\.\s+(?:Beginner|Advanced|Expert|Developer)",
+                re.MULTILINE | re.IGNORECASE,
+            ),
+            re.compile(r"^\|\s*(?:\d+|Lesson\s+\d+|第\s*\d+\s*课)\s*\|", re.MULTILINE | re.IGNORECASE),
+        )
+        for path in self.public_markdown_files():
+            text = path.read_text(encoding="utf-8")
+            for pattern in forbidden_patterns:
+                self.assertIsNone(pattern.search(text), f"{path}: {pattern.pattern}")
+
 
 if __name__ == "__main__":
     unittest.main()

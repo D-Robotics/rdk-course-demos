@@ -63,15 +63,15 @@ plugins:
             Home: 首页
             Course introduction: 课程介绍
             Fundamentals: 基础入门
-            Course outline: 课程大纲
+            Course routes: 课程路径
             Common foundation: 通用基础
             Community & ecosystem: 社区与生态
             RDK Studio: RDK Studio
             RDK X5: RDK X5
             RDK S100: RDK S100
-            Flash a system image: 烧录系统镜像
-            Boot troubleshooting: 启动问题排查
-            SPI display demo: SPI 显示屏示例
+            System flashing: 系统烧录
+            Boot & troubleshooting: 启动与问题排查
+            SPI display: SPI 显示屏
             ModelZoo & RoboGo: ModelZoo 与 RoboGo
             Course overview: 课程介绍
             TROS: TROS
@@ -100,17 +100,17 @@ markdown_extensions:
 nav:
   - Home: index.md
   - Fundamentals:
-      - Course outline: beginner/index.md
+      - Course routes: beginner/index.md
       - Common foundation:
           - Community & ecosystem: beginner/01-community-ecosystem.md
           - RDK Studio: beginner/03-rdk-studio.md
       - RDK X5:
-          - Flash a system image: beginner/04-flash-system-x5.md
-          - Boot troubleshooting: beginner/05-boot-troubleshooting-x5.md
-          - SPI display demo: hardware/spi-display.md
+          - System flashing: beginner/04-flash-system-x5.md
+          - Boot & troubleshooting: beginner/05-boot-troubleshooting-x5.md
+          - SPI display: hardware/spi-display.md
       - RDK S100:
-          - Flash a system image: beginner/04-flash-system-s100.md
-          - Boot troubleshooting: beginner/05-boot-troubleshooting-s100.md
+          - System flashing: beginner/04-flash-system-s100.md
+          - Boot & troubleshooting: beginner/05-boot-troubleshooting-s100.md
   - ModelZoo & RoboGo:
       - Course overview: modelzoo/index.md
   - TROS:
