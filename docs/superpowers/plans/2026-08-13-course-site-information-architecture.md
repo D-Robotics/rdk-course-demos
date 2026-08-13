@@ -1,64 +1,64 @@
-# RDK Classroom Information Architecture Implementation Plan
+# RDK 小课堂信息架构实施计划
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **供执行本计划的智能体使用：** 必须使用 `superpowers:subagent-driven-development`（推荐）或 `superpowers:executing-plans` 子技能，逐项实施本计划。每个步骤使用复选框（`- [ ]`）跟踪进度。
 
-**Goal:** Merge the approved course introduction into the homepage, remove public lesson numbering, and organize Fundamentals into common, RDK X5, and RDK S100 learning paths.
+**目标：** 将已确认的课程介绍合并到首页，移除公开页面中的课程序号，并把“基础入门”组织为通用基础、RDK X5 和 RDK S100 三条学习路径。
 
-**Architecture:** The bilingual homepage becomes the single course-overview content source. Common foundation courses remain shared, while hands-on Fundamentals topics are represented in parallel X5 and S100 routes; later course lines remain common. A small `unittest` regression suite validates source structure before every strict MkDocs build.
+**架构：** 中英文首页成为课程介绍的唯一内容来源。通用基础课程保持共用，其余动手实践类基础主题分别进入 X5 与 S100 路径；后续课程体系暂时保持通用。通过一组精简的 `unittest` 回归测试，在每次 MkDocs 严格构建前检查源文件结构。
 
-**Tech Stack:** MkDocs Material, `mkdocs-static-i18n`, Markdown, YAML, Python 3 standard-library `unittest`.
+**技术栈：** MkDocs Material、`mkdocs-static-i18n`、Markdown、YAML、Python 3 标准库 `unittest`。
 
-## Global Constraints
+## 全局约束
 
-- Use `docs/index.md` and `docs/index.zh.md` as the only public course-introduction source.
-- Community and Ecosystem, Product Overview, and RDK Studio are common Fundamentals topics.
-- Community and Ecosystem remains a standalone course and is not split by board.
-- All other Fundamentals topics are listed separately under RDK X5 and RDK S100.
-- ModelZoo and RoboGo, TROS, System and Drivers, Large Models and Embodied AI, and Developer Cases remain common.
-- Public content must not use `第 N 课`, `Lesson N`, or ordinal course prefixes such as `01 ·`.
-- Internal numbered repository directories must not be renamed or moved.
-- Only approved, existing handbooks become clickable pages; missing topics remain planned entries without invented technical content.
-- English and Chinese navigation and curriculum structures must match.
-- The unpublished `/course-overview/` page may be removed without a redirect.
-
----
-
-## File Map
-
-- `tests/test_course_site_structure.py`: regression checks for homepage ownership, public naming, board-route classification, and bilingual parity.
-- `tests/__init__.py`: makes the regression test directory importable by `unittest`.
-- `docs/index.md`: complete English course introduction and curriculum.
-- `docs/index.zh.md`: complete Chinese course introduction and curriculum.
-- `docs/course-overview.md`: remove after its content is copied into the homepage.
-- `docs/course-overview.zh.md`: remove after its content is copied into the homepage.
-- `docs/beginner/index.md`: compact English common/X5/S100 route selector.
-- `docs/beginner/index.zh.md`: compact Chinese common/X5/S100 route selector.
-- `docs/beginner/01-community-ecosystem.md`: public English title and cross-course wording without lesson numbers.
-- `docs/beginner/01-community-ecosystem.zh.md`: public Chinese title and cross-course wording without lesson numbers.
-- `docs/beginner/03-rdk-studio.md`: public English title without lesson number.
-- `docs/beginner/03-rdk-studio.zh.md`: public Chinese title without lesson number.
-- `mkdocs.yml`: topic-based bilingual navigation without ordinal labels or a Course Introduction entry.
+- 仅使用 `docs/index.md` 和 `docs/index.zh.md` 作为公开课程介绍的内容来源。
+- “社区与生态”“产品介绍”和“RDK Studio”属于通用基础主题。
+- “社区与生态”保持为独立课程，不按开发板拆分。
+- 其余基础入门主题分别列在 RDK X5 和 RDK S100 路径下。
+- ModelZoo 与 RoboGo、TROS、系统与驱动、大模型与具身智能、开发者案例暂时保持通用。
+- 公开内容不得使用 `第 N 课`、`Lesson N` 或 `01 ·` 之类的序号前缀。
+- 仓库内部带序号的目录不得重命名或移动。
+- 只有已经确认且实际存在的讲义才能成为可点击页面；尚未发布的主题只保留规划项，不虚构技术内容。
+- 中英文导航与课程目录的结构必须一致。
+- 尚未对外分享的 `/course-overview/` 页面可以直接删除，无需设置重定向。
 
 ---
 
-### Task 1: Make the homepage the single course introduction
+## 文件清单
 
-**Files:**
-- Create: `tests/__init__.py`
-- Create: `tests/test_course_site_structure.py`
-- Modify: `docs/index.md`
-- Modify: `docs/index.zh.md`
-- Delete: `docs/course-overview.md`
-- Delete: `docs/course-overview.zh.md`
-- Modify: `mkdocs.yml`
+- `tests/test_course_site_structure.py`：检查首页归属、公开命名、开发板路径分类和双语一致性的回归测试。
+- `tests/__init__.py`：使 `unittest` 可以导入回归测试目录。
+- `docs/index.md`：完整的英文课程介绍与课程目录。
+- `docs/index.zh.md`：完整的中文课程介绍与课程目录。
+- `docs/course-overview.md`：内容复制到首页后删除。
+- `docs/course-overview.zh.md`：内容复制到首页后删除。
+- `docs/beginner/index.md`：精简的英文通用/X5/S100 路径选择页。
+- `docs/beginner/index.zh.md`：精简的中文通用/X5/S100 路径选择页。
+- `docs/beginner/01-community-ecosystem.md`：移除课程序号后的英文公开标题与跨课程表述。
+- `docs/beginner/01-community-ecosystem.zh.md`：移除课程序号后的中文公开标题与跨课程表述。
+- `docs/beginner/03-rdk-studio.md`：移除课程序号后的英文公开标题。
+- `docs/beginner/03-rdk-studio.zh.md`：移除课程序号后的中文公开标题。
+- `mkdocs.yml`：按主题组织的双语导航，不包含序号标签或单独的“课程介绍”入口。
 
-**Interfaces:**
-- Consumes: the complete reviewed content currently in `docs/course-overview.md` and `docs/course-overview.zh.md`.
-- Produces: `docs/index.md` and `docs/index.zh.md` as the only public course-introduction files; `CourseSiteStructureTests.project_root` for later regression tests.
+---
 
-- [ ] **Step 1: Add a failing homepage-ownership regression test**
+### 任务 1：让首页成为唯一的课程介绍页面
 
-Create `tests/__init__.py` as an empty file. Create `tests/test_course_site_structure.py` with:
+**文件：**
+- 新建：`tests/__init__.py`
+- 新建：`tests/test_course_site_structure.py`
+- 修改：`docs/index.md`
+- 修改：`docs/index.zh.md`
+- 删除：`docs/course-overview.md`
+- 删除：`docs/course-overview.zh.md`
+- 修改：`mkdocs.yml`
+
+**接口关系：**
+- 输入：当前 `docs/course-overview.md` 与 `docs/course-overview.zh.md` 中已经评审通过的完整内容。
+- 输出：`docs/index.md` 与 `docs/index.zh.md` 成为唯一的公开课程介绍文件；提供 `CourseSiteStructureTests.project_root` 给后续回归测试使用。
+
+- [ ] **步骤 1：添加一个当前必然失败的“首页唯一归属”回归测试**
+
+创建空文件 `tests/__init__.py`，并创建 `tests/test_course_site_structure.py`，内容如下：
 
 ```python
 from pathlib import Path
@@ -106,61 +106,61 @@ if __name__ == "__main__":
     unittest.main()
 ```
 
-- [ ] **Step 2: Run the new test and verify that the current two-page structure fails**
+- [ ] **步骤 2：运行新测试，确认当前双页面结构会失败**
 
-Run:
+运行：
 
 ```powershell
 python -m unittest tests.test_course_site_structure.CourseSiteStructureTests.test_home_is_the_single_course_overview -v
 ```
 
-Expected: `FAIL` because `docs/course-overview.md` and `docs/course-overview.zh.md` still exist and the current homepages do not contain the full reviewed introduction.
+预期：`FAIL`。原因是 `docs/course-overview.md` 和 `docs/course-overview.zh.md` 仍然存在，而且当前首页尚未包含完整的已评审课程介绍。
 
-- [ ] **Step 3: Move the reviewed overview content into the homepages**
+- [ ] **步骤 3：将已评审的课程介绍内容迁移到首页**
 
-Copy the complete current contents before deleting the source pages:
+删除原页面之前，先完整复制当前内容：
 
 ```powershell
 Copy-Item -LiteralPath docs/course-overview.md -Destination docs/index.md
 Copy-Item -LiteralPath docs/course-overview.zh.md -Destination docs/index.zh.md
 ```
 
-Then delete:
+然后删除：
 
 ```text
 docs/course-overview.md
 docs/course-overview.zh.md
 ```
 
-In `mkdocs.yml`, remove this navigation entry:
+在 `mkdocs.yml` 中删除以下导航项：
 
 ```yaml
 - Course introduction: course-overview.md
 ```
 
-Do not alter the copied factual descriptions yet; Tasks 2 and 3 change only public naming and curriculum organization.
+此时不要修改复制过来的事实性介绍；任务 2 和任务 3 只处理公开命名与课程目录组织。
 
-- [ ] **Step 4: Run the focused regression test**
+- [ ] **步骤 4：运行该项回归测试**
 
-Run:
+运行：
 
 ```powershell
 python -m unittest tests.test_course_site_structure.CourseSiteStructureTests.test_home_is_the_single_course_overview -v
 ```
 
-Expected: `PASS`.
+预期：`PASS`。
 
-- [ ] **Step 5: Run a strict site build**
+- [ ] **步骤 5：严格构建网站**
 
-Run:
+运行：
 
 ```powershell
 python -m mkdocs build --strict
 ```
 
-Expected: exit code `0`; the English site builds at the root and the Chinese site under `site/zh`.
+预期：退出码为 `0`；英文站点生成在根目录，中文站点生成在 `site/zh` 下。
 
-- [ ] **Step 6: Commit the single-source homepage change**
+- [ ] **步骤 6：提交首页单一内容源改动**
 
 ```powershell
 git add tests docs/index.md docs/index.zh.md docs/course-overview.md docs/course-overview.zh.md mkdocs.yml
@@ -169,23 +169,23 @@ git commit -m "docs: merge course introduction into home"
 
 ---
 
-### Task 2: Remove ordinal labels from published course pages and navigation
+### 任务 2：移除公开课程页面与导航中的序号标签
 
-**Files:**
-- Modify: `tests/test_course_site_structure.py`
-- Modify: `docs/beginner/01-community-ecosystem.md`
-- Modify: `docs/beginner/01-community-ecosystem.zh.md`
-- Modify: `docs/beginner/03-rdk-studio.md`
-- Modify: `docs/beginner/03-rdk-studio.zh.md`
-- Modify: `mkdocs.yml`
+**文件：**
+- 修改：`tests/test_course_site_structure.py`
+- 修改：`docs/beginner/01-community-ecosystem.md`
+- 修改：`docs/beginner/01-community-ecosystem.zh.md`
+- 修改：`docs/beginner/03-rdk-studio.md`
+- 修改：`docs/beginner/03-rdk-studio.zh.md`
+- 修改：`mkdocs.yml`
 
-**Interfaces:**
-- Consumes: the homepage ownership established in Task 1.
-- Produces: topic-only public titles and topic-only navigation group labels; `public_markdown_files()` for the final whole-site naming check in Task 3.
+**接口关系：**
+- 输入：任务 1 建立的首页唯一归属关系。
+- 输出：只按主题命名的公开标题与导航分组标签；提供 `public_markdown_files()`，供任务 3 最终检查全站公开命名。
 
-- [ ] **Step 1: Add failing tests for common-course titles and navigation labels**
+- [ ] **步骤 1：为通用课程标题与导航标签添加当前必然失败的测试**
 
-Add these imports and methods to `CourseSiteStructureTests`:
+在 `CourseSiteStructureTests` 中加入以下导入与方法：
 
 ```python
 import re
@@ -228,19 +228,19 @@ import re
             self.assertIn(required, config)
 ```
 
-- [ ] **Step 2: Run the two new tests and verify that current titles and navigation fail**
+- [ ] **步骤 2：运行两项新测试，确认当前标题与导航会失败**
 
-Run:
+运行：
 
 ```powershell
 python -m unittest tests.test_course_site_structure.CourseSiteStructureTests.test_common_course_titles_are_topic_based tests.test_course_site_structure.CourseSiteStructureTests.test_navigation_uses_topic_groups -v
 ```
 
-Expected: `FAIL` because the Community page titles contain Lesson 1 / 第一课, the Studio English title contains Lesson 03, and navigation groups use ordinal prefixes.
+预期：`FAIL`。原因是“社区与生态”页面标题仍包含 `Lesson 1` / `第一课`，Studio 英文标题仍包含 `Lesson 03`，导航分组也仍使用序号前缀。
 
-- [ ] **Step 3: Replace the four public page titles and numbered cross-references**
+- [ ] **步骤 3：替换四个公开页面标题及带序号的跨课程引用**
 
-Apply these exact title changes:
+严格执行以下标题变更：
 
 ```text
 # RDK Lesson 1: Community and Ecosystem Introduction
@@ -256,11 +256,11 @@ Apply these exact title changes:
 → # RDK Studio 入门
 ```
 
-Within the Community handbooks, replace references such as `covered in Lesson 3` / `第三课将专门介绍` with `covered in the RDK Studio course` / `RDK Studio 课程将专门介绍`. Replace the closing `next lesson` / `下一课` language with an unnumbered invitation to continue to Product Overview.
+在“社区与生态”中英文讲义中，将 `covered in Lesson 3` / `第三课将专门介绍` 等表述替换为 `covered in the RDK Studio course` / `RDK Studio 课程将专门介绍`。将结尾的 `next lesson` / `下一课` 改成不带序号、引导继续阅读“产品介绍”的表述。
 
-- [ ] **Step 4: Replace ordinal navigation group names**
+- [ ] **步骤 4：替换带序号的导航分组名称**
 
-In the English navigation and `nav_translations`, use these public group names:
+英文导航与 `nav_translations` 使用以下公开分组名称：
 
 ```yaml
 Fundamentals
@@ -270,7 +270,7 @@ System & drivers
 LLMs & embodied AI
 ```
 
-Use these Chinese translations:
+使用以下中文翻译：
 
 ```yaml
 Fundamentals: 基础入门
@@ -280,21 +280,21 @@ System & drivers: 系统与驱动
 LLMs & embodied AI: 大模型与具身智能
 ```
 
-Keep all internal file and directory paths unchanged.
+保持所有内部文件和目录路径不变。
 
-- [ ] **Step 5: Run the title and navigation tests**
+- [ ] **步骤 5：运行标题与导航测试**
 
-Run:
+运行：
 
 ```powershell
 python -m unittest tests.test_course_site_structure.CourseSiteStructureTests.test_common_course_titles_are_topic_based tests.test_course_site_structure.CourseSiteStructureTests.test_navigation_uses_topic_groups -v
 ```
 
-Expected: both tests `PASS`.
+预期：两项测试均为 `PASS`。
 
-- [ ] **Step 6: Build and commit the naming change**
+- [ ] **步骤 6：构建并提交命名改动**
 
-Run:
+运行：
 
 ```powershell
 python -m mkdocs build --strict
@@ -302,27 +302,27 @@ git add tests docs/beginner/01-community-ecosystem.md docs/beginner/01-community
 git commit -m "docs: use topic-based course names"
 ```
 
-Expected: strict build succeeds and the commit contains no directory rename.
+预期：严格构建成功，提交中不包含任何目录重命名。
 
 ---
 
-### Task 3: Build common, X5, and S100 Fundamentals routes
+### 任务 3：建立通用、X5 与 S100 三类基础入门路径
 
-**Files:**
-- Modify: `tests/test_course_site_structure.py`
-- Modify: `docs/index.md`
-- Modify: `docs/index.zh.md`
-- Modify: `docs/beginner/index.md`
-- Modify: `docs/beginner/index.zh.md`
-- Modify: `mkdocs.yml`
+**文件：**
+- 修改：`tests/test_course_site_structure.py`
+- 修改：`docs/index.md`
+- 修改：`docs/index.zh.md`
+- 修改：`docs/beginner/index.md`
+- 修改：`docs/beginner/index.zh.md`
+- 修改：`mkdocs.yml`
 
-**Interfaces:**
-- Consumes: topic-only common page names and navigation groups from Task 2.
-- Produces: the final Fundamentals classification on the homepages, route selectors, and sidebar.
+**接口关系：**
+- 输入：任务 2 产出的纯主题通用页面名称与导航分组。
+- 输出：首页、路径选择页和侧边栏中最终确定的基础入门分类。
 
-- [ ] **Step 1: Add failing route and public-numbering tests**
+- [ ] **步骤 1：添加当前必然失败的路径分类与公开序号测试**
 
-Add these methods to `CourseSiteStructureTests`:
+在 `CourseSiteStructureTests` 中添加以下方法：
 
 ```python
     def test_fundamentals_have_common_x5_and_s100_groups(self) -> None:
@@ -388,19 +388,19 @@ Add these methods to `CourseSiteStructureTests`:
                 self.assertIsNone(pattern.search(text), f"{path}: {pattern.pattern}")
 ```
 
-- [ ] **Step 2: Run the new route tests and verify the current curriculum fails**
+- [ ] **步骤 2：运行新路径测试，确认当前课程目录会失败**
 
-Run:
+运行：
 
 ```powershell
 python -m unittest tests.test_course_site_structure.CourseSiteStructureTests.test_fundamentals_have_common_x5_and_s100_groups tests.test_course_site_structure.CourseSiteStructureTests.test_public_docs_do_not_expose_lesson_ordinals -v
 ```
 
-Expected: `FAIL` because the copied overview still uses numbered tables and the Fundamentals overview does not yet list all board topics twice.
+预期：`FAIL`。原因是复制后的课程介绍仍然使用带序号的表格，而且基础入门概览尚未分别在两块开发板路径下列出全部主题。
 
-- [ ] **Step 3: Rewrite the Fundamentals curriculum on both homepages**
+- [ ] **步骤 3：重写中英文首页中的基础入门课程目录**
 
-Preserve all approved descriptions from the copied overview. Replace the single numbered Fundamentals table with these three unnumbered sections in both languages:
+保留复制过来的全部已确认说明。将单个带序号的基础入门表格替换为以下三个不带序号的中英文分组：
 
 ```text
 Common foundation / 通用基础
@@ -435,19 +435,19 @@ RDK S100
   CAN
 ```
 
-Use three-column tables: `Topic | Focus | Materials` and `主题 | 内容重点 | 配套资料`. Link only existing approved pages:
+使用三列表格：英文为 `Topic | Focus | Materials`，中文为 `主题 | 内容重点 | 配套资料`。仅链接以下已经存在并通过确认的页面：
 
-- Community and Ecosystem;
-- RDK Studio;
-- X5 and S100 System Flashing;
-- X5 and S100 Boot and Troubleshooting;
-- X5 SPI demo.
+- 社区与生态；
+- RDK Studio；
+- X5 与 S100 系统烧录；
+- X5 与 S100 启动和问题排查；
+- X5 SPI 示例。
 
-Product Overview and unpublished board topics remain plain text with their existing approved focus descriptions and repository destinations where applicable.
+“产品介绍”与尚未发布的开发板主题保持为纯文本，并保留现有的已确认内容说明；适用时同时保留对应的仓库目录地址。
 
-- [ ] **Step 4: Remove numbering from later common course lines**
+- [ ] **步骤 4：移除后续通用课程体系中的序号**
 
-For ModelZoo and RoboGo, remove the `No.` / `序号` column and retain every existing topic, description, and material type in the current order. Remove Roman or Chinese ordinal prefixes from all module headings:
+对于 ModelZoo 与 RoboGo，删除 `No.` / `序号` 列，按当前顺序完整保留所有既有主题、说明和资料类型。移除所有模块标题中的罗马数字或中文序号前缀：
 
 ```text
 Advanced: ModelZoo and RoboGo Development Guide
@@ -465,25 +465,25 @@ TROS 开发指南
 开发者案例
 ```
 
-Do not split these later course lines by board.
+这些后续课程体系暂不按开发板拆分。
 
-- [ ] **Step 5: Rewrite the compact Fundamentals route selectors**
+- [ ] **步骤 5：重写精简的基础入门路径选择页**
 
-Rewrite `docs/beginner/index.md` and `docs/beginner/index.zh.md` with:
+重写 `docs/beginner/index.md` 和 `docs/beginner/index.zh.md`，内容包括：
 
-- a short Fundamentals introduction;
-- a Common foundation table containing Community and Ecosystem, Product Overview, and RDK Studio;
-- an RDK X5 table containing all eleven board-specific topics;
-- an RDK S100 table containing all eleven board-specific topics;
-- no ordinal course column;
-- clickable handbook links only for published pages;
-- GitHub repository-directory links for planned topics without handbook links.
+- 一段简短的基础入门介绍；
+- 一个通用基础表格，包含“社区与生态”“产品介绍”和 RDK Studio；
+- 一个 RDK X5 表格，包含全部 11 个开发板专属主题；
+- 一个 RDK S100 表格，包含全部 11 个开发板专属主题；
+- 不设置课程序号列；
+- 只有已发布页面提供可点击的讲义链接；
+- 尚无讲义的规划主题提供 GitHub 仓库目录链接。
 
-The page must route users; it must not repeat the homepage audience, resource, or production sections.
+该页面只负责引导用户选择路径，不重复首页中的适用人群、课程资源或内容生产关系等章节。
 
-- [ ] **Step 6: Align the sidebar with published routes**
+- [ ] **步骤 6：让侧边栏与已发布路径保持一致**
 
-Use this structure in `mkdocs.yml`:
+在 `mkdocs.yml` 中使用以下结构：
 
 ```yaml
 - Fundamentals:
@@ -500,30 +500,30 @@ Use this structure in `mkdocs.yml`:
         - Boot & troubleshooting: beginner/05-boot-troubleshooting-s100.md
 ```
 
-Do not add Product Overview or other planned topics to the sidebar until a public handbook exists. Add matching Chinese `nav_translations` for every displayed label.
+在公开讲义存在之前，不要把“产品介绍”或其他规划主题加入侧边栏。为每个已显示标签添加对应的中文 `nav_translations`。
 
-- [ ] **Step 7: Run route and public-numbering tests**
+- [ ] **步骤 7：运行路径与公开序号测试**
 
-Run:
+运行：
 
 ```powershell
 python -m unittest tests.test_course_site_structure.CourseSiteStructureTests.test_fundamentals_have_common_x5_and_s100_groups tests.test_course_site_structure.CourseSiteStructureTests.test_public_docs_do_not_expose_lesson_ordinals -v
 ```
 
-Expected: both tests `PASS`.
+预期：两项测试均为 `PASS`。
 
-- [ ] **Step 8: Run the complete regression suite and strict build**
+- [ ] **步骤 8：运行完整回归测试与严格构建**
 
-Run:
+运行：
 
 ```powershell
 python -m unittest tests.test_course_site_structure -v
 python -m mkdocs build --strict
 ```
 
-Expected: all tests pass and MkDocs exits `0`.
+预期：所有测试通过，MkDocs 退出码为 `0`。
 
-- [ ] **Step 9: Commit the route architecture**
+- [ ] **步骤 9：提交路径信息架构改动**
 
 ```powershell
 git add tests docs/index.md docs/index.zh.md docs/beginner/index.md docs/beginner/index.zh.md mkdocs.yml
@@ -532,19 +532,19 @@ git commit -m "docs: split fundamentals by board path"
 
 ---
 
-### Task 4: Verify bilingual output and publication readiness
+### 任务 4：验证双语输出与发布准备状态
 
-**Files:**
-- Modify if validation finds a defect: `tests/test_course_site_structure.py`
-- Modify if validation finds a defect: the specific Markdown or YAML source that violates the design
+**文件：**
+- 如验证发现缺陷则修改：`tests/test_course_site_structure.py`
+- 如验证发现缺陷则修改：不符合设计的具体 Markdown 或 YAML 源文件
 
-**Interfaces:**
-- Consumes: final source structure from Tasks 1–3.
-- Produces: a clean branch with passing regression tests and a strict bilingual MkDocs build.
+**接口关系：**
+- 输入：任务 1～3 形成的最终源文件结构。
+- 输出：一个工作区干净、回归测试全部通过且可严格构建双语 MkDocs 站点的分支。
 
-- [ ] **Step 1: Add a bilingual structure parity test**
+- [ ] **步骤 1：添加双语结构一致性测试**
 
-Add this method to `CourseSiteStructureTests`:
+在 `CourseSiteStructureTests` 中添加以下方法：
 
 ```python
     def test_bilingual_route_structure_matches(self) -> None:
@@ -571,17 +571,17 @@ Add this method to `CourseSiteStructureTests`:
             self.assertIn(chinese_label, chinese_routes)
 ```
 
-- [ ] **Step 2: Run all source-structure tests**
+- [ ] **步骤 2：运行全部源文件结构测试**
 
 ```powershell
 python -m unittest tests.test_course_site_structure -v
 ```
 
-Expected: all tests `PASS`.
+预期：所有测试均为 `PASS`。
 
-- [ ] **Step 3: Scan public sources for forbidden numbering and deleted links**
+- [ ] **步骤 3：扫描公开源文件中的禁用序号与已删除链接**
 
-Run:
+运行：
 
 ```powershell
 $publicDocs = Get-ChildItem docs -Recurse -File -Filter *.md |
@@ -595,28 +595,28 @@ $overviewRefs = Get-ChildItem docs,mkdocs.yml -Recurse -File |
 if ($overviewRefs) { $overviewRefs; exit 1 }
 ```
 
-Expected: no output and exit code `0`.
+预期：无输出，退出码为 `0`。
 
-- [ ] **Step 4: Run the production-equivalent strict build**
+- [ ] **步骤 4：运行与正式发布等价的严格构建**
 
 ```powershell
 python -m mkdocs build --strict
 ```
 
-Expected: English output under `site/`, Chinese output under `site/zh/`, exit code `0`.
+预期：英文输出位于 `site/`，中文输出位于 `site/zh/`，退出码为 `0`。
 
-- [ ] **Step 5: Inspect generated navigation and key pages**
+- [ ] **步骤 5：检查生成后的导航与关键页面**
 
-Run:
+运行：
 
 ```powershell
 rg -n "Common foundation|RDK X5|RDK S100|Community and Ecosystem" site/index.html site/beginner/index.html
 rg -n "通用基础|RDK X5|RDK S100|社区与生态" site/zh/index.html site/zh/beginner/index.html
 ```
 
-Expected: both languages expose the three Fundamentals groups and the standalone Community and Ecosystem course; no Course Introduction navigation item appears.
+预期：中英文站点都显示三个基础入门分组以及独立的“社区与生态”课程；导航中不再出现单独的“课程介绍”入口。
 
-- [ ] **Step 6: Review the complete branch diff**
+- [ ] **步骤 6：检查当前分支的完整差异**
 
 ```powershell
 git diff develop...HEAD --check
@@ -624,15 +624,15 @@ git diff develop...HEAD --stat
 git status -sb
 ```
 
-Expected: no whitespace errors, only the design/plan, tests, homepage, Fundamentals sources, common handbook titles, and `mkdocs.yml` are changed; the worktree is clean.
+预期：没有空白字符错误；变更范围仅包括设计/计划文档、测试、首页、基础入门源文件、通用讲义标题和 `mkdocs.yml`；工作区保持干净。
 
-- [ ] **Step 7: Commit the final parity test or fixes if this task changed files**
+- [ ] **步骤 7：如本任务产生文件改动，提交最终一致性测试或修复**
 
-If Step 1 or validation fixes changed files:
+如果步骤 1 或验证修复产生了文件改动：
 
 ```powershell
 git add tests docs mkdocs.yml
 git commit -m "test: verify bilingual course routes"
 ```
 
-If no files changed after Task 3, do not create an empty commit.
+如果任务 3 完成后没有新增文件改动，则不要创建空提交。
