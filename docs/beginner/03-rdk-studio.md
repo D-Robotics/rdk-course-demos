@@ -1,4 +1,4 @@
-# RDK Lesson 03: Getting Started with RDK Studio
+# Getting Started with RDK Studio
 
 > Course version: This course is based on RDK Studio v1.3.3. For later interface or feature changes, follow the corresponding later release.
 >

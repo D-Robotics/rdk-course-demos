@@ -1,4 +1,4 @@
-# RDK 第一课：RDK 社区与生态入门
+# RDK 社区与生态
 
 RDK 的资料不仅包括开发板手册，还包括源码仓库、模型示例、机器人开发文档、开发工具、应用案例和技术社区。
 
@@ -61,7 +61,7 @@ RDK 的资料不仅包括开发板手册，还包括源码仓库、模型示例�
 | 查看开源项目和源码 | D-Robotics GitHub | 仓库、README、源文件、Issues |
 | 查找 BPU 模型部署示例 | RDK Model Zoo | 板卡分支、模型目录、README |
 | 开发 ROS 2 / TROS 机器人应用 | TROS 用户手册与 GitHub | 使用路径、功能包、源码、Issues |
-| 进入面向 RDK 设备的开发工作台 | RDK Studio | 设备开发入口；第三课详细介绍 |
+| 进入面向 RDK 设备的开发工作台 | RDK Studio | 设备开发入口；RDK Studio 课程详细介绍 |
 | 了解已有应用方案和使用场景 | NodeHub | 应用案例补充入口 |
 | 提问、反馈问题或分享经验 | 地瓜机器人论坛 | 技术讨论、问题反馈、经验分享 |
 
@@ -169,7 +169,7 @@ TROS 的资料分为两个入口：
 
 ### 8.1 RDK Studio
 
-[RDK Studio](https://d-robotics.github.io/rdk_studio_doc/) 是面向 RDK 设备的 AI 原生开发工作台，可以作为设备开发入口；第三课将专门介绍其使用方式。
+[RDK Studio](https://d-robotics.github.io/rdk_studio_doc/) 是面向 RDK 设备的 AI 原生开发工作台，可以作为设备开发入口；RDK Studio 课程将专门介绍其使用方式。
 
 ### 8.2 NodeHub
 
@@ -251,7 +251,7 @@ NodeHub 是应用案例的补充入口，用于了解已有方案和使用场景
 4. **补充入口适度使用**：RDK Studio 是设备开发入口，NodeHub 用于了解应用案例；
 5. **带着完整信息反馈**：板卡、版本、步骤、预期、实际结果、日志和已做排查缺一不可。
 
-下一课将介绍 **RDK 产品简介**，帮助你进一步理解不同 RDK 产品的定位和选择方式。
+继续阅读 **RDK 产品简介**，进一步了解不同 RDK 产品的定位和选择方式。
 
 ## 13. 拓展练习
 
