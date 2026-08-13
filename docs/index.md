@@ -147,40 +147,40 @@ After completing this module, you should be able to use an RDK board independent
 | Topic | Focus | Materials |
 |---|---|---|
 | [Community and Ecosystem](beginner/01-community-ecosystem.md) | RDK community, documentation entry points, NodeHub as an additional application-case entry, and forum guidelines | Video / Handbook / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/01_community_ecosystem) |
-| Product Overview | Product families, hardware capabilities, roadmap, and typical use cases | Video / Handbook / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/02_product_intro) |
+| Product Overview | Product families, hardware capabilities, roadmap, and typical use cases | Video / Handbook / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/02_product_intro) |
 | [RDK Studio](beginner/03-rdk-studio.md) | Meet the AI-native development workspace for RDK devices; use Moss for a read-only X5 health check and BPU YOLO real-time detection, and discover the terminal, files, code-server, remote desktop, system flashing, and on-device agents | Video / Handbook / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/03_rdk_studio) |
 
 ### RDK X5
 
 | Topic | Focus | Materials |
 |---|---|---|
-| [System Flashing](beginner/04-flash-system-x5.md) | System image flashing, MiniBoot updates, and post-flash checks | Video / Handbook / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/04_flash_system) |
-| [Boot and Troubleshooting](beginner/05-boot-troubleshooting-x5.md) | Boot process, indicator status, boot logs, and typical boot issues | Video / Handbook / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/05_boot_troubleshooting) |
-| Remote Connection | Serial connection, SSH, networking, VNC, and remote development | Video / Handbook / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/06_remote_connection) |
-| Camera | USB cameras, MIPI cameras, C/Python access, and quick TROS use | Video / Handbook / Demo / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/07_camera) |
-| Audio | Onboard earphone interface, audio boards, and USB audio-device validation | Video / Handbook / Demo / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/08_audio) |
-| Display | HDMI and DSI display modules, display configuration, and result validation | Video / Handbook / Demo / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/09_display) |
-| Video Codec | Encoding, decoding, BSP interfaces, RTSP streaming, and decoding | Video / Handbook / Demo / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/10_codec) |
-| GPIO and PWM | GPIO and PWM basics, LED control, and servo-control demos | Video / Handbook / Demo / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/11_40pin_gpio_pwm) |
-| UART and I2C | UART basics, UART send/receive demos, I2C basics, and an I2C temperature-and-humidity sensor demo | Video / Handbook / Demo / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/12_40pin_uart_i2c) |
-| [SPI](hardware/spi-display.md) | SPI basics and an SPI display-driving demo | Video / Handbook / Demo / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/13_40pin_spi) |
-| CAN | CAN FD basics, can-utils, CAN loopback testing, CAN motor-control demos, and a CAN logic-analyzer demo | Video / Handbook / Demo / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/14_can) |
+| [System Flashing](beginner/04-flash-system-x5.md) | System image flashing, MiniBoot updates, and post-flash checks | Video / Handbook / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/04_flash_system) |
+| [Boot and Troubleshooting](beginner/05-boot-troubleshooting-x5.md) | Boot process, indicator status, boot logs, and typical boot issues | Video / Handbook / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/05_boot_troubleshooting) |
+| Remote Connection | Serial connection, SSH, networking, VNC, and remote development | Video / Handbook / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/06_remote_connection) |
+| Camera | USB cameras, MIPI cameras, C/Python access, and quick TROS use | Video / Handbook / Demo / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/07_camera) |
+| Audio | Onboard earphone interface, audio boards, and USB audio-device validation | Video / Handbook / Demo / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/08_audio) |
+| Display | HDMI and DSI display modules, display configuration, and result validation | Video / Handbook / Demo / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/09_display) |
+| Video Codec | Encoding, decoding, BSP interfaces, RTSP streaming, and decoding | Video / Handbook / Demo / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/10_codec) |
+| GPIO and PWM | GPIO and PWM basics, LED control, and servo-control demos | Video / Handbook / Demo / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/11_40pin_gpio_pwm) |
+| UART and I2C | UART basics, UART send/receive demos, I2C basics, and an I2C temperature-and-humidity sensor demo | Video / Handbook / Demo / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/12_40pin_uart_i2c) |
+| [SPI](hardware/spi-display.md) | SPI basics and an SPI display-driving demo | Video / Handbook / Demo / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/13_40pin_spi) |
+| CAN | CAN FD basics, can-utils, CAN loopback testing, CAN motor-control demos, and a CAN logic-analyzer demo | Video / Handbook / Demo / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/14_can) |
 
 ### RDK S100
 
 | Topic | Focus | Materials |
 |---|---|---|
-| [System Flashing](beginner/04-flash-system-s100.md) | System image flashing, MiniBoot updates, and post-flash checks | Video / Handbook / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/04_flash_system) |
-| [Boot and Troubleshooting](beginner/05-boot-troubleshooting-s100.md) | Boot process, indicator status, boot logs, and typical boot issues | Video / Handbook / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/05_boot_troubleshooting) |
-| Remote Connection | Serial connection, SSH, networking, VNC, and remote development | Video / Handbook / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/06_remote_connection) |
-| Camera | USB cameras, MIPI cameras, C/Python access, and quick TROS use | Video / Handbook / Demo / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/07_camera) |
-| Audio | Onboard earphone interface, audio boards, and USB audio-device validation | Video / Handbook / Demo / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/08_audio) |
-| Display | HDMI and DSI display modules, display configuration, and result validation | Video / Handbook / Demo / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/09_display) |
-| Video Codec | Encoding, decoding, BSP interfaces, RTSP streaming, and decoding | Video / Handbook / Demo / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/10_codec) |
-| GPIO and PWM | GPIO and PWM basics, LED control, and servo-control demos | Video / Handbook / Demo / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/11_40pin_gpio_pwm) |
-| UART and I2C | UART basics, UART send/receive demos, I2C basics, and an I2C temperature-and-humidity sensor demo | Video / Handbook / Demo / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/12_40pin_uart_i2c) |
-| SPI | SPI basics and an SPI display-driving demo | Video / Handbook / Demo / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/13_40pin_spi) |
-| CAN | CAN FD basics, can-utils, CAN loopback testing, CAN motor-control demos, and a CAN logic-analyzer demo | Video / Handbook / Demo / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/14_can) |
+| [System Flashing](beginner/04-flash-system-s100.md) | System image flashing, MiniBoot updates, and post-flash checks | Video / Handbook / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/04_flash_system) |
+| [Boot and Troubleshooting](beginner/05-boot-troubleshooting-s100.md) | Boot process, indicator status, boot logs, and typical boot issues | Video / Handbook / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/05_boot_troubleshooting) |
+| Remote Connection | Serial connection, SSH, networking, VNC, and remote development | Video / Handbook / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/06_remote_connection) |
+| Camera | USB cameras, MIPI cameras, C/Python access, and quick TROS use | Video / Handbook / Demo / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/07_camera) |
+| Audio | Onboard earphone interface, audio boards, and USB audio-device validation | Video / Handbook / Demo / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/08_audio) |
+| Display | HDMI and DSI display modules, display configuration, and result validation | Video / Handbook / Demo / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/09_display) |
+| Video Codec | Encoding, decoding, BSP interfaces, RTSP streaming, and decoding | Video / Handbook / Demo / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/10_codec) |
+| GPIO and PWM | GPIO and PWM basics, LED control, and servo-control demos | Video / Handbook / Demo / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/11_40pin_gpio_pwm) |
+| UART and I2C | UART basics, UART send/receive demos, I2C basics, and an I2C temperature-and-humidity sensor demo | Video / Handbook / Demo / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/12_40pin_uart_i2c) |
+| SPI | SPI basics and an SPI display-driving demo | Video / Handbook / Demo / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/13_40pin_spi) |
+| CAN | CAN FD basics, can-utils, CAN loopback testing, CAN motor-control demos, and a CAN logic-analyzer demo | Video / Handbook / Demo / [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/14_can) |
 
 ---
 

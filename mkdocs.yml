@@ -4,6 +4,8 @@ site_url: https://d-robotics.github.io/rdk-course-demos/
 repo_url: https://github.com/D-Robotics/rdk-course-demos
 repo_name: D-Robotics/rdk-course-demos
 edit_uri: edit/develop/docs/
+exclude_docs: |
+  superpowers/**
 
 theme:
   name: material

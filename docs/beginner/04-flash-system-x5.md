@@ -21,5 +21,5 @@ If the X5 has no display or network connection, do not immediately flash it agai
 
 ## Resources
 
-- [Course code and materials](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/04_flash_system)
+- [Course code and materials](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/04_flash_system)
 - [Official RDK X5 documentation](https://developer.d-robotics.cc/rdk_doc/Quick_start/)

@@ -2,6 +2,8 @@ from pathlib import Path
 import re
 import unittest
 
+import yaml
+
 
 class CourseSiteStructureTests(unittest.TestCase):
     project_root = Path(__file__).resolve().parents[1]
@@ -186,6 +188,33 @@ class CourseSiteStructureTests(unittest.TestCase):
             self.assertTrue(any(pattern.search(heading) for pattern in patterns), heading)
         for heading in allowed_headings:
             self.assertFalse(any(pattern.search(heading) for pattern in patterns), heading)
+
+    def test_course_repository_links_use_develop_branch(self) -> None:
+        repository_tree_url = "https://github.com/D-Robotics/rdk-course-demos/tree/"
+        public_sources = [self.project_root / "mkdocs.yml", *self.public_markdown_files()]
+        course_links: list[tuple[Path, str]] = []
+
+        for path in public_sources:
+            text = path.read_text(encoding="utf-8")
+            self.assertNotIn(f"{repository_tree_url}main", text, str(path))
+            course_links.extend(
+                (path, match.group(0))
+                for match in re.finditer(rf"{re.escape(repository_tree_url)}[^/)\s]+", text)
+            )
+
+        self.assertTrue(course_links, "expected public course repository links")
+        for path, link in course_links:
+            self.assertEqual(f"{repository_tree_url}develop", link, str(path))
+
+    def test_internal_superpowers_docs_are_excluded_from_build(self) -> None:
+        config = yaml.safe_load(self.read("mkdocs.yml"))
+        excluded_docs = config.get("exclude_docs", "")
+        if isinstance(excluded_docs, str):
+            excluded_patterns = excluded_docs.splitlines()
+        else:
+            excluded_patterns = excluded_docs
+
+        self.assertIn("superpowers/**", excluded_patterns)
 
 
 if __name__ == "__main__":
