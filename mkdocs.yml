@@ -99,7 +99,6 @@ markdown_extensions:
 
 nav:
   - Home: index.md
-  - Course introduction: course-overview.md
   - 01 · Fundamentals:
       - Course outline: beginner/index.md
       - Common foundation:
