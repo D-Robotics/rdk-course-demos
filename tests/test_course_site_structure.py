@@ -16,6 +16,22 @@ class CourseSiteStructureTests(unittest.TestCase):
             if "superpowers" not in path.parts
         ]
 
+    def public_lesson_ordinal_patterns(self) -> tuple[re.Pattern[str], ...]:
+        return (
+            re.compile(r"Lesson\s+\d+", re.IGNORECASE),
+            re.compile(r"第\s*\d+\s*课"),
+            re.compile(r"^#{1,6}\s+\d+\s*·\s+", re.MULTILINE),
+            re.compile(
+                r"^#{1,6}\s+[IVX]+\.\s+(?:Beginner|Advanced|Expert|Developer)",
+                re.MULTILINE | re.IGNORECASE,
+            ),
+            re.compile(
+                r"^#{1,6}\s+[一二三四五六七八九十]+、(?:入门篇|进阶篇|高阶篇|开发者案例)(?:[：:]|$)",
+                re.MULTILINE,
+            ),
+            re.compile(r"^\|\s*(?:\d+|Lesson\s+\d+|第\s*\d+\s*课)\s*\|", re.MULTILINE | re.IGNORECASE),
+        )
+
     def test_home_is_the_single_course_overview(self) -> None:
         self.assertFalse((self.project_root / "docs/course-overview.md").exists())
         self.assertFalse((self.project_root / "docs/course-overview.zh.md").exists())
@@ -127,20 +143,26 @@ class CourseSiteStructureTests(unittest.TestCase):
                 self.assertGreaterEqual(text.count(topic), 2, topic)
 
     def test_public_docs_do_not_expose_lesson_ordinals(self) -> None:
-        forbidden_patterns = (
-            re.compile(r"Lesson\s+\d+", re.IGNORECASE),
-            re.compile(r"第\s*\d+\s*课"),
-            re.compile(r"^#{1,6}\s+\d+\s*·\s+", re.MULTILINE),
-            re.compile(
-                r"^#{1,6}\s+[IVX]+\.\s+(?:Beginner|Advanced|Expert|Developer)",
-                re.MULTILINE | re.IGNORECASE,
-            ),
-            re.compile(r"^\|\s*(?:\d+|Lesson\s+\d+|第\s*\d+\s*课)\s*\|", re.MULTILINE | re.IGNORECASE),
-        )
         for path in self.public_markdown_files():
             text = path.read_text(encoding="utf-8")
-            for pattern in forbidden_patterns:
+            for pattern in self.public_lesson_ordinal_patterns():
                 self.assertIsNone(pattern.search(text), f"{path}: {pattern.pattern}")
+
+    def test_chinese_curriculum_ordinals_do_not_match_regular_sections(self) -> None:
+        patterns = self.public_lesson_ordinal_patterns()
+        forbidden_headings = (
+            "## 二、进阶篇：TROS 开发指南",
+            "## 六、开发者案例",
+        )
+        allowed_headings = (
+            "## 1. 安装依赖",
+            "## 一、普通章节",
+        )
+
+        for heading in forbidden_headings:
+            self.assertTrue(any(pattern.search(heading) for pattern in patterns), heading)
+        for heading in allowed_headings:
+            self.assertFalse(any(pattern.search(heading) for pattern in patterns), heading)
 
 
 if __name__ == "__main__":
