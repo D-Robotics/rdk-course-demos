@@ -1,0 +1,103 @@
+{
+  "meta": {
+    "title": "RDK 小课堂｜课程介绍",
+    "lang": "cn",
+    "logo_key": "logo-cn",
+    "source_handbook": "RDK 小课堂课程介绍.md"
+  },
+  "slides": [
+    {
+      "pattern": "cover",
+      "data_title": "RDK 小课堂课程介绍",
+      "kicker": "RDK Course Overview",
+      "title": "RDK 小课堂 [gradient]课程介绍[/gradient]",
+      "lead": "从第一块板卡上手，到模型部署、TROS 开发、系统调试与具身智能应用，把 RDK 的学习路径拆成可以一步步完成的课程体系。"
+    },
+    {
+      "pattern": "cards-4",
+      "data_title": "课程解决什么问题",
+      "kicker": "What This Course Solves",
+      "title": "这套课程解决什么问题？",
+      "lead": "从能上手、能复现实验，到可以面向项目持续开发。",
+      "cards": ["完成基础操作", "复现实验结果", "建立开发方法", "走向真实项目"]
+    },
+    {
+      "pattern": "checklist",
+      "data_title": "这门课适合谁",
+      "kicker": "Audience",
+      "title": "这门课适合谁？",
+      "lead": "无论你是第一次接触 RDK，还是已经具备 Linux、AI、ROS 或机器人开发经验，都可以从对应路径切入。"
+    },
+    {
+      "pattern": "path",
+      "data_title": "建议学习路径",
+      "kicker": "Learning Path",
+      "title": "建议按这条路径学习",
+      "steps": ["基础入门", "模型与机器人应用", "系统与驱动", "大模型与具身智能", "开发者案例"]
+    },
+    {
+      "pattern": "cards-4",
+      "data_title": "每节课的内容",
+      "kicker": "Course Package",
+      "title": "每节课由四类内容组成",
+      "lead": "视频讲清思路，讲义沉淀细节，Demo 支持复现，官方文档提供深入确认。",
+      "cards": ["课程视频", "GitHub Pages 讲义", "GitHub Demo", "官方文档"]
+    },
+    {
+      "pattern": "timeline",
+      "data_title": "推荐学习方式",
+      "kicker": "How To Learn",
+      "title": "推荐学习方式",
+      "lead": "不要只看视频，也不要只复制命令。最有效的方式，是把每节课都当成一次板端小实验来完成。",
+      "steps": ["先看目标", "跟随演示", "亲手复现", "按成功标准验证", "记录问题"]
+    },
+    {
+      "pattern": "cards-4",
+      "data_title": "入门篇",
+      "kicker": "Chapter 01",
+      "title": "入门篇：RDK 的基础使用",
+      "lead": "从“能启动、能连接、能看到结果”开始，逐步覆盖系统烧录、启动排查、远程连接与外设验证。"
+    },
+    {
+      "pattern": "cards-3",
+      "data_title": "进阶篇",
+      "kicker": "Advanced Chapters",
+      "title": "进阶篇：从样例运行到应用开发",
+      "lead": "当基础能力建立起来后，继续走向模型、机器人软件栈与更底层的系统能力。",
+      "cards": ["ModelZoo 与 RoboGo", "TROS", "系统与驱动"]
+    },
+    {
+      "pattern": "cards-3",
+      "data_title": "高阶篇",
+      "kicker": "Higher Level",
+      "title": "高阶篇：大语言模型与具身智能",
+      "lead": "理解 RDK 在具身智能应用中的角色，组合语音、视觉、ROS/TROS 和大模型能力完成基础项目。"
+    },
+    {
+      "pattern": "cards-3",
+      "data_title": "开发者案例",
+      "kicker": "Developer Showcase",
+      "title": "开发者案例：从课程到真实项目",
+      "lead": "沉淀真实项目案例、社区开发者作品和典型应用方案，为实际项目提供参考。"
+    },
+    {
+      "pattern": "resources",
+      "data_title": "学习资源",
+      "kicker": "Resources",
+      "title": "学习时建议同步准备这些资源",
+      "resources": [
+        {"name": "GitHub Pages 讲义", "href": "https://d-robotics.github.io/rdk-course-demos/zh/"},
+        {"name": "GitHub Demo", "href": "https://github.com/D-Robotics/rdk-course-demos"},
+        {"name": "官方文档", "href": "https://developer.d-robotics.cc/rdk_doc_center/"},
+        {"name": "开发者社区", "href": "https://developer.d-robotics.cc/"}
+      ]
+    },
+    {
+      "pattern": "closing",
+      "data_title": "进入第一课",
+      "kicker": "Up Next · Lesson 01",
+      "title": "接下来，从 [gradient]第一课[/gradient] 开始",
+      "lead": "先建立 RDK 的社区与生态资源地图——知道资料在哪、Demo 在哪、源码在哪、问题怎么反馈，后续每一步上手都会更顺畅。"
+    }
+  ]
+}

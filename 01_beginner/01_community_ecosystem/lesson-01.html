@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RDK Course | Lesson 1: Community and Ecosystem Introduction</title>
+  <style>
+    :root {
+      /* === 地瓜品牌色板（官方规范）=== */
+      --brand:  #FF3C00;   /* 核心标准色：RGB 255,60,0 · CMYK 0,87,94,0 */
+      --brand2: #FF6200;   /* 品牌橙 2：RGB 255,98,0 · 黑客松渐变终点 */
+      --brand3: #FF0900;   /* 品牌深红：RGB 255,9,0 · 全谱渐变起点 */
+      --o1:     #FF5500;   /* 辅色 O1：RGB 255,85,0 */
+      --o2:     #FF7300;   /* 辅色 O2：RGB 255,115,0 */
+      --o3:     #FF8C00;   /* 辅色 O3：RGB 255,140,0 */
+      --o4:     #FF9D00;   /* 辅色 O4：RGB 255,157,0 */
+      --o5:     #FFAE00;   /* 辅色 O5：RGB 255,174,0 · 全谱渐变暖金终点 */
+      /* === 灰阶与线条 === */
+      --text: #111111;
+      --muted: #6e6e73;
+      --line: rgba(17, 17, 17, .10);
+      --line2: rgba(255, 60, 0, .18);
+      --shadow: 0 24px 70px rgba(0, 0, 0, .08);
+      --soft-shadow: 0 10px 30px rgba(0, 0, 0, .06);
+      /* === 字体 === */
+      --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "PingFang SC", "HarmonyOS Sans SC", "MiSans", "Microsoft YaHei UI", "Microsoft YaHei", "Myriad Pro", sans-serif;
+      --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+      /* === 缓动 === */
+      --ease-out-expo: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+    body {
+      font-family: var(--font-sans);
+      font-weight: 400;
+      font-variant-numeric: tabular-nums;
+      font-feature-settings: "ss01", "ss02", "cv11";
+      text-rendering: optimizeLegibility;
+      background:
+        radial-gradient(circle at 86% 10%, rgba(255, 60, 0, .13), transparent 30%),
+        radial-gradient(circle at 8% 90%, rgba(255, 174, 0, .13), transparent 34%),
+        linear-gradient(135deg, #ffffff 0%, #f8f7f4 44%, #f2f1ee 100%);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    body::before {
+      content: ""; position: fixed; inset: 0;
+      background:
+        linear-gradient(90deg, rgba(0,0,0,.035) 1px, transparent 1px),
+        linear-gradient(rgba(0,0,0,.03) 1px, transparent 1px);
+      background-size: 64px 64px;
+      mask-image: radial-gradient(circle at center, rgba(0,0,0,.52), transparent 72%);
+      pointer-events: none;
+    }
+    body::after {
+      content: ""; position: fixed; right: -14vw; top: -18vh;
+      width: 52vw; height: 52vw; border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,98,0,.20), rgba(255,9,0,.08) 38%, transparent 66%);
+      filter: blur(4px); pointer-events: none;
+    }
+    .brand-logo {
+      position: fixed; right: 34px; top: 24px; z-index: 20;
+      height: 44px; width: auto; object-fit: contain; object-position: right center;
+      pointer-events: none; filter: drop-shadow(0 6px 14px rgba(0, 0, 0, .08));
+    }
+    .deck { width: 100vw; height: 100vh; position: relative; }
+    .slide {
+      position: absolute; inset: 0; padding: 5.2vh 6vw;
+      display: none; opacity: 0;
+      transform: translateY(28px) scale(.985); filter: blur(4px);
+      transition: opacity .8s var(--ease-out-expo), transform .8s var(--ease-out-expo), filter .6s var(--ease-out-expo);
+      will-change: opacity, transform, filter;
+    }
+    .slide.active { display: flex; opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+    .slide.leaving {
+      display: flex; opacity: 0; transform: translateY(-24px) scale(.985); filter: blur(4px);
+      transition: opacity .38s var(--ease-out-expo), transform .38s var(--ease-out-expo), filter .38s var(--ease-out-expo);
+    }
+    .slide.active .slide-inner > * { animation: rise .9s var(--ease-out-expo) both; }
+    .slide.active .slide-inner > *:nth-child(1) { animation-delay: .08s; }
+    .slide.active .slide-inner > *:nth-child(2) { animation-delay: .18s; }
+    .slide.active .slide-inner > *:nth-child(3) { animation-delay: .28s; }
+    .slide.active .slide-inner > *:nth-child(4) { animation-delay: .38s; }
+    .slide.active .slide-inner > *:nth-child(5) { animation-delay: .48s; }
+    .slide.active .grid > *, .slide.active .path > *,
+    .slide.active .checklist > li, .slide.active .timeline > *,
+    .slide.active .flow > * {
+      animation: rise-sub .8s var(--ease-out-expo) both;
+    }
+    .slide.active .grid > *:nth-child(1), .slide.active .path > *:nth-child(1),
+    .slide.active .checklist > li:nth-child(1), .slide.active .timeline > *:nth-child(1),
+    .slide.active .flow > *:nth-child(1) { animation-delay: .28s; }
+    .slide.active .grid > *:nth-child(2), .slide.active .path > *:nth-child(2),
+    .slide.active .checklist > li:nth-child(2), .slide.active .timeline > *:nth-child(2),
+    .slide.active .flow > *:nth-child(2) { animation-delay: .36s; }
+    .slide.active .grid > *:nth-child(3), .slide.active .path > *:nth-child(3),
+    .slide.active .checklist > li:nth-child(3), .slide.active .timeline > *:nth-child(3),
+    .slide.active .flow > *:nth-child(3) { animation-delay: .44s; }
+    .slide.active .grid > *:nth-child(4), .slide.active .path > *:nth-child(4),
+    .slide.active .checklist > li:nth-child(4), .slide.active .timeline > *:nth-child(4),
+    .slide.active .flow > *:nth-child(4) { animation-delay: .52s; }
+    .slide.active .grid > *:nth-child(5), .slide.active .path > *:nth-child(5),
+    .slide.active .flow > *:nth-child(5) { animation-delay: .60s; }
+    .slide.active .grid > *:nth-child(6), .slide.active .path > *:nth-child(6) { animation-delay: .68s; }
+    .slide.active .grid > *:nth-child(7) { animation-delay: .76s; }
+    .slide.active .grid > *:nth-child(8) { animation-delay: .84s; }
+    @keyframes rise { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes rise-sub { from { opacity: 0; transform: translateY(14px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    @media (prefers-reduced-motion: reduce) {
+      .slide, .slide.leaving { transition-duration: .12s; filter: none; transform: none; }
+      .slide.active * { animation: none !important; }
+    }
+    .slide-inner {
+      position: relative; width: min(1600px, 100%); height: min(900px, 100%);
+      margin: auto; display: flex; flex-direction: column; justify-content: center; gap: 26px; z-index: 1;
+    }
+    .kicker {
+      display: inline-flex; align-items: center; gap: 10px;
+      font-family: var(--font-sans);
+      color: var(--brand); font-size: 13px; letter-spacing: .16em; font-weight: 640;
+      text-transform: uppercase;
+    }
+    .kicker::before { content: ""; width: 32px; height: 2px; background: linear-gradient(90deg, var(--brand), rgba(255,60,0,0)); }
+    h1, h2, h3, p { margin: 0; }
+    h1, h2, h3 { font-family: var(--font-sans); color: #050505; text-wrap: balance; }
+    h1 { font-size: clamp(40px, 4.6vw, 76px); line-height: 1.03; letter-spacing: -0.036em; font-weight: 720; white-space: nowrap; }
+    h2 { font-size: clamp(32px, 3.4vw, 54px); line-height: 1.06; letter-spacing: -0.028em; font-weight: 720; white-space: normal; }
+    h3 { font-size: clamp(19px, 1.55vw, 26px); line-height: 1.24; letter-spacing: -0.012em; font-weight: 640; color: #111; }
+    p, li { font-size: clamp(16px, 1.2vw, 20px); line-height: 1.6; letter-spacing: -0.006em; color: var(--muted); }
+    .lead { font-size: clamp(18px, 1.45vw, 25px); color: #333336; max-width: 1080px; line-height: 1.55; letter-spacing: -0.010em; font-weight: 400; text-wrap: pretty; }
+    .gradient { background: linear-gradient(90deg, var(--brand3), var(--brand), var(--brand2), var(--o5)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .grid { display: grid; gap: 20px; }
+    .cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .split { display: grid; grid-template-columns: 1.08fr .92fr; gap: 34px; align-items: center; }
+    .card { padding: 22px; border-radius: 28px; background: rgba(255,255,255,.78); border: 1px solid var(--line); min-height: 118px; box-shadow: var(--soft-shadow); backdrop-filter: blur(18px); }
+    .card h3 { margin-bottom: 10px; }
+    .card p, .card li { font-size: clamp(15px, 1.05vw, 18px); line-height: 1.55; }
+    .card.themed { position: relative; padding: 24px 22px 20px; overflow: hidden; border: 1px solid rgba(255,255,255,.9); }
+    .card.themed::before { content: ""; position: absolute; inset: 0; background: var(--tint, linear-gradient(135deg, rgba(255,255,255,.86), rgba(255,247,240,.72))); z-index: 0; }
+    .card.themed > * { position: relative; z-index: 1; }
+    .card.themed .card-icon { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 14px; background: rgba(255,255,255,.9); border: 1px solid rgba(255,255,255,.9); box-shadow: 0 8px 22px rgba(255,60,0,.10), inset 0 0 0 1px rgba(0,0,0,.02); color: var(--accent); margin-bottom: 14px; }
+    .card.themed .card-icon svg { width: 22px; height: 22px; }
+    .card.themed h3 { color: var(--accent, var(--brand)); font-weight: 720; letter-spacing: -0.014em; margin-bottom: 8px; }
+    .card.themed p { color: #3a3a3d; }
+    .tint-1 { --tint: linear-gradient(135deg, rgba(255,68,0,.14), rgba(255,255,255,.6)); --accent: #E53500; }
+    .tint-2 { --tint: linear-gradient(135deg, rgba(255,140,0,.14), rgba(255,255,255,.6)); --accent: #C96500; }
+    .tint-3 { --tint: linear-gradient(135deg, rgba(255,196,0,.16), rgba(255,255,255,.6)); --accent: #A67200; }
+    .tint-4 { --tint: linear-gradient(135deg, rgba(112,196,255,.16), rgba(255,255,255,.6)); --accent: #0A6DBF; }
+    .tint-5 { --tint: linear-gradient(135deg, rgba(140,120,255,.14), rgba(255,255,255,.6)); --accent: #5A46C7; }
+    .tint-6 { --tint: linear-gradient(135deg, rgba(80,200,150,.14), rgba(255,255,255,.6)); --accent: #158961; }
+    .tag { display: inline-flex; align-items: center; padding: 6px 11px; border: 1px solid rgba(255,60,0,.18); border-radius: 999px; background: rgba(255,60,0,.07); color: var(--brand); font-size: 13px; font-weight: 700; margin: 4px 6px 4px 0; }
+    .hero-panel { position: relative; min-height: 480px; border-radius: 42px; background: rgba(255,255,255,.72); border: 1px solid rgba(255,255,255,.84); box-shadow: var(--shadow); overflow: hidden; backdrop-filter: blur(24px); }
+    .hero-panel::before { content: ""; position: absolute; inset: auto -80px -100px auto; width: 300px; height: 300px; border-radius: 50%; background: linear-gradient(135deg, rgba(255,98,0,.22), rgba(255,9,0,.08)); }
+    .hero-orbit { position: absolute; inset: 48px; border-radius: 50%; border: 1px solid rgba(255,60,0,.16); }
+    .hero-orbit.two { inset: 105px; border-color: rgba(255,174,0,.24); }
+    .hero-center { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 180px; height: 180px; border-radius: 50%; display: grid; place-items: center; text-align: center; background: linear-gradient(135deg, #fff, #fff2e9); border: 1px solid rgba(255,60,0,.18); box-shadow: 0 20px 60px rgba(255,60,0,.12); }
+    .hero-center strong { color: var(--brand); font-size: 38px; line-height: 1; letter-spacing: -0.03em; }
+    .hero-center span { color: var(--muted); font-size: 14px; }
+    .node { position: absolute; padding: 9px 14px; border-radius: 16px; background: rgba(255,255,255,.90); border: 1px solid var(--line2); font-weight: 700; color: #1d1d1f; box-shadow: 0 10px 28px rgba(255,60,0,.10); font-size: 14px; letter-spacing: -0.004em; }
+    .n1 { left: 54px; top: 76px; }
+    .n2 { right: 58px; top: 96px; }
+    .n3 { left: 70px; bottom: 92px; }
+    .n4 { right: 74px; bottom: 78px; }
+    .path { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px; align-items: stretch; }
+    .path-step { position: relative; padding: 18px 16px; border-radius: 24px; background: rgba(255,255,255,.82); border: 1px solid var(--line); box-shadow: var(--soft-shadow); min-height: 150px; }
+    .path-step::before { content: attr(data-no); display: block; color: rgba(255,60,0,.22); font-size: 38px; line-height: 1; font-weight: 900; margin-bottom: 10px; }
+    .path-step strong { display: block; color: #111; font-size: 19px; line-height: 1.2; margin-bottom: 6px; font-weight: 720; }
+    .path-step span { color: var(--muted); font-size: 14px; line-height: 1.5; }
+    .resource { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 18px 20px; border-radius: 24px; background: rgba(255,255,255,.82); border: 1px solid var(--line); box-shadow: var(--soft-shadow); }
+    .resource strong { font-size: 19px; color: #111; font-weight: 720; letter-spacing: -0.01em; }
+    .resource span { color: var(--muted); font-size: 14px; line-height: 1.5; }
+    a.btn { text-decoration: none; border: 1px solid rgba(255,60,0,.20); color: #fff; background: linear-gradient(135deg, var(--brand), var(--brand2)); padding: 10px 15px; border-radius: 999px; font-weight: 800; cursor: pointer; white-space: nowrap; box-shadow: 0 10px 24px rgba(255,60,0,.18); }
+    .timeline { display: grid; gap: 16px; }
+    .timeline-row { display: grid; grid-template-columns: 68px 1fr; gap: 22px; align-items: center; padding: 16px 20px; background: rgba(255,255,255,.72); border: 1px solid var(--line); border-radius: 20px; box-shadow: var(--soft-shadow); }
+    .timeline-row p { margin: 0; color: #202124; font-size: clamp(16px, 1.2vw, 20px); line-height: 1.5; letter-spacing: -0.006em; }
+    .time { display: inline-flex; align-items: center; justify-content: center; width: 68px; height: 34px; border-radius: 999px; background: linear-gradient(135deg, rgba(255,60,0,.10), rgba(255,174,0,.10)); border: 1px solid rgba(255,60,0,.18); color: var(--brand); font-weight: 700; font-size: 13px; letter-spacing: .04em; }
+    .checklist { list-style: none; padding: 0; margin: 0; display: grid; gap: 14px; }
+    .checklist li { padding: 12px 16px 12px 44px; background: rgba(255,255,255,.82); border: 1px solid var(--line); border-radius: 18px; position: relative; box-shadow: var(--soft-shadow); font-size: clamp(14px, 1.1vw, 18px); color: #202124; }
+    .checklist li::before { content: "✓"; position: absolute; left: 16px; top: 12px; color: var(--brand); font-weight: 900; }
+    .flow { display: flex; align-items: stretch; gap: 14px; flex-wrap: wrap; }
+    .step { flex: 1; min-width: 180px; padding: 21px; position: relative; border-radius: 22px; border: 1px solid var(--line); background: rgba(255,255,255,.82); box-shadow: var(--soft-shadow); }
+    .step:not(:last-child)::after { content: "→"; position: absolute; right: -18px; top: 50%; transform: translateY(-50%); color: var(--brand); font-size: 24px; z-index: 2; font-weight: 800; }
+    .step strong { display: block; font-size: 19px; margin-bottom: 6px; color: #111; font-weight: 720; letter-spacing: -0.01em; }
+    .step span { color: var(--muted); font-size: 14px; line-height: 1.5; }
+    .code { font-family: var(--font-mono); color: #111; background: #fff; border: 1px solid rgba(255,60,0,.16); padding: 14px 16px; border-radius: 16px; font-size: 17px; box-shadow: var(--soft-shadow); }
+    .bar { position: fixed; left: 28px; right: 28px; bottom: 22px; height: 4px; background: rgba(0,0,0,.08); border-radius: 99px; overflow: hidden; z-index: 10; }
+    .bar span { display: block; height: 100%; width: 0%; background: linear-gradient(90deg, var(--brand3), var(--brand), var(--brand2), var(--o5)); transition: width .25s ease; }
+    .nav { position: fixed; right: 28px; bottom: 38px; display: flex; gap: 10px; z-index: 10; align-items: center; }
+    .nav button { width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line); background: rgba(255,255,255,.78); color: #111; font-size: 22px; cursor: pointer; box-shadow: var(--soft-shadow); }
+    .page { color: var(--muted); font-size: 15px; min-width: 68px; text-align: center; font-weight: 700; }
+    .hint { position: fixed; left: 28px; bottom: 38px; color: rgba(0,0,0,.42); font-size: 14px; z-index: 10; }
+    @media (max-width: 1200px) {
+      .path { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .cols-4, .cols-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .split { grid-template-columns: 1fr; }
+      .hero-panel { min-height: 340px; }
+      .brand-logo { height: 34px; }
+      h1, h2 { white-space: normal; }
+    }
+
+  </style>
+</head>
+<body>
+  <img class="brand-logo" src="data:image/png;base64,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" alt="D-Robotics" />
+  <main class="deck" id="deck">
+    <section class="slide active" data-title="Lesson 1 Cover">
+      <div class="slide-inner split">
+        <div>
+          <div class="kicker">Lesson 01 · RDK Course</div>
+          <h1>RDK Community & <span class="gradient">Ecosystem</span></h1>
+          <p class="lead">Build a clear RDK resource map and know where to look first when a development need arises.</p>
+          <div><span class="tag">Official docs</span><span class="tag">GitHub</span><span class="tag">Model Zoo</span><span class="tag">TROS</span><span class="tag">Feedback</span></div>
+        </div>
+        <div class="hero-panel">
+          <div class="hero-orbit"></div><div class="hero-orbit two"></div>
+          <div class="node n1">Find docs by board</div><div class="node n2">Find source by task</div><div class="node n3">Choose the right branch</div><div class="node n4">Report with context</div>
+          <div class="hero-center"><div><strong>RDK</strong><br><span>Community resource map</span></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="What This Solves">
+      <div class="slide-inner">
+        <div class="kicker">What This Solves</div>
+        <h2>Know Where to Start</h2>
+        <p class="lead">The first challenge is often not entering commands, but choosing the correct entry point.</p>
+        <div class="grid cols-4">
+          <div class="card themed tint-1"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div><h3>Find the Manual</h3><p>Locate board interfaces, system configuration, and getting-started steps.</p></div>
+          <div class="card themed tint-2"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.4 3.4 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.4 13.4 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg></div><h3>Find Source & Models</h3><p>Decide whether the task belongs in GitHub or Model Zoo.</p></div>
+          <div class="card themed tint-4"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M12 4v4"/><circle cx="12" cy="3" r="1"/><circle cx="8.5" cy="14" r="1"/><circle cx="15.5" cy="14" r="1"/><path d="M9 17h6"/><path d="M3 14H1M23 14h-2"/></svg></div><h3>Find TROS</h3><p>Separate the robotics manual from package source code.</p></div>
+          <div class="card themed tint-6"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div><h3>Find Feedback</h3><p>Choose the forum or Issues and prepare complete context.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Learning Outcomes">
+      <div class="slide-inner">
+        <div class="kicker">What You'll Learn</div>
+        <h2>Four Shortest Paths</h2>
+
+        <div class="grid cols-4">
+          <div class="card themed tint-1"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 12h20"/><path d="M6 4v16M18 4v16M2 8h4M2 16h4M18 8h4M18 16h4"/></svg></div><h3>Manuals & APIs</h3><p>Open the correct manual and find the X5 video codec APIs.</p></div>
+          <div class="card themed tint-2"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 3v18M16 3v18M3 8h18M3 16h18"/></svg></div><h3>Source & Models</h3><p>Identify official repos, choose a board branch, and read the README first.</p></div>
+          <div class="card themed tint-4"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M12 4v4"/><circle cx="12" cy="3" r="1"/><circle cx="8.5" cy="14" r="1"/><circle cx="15.5" cy="14" r="1"/><path d="M9 17h6"/><path d="M3 14H1M23 14h-2"/></svg></div><h3>TROS Resources</h3><p>Find the TROS manual and source entry points and understand their roles.</p></div>
+          <div class="card themed tint-6"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6l2 2 3-3M3 12l2 2 3-3M3 18l2 2 3-3"/></svg></div><h3>Useful Feedback</h3><p>Find the new-topic entry and organize a reproducible problem report.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Resource Map">
+      <div class="slide-inner">
+        <div class="kicker">Resource Map</div>
+        <h2>Choose an Entry by Task</h2>
+
+        <div class="grid cols-3">
+          <div class="card themed tint-1"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div><h3>Resource Center</h3><p>Board manuals, system setup, basic applications, and FAQs.</p></div>
+          <div class="card themed tint-2"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.4 3.4 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.4 13.4 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg></div><h3>GitHub</h3><p>Official repositories, source, README files, and Issues.</p></div>
+          <div class="card themed tint-3"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 3v18M16 3v18M3 8h18M3 16h18"/></svg></div><h3>Model Zoo</h3><p>BPU model examples, board branches, and deployment guides.</p></div>
+          <div class="card themed tint-4"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M12 4v4"/><circle cx="12" cy="3" r="1"/><circle cx="8.5" cy="14" r="1"/><circle cx="15.5" cy="14" r="1"/><path d="M9 17h6"/><path d="M3 14H1M23 14h-2"/></svg></div><h3>TROS</h3><p>Robotics manuals, package source code, and Issues.</p></div>
+          <div class="card themed tint-5"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 3 4 6 4 9s-1.5 6-4 9c-2.5-3-4-6-4-9s1.5-6 4-9z"/></svg></div><h3>Studio / NodeHub</h3><p>A device-development entry and an application-case entry.</p></div>
+          <div class="card themed tint-6"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div><h3>Forum</h3><p>Technical discussions, problem reports, and shared experience.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Key Concepts">
+      <div class="slide-inner">
+        <div class="kicker">Key Concepts</div>
+        <h2>Eight Terms to Know</h2>
+
+        <div class="grid cols-4">
+          <div class="card themed tint-1"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="5" width="14" height="14" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/></svg></div><h3>RDK</h3><p>Robotics Development Kit, a platform for robotics and intelligent application development.</p></div>
+          <div class="card themed tint-2"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2.5"/><circle cx="5" cy="18" r="2.5"/><circle cx="19" cy="18" r="2.5"/><path d="M12 7.5v2.5M11 11c-1.6 1-3.7 2.6-5 5M13 11c1.6 1 3.7 2.6 5 5"/></svg></div><h3>BPU</h3><p>Brain Processing Unit, the on-device accelerator for AI inference.</p></div>
+          <div class="card themed tint-3"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8l4 4-4 4"/><path d="M12 16h6"/></svg></div><h3>RDK OS</h3><p>A Linux system image for RDK boards with platform drivers and runtime components.</p></div>
+          <div class="card themed tint-4"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div><h3>miniboot</h3><p>The RDK bootloader; its version matters for boot and some low-level issues.</p></div>
+          <div class="card themed tint-5"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M12 4v4"/><circle cx="12" cy="3" r="1"/><circle cx="8.5" cy="14" r="1"/><circle cx="15.5" cy="14" r="1"/><path d="M9 17h6"/><path d="M3 14H1M23 14h-2"/></svg></div><h3>TROS</h3><p>TogetheROS.Bot, a robotics application platform compatible with ROS 2 interfaces.</p></div>
+          <div class="card themed tint-6"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 3v18M16 3v18M3 8h18M3 16h18"/></svg></div><h3>Model Zoo</h3><p>A collection of model examples and tools for RDK and BPU.</p></div>
+          <div class="card themed tint-1"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 3 4 6 4 9s-1.5 6-4 9c-2.5-3-4-6-4-9s1.5-6 4-9z"/></svg></div><h3>RDK Studio</h3><p>An AI-native development workspace for RDK devices.</p></div>
+          <div class="card themed tint-2"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h6v3.5a1.5 1.5 0 1 0 3 0V4h6v6h-3.5a1.5 1.5 0 1 0 0 3H20v6h-6v-3.5a1.5 1.5 0 1 0-3 0V20H4v-6h3.5a1.5 1.5 0 1 0 0-3H4z"/></svg></div><h3>NodeHub</h3><p>An additional application-case entry for existing solutions and scenarios.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Find the Board Manual">
+      <div class="slide-inner">
+        <div class="kicker">Documentation</div>
+        <h2>First, Confirm the Board Series</h2>
+        <p class="lead">Do not start with a command. Identify the series your board belongs to first.</p>
+        <div class="grid cols-3">
+          <div class="card themed tint-1"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="5" width="14" height="14" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/></svg></div><h3>RDK X Series</h3><p>For products such as RDK X3, RDK X5, and RDK X5 Module.</p></div>
+          <div class="card themed tint-2"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div><h3>RDK S Series</h3><p>For products such as RDK S100, RDK S100P, and RDK S600.</p></div>
+          <div class="card themed tint-4"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg></div><h3>Check the Product</h3><p>Inside the manual, confirm that the selected product matches your device.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="X5 Codec APIs">
+      <div class="slide-inner split">
+        <div>
+          <div class="kicker">Documentation · RDK X5</div>
+          <h2>Find the X5 Codec APIs</h2>
+          <p class="lead">The goal is a repeatable search path, not memorizing a single interface.</p>
+        </div>
+        <div class="timeline">
+          <div class="timeline-row"><div class="time">Step 1</div><p>Open the RDK X3/X5 User Manual from GitHub IO.</p></div>
+          <div class="timeline-row"><div class="time">Step 2</div><p>Confirm that the current product is RDK X5.</p></div>
+          <div class="timeline-row"><div class="time">Step 3</div><p>Go to 3 Basic Application Development → 3.6 API Reference → RDK X5 → Python Interface.</p></div>
+          <div class="timeline-row"><div class="time">Step 4</div><p>Open Encoder Object or Decoder Object, then review API Reference.</p></div>
+          <div class="timeline-row"><div class="time">Search</div><p>Or search for Encoder, Decoder, encoding, or decoding in the upper-right corner.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="D-Robotics GitHub">
+      <div class="slide-inner">
+        <div class="kicker">Source Code</div>
+        <h2>GitHub: Check Three Things</h2>
+        <p class="lead">Use GitHub for official open-source projects, implementation details, and issue history.</p>
+        <div class="grid cols-3">
+          <div class="card themed tint-1"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg></div><h3>Right Repository</h3><p>Confirm that the repository name and purpose match your task.</p></div>
+          <div class="card themed tint-2"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M16 18l6-6-6-6"/><path d="M8 6l-6 6 6 6"/></svg></div><h3>Right Branch</h3><p>Make sure the branch matches your board and platform.</p></div>
+          <div class="card themed tint-4"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/></svg></div><h3>Read the README</h3><p>Review dependencies, directory structure, and usage before acting.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Model Zoo">
+      <div class="slide-inner split">
+        <div>
+          <div class="kicker">Model Zoo</div>
+          <h2>Model Zoo: Pick the Board Branch</h2>
+          <p class="lead">This lesson shows only the shortest lookup path. It does not download code or run a model.</p>
+        </div>
+        <div class="timeline">
+          <div class="timeline-row"><div class="time">RDK X5</div><p>Choose rdk_x5; use rdk_x5_legacy only for historical examples.</p></div>
+          <div class="timeline-row"><div class="time">RDK X3</div><p>Choose rdk_x3, then open the target task directory.</p></div>
+          <div class="timeline-row"><div class="time">RDK S</div><p>Choose rdk_s, then find the example by domain.</p></div>
+          <div class="timeline-row"><div class="time">README</div><p>Read the target directory README before deciding the next step.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="TROS Entry Points">
+      <div class="slide-inner">
+        <div class="kicker">TROS</div>
+        <h2>TROS: Manual and Source Together</h2>
+        <p class="lead">TogetheROS.Bot is compatible with ROS 2 interfaces and provides platform capabilities for RDK robotics applications.</p>
+        <div class="grid cols-3">
+          <div class="card themed tint-1"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/></svg></div><h3>Start with the Manual</h3><p>Learn concepts, setup paths, features, and application examples.</p></div>
+          <div class="card themed tint-2"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.4 3.4 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.4 13.4 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg></div><h3>Then Open Source</h3><p>Find packages, source code, README files, and Issues.</p></div>
+          <div class="card themed tint-4"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M12 4v4"/><circle cx="12" cy="3" r="1"/><circle cx="8.5" cy="14" r="1"/><circle cx="15.5" cy="14" r="1"/><path d="M9 17h6"/><path d="M3 14H1M23 14h-2"/></svg></div><h3>Scope of This Lesson</h3><p>Only show both entries; do not install TROS or run nodes.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Studio and NodeHub">
+      <div class="slide-inner">
+        <div class="kicker">Additional Entries</div>
+        <h2>Two Additional Entry Points</h2>
+
+        <div class="grid cols-3">
+          <div class="card themed tint-1"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 3 4 6 4 9s-1.5 6-4 9c-2.5-3-4-6-4-9s1.5-6 4-9z"/></svg></div><h3>RDK Studio</h3><p>An AI-native workspace for RDK devices and a device-development entry point.</p></div>
+          <div class="card themed tint-2"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h6v3.5a1.5 1.5 0 1 0 3 0V4h6v6h-3.5a1.5 1.5 0 1 0 0 3H20v6h-6v-3.5a1.5 1.5 0 1 0-3 0V20H4v-6h3.5a1.5 1.5 0 1 0 0-3H4z"/></svg></div><h3>NodeHub</h3><p>An additional application-case entry for existing solutions and scenarios.</p></div>
+          <div class="card themed tint-4"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/></svg></div><h3>Course Scope</h3><p>Lesson 3 covers RDK Studio; this lesson does not cover NodeHub search or execution.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Feedback Channels">
+      <div class="slide-inner">
+        <div class="kicker">Community</div>
+        <h2>Choose Feedback by Problem Type</h2>
+
+        <div class="grid cols-3">
+          <div class="card themed tint-1"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div><h3>Forum</h3><p>For usage, environment, experience sharing, and application cases.</p></div>
+          <div class="card themed tint-2"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.4 3.4 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.4 13.4 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg></div><h3>GitHub Issues</h3><p>For problems confirmed to belong to a specific official repository.</p></div>
+          <div class="card themed tint-4"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg></div><h3>New Topic Entry</h3><p>Show the entry only; do not search, fill in, or publish a post.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Effective Problem Report">
+      <div class="slide-inner split">
+        <div>
+          <div class="kicker">Question Template</div>
+          <h2>Seven Fields for a Useful Report</h2>
+          <p class="lead">A good title states the board, task, and symptom directly.</p>
+        </div>
+        <ul class="checklist">
+          <li>Board model</li>
+          <li>System or software version</li>
+          <li>Steps to reproduce</li>
+          <li>Expected result</li>
+          <li>Actual result</li>
+          <li>Key logs with context</li>
+          <li>What you have already checked</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Completion Checklist">
+      <div class="slide-inner split">
+        <div>
+          <div class="kicker">Completion Checklist</div>
+          <h2>Complete Four Tasks</h2>
+          <p class="lead">Together, these four tasks form your first RDK resource map.</p>
+        </div>
+        <ul class="checklist">
+          <li>Open the correct board manual and locate one specific topic</li>
+          <li>Choose the correct Model Zoo branch and find the target README</li>
+          <li>Find both the TROS manual and source-code entry points</li>
+          <li>Find the forum post entry and list all seven fields of a useful report</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Up Next">
+      <div class="slide-inner">
+        <div class="kicker">Up Next · Lesson 02</div>
+        <h2>Up Next: RDK Product Overview</h2>
+        <p class="lead">Understand the positioning of different RDK products and how to choose one.</p>
+        <div class="grid cols-3">
+          <div class="card themed tint-1"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="5" width="14" height="14" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/></svg></div><h3>Product Line</h3><p>Meet the RDK product families and form factors.</p></div>
+          <div class="card themed tint-4"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div><h3>Key Differences</h3><p>Compare compute, interfaces, and platform positioning.</p></div>
+          <div class="card themed tint-6"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg></div><h3>How to Choose</h3><p>Match the product to your task and scenario.</p></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="hint">Keyboard: ← / → / Space to navigate</div>
+  <div class="nav"><button id="prev">‹</button><span class="page" id="page"></span><button id="next">›</button></div>
+  <div class="bar"><span id="progress"></span></div>
+
+  <script>
+    const slides = [...document.querySelectorAll('.slide')];
+    const page = document.getElementById('page');
+    const progress = document.getElementById('progress');
+    let index = 0;
+    let transitioning = false;
+    function show(nextIndex) {
+      nextIndex = Math.max(0, Math.min(slides.length - 1, nextIndex));
+      if (nextIndex === index && slides[index].classList.contains('active')) return;
+      if (transitioning) return;
+      const current = slides[index];
+      if (current && current !== slides[nextIndex] && current.classList.contains('active')) {
+        transitioning = true;
+        current.classList.remove('active');
+        current.classList.add('leaving');
+        setTimeout(() => {
+          current.classList.remove('leaving');
+          slides.forEach((slide, i) => slide.classList.toggle('active', i === nextIndex));
+          index = nextIndex;
+          page.textContent = `${index + 1} / ${slides.length}`;
+          progress.style.width = `${((index + 1) / slides.length) * 100}%`;
+          transitioning = false;
+        }, 320);
+      } else {
+        slides.forEach((slide, i) => slide.classList.toggle('active', i === nextIndex));
+        index = nextIndex;
+        page.textContent = `${index + 1} / ${slides.length}`;
+        progress.style.width = `${((index + 1) / slides.length) * 100}%`;
+      }
+    }
+    document.getElementById('prev').onclick = () => show(index - 1);
+    document.getElementById('next').onclick = () => show(index + 1);
+    window.addEventListener('keydown', event => {
+      if (['ArrowRight', 'PageDown', ' '].includes(event.key)) { event.preventDefault(); show(index + 1); }
+      if (['ArrowLeft', 'PageUp'].includes(event.key)) { event.preventDefault(); show(index - 1); }
+      if (event.key === 'Home') show(0);
+      if (event.key === 'End') show(slides.length - 1);
+      if (/^[0-9]$/.test(event.key)) {
+        const n = Number(event.key);
+        if (n > 0 && n <= slides.length) show(n - 1);
+      }
+    });
+    show(0);
+  </script>
+
+</body>
+</html>

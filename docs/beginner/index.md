@@ -8,10 +8,10 @@ These lessons apply across the RDK platform family.
 
 | Lesson | Tutorial | Code examples |
 | --- | --- | --- |
-| Guide | RDK Classroom: course structure and learning workflow | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner) |
-| 01 | [RDK community and ecosystem](01-community-ecosystem.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/01_community_ecosystem) |
+| Guide | [RDK Classroom course introduction](../course-overview.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/00_course_overview) |
+| 01 | [RDK community and ecosystem](01-community-ecosystem.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/01_community_ecosystem) |
 | 02 | RDK products and roadmap | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/02_product_intro) |
-| 03 | RDK Studio | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/03_rdk_studio) |
+| 03 | [RDK Studio](03-rdk-studio.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/03_rdk_studio) |
 
 ## RDK X5 learning path
 

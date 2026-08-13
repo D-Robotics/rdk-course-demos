@@ -1,0 +1,203 @@
+{
+  "meta": {
+    "title": "RDK 小课堂｜第一课：RDK 社区与生态入门",
+    "lang": "cn",
+    "logo_key": "logo-cn"
+  },
+  "slides": [
+    {
+      "pattern": "cover",
+      "data_title": "第一课封面",
+      "kicker": "Lesson 01 · RDK Course",
+      "title": "RDK 社区与 [gradient]生态入门[/gradient]",
+      "lead": "建立一张清晰的 RDK 资源地图，遇到开发需求时，知道应该先去哪里找答案。",
+      "tags": ["官方手册", "GitHub", "Model Zoo", "TROS", "问题反馈"],
+      "hero_nodes": ["按板卡找手册", "按任务找源码", "按平台选分支", "带完整信息反馈"],
+      "hero_center": {
+        "strong": "RDK",
+        "sub": "社区与生态资源地图"
+      }
+    },
+    {
+      "pattern": "cards-4",
+      "data_title": "本课解决的问题",
+      "kicker": "What This Solves",
+      "title": "先确定应该去哪里找",
+      "lead": "刚开始使用 RDK，常见困难不是不会输入命令，而是不知道正确入口。",
+      "cards": [
+        {"tint": "tint-1", "icon": "layers", "title": "找手册", "body": "查看板卡接口、系统配置或快速入门步骤。"},
+        {"tint": "tint-2", "icon": "github", "title": "找源码和模型", "body": "判断应该进入 GitHub 还是 Model Zoo。"},
+        {"tint": "tint-4", "icon": "robot", "title": "找 TROS", "body": "区分机器人开发手册与功能包源码入口。"},
+        {"tint": "tint-6", "icon": "message", "title": "找反馈入口", "body": "选择论坛或 Issues，并准备完整问题信息。"}
+      ]
+    },
+    {
+      "pattern": "cards-4",
+      "data_title": "学习目标",
+      "kicker": "What You'll Learn",
+      "title": "完成后掌握四条最短路径",
+      "cards": [
+        {"tint": "tint-1", "icon": "film", "title": "手册与 API", "body": "按板卡进入正确手册，找到 X5 视频编解码 API。"},
+        {"tint": "tint-2", "icon": "grid", "title": "源码与模型", "body": "识别官方仓库、选择板卡分支并先读 README。"},
+        {"tint": "tint-4", "icon": "robot", "title": "TROS 资料", "body": "找到 TROS 手册与源码，并理解两者分工。"},
+        {"tint": "tint-6", "icon": "list-check", "title": "有效反馈", "body": "找到发帖入口，整理可复现的问题描述。"}
+      ]
+    },
+    {
+      "pattern": "cards-6",
+      "data_title": "资源地图",
+      "kicker": "Resource Map",
+      "title": "按开发任务选择入口",
+      "cards": [
+        {"tint": "tint-1", "icon": "layers", "title": "资料中心", "body": "板卡手册、系统配置、基础应用与 FAQ。"},
+        {"tint": "tint-2", "icon": "github", "title": "GitHub", "body": "官方仓库、源码、README 与 Issues。"},
+        {"tint": "tint-3", "icon": "grid", "title": "Model Zoo", "body": "BPU 模型示例、板卡分支与部署说明。"},
+        {"tint": "tint-4", "icon": "robot", "title": "TROS", "body": "机器人应用手册、功能包源码与 Issues。"},
+        {"tint": "tint-5", "icon": "globe", "title": "Studio / NodeHub", "body": "设备开发入口与应用案例补充入口。"},
+        {"tint": "tint-6", "icon": "message", "title": "论坛", "body": "技术讨论、问题反馈与经验分享。"}
+      ]
+    },
+    {
+      "pattern": "cards-8",
+      "data_title": "关键概念",
+      "kicker": "Key Concepts",
+      "title": "八个关键词先认识",
+      "cards": [
+        {"tint": "tint-1", "icon": "chip", "title": "RDK", "body": "Robotics Development Kit，面向机器人与智能应用开发的平台。"},
+        {"tint": "tint-2", "icon": "brain", "title": "BPU", "body": "Brain Processing Unit，板端 AI 推理加速单元。"},
+        {"tint": "tint-3", "icon": "terminal", "title": "RDK OS", "body": "面向 RDK 板卡的 Linux 系统镜像，包含平台驱动与运行环境。"},
+        {"tint": "tint-4", "icon": "wrench", "title": "miniboot", "body": "RDK 引导程序；启动和部分底层问题需要关注其版本。"},
+        {"tint": "tint-5", "icon": "robot", "title": "TROS", "body": "TogetheROS.Bot，与 ROS 2 接口兼容的机器人应用平台。"},
+        {"tint": "tint-6", "icon": "grid", "title": "Model Zoo", "body": "面向 RDK 与 BPU 的模型示例和工具集合。"},
+        {"tint": "tint-1", "icon": "globe", "title": "RDK Studio", "body": "面向 RDK 设备的 AI 原生开发工作台。"},
+        {"tint": "tint-2", "icon": "puzzle", "title": "NodeHub", "body": "用于了解已有方案和使用场景的应用案例补充入口。"}
+      ]
+    },
+    {
+      "pattern": "cards-3",
+      "data_title": "按板卡找手册",
+      "kicker": "Documentation",
+      "title": "第一步：先确认板卡系列",
+      "lead": "不要从一个具体命令开始。先确定自己的板卡属于哪个系列。",
+      "cards": [
+        {"tint": "tint-1", "icon": "chip", "title": "RDK X 系列", "body": "面向 RDK X3、RDK X5、RDK X5 Module 等产品。"},
+        {"tint": "tint-2", "icon": "layers", "title": "RDK S 系列", "body": "面向 RDK S100、RDK S100P、RDK S600 等产品。"},
+        {"tint": "tint-4", "icon": "search", "title": "核对当前产品", "body": "进入手册后，再确认页面中的产品型号与当前设备一致。"}
+      ]
+    },
+    {
+      "pattern": "split-timeline",
+      "data_title": "X5 编解码 API",
+      "kicker": "Documentation · RDK X5",
+      "title": "找到 X5 编解码 API",
+      "lead": "重点不是记住某个接口，而是掌握可重复的查找方法。",
+      "steps": [
+        {"badge": "Step 1", "body": "从资料中心进入 RDK X 系列用户手册。"},
+        {"badge": "Step 2", "body": "确认当前产品为 RDK X5。"},
+        {"badge": "Step 3", "body": "进入 3 基础应用开发 → 3.6 API 说明 → RDK X5 → Python 接口。"},
+        {"badge": "Step 4", "body": "打开 Encoder 对象或 Decoder 对象，查看 API 参考。"},
+        {"badge": "Search", "body": "也可在右上角搜索 Encoder、Decoder、编码或解码。"}
+      ]
+    },
+    {
+      "pattern": "cards-3",
+      "data_title": "D-Robotics GitHub",
+      "kicker": "Source Code",
+      "title": "GitHub：先确认三件事",
+      "lead": "GitHub 用来查看官方开源项目、实现细节与问题记录。",
+      "cards": [
+        {"tint": "tint-1", "icon": "target", "title": "仓库是否匹配", "body": "先看仓库名称与用途是否对应当前任务。"},
+        {"tint": "tint-2", "icon": "code", "title": "分支是否匹配", "body": "确认当前分支适合自己的板卡与平台。"},
+        {"tint": "tint-4", "icon": "book-open", "title": "README 怎么说", "body": "操作前先读依赖、目录结构和使用方法。"}
+      ]
+    },
+    {
+      "pattern": "split-timeline",
+      "data_title": "Model Zoo",
+      "kicker": "Model Zoo",
+      "title": "Model Zoo：先选对分支",
+      "lead": "本课只展示最短查找路径，不下载代码，也不运行模型。",
+      "steps": [
+        {"badge": "RDK X5", "body": "选择 rdk_x5；历史示例按需查看 rdk_x5_legacy。"},
+        {"badge": "RDK X3", "body": "选择 rdk_x3，再进入目标任务目录。"},
+        {"badge": "RDK S", "body": "选择 rdk_s，再按领域找到目标示例。"},
+        {"badge": "README", "body": "进入目标目录后，先读 README，再决定下一步。"}
+      ]
+    },
+    {
+      "pattern": "cards-3",
+      "data_title": "TROS 入口",
+      "kicker": "TROS",
+      "title": "TROS：手册与源码配合看",
+      "lead": "TogetheROS.Bot 与 ROS 2 接口兼容，并面向 RDK 机器人应用提供平台能力。",
+      "cards": [
+        {"tint": "tint-1", "icon": "book-open", "title": "先看用户手册", "body": "理解概念、安装与使用路径、功能介绍和应用示例。"},
+        {"tint": "tint-2", "icon": "github", "title": "再看官方源码", "body": "查找具体功能包、源码、README 和 Issues。"},
+        {"tint": "tint-4", "icon": "robot", "title": "本课展示范围", "body": "只展示两个入口，不安装 TROS，也不运行节点。"}
+      ]
+    },
+    {
+      "pattern": "cards-3",
+      "data_title": "Studio 与 NodeHub",
+      "kicker": "Additional Entries",
+      "title": "两个补充入口",
+      "cards": [
+        {"tint": "tint-1", "icon": "globe", "title": "RDK Studio", "body": "面向 RDK 设备的 AI 原生开发工作台，可作为设备开发入口。"},
+        {"tint": "tint-2", "icon": "puzzle", "title": "NodeHub", "body": "应用案例补充入口，用于了解已有方案和使用场景。"},
+        {"tint": "tint-4", "icon": "gradcap", "title": "课程安排", "body": "第三课专门介绍 RDK Studio；本课不展开 NodeHub 搜索或运行流程。"}
+      ]
+    },
+    {
+      "pattern": "cards-3",
+      "data_title": "问题反馈入口",
+      "kicker": "Community",
+      "title": "根据问题类型选择反馈入口",
+      "cards": [
+        {"tint": "tint-1", "icon": "message", "title": "论坛", "body": "适合使用问题、环境问题、经验交流和案例分享。"},
+        {"tint": "tint-2", "icon": "github", "title": "GitHub Issues", "body": "适合已确认与某个官方仓库直接相关的问题。"},
+        {"tint": "tint-4", "icon": "search", "title": "新建话题入口", "body": "页面只展示入口，不现场搜索、填写或发布帖子。"}
+      ]
+    },
+    {
+      "pattern": "split-checklist",
+      "data_title": "有效问题的信息",
+      "kicker": "Question Template",
+      "title": "一个有效问题需要七项信息",
+      "lead": "标题建议直接包含“板卡 + 任务 + 现象”。",
+      "items": [
+        "板卡型号",
+        "系统或软件版本",
+        "复现步骤",
+        "预期结果",
+        "实际结果",
+        "关键日志与上下文",
+        "已经做过的排查"
+      ]
+    },
+    {
+      "pattern": "split-checklist",
+      "data_title": "完成标准",
+      "kicker": "Completion Checklist",
+      "title": "完成四项任务就算通关",
+      "lead": "这四项共同组成你的第一张 RDK 资源地图。",
+      "items": [
+        "按板卡系列进入正确手册，并找到一个具体主题",
+        "在 Model Zoo 选择正确分支，并找到目标目录 README",
+        "分别找到 TROS 用户手册和源码入口",
+        "找到论坛发帖入口，并列出有效问题所需的七项信息"
+      ]
+    },
+    {
+      "pattern": "closing",
+      "data_title": "下一课",
+      "kicker": "Up Next · Lesson 02",
+      "title": "下一课：RDK 产品简介",
+      "lead": "进一步理解不同 RDK 产品的定位和选择方式。",
+      "cards": [
+        {"tint": "tint-1", "icon": "chip", "title": "产品系列", "body": "认识不同 RDK 产品与形态。"},
+        {"tint": "tint-4", "icon": "layers", "title": "核心差异", "body": "理解算力、接口与平台定位。"},
+        {"tint": "tint-6", "icon": "target", "title": "选择方法", "body": "根据任务与场景选择合适产品。"}
+      ]
+    }
+  ]
+}
