@@ -1,0 +1,233 @@
+{
+  "meta": {
+    "title": "RDK Course | Lesson 03: Getting Started with RDK Studio",
+    "lang": "en",
+    "logo_key": "logo-en",
+    "hint": "Keyboard: ← / → / Space to navigate"
+  },
+  "slides": [
+    {
+      "pattern": "cover",
+      "data_title": "Cover",
+      "kicker": "Lesson 03 · RDK Course",
+      "title": "Getting Started with [gradient]RDK Studio[/gradient]",
+      "lead": "Let an AI Agent understand an RDK device: inspect the X5, then launch real-time BPU YOLO with one prompt.",
+      "tags": ["RDK Studio v1.3.3", "Moss", "RDK X5", "BPU YOLO", "USB Camera"],
+      "hero_nodes": ["Device access", "Agent workflow", "BPU inference", "Developer tools"],
+      "hero_center": {"strong": "Studio", "sub": "AI-native development workbench"}
+    },
+    {
+      "pattern": "cards-3",
+      "data_title": "Learning goals",
+      "kicker": "What You'll Learn",
+      "title": "Three [gradient]real results[/gradient]",
+      "lead": "Move beyond a menu tour. Connect the device, Agent, and tools in one task context.",
+      "cards": [
+        {"tint": "tint-1", "icon": "list-check", "title": "Read-only X5 check", "body": "Verify connection, CPU, memory, temperature, storage, and network."},
+        {"tint": "tint-4", "icon": "eye", "title": "BPU YOLO", "body": "Launch real-time USB-camera detection with one prompt."},
+        {"tint": "tint-6", "icon": "wrench", "title": "Developer tools", "body": "Open terminal, files, code-server, and remote desktop."}
+      ]
+    },
+    {
+      "pattern": "resource-list",
+      "data_title": "Resources",
+      "kicker": "Resources",
+      "title": "Course and official resources",
+      "resources": [
+        {"name": "RDK Studio", "desc": "Download the app and explore product information", "href": "https://developer.d-robotics.cc/rdkstudio"},
+        {"name": "Documentation Center", "desc": "Official RDK Studio and board manuals", "href": "https://d-robotics.github.io/rdk_doc_center/en/"},
+        {"name": "RDK Course Demos", "desc": "Public handbook and course demos", "href": "https://d-robotics.github.io/rdk-course-demos/"},
+        {"name": "D-Robotics GitHub", "desc": "Examples, TROS, ModelZoo, and documentation source", "href": "https://github.com/D-Robotics"}
+      ]
+    },
+    {
+      "pattern": "flow-5",
+      "data_title": "Core architecture",
+      "kicker": "Core Architecture",
+      "title": "How one task reaches the X5",
+      "steps": [
+        {"title": "State the goal", "sub": "Natural-language task"},
+        {"title": "RDK Studio", "sub": "Organizes project and device"},
+        {"title": "Select Agent", "sub": "Moss or external Agent"},
+        {"title": "Select model", "sub": "Cloud, self-hosted, or local"},
+        {"title": "Operate X5", "sub": "Tools and device result"}
+      ]
+    },
+    {
+      "pattern": "cards-4",
+      "data_title": "Agent and model",
+      "kicker": "Agent & Model",
+      "title": "Agent and model are separate",
+      "lead": "The Agent manages tasks and tools. The model supplies reasoning.",
+      "cards": [
+        {"tint": "tint-1", "icon": "message", "title": "Moss", "body": "Studio's default native, device-aware Agent."},
+        {"tint": "tint-2", "icon": "code", "title": "External Agents", "body": "Claude Code, Codex, and OpenCode reuse their local CLI environments."},
+        {"tint": "tint-4", "icon": "brain", "title": "Compatible models", "body": "Connect a supported cloud API, team-hosted service, or local model."},
+        {"tint": "tint-6", "icon": "robot", "title": "Board Agents", "body": "Use Moss on the device or install OpenClaw and other Agents."}
+      ]
+    },
+    {
+      "pattern": "cards-4",
+      "data_title": "Connection methods",
+      "kicker": "Device Access",
+      "title": "Choose the right connection",
+      "cards": [
+        {"tint": "tint-1", "icon": "terminal", "title": "SSH", "body": "The most general connection for a full workspace."},
+        {"tint": "tint-2", "icon": "chip", "title": "Type-C", "body": "Direct access for supported X5 and S100 boards; not supported by X3."},
+        {"tint": "tint-4", "icon": "list-check", "title": "Serial", "body": "Reads boot and recovery logs; not a full device connection."},
+        {"tint": "tint-6", "icon": "wrench", "title": "Flashing", "body": "Verify board, image, and target medium before writing."}
+      ]
+    },
+    {
+      "pattern": "cards-6",
+      "data_title": "Workbench state",
+      "kicker": "Workbench",
+      "title": "Check six states before a task",
+      "cards": [
+        {"tint": "tint-1", "icon": "code", "title": "Project", "body": "Code and document scope for the current task."},
+        {"tint": "tint-2", "icon": "layers", "title": "Workspace", "body": "Local, device-side, or hybrid directory."},
+        {"tint": "tint-3", "icon": "chip", "title": "Device", "body": "Confirm the intended X5 is selected and online."},
+        {"tint": "tint-4", "icon": "list-check", "title": "Permission", "body": "Review allowed operations and approval boundaries."},
+        {"tint": "tint-5", "icon": "message", "title": "Agent", "body": "Controls the task loop and available tools."},
+        {"tint": "tint-6", "icon": "brain", "title": "Model", "body": "Affects capability, latency, cost, and data boundaries."}
+      ]
+    },
+    {
+      "pattern": "cards-3",
+      "data_title": "Work modes",
+      "kicker": "Work Modes",
+      "title": "Execute, Plan, and Spec",
+      "cards": [
+        {"tint": "tint-1", "icon": "zap", "title": "Execute", "body": "Run a clear task whose impact has been reviewed."},
+        {"tint": "tint-4", "icon": "list-check", "title": "Plan", "body": "List steps, risks, and validation before making changes."},
+        {"tint": "tint-6", "icon": "layers", "title": "Spec", "body": "Create an approvable specification before implementation."}
+      ]
+    },
+    {
+      "pattern": "code-highlight",
+      "data_title": "Health-check prompt",
+      "kicker": "Demo 01 · Prompt",
+      "title": "Start with a read-only check",
+      "lead": "State the target, scope, safety boundary, and output format together.",
+      "cards": [
+        {"title": "One complete task", "code": "Perform a read-only health check on the connected RDK X5. Check device and SSH status, CPU, memory, temperature, storage, and network. Do not install software, change configuration, or restart services.", "note": "Return Healthy, Needs Attention, and Recommended Action, then list every verified item."},
+        {"title": "Explicit safety boundary", "code": "Read information only\nDo not install software\nDo not change configuration\nDo not restart services", "note": "A failed check must be marked unverified, never guessed."}
+      ]
+    },
+    {
+      "pattern": "cards-6",
+      "data_title": "Health-check result",
+      "kicker": "Demo 01 · Result",
+      "title": "Six results you can verify",
+      "cards": [
+        {"tint": "tint-1", "icon": "terminal", "title": "Connection", "body": "Device and SSH are successful, failed, or unverified."},
+        {"tint": "tint-2", "icon": "chip", "title": "CPU", "body": "Inspect load or utilization."},
+        {"tint": "tint-3", "icon": "layers", "title": "Memory", "body": "Check total, used, and available memory."},
+        {"tint": "tint-4", "icon": "flask", "title": "Temperature", "body": "Read the current key temperature."},
+        {"tint": "tint-5", "icon": "grid", "title": "Storage", "body": "Check the main filesystem and free space."},
+        {"tint": "tint-6", "icon": "globe", "title": "Network", "body": "Explain interface and connectivity without exposing addresses."}
+      ]
+    },
+    {
+      "pattern": "code-highlight",
+      "data_title": "YOLO prompt",
+      "kicker": "Demo 02 · Prompt",
+      "title": "Launch BPU YOLO with one prompt",
+      "lead": "Name the device, compute engine, input, and final result—not the repository or commands.",
+      "cards": [
+        {"title": "Target and compute", "code": "On the connected RDK X5, run real-time YOLO object detection using the X5 BPU.", "note": "Inference must run on the BPU, not the CPU."},
+        {"title": "Input and result", "code": "Use the USB camera connected to the X5. When ready, open the live detection page in RDK Studio's built-in browser.", "note": "Moss selects a mature solution."}
+      ]
+    },
+    {
+      "pattern": "flow-5",
+      "data_title": "YOLO flow",
+      "kicker": "Demo 02 · Flow",
+      "title": "From one sentence to live video",
+      "steps": [
+        {"title": "Enter prompt", "sub": "PC-side workbench"},
+        {"title": "Moss executes", "sub": "Connects to current X5"},
+        {"title": "BPU inference", "sub": "Runs YOLO"},
+        {"title": "USB camera", "sub": "Live video input"},
+        {"title": "Built-in browser", "sub": "Boxes and class labels"}
+      ]
+    },
+    {
+      "pattern": "split-checklist",
+      "data_title": "YOLO success",
+      "kicker": "Demo 02 · Success",
+      "title": "All six conditions must pass",
+      "lead": "Logs, a still image, or CPU inference cannot replace the live BPU result.",
+      "items": [
+        "The target is the currently connected RDK X5",
+        "YOLO inference runs on the X5 BPU",
+        "Input comes from the USB camera connected to the X5",
+        "Studio automatically opens its built-in browser",
+        "The browser continuously displays the live camera stream",
+        "Detection boxes and class labels appear in the live view"
+      ]
+    },
+    {
+      "pattern": "cards-4",
+      "data_title": "Four tools",
+      "kicker": "Developer Tools",
+      "title": "A successful result in each tool",
+      "cards": [
+        {"tint": "tint-1", "icon": "terminal", "title": "Terminal", "body": "Run one read-only command and return system or BPU state."},
+        {"tint": "tint-2", "icon": "book-open", "title": "Files", "body": "Open a non-sensitive directory and one text file."},
+        {"tint": "tint-4", "icon": "code", "title": "code-server", "body": "Load a project and show tree, search, editor, and terminal."},
+        {"tint": "tint-6", "icon": "film", "title": "Remote desktop", "body": "Open the X5 desktop and interact with one window."}
+      ]
+    },
+    {
+      "pattern": "cards-3",
+      "data_title": "Capability boundaries",
+      "kicker": "Capability Boundaries",
+      "title": "Understand boundaries first",
+      "cards": [
+        {"tint": "tint-1", "icon": "wrench", "title": "System flashing", "body": "Preview board, image, and medium selection; writing overwrites data."},
+        {"tint": "tint-4", "icon": "robot", "title": "Board Agents", "body": "Use Moss on the device or install OpenClaw and other Agents."},
+        {"tint": "tint-6", "icon": "brain", "title": "Model production", "body": "Training, quantization, and HBM compilation use cloud or model toolchains."}
+      ]
+    },
+    {
+      "pattern": "split-checklist",
+      "data_title": "Safety boundary",
+      "kicker": "Safety",
+      "title": "Six checks before risky actions",
+      "lead": "Installation, networking, restart, file overwrite, flashing, and external sharing require explicit review.",
+      "items": [
+        "The target device is correct",
+        "The target path or medium is correct",
+        "The impact is understood",
+        "Important data is backed up",
+        "A workable rollback path exists",
+        "The validation method is clear"
+      ]
+    },
+    {
+      "pattern": "cards-4",
+      "data_title": "FAQ",
+      "kicker": "FAQ",
+      "title": "Do not confuse these concepts",
+      "cards": [
+        {"tint": "tint-1", "icon": "message", "title": "Moss ≠ model", "body": "Moss manages tasks and tools; the model supplies reasoning."},
+        {"tint": "tint-2", "icon": "code", "title": "Codex ≠ Studio", "body": "Codex is an optional external Agent, not the Studio backend."},
+        {"tint": "tint-4", "icon": "terminal", "title": "Serial ≠ SSH", "body": "Serial reads logs; a full workspace needs SSH or supported Type-C."},
+        {"tint": "tint-6", "icon": "robot", "title": "Board Agent is optional", "body": "Terminal, files, IDE, and normal Moss tasks do not depend on it."}
+      ]
+    },
+    {
+      "pattern": "closing",
+      "data_title": "Completion",
+      "kicker": "Completion",
+      "title": "From goal to [gradient]verified result[/gradient]",
+      "lead": "Confirm context, define boundaries, and verify the real device result.",
+      "cards": [
+        {"tint": "tint-1", "icon": "list-check", "title": "Read the state", "body": "Project, device, permission, work mode, Agent, and model."},
+        {"tint": "tint-4", "icon": "eye", "title": "Complete two tasks", "body": "Read-only X5 check plus real-time X5 BPU YOLO."},
+        {"tint": "tint-6", "icon": "target", "title": "Verify results", "body": "Trace every conclusion back to real device state."}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,203 @@
+{
+  "meta": {
+    "title": "RDK Course | Lesson 1: Community and Ecosystem Introduction",
+    "lang": "en",
+    "logo_key": "logo-en"
+  },
+  "slides": [
+    {
+      "pattern": "cover",
+      "data_title": "Lesson 1 Cover",
+      "kicker": "Lesson 01 · RDK Course",
+      "title": "RDK Community & [gradient]Ecosystem[/gradient]",
+      "lead": "Build a clear RDK resource map and know where to look first when a development need arises.",
+      "tags": ["Official docs", "GitHub", "Model Zoo", "TROS", "Feedback"],
+      "hero_nodes": ["Find docs by board", "Find source by task", "Choose the right branch", "Report with context"],
+      "hero_center": {
+        "strong": "RDK",
+        "sub": "Community resource map"
+      }
+    },
+    {
+      "pattern": "cards-4",
+      "data_title": "What This Solves",
+      "kicker": "What This Solves",
+      "title": "Know Where to Start",
+      "lead": "The first challenge is often not entering commands, but choosing the correct entry point.",
+      "cards": [
+        {"tint": "tint-1", "icon": "layers", "title": "Find the Manual", "body": "Locate board interfaces, system configuration, and getting-started steps."},
+        {"tint": "tint-2", "icon": "github", "title": "Find Source & Models", "body": "Decide whether the task belongs in GitHub or Model Zoo."},
+        {"tint": "tint-4", "icon": "robot", "title": "Find TROS", "body": "Separate the robotics manual from package source code."},
+        {"tint": "tint-6", "icon": "message", "title": "Find Feedback", "body": "Choose the forum or Issues and prepare complete context."}
+      ]
+    },
+    {
+      "pattern": "cards-4",
+      "data_title": "Learning Outcomes",
+      "kicker": "What You'll Learn",
+      "title": "Four Shortest Paths",
+      "cards": [
+        {"tint": "tint-1", "icon": "film", "title": "Manuals & APIs", "body": "Open the correct manual and find the X5 video codec APIs."},
+        {"tint": "tint-2", "icon": "grid", "title": "Source & Models", "body": "Identify official repos, choose a board branch, and read the README first."},
+        {"tint": "tint-4", "icon": "robot", "title": "TROS Resources", "body": "Find the TROS manual and source entry points and understand their roles."},
+        {"tint": "tint-6", "icon": "list-check", "title": "Useful Feedback", "body": "Find the new-topic entry and organize a reproducible problem report."}
+      ]
+    },
+    {
+      "pattern": "cards-6",
+      "data_title": "Resource Map",
+      "kicker": "Resource Map",
+      "title": "Choose an Entry by Task",
+      "cards": [
+        {"tint": "tint-1", "icon": "layers", "title": "Resource Center", "body": "Board manuals, system setup, basic applications, and FAQs."},
+        {"tint": "tint-2", "icon": "github", "title": "GitHub", "body": "Official repositories, source, README files, and Issues."},
+        {"tint": "tint-3", "icon": "grid", "title": "Model Zoo", "body": "BPU model examples, board branches, and deployment guides."},
+        {"tint": "tint-4", "icon": "robot", "title": "TROS", "body": "Robotics manuals, package source code, and Issues."},
+        {"tint": "tint-5", "icon": "globe", "title": "Studio / NodeHub", "body": "A device-development entry and an application-case entry."},
+        {"tint": "tint-6", "icon": "message", "title": "Forum", "body": "Technical discussions, problem reports, and shared experience."}
+      ]
+    },
+    {
+      "pattern": "cards-8",
+      "data_title": "Key Concepts",
+      "kicker": "Key Concepts",
+      "title": "Eight Terms to Know",
+      "cards": [
+        {"tint": "tint-1", "icon": "chip", "title": "RDK", "body": "Robotics Development Kit, a platform for robotics and intelligent application development."},
+        {"tint": "tint-2", "icon": "brain", "title": "BPU", "body": "Brain Processing Unit, the on-device accelerator for AI inference."},
+        {"tint": "tint-3", "icon": "terminal", "title": "RDK OS", "body": "A Linux system image for RDK boards with platform drivers and runtime components."},
+        {"tint": "tint-4", "icon": "wrench", "title": "miniboot", "body": "The RDK bootloader; its version matters for boot and some low-level issues."},
+        {"tint": "tint-5", "icon": "robot", "title": "TROS", "body": "TogetheROS.Bot, a robotics application platform compatible with ROS 2 interfaces."},
+        {"tint": "tint-6", "icon": "grid", "title": "Model Zoo", "body": "A collection of model examples and tools for RDK and BPU."},
+        {"tint": "tint-1", "icon": "globe", "title": "RDK Studio", "body": "An AI-native development workspace for RDK devices."},
+        {"tint": "tint-2", "icon": "puzzle", "title": "NodeHub", "body": "An additional application-case entry for existing solutions and scenarios."}
+      ]
+    },
+    {
+      "pattern": "cards-3",
+      "data_title": "Find the Board Manual",
+      "kicker": "Documentation",
+      "title": "First, Confirm the Board Series",
+      "lead": "Do not start with a command. Identify the series your board belongs to first.",
+      "cards": [
+        {"tint": "tint-1", "icon": "chip", "title": "RDK X Series", "body": "For products such as RDK X3, RDK X5, and RDK X5 Module."},
+        {"tint": "tint-2", "icon": "layers", "title": "RDK S Series", "body": "For products such as RDK S100, RDK S100P, and RDK S600."},
+        {"tint": "tint-4", "icon": "search", "title": "Check the Product", "body": "Inside the manual, confirm that the selected product matches your device."}
+      ]
+    },
+    {
+      "pattern": "split-timeline",
+      "data_title": "X5 Codec APIs",
+      "kicker": "Documentation · RDK X5",
+      "title": "Find the X5 Codec APIs",
+      "lead": "The goal is a repeatable search path, not memorizing a single interface.",
+      "steps": [
+        {"badge": "Step 1", "body": "Open the RDK X3/X5 User Manual from GitHub IO."},
+        {"badge": "Step 2", "body": "Confirm that the current product is RDK X5."},
+        {"badge": "Step 3", "body": "Go to 3 Basic Application Development → 3.6 API Reference → RDK X5 → Python Interface."},
+        {"badge": "Step 4", "body": "Open Encoder Object or Decoder Object, then review API Reference."},
+        {"badge": "Search", "body": "Or search for Encoder, Decoder, encoding, or decoding in the upper-right corner."}
+      ]
+    },
+    {
+      "pattern": "cards-3",
+      "data_title": "D-Robotics GitHub",
+      "kicker": "Source Code",
+      "title": "GitHub: Check Three Things",
+      "lead": "Use GitHub for official open-source projects, implementation details, and issue history.",
+      "cards": [
+        {"tint": "tint-1", "icon": "target", "title": "Right Repository", "body": "Confirm that the repository name and purpose match your task."},
+        {"tint": "tint-2", "icon": "code", "title": "Right Branch", "body": "Make sure the branch matches your board and platform."},
+        {"tint": "tint-4", "icon": "book-open", "title": "Read the README", "body": "Review dependencies, directory structure, and usage before acting."}
+      ]
+    },
+    {
+      "pattern": "split-timeline",
+      "data_title": "Model Zoo",
+      "kicker": "Model Zoo",
+      "title": "Model Zoo: Pick the Board Branch",
+      "lead": "This lesson shows only the shortest lookup path. It does not download code or run a model.",
+      "steps": [
+        {"badge": "RDK X5", "body": "Choose rdk_x5; use rdk_x5_legacy only for historical examples."},
+        {"badge": "RDK X3", "body": "Choose rdk_x3, then open the target task directory."},
+        {"badge": "RDK S", "body": "Choose rdk_s, then find the example by domain."},
+        {"badge": "README", "body": "Read the target directory README before deciding the next step."}
+      ]
+    },
+    {
+      "pattern": "cards-3",
+      "data_title": "TROS Entry Points",
+      "kicker": "TROS",
+      "title": "TROS: Manual and Source Together",
+      "lead": "TogetheROS.Bot is compatible with ROS 2 interfaces and provides platform capabilities for RDK robotics applications.",
+      "cards": [
+        {"tint": "tint-1", "icon": "book-open", "title": "Start with the Manual", "body": "Learn concepts, setup paths, features, and application examples."},
+        {"tint": "tint-2", "icon": "github", "title": "Then Open Source", "body": "Find packages, source code, README files, and Issues."},
+        {"tint": "tint-4", "icon": "robot", "title": "Scope of This Lesson", "body": "Only show both entries; do not install TROS or run nodes."}
+      ]
+    },
+    {
+      "pattern": "cards-3",
+      "data_title": "Studio and NodeHub",
+      "kicker": "Additional Entries",
+      "title": "Two Additional Entry Points",
+      "cards": [
+        {"tint": "tint-1", "icon": "globe", "title": "RDK Studio", "body": "An AI-native workspace for RDK devices and a device-development entry point."},
+        {"tint": "tint-2", "icon": "puzzle", "title": "NodeHub", "body": "An additional application-case entry for existing solutions and scenarios."},
+        {"tint": "tint-4", "icon": "gradcap", "title": "Course Scope", "body": "Lesson 3 covers RDK Studio; this lesson does not cover NodeHub search or execution."}
+      ]
+    },
+    {
+      "pattern": "cards-3",
+      "data_title": "Feedback Channels",
+      "kicker": "Community",
+      "title": "Choose Feedback by Problem Type",
+      "cards": [
+        {"tint": "tint-1", "icon": "message", "title": "Forum", "body": "For usage, environment, experience sharing, and application cases."},
+        {"tint": "tint-2", "icon": "github", "title": "GitHub Issues", "body": "For problems confirmed to belong to a specific official repository."},
+        {"tint": "tint-4", "icon": "search", "title": "New Topic Entry", "body": "Show the entry only; do not search, fill in, or publish a post."}
+      ]
+    },
+    {
+      "pattern": "split-checklist",
+      "data_title": "Effective Problem Report",
+      "kicker": "Question Template",
+      "title": "Seven Fields for a Useful Report",
+      "lead": "A good title states the board, task, and symptom directly.",
+      "items": [
+        "Board model",
+        "System or software version",
+        "Steps to reproduce",
+        "Expected result",
+        "Actual result",
+        "Key logs with context",
+        "What you have already checked"
+      ]
+    },
+    {
+      "pattern": "split-checklist",
+      "data_title": "Completion Checklist",
+      "kicker": "Completion Checklist",
+      "title": "Complete Four Tasks",
+      "lead": "Together, these four tasks form your first RDK resource map.",
+      "items": [
+        "Open the correct board manual and locate one specific topic",
+        "Choose the correct Model Zoo branch and find the target README",
+        "Find both the TROS manual and source-code entry points",
+        "Find the forum post entry and list all seven fields of a useful report"
+      ]
+    },
+    {
+      "pattern": "closing",
+      "data_title": "Up Next",
+      "kicker": "Up Next · Lesson 02",
+      "title": "Up Next: RDK Product Overview",
+      "lead": "Understand the positioning of different RDK products and how to choose one.",
+      "cards": [
+        {"tint": "tint-1", "icon": "chip", "title": "Product Line", "body": "Meet the RDK product families and form factors."},
+        {"tint": "tint-4", "icon": "layers", "title": "Key Differences", "body": "Compare compute, interfaces, and platform positioning."},
+        {"tint": "tint-6", "icon": "target", "title": "How to Choose", "body": "Match the product to your task and scenario."}
+      ]
+    }
+  ]
+}

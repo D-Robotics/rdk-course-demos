@@ -4,7 +4,7 @@ RDK Classroom 是面向海外开发者的 D-Robotics RDK 教程与实践平台�
 
 教程网站使用 MkDocs Material 构建，发布在 GitHub Pages。教程正文统一维护在 `docs/` 下的 Markdown 文件中，代码示例维护在本仓库的课程目录中。
 
-每次向 `main` 分支推送 Markdown 或示例代码后，GitHub Actions 会自动构建并部署文档站。
+每次向 `develop` 分支推送 Markdown 或示例代码后，GitHub Actions 会自动构建并部署文档站。
 
 文档站：<https://d-robotics.github.io/rdk-course-demos/>
 
@@ -22,6 +22,7 @@ RDK Classroom 是面向海外开发者的 D-Robotics RDK 教程与实践平台�
 ```text
 rdk-course-demos/
 ├── 01_beginner/            # 入门篇：RDK 的基础使用（共 14 课）
+│   ├── 00_course_overview/       # 整个 RDK 小课堂的课程介绍与中英文页面源文件
 │   ├── 01_community_ecosystem/   # 第 1 课：社区与生态入门
 │   ├── 02_product_intro/         # 第 2 课：RDK 产品简介
 │   ├── 03_rdk_studio/            # 第 3 课：RDK Studio 介绍
@@ -40,7 +41,7 @@ rdk-course-demos/
 └── 03_tros/                # 进阶篇：TROS 开发指南
 ```
 
-当前仅初始化课程目录。没有配套代码的课程目录可以暂时保留为空目录占位。
+课程讲义维护在 `docs/`，可独立打开的中英文 HTML 页面和 Blueprint 保存在对应课程目录。没有配套代码的课程目录可以暂时保留为空目录占位。
 
 ## 使用方式
 

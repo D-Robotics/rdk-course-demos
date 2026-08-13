@@ -1,0 +1,103 @@
+{
+  "meta": {
+    "title": "RDK Course | Course Overview",
+    "lang": "en",
+    "logo_key": "logo-en",
+    "source_handbook": "RDK Course Overview.md"
+  },
+  "slides": [
+    {
+      "pattern": "cover",
+      "data_title": "RDK Course Overview",
+      "kicker": "RDK Course Overview",
+      "title": "RDK Course [gradient]Overview[/gradient]",
+      "lead": "A step-by-step path from your first RDK board to model deployment, TROS development, system debugging, and embodied AI applications."
+    },
+    {
+      "pattern": "cards-4",
+      "data_title": "What This Course Solves",
+      "kicker": "What This Course Solves",
+      "title": "What this course solves",
+      "lead": "Get started, reproduce experiments, and build toward real projects.",
+      "cards": ["Complete basic tasks", "Reproduce results", "Build a development method", "Move into real projects"]
+    },
+    {
+      "pattern": "checklist",
+      "data_title": "Who This Course Is For",
+      "kicker": "Audience",
+      "title": "Who this course is for",
+      "lead": "Start from the path that matches your experience with RDK, Linux, AI, ROS, or robotics."
+    },
+    {
+      "pattern": "path",
+      "data_title": "Recommended Learning Path",
+      "kicker": "Learning Path",
+      "title": "Recommended learning path",
+      "steps": ["RDK basics", "Models and robotics", "Systems and drivers", "Large models and embodied AI", "Developer cases"]
+    },
+    {
+      "pattern": "cards-4",
+      "data_title": "Course Package",
+      "kicker": "Course Package",
+      "title": "Every lesson has four pieces",
+      "lead": "Videos explain the path, handbooks preserve details, demos support reproduction, and official docs provide complete references.",
+      "cards": ["Course video", "GitHub Pages handbook", "GitHub demo", "Official documentation"]
+    },
+    {
+      "pattern": "timeline",
+      "data_title": "How to Learn",
+      "kicker": "How To Learn",
+      "title": "How to learn",
+      "lead": "Treat every lesson as a small on-device experiment instead of only watching or copying commands.",
+      "steps": ["Read the outcome", "Follow the demo", "Reproduce it", "Verify success", "Record problems"]
+    },
+    {
+      "pattern": "cards-4",
+      "data_title": "RDK Basics",
+      "kicker": "Chapter 01",
+      "title": "Beginner: RDK Basics",
+      "lead": "Start with visible results, then cover system flashing, boot troubleshooting, remote access, and peripheral validation."
+    },
+    {
+      "pattern": "cards-3",
+      "data_title": "Advanced Modules",
+      "kicker": "Advanced Chapters",
+      "title": "Advanced: from samples to applications",
+      "lead": "Continue from established basics to models, robotics software, and lower-level system capabilities.",
+      "cards": ["ModelZoo and RoboGo", "TROS", "Systems and drivers"]
+    },
+    {
+      "pattern": "cards-3",
+      "data_title": "Large Models and Embodied AI",
+      "kicker": "Higher Level",
+      "title": "Large models and embodied AI",
+      "lead": "Understand RDK's role in embodied AI by combining speech, vision, ROS/TROS, and large-model capabilities in basic projects."
+    },
+    {
+      "pattern": "cards-3",
+      "data_title": "Developer Cases",
+      "kicker": "Developer Showcase",
+      "title": "Developer cases: from course to projects",
+      "lead": "Collect real projects, community work, and representative application solutions for practical reference."
+    },
+    {
+      "pattern": "resources",
+      "data_title": "Learning Resources",
+      "kicker": "Resources",
+      "title": "Resources to keep at hand",
+      "resources": [
+        {"name": "GitHub Pages Handbooks", "href": "https://d-robotics.github.io/rdk-course-demos/"},
+        {"name": "GitHub Demos", "href": "https://github.com/D-Robotics/rdk-course-demos"},
+        {"name": "Official Docs", "href": "https://d-robotics.github.io/rdk_doc_center/en/"},
+        {"name": "Developer Community", "href": "https://developer.d-robotics.cc/en"}
+      ]
+    },
+    {
+      "pattern": "closing",
+      "data_title": "Begin Lesson 01",
+      "kicker": "Up Next · Lesson 01",
+      "title": "Up next: [gradient]Lesson 01[/gradient]",
+      "lead": "Build an RDK community and ecosystem resource map—where to find documentation, demos, source code, and support."
+    }
+  ]
+}
