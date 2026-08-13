@@ -41,7 +41,7 @@
 
 ---
 
-### 任务 1：让首页成为唯一的课程介绍页面
+### Task 1（任务 1）：让首页成为唯一的课程介绍页面
 
 **文件：**
 - 新建：`tests/__init__.py`
@@ -169,7 +169,7 @@ git commit -m "docs: merge course introduction into home"
 
 ---
 
-### 任务 2：移除公开课程页面与导航中的序号标签
+### Task 2（任务 2）：移除公开课程页面与导航中的序号标签
 
 **文件：**
 - 修改：`tests/test_course_site_structure.py`
@@ -306,7 +306,7 @@ git commit -m "docs: use topic-based course names"
 
 ---
 
-### 任务 3：建立通用、X5 与 S100 三类基础入门路径
+### Task 3（任务 3）：建立通用、X5 与 S100 三类基础入门路径
 
 **文件：**
 - 修改：`tests/test_course_site_structure.py`
@@ -532,7 +532,7 @@ git commit -m "docs: split fundamentals by board path"
 
 ---
 
-### 任务 4：验证双语输出与发布准备状态
+### Task 4（任务 4）：验证双语输出与发布准备状态
 
 **文件：**
 - 如验证发现缺陷则修改：`tests/test_course_site_structure.py`
