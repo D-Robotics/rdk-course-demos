@@ -39,7 +39,7 @@ Follow this sequence if you are developing on RDK S100.
 | --- | --- | --- |
 | 04 | [Flash a system image](04-flash-system-s100.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/04_flash_system) |
 | 05 | [Boot troubleshooting](05-boot-troubleshooting-s100.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/05_boot_troubleshooting) |
-| 06 | Remote access | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/06_remote_connection) |
+| 06 | [Remote access](06-remote-connection-s100.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/06_remote_connection) |
 | 07 | Camera | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/07_camera) |
 | 08 | Audio | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/08_audio) |
 | 09 | Display | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/09_display) |

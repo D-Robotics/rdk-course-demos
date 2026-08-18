@@ -43,7 +43,7 @@
 | --- | --- | --- |
 | 04 | [烧录系统镜像](04-flash-system-s100.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/04_flash_system) |
 | 05 | [启动问题排查](05-boot-troubleshooting-s100.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/05_boot_troubleshooting) |
-| 06 | 远程连接 | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/06_remote_connection) |
+| 06 | [远程连接](06-remote-connection-s100.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/06_remote_connection) |
 | 07 | Camera 使用 | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/07_camera) |
 | 08 | Audio 使用 | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/08_audio) |
 | 09 | 显示模块使用 | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/09_display) |
