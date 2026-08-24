@@ -154,7 +154,7 @@ Demo 中可能包含：
 | 第 8 课 | RDK 第八课：音频使用 | 板载 Earphone、音频板、USB 音频设备验证 | 视频 / 讲义 / Demo |
 | 第 9 课 | RDK 显示模块使用 | HDMI、DSI 显示模块、显示配置与效果验证 | 视频 / 讲义 / Demo |
 | 第 10 课 | RDK 第十课：编解码使用 | 编码能力、解码能力、BSP 接口、RTSP 推流解码 | 视频 / 讲义 / Demo |
-| 第 11 课 | RDK 40pin 使用（1） | GPIO、PWM 基础、点灯、舵机控制 Demo | 视频 / 讲义 / Demo |
+| 第 11 课 | RDK 40pin 使用（1） | GPIO、中断、PWM 基础、按键读取、舵机控制 Demo | 视频 / 讲义 / Demo |
 | 第 12 课 | RDK 40pin 使用（2） | 串口基础、串口收发 Demo、I2C 基础、I2C 读取温湿度传感器 Demo | 视频 / 讲义 / Demo |
 | 第 13 课 | RDK 40pin 使用（3） | SPI 基础、SPI 驱动屏幕 Demo | 视频 / 讲义 / Demo |
 | 第 14 课 | RDK CAN 口使用 | CAN FD 基础、can-utils、CAN 回环测试、CAN 电机控制 Demo、CAN 逻辑分析仪制作 Demo | 视频 / 讲义 / Demo |

@@ -154,7 +154,7 @@ After completing this module, you should be able to use an RDK board independent
 | Lesson 8 | RDK Lesson 8: Audio | Onboard earphone interface, audio boards, and USB audio-device validation | Video / Handbook / Demo |
 | Lesson 9 | Using Display Modules with RDK | HDMI and DSI display modules, display configuration, and result validation | Video / Handbook / Demo |
 | Lesson 10 | RDK Lesson 10: Codec Usage | Encoding, decoding, BSP interfaces, RTSP streaming, and decoding | Video / Handbook / Demo |
-| Lesson 11 | RDK 40pin Usage (1) | GPIO and PWM basics, LED control, and servo-control demos | Video / Handbook / Demo |
+| Lesson 11 | RDK 40pin Usage (1) | GPIO, interrupts, and PWM basics, plus button-input and servo-control demos | Video / Handbook / Demo |
 | Lesson 12 | RDK 40pin Usage (2) | UART basics, UART send/receive demos, I2C basics, and an I2C temperature-and-humidity sensor demo | Video / Handbook / Demo |
 | Lesson 13 | RDK 40pin Usage (3) | SPI basics and an SPI display-driving demo | Video / Handbook / Demo |
 | Lesson 14 | Using the RDK CAN Interface | CAN FD basics, can-utils, CAN loopback testing, CAN motor-control demos, and a CAN logic-analyzer demo | Video / Handbook / Demo |
