@@ -4,6 +4,16 @@ After flashing the system image, you can perform most daily development tasks fr
 
 This lesson first uses the J16 debug serial port to access the system, then configures a wired connection through eth1, and finally logs in over SSH. The serial console does not depend on the network, so it is useful for initial setup and troubleshooting. SSH requires a working network connection and is better suited to daily development.
 
+## Course demo
+
+- [Browse the Chinese slide demo, speaker script, and recording assets](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/06_remote_connection)
+
+![RDK S100 serial-console slide](../assets/images/beginner/serial-slide-s100.png)
+
+![RDK S100 SSH slide](../assets/images/beginner/ssh-slide-s100.png)
+
+![RDK S100 remote-access summary slide](../assets/images/beginner/ending-summary-s100.png)
+
 ## Prerequisites
 
 - An RDK S100 that has been flashed and boots successfully

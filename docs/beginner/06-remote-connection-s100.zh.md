@@ -5,6 +5,22 @@
 
 本课程先通过 J16 调试串口进入系统，再配置 eth1 有线连接，最后使用 SSH 登录。串口不依赖网络，适合首次连接和故障排查。SSH 建立在网络连通的基础上，适合后续开发。
 
+## 配套演示
+
+- [查看中文演示页、讲课稿和全部录课素材](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/06_remote_connection)
+
+### 串口连接页面
+
+![RDK S100 串口连接演示页](../assets/images/beginner/serial-slide-s100.zh.png)
+
+### SSH 连接页面
+
+![RDK S100 SSH 连接演示页](../assets/images/beginner/ssh-slide-s100.zh.png)
+
+### 课程总结页面
+
+![RDK S100 远程连接课程总结](../assets/images/beginner/ending-summary-s100.zh.png)
+
 ## 准备工作
 
 - 已经完成系统烧录，开发板可以正常启动
