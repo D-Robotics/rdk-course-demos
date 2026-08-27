@@ -151,7 +151,7 @@ After completing this module, you should be able to use an RDK board independent
 | Lesson 5 | RDK Boot Process and Troubleshooting | Boot process, indicator status, boot logs, and typical boot issues | Video / Handbook |
 | Lesson 6 | Remote Connection to RDK | Serial connection, SSH, networking, VNC, and remote development | Video / Handbook |
 | Lesson 7 | Using Cameras with RDK | USB cameras, MIPI cameras, C/Python access, and quick TROS use | Video / Handbook / Demo |
-| Lesson 8 | RDK Lesson 8: Audio | Onboard earphone interface, audio boards, and USB audio-device validation | Video / Handbook / Demo |
+| Lesson 8 | Audio Peripherals on RDK X5 | Onboard earphone interface, audio boards, and USB audio-device validation | Video / Handbook / Demo |
 | Lesson 9 | Using Display Modules with RDK | HDMI and DSI display modules, display configuration, and result validation | Video / Handbook / Demo |
 | Lesson 10 | RDK Lesson 10: Codec Usage | Encoding, decoding, BSP interfaces, RTSP streaming, and decoding | Video / Handbook / Demo |
 | Lesson 11 | RDK 40pin Usage (1) | GPIO, interrupts, and PWM basics, plus button-input and servo-control demos | Video / Handbook / Demo |

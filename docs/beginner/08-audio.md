@@ -1,4 +1,4 @@
-# Lesson 8: Audio Peripherals on RDK X5
+# Audio Peripherals on RDK X5
 
 This lesson covers four audio hardware options on the RDK X5: the onboard 3.5mm jack, a USB speaker, the WM8960 Audio HAT, and the Audio Driver HAT REV2. You will learn how to identify sound cards, record and play back audio, and understand card-number drift and Codec routing.
 

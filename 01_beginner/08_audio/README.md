@@ -1,10 +1,10 @@
-# 第 8 课：RDK 音频外设入门
+# RDK 音频外设入门
 
 > **课程定位：** 认识 RDK X5 上的四种音频硬件（板载 3.5mm、USB 扬声器、WM8960 Audio HAT、Audio Driver HAT REV2），掌握声卡侦察、录音与播放验证，理解声卡序号漂移与 Codec 路由配置。
 >
 > **适用硬件：** RDK X5
 >
-> **在线讲义：** [第 8 课　RDK 音频外设入门](https://d-robotics.github.io/rdk-course-demos/zh/beginner/08-audio/)
+> **在线讲义：** [RDK 音频外设入门](https://d-robotics.github.io/rdk-course-demos/zh/beginner/08-audio/)
 >
 > **官方文档：** [RDK 音频应用](https://developer.d-robotics.cc/rdk_doc_center/)
 
@@ -43,8 +43,8 @@ cat /proc/asound/cards
 ls /dev/snd/
 aplay -l
 
-# 板载 3.5mm 录放（不接子板时板载独占 0 号）
-arecord -Dhw:0,0 -c 2 -r 48000 -f S24_LE -t wav -d 10 /userdata/record1.wav
+# 板载 3.5mm 录放（不接子板时板载独占 0 号；录 16bit，标准格式）
+arecord -Dhw:0,0 -c 2 -r 48000 -f S16_LE -t wav -d 10 /userdata/record1.wav
 aplay -D hw:0,0 /userdata/record1.wav
 
 # WM8960 录音（先配输入路由，见在线讲义 6.5 节）
@@ -59,8 +59,8 @@ tinycap ./4chn_test.wav -D 0 -d 1 -c 4 -b 16 -r 48000 -p 512 -n 4 -t 5
 
 ## 参考资料
 
-- [第 8 课在线讲义（中文）](https://d-robotics.github.io/rdk-course-demos/zh/beginner/08-audio/)
-- [Lesson 8 online handbook (English)](https://d-robotics.github.io/rdk-course-demos/beginner/08-audio/)
+- [RDK 音频外设入门（中文讲义）](https://d-robotics.github.io/rdk-course-demos/zh/beginner/08-audio/)
+- [Audio Peripherals on RDK X5 (English handbook)](https://d-robotics.github.io/rdk-course-demos/beginner/08-audio/)
 - [RDK X5 官方音频文档](https://developer.d-robotics.cc/rdk_doc_center/)
 - [微雪 WM8960 Audio HAT 产品页](https://www.waveshare.net/wiki/WM8960_Audio_HAT)
 - [微雪 Audio Driver HAT 产品页](https://www.waveshare.net/shop/Audio-Driver-HAT.htm)

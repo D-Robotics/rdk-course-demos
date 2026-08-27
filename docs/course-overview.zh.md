@@ -151,7 +151,7 @@ Demo 中可能包含：
 | 第 5 课 | RDK 启动说明与问题排查 | 启动流程、灯状态、启动日志、典型启动问题 | 视频 / 讲义 |
 | 第 6 课 | RDK 远程连接 | 串口连接、SSH、网络连接、VNC、远程开发 | 视频 / 讲义 |
 | 第 7 课 | RDK Camera 使用 | USB Camera、MIPI Camera、C/Python 调用、TROS 快速使用 | 视频 / 讲义 / Demo |
-| 第 8 课 | RDK 第八课：音频使用 | 板载 Earphone、音频板、USB 音频设备验证 | 视频 / 讲义 / Demo |
+| 第 8 课 | RDK 音频外设入门 | 板载 Earphone、音频板、USB 音频设备验证 | 视频 / 讲义 / Demo |
 | 第 9 课 | RDK 显示模块使用 | HDMI、DSI 显示模块、显示配置与效果验证 | 视频 / 讲义 / Demo |
 | 第 10 课 | RDK 第十课：编解码使用 | 编码能力、解码能力、BSP 接口、RTSP 推流解码 | 视频 / 讲义 / Demo |
 | 第 11 课 | RDK 40pin 使用（1） | GPIO、中断、PWM 基础、按键读取、舵机控制 Demo | 视频 / 讲义 / Demo |
