@@ -80,12 +80,24 @@ X5 板载一个 3.5mm 耳机口，使用 **4 段式耳机**（CTIA 标准，带 
 
 ### 4.2 侦察
 
-不接任何子板时，板载声卡独占 0 号：
+不接任何子板时，板载声卡独占 0 号。依次用三条命令侦察：
 
 ```shell
+# 1. 看声卡列表：确认板载声卡已注册
 root@ubuntu:~# cat /proc/asound/cards
  0 [duplexaudio    ]: simple-card - duplex-audio
                       duplex-audio
+
+# 2. 看逻辑设备：确认播放与录音端点
+root@ubuntu:~# cat /proc/asound/devices
+  2: [ 0- 0]: digital audio playback
+  3: [ 0- 0]: digital audio capture
+  4: [ 0]   : control
+ 33:        : timer
+
+# 3. 看用户空间的设备节点
+root@ubuntu:~# ls /dev/snd/
+by-path/   controlC0  pcmC0D0c   pcmC0D0p   timer
 ```
 
 对应设备节点 `pcmC0D0p`（播放）和 `pcmC0D0c`（录音），即 `hw:0,0`。
@@ -218,11 +230,26 @@ sync && reboot
 ### 6.3 重启后验证
 
 ```shell
+# 1. 看声卡列表：出现 duplexaudioi2s1 = HAT 加载成功
 root@ubuntu:~# cat /proc/asound/cards
  0 [duplexaudioi2s1]: simple-card - duplex-audio-i2s1   ← WM8960 HAT
                       duplex-audio-i2s1
  1 [duplexaudio    ]: simple-card - duplex-audio        ← 板载（降为 1 号）
                       duplex-audio
+
+# 2. 看逻辑设备：0 号卡对应播放 0-0、录音 0-1
+root@ubuntu:~# cat /proc/asound/devices
+  2: [ 0- 0]: digital audio playback
+  3: [ 0- 1]: digital audio capture
+  4: [ 0]   : control
+  5: [ 1- 0]: digital audio playback
+  6: [ 1- 0]: digital audio capture
+  7: [ 1]   : control
+ 33:        : timer
+
+# 3. 看设备节点：pcmC0D0p 播放、pcmC0D1c 录音
+root@ubuntu:~# ls /dev/snd/
+by-path  controlC0  controlC1  pcmC0D0p  pcmC0D1c  pcmC1D0c  pcmC1D0p  timer
 ```
 
 `duplexaudioi2s1` 出现 = 驱动加载成功。此时：
@@ -328,7 +355,7 @@ srpi-config
       → 选择 Audio Driver HAT V2
 ```
 
-重启后 `cat /proc/asound/cards` 同样出现 `duplexaudioi2s1`（REV2 与 WM8960 注册名一致，靠配置项区分实际硬件）。
+重启后 `cat /proc/asound/cards` 同样出现 `duplexaudioi2s1`（REV2 与 WM8960 注册名一致，靠配置项区分实际硬件）。三件套侦察输出与 WM8960 一节相同：0 号卡播放 `0-0`、录音 `0-1`，节点 `pcmC0D0p` / `pcmC0D1c`。
 
 ### 7.3 录音：2 通道与 4 通道
 

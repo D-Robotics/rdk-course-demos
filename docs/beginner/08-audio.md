@@ -72,12 +72,24 @@ The headset must be **fully plugged in**. If it is not inserted deep enough and 
 
 ### 4.2 Reconnaissance
 
-With no HAT attached, the onboard card owns number 0:
+With no HAT attached, the onboard card owns number 0. Reconnoiter with three commands in order:
 
 ```shell
+# 1. List cards: confirm the onboard card is registered
 root@ubuntu:~# cat /proc/asound/cards
  0 [duplexaudio    ]: simple-card - duplex-audio
                       duplex-audio
+
+# 2. List logical devices: confirm playback and capture endpoints
+root@ubuntu:~# cat /proc/asound/devices
+  2: [ 0- 0]: digital audio playback
+  3: [ 0- 0]: digital audio capture
+  4: [ 0]   : control
+ 33:        : timer
+
+# 3. Inspect device nodes in user space
+root@ubuntu:~# ls /dev/snd/
+by-path/   controlC0  pcmC0D0c   pcmC0D0p   timer
 ```
 
 The corresponding device nodes are `pcmC0D0p` (playback) and `pcmC0D0c` (capture), i.e. `hw:0,0`.
@@ -206,11 +218,26 @@ sync && reboot
 ### 6.3 Verify After Reboot
 
 ```shell
+# 1. List cards: duplexaudioi2s1 appearing = HAT loaded
 root@ubuntu:~# cat /proc/asound/cards
  0 [duplexaudioi2s1]: simple-card - duplex-audio-i2s1   ← WM8960 HAT
                       duplex-audio-i2s1
  1 [duplexaudio    ]: simple-card - duplex-audio        ← onboard (demoted to 1)
                       duplex-audio
+
+# 2. List logical devices: card 0 = playback 0-0, capture 0-1
+root@ubuntu:~# cat /proc/asound/devices
+  2: [ 0- 0]: digital audio playback
+  3: [ 0- 1]: digital audio capture
+  4: [ 0]   : control
+  5: [ 1- 0]: digital audio playback
+  6: [ 1- 0]: digital audio capture
+  7: [ 1]   : control
+ 33:        : timer
+
+# 3. Inspect nodes: pcmC0D0p playback, pcmC0D1c capture
+root@ubuntu:~# ls /dev/snd/
+by-path  controlC0  controlC1  pcmC0D0p  pcmC0D1c  pcmC1D0c  pcmC1D0p  timer
 ```
 
 The appearance of `duplexaudioi2s1` means the driver loaded successfully. Now:
@@ -314,7 +341,7 @@ srpi-config
       → select Audio Driver HAT V2
 ```
 
-After reboot, `cat /proc/asound/cards` shows `duplexaudioi2s1` again (REV2 and WM8960 share the same registered name; the actual hardware is distinguished by the config selection).
+After reboot, `cat /proc/asound/cards` shows `duplexaudioi2s1` again (REV2 and WM8960 share the same registered name; the actual hardware is distinguished by the config selection). The three-command recon output is identical to the WM8960 section: card 0 = playback `0-0`, capture `0-1`, nodes `pcmC0D0p` / `pcmC0D1c`.
 
 ### 7.3 Recording: 2-Channel and 4-Channel
 
