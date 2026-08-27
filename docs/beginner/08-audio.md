@@ -452,3 +452,11 @@ Verify (your ears + a replayable file)
 - **Card-number drift is the norm; reconnaissance is the habit.**
 
 **Extension exercise:** record a clip of your own voice with the WM8960 and play it through the USB speaker (a cross-device record-play combination that reinforces card-locating skills).
+
+---
+
+## 10. References
+
+- [RDK X5 audio application documentation](https://developer.d-robotics.cc/rdk_x_doc/03_Basic_Application/05_audio) (the original source for the onboard Earphone, WM8960, Audio Driver HAT REV2, and the audio FAQ)
+- [Waveshare WM8960 Audio HAT product page](https://www.waveshare.net/wiki/WM8960_Audio_HAT)
+- [Waveshare Audio Driver HAT product page](https://www.waveshare.net/shop/Audio-Driver-HAT.htm)

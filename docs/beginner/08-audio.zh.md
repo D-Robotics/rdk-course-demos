@@ -470,3 +470,11 @@ USB 设备：换口重插、查 `lsusb` 是否识别到硬件。HAT 子板：检
 - **序号漂移是常态，侦察是习惯。**
 
 **拓展练习：** 用 WM8960 录一段自己的语音，通过 USB 扬声器播放出来（跨设备录放组合，巩固序号定位能力）。
+
+---
+
+## 10. 参考链接
+
+- [RDK X5 音频应用官方文档](https://developer.d-robotics.cc/rdk_x_doc/03_Basic_Application/05_audio)（板载 Earphone、WM8960、Audio Driver HAT REV2、音频 FAQ 的原始出处）
+- [微雪 WM8960 Audio HAT 产品页](https://www.waveshare.net/wiki/WM8960_Audio_HAT)
+- [微雪 Audio Driver HAT 产品页](https://www.waveshare.net/shop/Audio-Driver-HAT.htm)
