@@ -85,8 +85,8 @@ The corresponding device nodes are `pcmC0D0p` (playback) and `pcmC0D0c` (capture
 ### 4.3 Record and Play
 
 ```shell
-# Record 10 seconds (-d 10), 48kHz stereo 24-bit
-arecord -Dhw:0,0 -c 2 -r 48000 -f S24_LE -t wav -d 10 /userdata/record1.wav
+# Record 10 seconds (-d 10), 48kHz stereo 16-bit
+arecord -Dhw:0,0 -c 2 -r 48000 -f S16_LE -t wav -d 10 /userdata/record1.wav
 
 # Play back
 aplay -D hw:0,0 /userdata/record1.wav
@@ -99,6 +99,36 @@ aplay -D hw:0,0 /userdata/record1.wav
 > ```shell
 > scp sunrise@<board-ip>:/userdata/record1.wav ./
 > ```
+
+> **Why 16-bit (S16_LE) instead of the manual's 24-bit (S24_LE)?** See "4.4 The recording-format trap".
+
+### 4.4 The Recording-Format Trap: Why S24_LE Turns to Noise on a PC
+
+Record with the manual's `-f S24_LE` and it plays back fine on the board via `aplay`; download the same file to a computer and it is very likely pure noise. **This is not broken hardware — it is the format itself.**
+
+**The summary table:**
+
+| ALSA format | Bytes per sample | Standard WAV? | On a computer player |
+|---|---|---|---|
+| S16_LE | 2 bytes | Standard 16-bit PCM | Normal |
+| S24_3LE | 3 bytes | Standard 24-bit PCM | Normal |
+| **S24_LE (used by the manual)** | **4 bytes** | **Non-standard: header says 24-bit, data is 4 bytes** | **Noise/static** |
+| S32_LE | 4 bytes | Standard 32-bit PCM | Normal (some older players refuse) |
+
+**Why this happens**
+
+The key is that ALSA's S24_LE and the WAV standard's 24-bit are not the same thing:
+
+- WAV-standard 24-bit = 3 bytes per sample (packed), which corresponds to ALSA's **S24_3LE**;
+- ALSA's **S24_LE** = "24 bits carried in a 32-bit container" — 4 bytes per sample (the low 24 bits hold valid data, the 4th byte is sign extension).
+
+`arecord -f S24_LE -t wav` has a well-known behavior: it writes the 4-byte samples verbatim into the file, yet writes "24 bits per sample" into the WAV header. The header and the body now contradict each other (header says 24-bit → 3 bytes/sample, actual data is 4 bytes/sample).
+
+**Why does it play back fine on the board?** Because `aplay` and `arecord` share the same ALSA convention: the writer stores 4 bytes and labels it 24-bit; the reader interprets it as ALSA's S24_LE (4 bytes). The write-side mistake and the read-side mistake cancel out, so local playback is correct — but this is only a "round-trip self-consistency", not a legally valid file.
+
+**Why is it all noise on a computer?** Windows/Mac players (VLC, Audacity, browsers, etc.) strictly follow the WAV standard: the header says 24-bit, so they slice data at 3 bytes per sample. The actual data is 4 bytes per sample, so every frame is off by 1 byte — left/right channels and samples are completely misaligned → noise. This is a long-confirmed arecord behavior on the alsa-devel mailing list.
+
+**Conclusion:** recording the onboard card at the manual's 24-bit yields noise when played on a computer. **Record at 16-bit (S16_LE)** — a standard format that plays correctly on both the board and a computer.
 
 ## 5. USB Speaker: Plug-and-Play and Card-Number Drift
 
@@ -133,6 +163,22 @@ aplay -D hw:1,0 /userdata/record1.wav
 ```
 
 **Success criteria:** sound comes out of the USB speaker, and no matter how the numbers change, you can locate the device through reconnaissance.
+
+### 5.3 USB Card Recording and the Config File
+
+A USB card (speaker/mic combo or a USB microphone) works just like the onboard card — `aplay` to play, `arecord` to record, pointing at whatever number it got from that recon pass:
+
+```shell
+# Record (assuming the USB card is card 1 now, using standard S16_LE)
+arecord -Dhw:1,0 -c 2 -r 48000 -f S16_LE -t wav -d 10 /userdata/usb_record.wav
+
+# Play (number depends on the current recon)
+aplay -D hw:1,0 /userdata/usb_record.wav
+```
+
+> To let upper-layer apps (desktop players, recording software) see the onboard card and the USB card at the same time, configure PulseAudio. The core is editing `/etc/pulse/default.pa` and appending `load-module module-alsa-sink/source` for the USB card, specifying `device=hw:X,Y` (X and Y come from the current output of `cat /proc/asound/cards` and `aplay -l`/`arecord -l`). Reboot or restart the PulseAudio service for it to take effect. This is an advanced step — the demo here talks to ALSA directly via `-D`, without the upper-layer service.
+
+**USB speaker summary:** like the onboard 3.5mm, it is a "zero-config" device — plug-and-play, operated with `aplay`/`arecord` plus `-D hw:X,Y`. The only trap is card-number drift, so reconnoiter before every operation.
 
 ## 6. WM8960 Audio HAT: Configure Routing Before It Can Sound
 

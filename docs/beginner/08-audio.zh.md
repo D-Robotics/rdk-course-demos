@@ -93,8 +93,8 @@ root@ubuntu:~# cat /proc/asound/cards
 ### 4.3 录音与播放
 
 ```shell
-# 录 10 秒（-d 10），48kHz 双声道 24bit
-arecord -Dhw:0,0 -c 2 -r 48000 -f S24_LE -t wav -d 10 /userdata/record1.wav
+# 录 10 秒（-d 10），48kHz 双声道 16bit
+arecord -Dhw:0,0 -c 2 -r 48000 -f S16_LE -t wav -d 10 /userdata/record1.wav
 
 # 回放
 aplay -D hw:0,0 /userdata/record1.wav
@@ -107,6 +107,36 @@ aplay -D hw:0,0 /userdata/record1.wav
 > ```shell
 > scp sunrise@<板卡IP>:/userdata/record1.wav ./
 > ```
+
+> **为什么用 16bit（S16_LE）而不是官方手册的 24bit（S24_LE）？** 见「4.4 录音格式陷阱」。
+
+### 4.4 录音格式陷阱：S24_LE 为什么下载到电脑全是噪声
+
+如果你照官方手册用 `-f S24_LE` 录了一段音频，在板子上用 `aplay` 回放是正常的；但把文件下载到电脑上播放，很可能全是噪声杂音。**这不是板卡录音坏了，而是格式本身的问题。**
+
+**先看结论表：**
+
+| ALSA 格式 | 每样本字节 | WAV 是否标准 | 电脑播放效果 |
+|---|---|---|---|
+| S16_LE | 2 字节 | 标准 16bit PCM | 正常 |
+| S24_3LE | 3 字节 | 标准 24bit PCM | 正常 |
+| **S24_LE（手册用的）** | **4 字节** | **非标准：头写 24bit、数据 4 字节** | **全是噪声/杂音** |
+| S32_LE | 4 字节 | 标准 32bit PCM | 正常（个别老播放器不支持） |
+
+**为什么会出现这个现象**
+
+关键在于 ALSA 里 S24_LE 和 WAV 标准的 24bit 不是一回事：
+
+- WAV 标准的 24bit = 每个样本 3 字节（打包存储），对应 ALSA 的 **S24_3LE**；
+- ALSA 的 **S24_LE** = "24bit 装在 32bit 容器里"，每个样本占 4 字节（低 24bit 是有效数据，第 4 字节是符号扩展）。
+
+`arecord -f S24_LE -t wav` 有个知名行为：它把 4 字节的样本原样写进文件，却在 WAV 头里把"每样本位数"写成 24bit。于是这个文件头和正文自相矛盾（头说 24bit→3 字节/样本，实际是 4 字节/样本）。
+
+**为什么板子上回放正常？** 因为 `aplay` 和 `arecord` 用的是 ALSA 同一套约定：写的时候按 4 字节写、头标 24bit；读的时候也按 ALSA 的 S24_LE（4 字节）去理解。写错的 + 读错的刚好抵消，所以本地听是对的——这只是一种"往返自洽"，并不代表文件本身合法。
+
+**为什么电脑上全是噪声？** Windows/Mac 的播放器（VLC、Audacity、浏览器等）严格按 WAV 标准读：头写着 24bit，就按 3 字节/样本切数据。而实际数据是 4 字节/样本，每读一帧就错位 1 字节，左右声道和采样完全错开 → 出来就是噪声杂音。这是 alsa-devel 邮件列表早已确认的 arecord 行为。
+
+**结论：** 板载声卡按官方手册的 24 位录制时，下载到电脑播放会全是噪声。**我们录制 16 位（S16_LE）即可**——标准格式，板端、电脑端都能正常播放。
 
 ---
 
@@ -143,6 +173,22 @@ aplay -D hw:1,0 /userdata/record1.wav
 ```
 
 **成功标准：** 声音从 USB 扬声器出来；无论序号怎么变，你都能通过侦察命令定位到它。
+
+### 5.3 USB 声卡的录音与配置文件
+
+USB 声卡（扬声器、麦克风一体设备或 USB 麦克风）的用法和板载一样，就是 `aplay` 播放、`arecord` 录音，指定它当次侦察到的序号即可：
+
+```shell
+# 录音（假设 USB 声卡当前是 1 号，用 S16_LE 标准格式）
+arecord -Dhw:1,0 -c 2 -r 48000 -f S16_LE -t wav -d 10 /userdata/usb_record.wav
+
+# 播放（序号以当次侦察为准）
+aplay -D hw:1,0 /userdata/usb_record.wav
+```
+
+> 如果想让应用层（如桌面播放器、录音软件）能同时看到板载声卡和 USB 声卡，需要配置 PulseAudio。核心是编辑 `/etc/pulse/default.pa`，为 USB 声卡追加 `load-module module-alsa-sink/source`，并指定 `device=hw:X,Y`（X、Y 来自 `cat /proc/asound/cards` 和 `aplay -l`/`arecord -l` 的当次输出）。配置后重启板卡或重启 PulseAudio 服务生效。这一步属于进阶用法，本课演示直接用 ALSA 的 `-D` 指定设备，不依赖上层服务。
+
+**USB 扬声器小结：** 它和板载 3.5mm 一样是"零配置"设备——即插即用，用 `aplay`/`arecord` 加 `-D hw:X,Y` 直接操作；唯一的坑是序号会漂移，所以每次操作前重新侦察。
 
 ---
 
