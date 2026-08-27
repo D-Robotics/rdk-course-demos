@@ -74,6 +74,7 @@ plugins:
             Boot troubleshooting: 启动问题排查
             Remote access: 远程连接
             GPIO and PWM: GPIO 与 PWM
+            UART serial communication: UART 串口通信
             SPI display demo: SPI 显示屏示例
             02 · ModelZoo & RoboGo: 02 · ModelZoo 与 RoboGo
             Course overview: 课程介绍
@@ -113,6 +114,7 @@ nav:
           - Flash a system image: beginner/04-flash-system-x5.md
           - Boot troubleshooting: beginner/05-boot-troubleshooting-x5.md
           - GPIO and PWM: beginner/11-40pin-gpio-pwm.md
+          - UART serial communication: beginner/12-40pin-uart.md
           - SPI display demo: hardware/spi-display.md
       - RDK S100:
           - Flash a system image: beginner/04-flash-system-s100.md

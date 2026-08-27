@@ -13,6 +13,6 @@
 | 第 9 课 | RDK 显示模块使用 | HDMI、DSI 显示模块、显示配置与效果验证 | 视频 / 讲义 / Demo | [09_display](./09_display/) |
 | 第 10 课 | 编解码使用 | 编码能力、解码能力、BSP 接口、RTSP 推流解码 | 视频 / 讲义 / Demo | [10_codec](./10_codec/) |
 | 第 11 课 | RDK 40pin 使用（1） | GPIO、中断、PWM 基础、按键读取、舵机控制 Demo | 视频 / 讲义 / Demo | [11_40pin_gpio_pwm](./11_40pin_gpio_pwm/) |
-| 第 12 课 | RDK 40pin 使用（2） | 串口基础、串口收发 demo、I2C 基础、I2C 读取温湿度传感器 demo | 视频 / 讲义 / Demo | [12_40pin_uart_i2c](./12_40pin_uart_i2c/) |
+| 第 12 课 | RDK 40pin 使用（2） | UART 串口基础、回环收发、Python serial API、真实外设接线 | 视频 / 讲义 / Demo | [12_40pin_uart_i2c](./12_40pin_uart_i2c/) |
 | 第 13 课 | RDK 40pin 使用（3） | SPI 基础、SPI 驱动屏幕 demo（**点亮屏幕与动画 Demo 已配套**） | 视频 / 讲义 / Demo | [13_40pin_spi](./13_40pin_spi/) |
 | 第 14 课 | RDK CAN 口使用 | CAN FD 基础、can-utils、CAN 回环测试、CAN 电机控制 demo、CAN 逻辑分析仪制作 demo | 视频 / 讲义 / Demo | [14_can](./14_can/) |

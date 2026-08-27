@@ -31,7 +31,7 @@
 | 09 | 显示模块使用 | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/09_display) |
 | 10 | 编解码使用 | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/10_codec) |
 | 11 | [40-pin 接口 GPIO 与 PWM](11-40pin-gpio-pwm.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/11_40pin_gpio_pwm) |
-| 12 | 40-pin 接口 UART 与 I2C | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/12_40pin_uart_i2c) |
+| 12 | [40-pin UART 串口通信](12-40pin-uart.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/12_40pin_uart_i2c) |
 | 13 | [40-pin 接口 SPI](../hardware/spi-display.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/13_40pin_spi) |
 | 14 | CAN 使用 | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/14_can) |
 

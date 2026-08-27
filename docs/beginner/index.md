@@ -27,7 +27,7 @@ Follow this sequence if you are developing on RDK X5.
 | 09 | Display | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/09_display) |
 | 10 | Video codec | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/10_codec) |
 | 11 | [40-pin: GPIO and PWM](11-40pin-gpio-pwm.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/11_40pin_gpio_pwm) |
-| 12 | 40-pin: UART and I2C | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/12_40pin_uart_i2c) |
+| 12 | [40-pin UART serial communication](12-40pin-uart.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/12_40pin_uart_i2c) |
 | 13 | [40-pin: SPI](../hardware/spi-display.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/13_40pin_spi) |
 | 14 | CAN | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/14_can) |
 
