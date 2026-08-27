@@ -355,9 +355,45 @@ srpi-config
       → 选择 Audio Driver HAT V2
 ```
 
-重启后 `cat /proc/asound/cards` 同样出现 `duplexaudioi2s1`（REV2 与 WM8960 注册名一致，靠配置项区分实际硬件）。三件套侦察输出与 WM8960 一节相同：0 号卡播放 `0-0`、录音 `0-1`，节点 `pcmC0D0p` / `pcmC0D1c`。
+按提示重启：
 
-### 7.3 录音：2 通道与 4 通道
+```shell
+sync && reboot
+```
+
+### 7.3 重启后侦察
+
+REV2 与 WM8960 注册名一致（都是 `duplexaudioi2s1`），靠配置项区分实际硬件。重启后依次用三条命令侦察：
+
+```shell
+# 1. 看声卡列表：出现 duplexaudioi2s1 = HAT 加载成功
+root@ubuntu:~# cat /proc/asound/cards
+ 0 [duplexaudioi2s1]: simple-card - duplex-audio-i2s1   ← Audio Driver HAT REV2
+                      duplex-audio-i2s1
+ 1 [duplexaudio    ]: simple-card - duplex-audio        ← 板载（降为 1 号）
+                      duplex-audio
+
+# 2. 看逻辑设备：0 号卡对应播放 0-0、录音 0-1
+root@ubuntu:~# cat /proc/asound/devices
+  2: [ 0- 0]: digital audio playback
+  3: [ 0- 1]: digital audio capture
+  4: [ 0]   : control
+  5: [ 1- 0]: digital audio playback
+  6: [ 1- 0]: digital audio capture
+  7: [ 1]   : control
+ 33:        : timer
+
+# 3. 看设备节点：pcmC0D0p 播放、pcmC0D1c 录音
+root@ubuntu:~# ls /dev/snd/
+by-path  controlC0  controlC1  pcmC0D0p  pcmC0D1c  pcmC1D0c  pcmC1D0p  timer
+```
+
+`duplexaudioi2s1` 出现 = 驱动加载成功。此时：
+
+- **REV2 是 0 号卡**：播放用 `pcmC0D0p`，录音用 `pcmC0D1c`；
+- 板载声卡降为 1 号——又一次序号漂移，侦察习惯继续生效。
+
+### 7.4 录音：2 通道与 4 通道
 
 REV2 采用 ES7210+ES8156 双 Codec，支持环形 4 麦克风阵列。注意它的录音设备号是 **d 1**（与 WM8960 的 d 0 不同）：
 
@@ -369,14 +405,14 @@ tinycap ./2chn_test.wav -D 0 -d 1 -c 2 -b 16 -r 48000 -p 512 -n 4 -t 5
 tinycap ./4chn_test.wav -D 0 -d 1 -c 4 -b 16 -r 48000 -p 512 -n 4 -t 5
 ```
 
-### 7.4 播放
+### 7.5 播放
 
 ```shell
 # 只支持 2 通道播放（不支持播放 4ch 文件）
 tinyplay ./2chn_test.wav -D 0 -d 0
 ```
 
-### 7.5 回采功能（讲义补充，视频不展开）
+### 7.6 回采功能（讲义补充，视频不展开）
 
 回采（echo / loopback）是把「播放通道的信号」同步采回来，供算法侧或应用侧分析播放内容的实际输出。REV2 的回采信号映射在录音通道 **7 和 8**，需要 8 通道录音，并保持录制与播放格式对齐。
 

@@ -341,9 +341,45 @@ srpi-config
       → select Audio Driver HAT V2
 ```
 
-After reboot, `cat /proc/asound/cards` shows `duplexaudioi2s1` again (REV2 and WM8960 share the same registered name; the actual hardware is distinguished by the config selection). The three-command recon output is identical to the WM8960 section: card 0 = playback `0-0`, capture `0-1`, nodes `pcmC0D0p` / `pcmC0D1c`.
+Reboot as prompted:
 
-### 7.3 Recording: 2-Channel and 4-Channel
+```shell
+sync && reboot
+```
+
+### 7.3 Reconnaissance After Reboot
+
+REV2 and WM8960 share the same registered name (`duplexaudioi2s1`); the actual hardware is distinguished by the config selection. After reboot, reconnoiter with three commands in order:
+
+```shell
+# 1. List cards: duplexaudioi2s1 appearing = HAT loaded
+root@ubuntu:~# cat /proc/asound/cards
+ 0 [duplexaudioi2s1]: simple-card - duplex-audio-i2s1   ← Audio Driver HAT REV2
+                      duplex-audio-i2s1
+ 1 [duplexaudio    ]: simple-card - duplex-audio        ← onboard (demoted to 1)
+                      duplex-audio
+
+# 2. List logical devices: card 0 = playback 0-0, capture 0-1
+root@ubuntu:~# cat /proc/asound/devices
+  2: [ 0- 0]: digital audio playback
+  3: [ 0- 1]: digital audio capture
+  4: [ 0]   : control
+  5: [ 1- 0]: digital audio playback
+  6: [ 1- 0]: digital audio capture
+  7: [ 1]   : control
+ 33:        : timer
+
+# 3. Inspect nodes: pcmC0D0p playback, pcmC0D1c capture
+root@ubuntu:~# ls /dev/snd/
+by-path  controlC0  controlC1  pcmC0D0p  pcmC0D1c  pcmC1D0c  pcmC1D0p  timer
+```
+
+The appearance of `duplexaudioi2s1` means the driver loaded successfully. Now:
+
+- **REV2 is card 0**: playback uses `pcmC0D0p`, capture uses `pcmC0D1c`;
+- the onboard card drops to number 1 — another round of card-number drift where the reconnaissance habit pays off again.
+
+### 7.4 Recording: 2-Channel and 4-Channel
 
 The REV2 uses an ES7210+ES8156 dual-Codec design and supports a ring of 4 microphones. Note that its capture device number is **d 1** (different from the WM8960's d 0):
 
@@ -355,14 +391,14 @@ tinycap ./2chn_test.wav -D 0 -d 1 -c 2 -b 16 -r 48000 -p 512 -n 4 -t 5
 tinycap ./4chn_test.wav -D 0 -d 1 -c 4 -b 16 -r 48000 -p 512 -n 4 -t 5
 ```
 
-### 7.4 Playback
+### 7.5 Playback
 
 ```shell
 # 2-channel playback only (4-channel files are not supported)
 tinyplay ./2chn_test.wav -D 0 -d 0
 ```
 
-### 7.5 Loopback Capture (Handbook Supplement, Not in the Video)
+### 7.6 Loopback Capture (Handbook Supplement, Not in the Video)
 
 Loopback (echo) captures the playback-channel signal synchronously so that algorithms or applications can analyze what is actually being played out. On the REV2, the loopback signal maps to capture channels **7 and 8**; it requires 8-channel recording with aligned record/playback formats.
 
