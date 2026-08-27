@@ -362,9 +362,53 @@ tinycap ./4chn_test.wav -D 0 -d 1 -c 4 -b 16 -r 48000 -p 512 -n 4 -t 5
 tinyplay ./2chn_test.wav -D 0 -d 0
 ```
 
-### 7.5 Loopback Capture (Advanced, Not Practiced Here)
+### 7.5 Loopback Capture (Handbook Supplement, Not in the Video)
 
-The REV2's loopback signal maps to capture channels 7 and 8; it requires 8-channel recording with aligned record/playback formats (16k/8ch/16bit). This lesson only covers the concept and use cases (algorithm-side analysis of playback signals); see the official audio_echo_test example for the full procedure.
+Loopback (echo) captures the playback-channel signal synchronously so that algorithms or applications can analyze what is actually being played out. On the REV2, the loopback signal maps to capture channels **7 and 8**; it requires 8-channel recording with aligned record/playback formats.
+
+#### Channel Mapping
+
+| Channel | Use |
+|---------|-----|
+| ch1–ch4 | Ring of 4 microphones |
+| ch7–ch8 | Playback loopback reference (PCB loopback path) |
+
+#### Why Tinyplay Alone Can't Do Loopback
+
+The ES8156 playback Codec only supports 2 channels, so you cannot `tinyplay` an 8-channel WAV to do format-aligned loopback. The official `/app/cdev_demo/audio_echo_test` C sample therefore constructs interleaved 8-channel PCM data at the application layer and completes "record → play → synchronous capture → verdict" in one shot.
+
+#### Manual Method (Two Terminals)
+
+To do loopback by hand, use two terminals and keep the 8-channel formats strictly aligned (16k/8ch/16bit):
+
+```shell
+# First record an 8ch clip to use as playback data during loopback
+tinycap ./8chn_echo_data.wav -D 0 -d 1 -c 8 -b 16 -r 16000 -p 256 -n 4 -t 5
+
+# Terminal A: start capture (leave enough time to switch to terminal B)
+tinycap ./8chn_capture.wav -D 0 -d 1 -c 8 -b 16 -r 16000 -p 256 -n 4 -t 50
+
+# Terminal B: simultaneously play the format-aligned 8-channel audio
+tinyplay ./8chn_echo_data.wav -D 0 -d 0
+```
+
+After capture, open `8chn_capture.wav` in Audacity and inspect the channel 7/8 waveform or spectrum to confirm loopback works.
+
+#### Official Sample: audio_echo_test (Recommended)
+
+`/app/cdev_demo/audio_echo_test` is the official C sample. It takes no arguments, uses a fixed 8ch / 16kHz / 16bit format, runs two phases automatically, and reports PASS/FAIL:
+
+```shell
+root@ubuntu:/app/cdev_demo/audio_echo_test# make
+root@ubuntu:/app/cdev_demo/audio_echo_test# ./audio_echo_test
+```
+
+- **Phase 1**: prompts `speak into mic (5s)`; speak into the microphone to produce `record_first.wav`
+- **Phase 2**: automatically replays the Phase 1 recording while capturing synchronously, produces `audio_echo_test.wav`, and prints per-channel peaks with a verdict
+
+Verdict logic: ch7/ch8 peak ≥ threshold → `PASS: PCB loopback` (onboard loopback OK); ch1–ch4 peak ≥ threshold → `PASS: wired loopback` (speaker sound picked up by mics); otherwise → `FAIL`.
+
+Key constants (in `audio_echo_test.c`): `CHANNELS=8`, `RATE=16000`, `FORMAT=S16_LE`, `CAPTURE_DEV=plughw:0,1`, `PLAYBACK_DEV=plughw:0,0`. If you change the sample rate, channel count, or device node, keep playback and capture formats strictly aligned.
 
 **Success criteria:** a 4-channel recording file is created with valid signals on all channels, and the 2-channel file plays back audibly.
 

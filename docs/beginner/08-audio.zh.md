@@ -376,9 +376,53 @@ tinycap ./4chn_test.wav -D 0 -d 1 -c 4 -b 16 -r 48000 -p 512 -n 4 -t 5
 tinyplay ./2chn_test.wav -D 0 -d 0
 ```
 
-### 7.5 回采功能（进阶，本课不实操）
+### 7.5 回采功能（讲义补充，视频不展开）
 
-REV2 的回采信号映射在录音通道 7、8，需 8 通道录音并保持录放格式对齐（16k/8ch/16bit）。本课只讲概念与适用场景（算法侧分析播放信号），完整操作见官方文档 audio_echo_test 示例。
+回采（echo / loopback）是把「播放通道的信号」同步采回来，供算法侧或应用侧分析播放内容的实际输出。REV2 的回采信号映射在录音通道 **7 和 8**，需要 8 通道录音，并保持录制与播放格式对齐。
+
+#### 通道映射
+
+| 通道 | 用途 |
+|------|------|
+| ch1–ch4 | 环形 4 路麦克风 |
+| ch7–ch8 | 播放回采参考信号（PCB 回采通路） |
+
+#### 为什么不能直接用 tinyplay 做回采
+
+ES8156 播放 Codec 仅支持 2 通道，无法用 `tinyplay` 播放 8 通道 WAV 来做格式对齐的回采。所以官方在板端提供了 `/app/cdev_demo/audio_echo_test` 这个 C 示例，在应用层构造 8 通道 interleaved PCM 数据，一次性完成「录音 → 回放 → 同步采集 → 判定」。
+
+#### 手动方式（两终端）
+
+如果坚持用命令行手动回采，需要两个终端配合，并保证 8 通道格式完全对齐（16k/8ch/16bit）：
+
+```shell
+# 先录一段 8ch 数据，作为回采时的 playback 数据
+tinycap ./8chn_echo_data.wav -D 0 -d 1 -c 8 -b 16 -r 16000 -p 256 -n 4 -t 5
+
+# 终端 A：开启录制进程（时间留足，方便切到终端 B）
+tinycap ./8chn_capture.wav -D 0 -d 1 -c 8 -b 16 -r 16000 -p 256 -n 4 -t 50
+
+# 终端 B：同时启动格式对齐的 8 通道播放
+tinyplay ./8chn_echo_data.wav -D 0 -d 0
+```
+
+录制完成后，用 Audacity 打开 `8chn_capture.wav`，查看第 7、8 通道的波形或频谱，验证回采是否正常。
+
+#### 官方示例 audio_echo_test（推荐）
+
+`/app/cdev_demo/audio_echo_test` 是官方 C 示例，无命令行参数，固定 8ch / 16kHz / 16bit，两阶段自动测试并输出 PASS/FAIL：
+
+```shell
+root@ubuntu:/app/cdev_demo/audio_echo_test# make
+root@ubuntu:/app/cdev_demo/audio_echo_test# ./audio_echo_test
+```
+
+- **Phase 1**：提示 `speak into mic (5s)`，对着麦克风说话，生成 `record_first.wav`
+- **Phase 2**：自动回放 Phase 1 录音并同步采集，生成 `audio_echo_test.wav`，输出各通道 peak 并判定
+
+程序判定逻辑：ch7/ch8 峰值 ≥ 阈值 → `PASS: PCB loopback`（板载回采正常）；ch1–ch4 峰值 ≥ 阈值 → `PASS: wired loopback`（扬声器声音被麦克风拾取）；均不满足 → `FAIL`。
+
+关键常量（定义在 `audio_echo_test.c` 中）：`CHANNELS=8`、`RATE=16000`、`FORMAT=S16_LE`、`CAPTURE_DEV=plughw:0,1`、`PLAYBACK_DEV=plughw:0,0`。修改采样率、通道数或设备节点时，必须保证 playback 与 capture 格式完全对齐。
 
 **成功标准：** 4 通道录音文件生成且各通道有有效信号；2 通道文件能正常回放出声。
 
