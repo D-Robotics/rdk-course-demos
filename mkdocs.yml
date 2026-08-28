@@ -122,6 +122,7 @@ nav:
           - Flash a system image: beginner/04-flash-system-s100.md
           - Boot troubleshooting: beginner/05-boot-troubleshooting-s100.md
           - Remote access: beginner/06-remote-connection-s100.md
+          - Audio Driver HAT: beginner/08-audio-s100.md
   - 02 · ModelZoo & RoboGo:
       - Course overview: modelzoo/index.md
   - 03 · TROS:
