@@ -1,0 +1,173 @@
+{
+  "meta": {
+    "title": "RDK Course | Lesson 09: RDK S100 Display Module",
+    "lang": "en",
+    "logo_key": "logo-en",
+    "hint": "Keyboard: ← / → / Space to navigate"
+  },
+  "slides": [
+    {
+      "pattern": "cover",
+      "data_title": "Cover",
+      "kicker": "Lesson 09 · RDK S100",
+      "title": "Display Module [gradient]Hands-on HDMI Verification[/gradient]",
+      "lead": "Complete a repeatable S100 HDMI check from physical wiring and system detection to visible image-quality tests.",
+      "tags": ["RDK S100", "HDMI-1", "1280×720", "GNOME / X11"],
+      "hero_nodes": ["Physical link", "System detection", "Always-on desktop", "Visual checks"],
+      "hero_center": {"strong": "HDMI", "sub": "Display Verification"}
+    },
+    {
+      "pattern": "cards-3",
+      "data_title": "Learning outcome",
+      "kicker": "Learning Outcome",
+      "title": "Build a Complete S100 Verification Loop",
+      "lead": "The framework is shared, but the board, active mode, and desktop environment need independent evidence.",
+      "cards": [
+        {"tint": "tint-1", "icon": "chip", "title": "Correct wiring", "body": "Confirm the S100 HDMI port, cable, monitor, and stable power."},
+        {"tint": "tint-2", "icon": "terminal", "title": "System detection", "body": "DRM and X11 independently report the connector and active mode."},
+        {"tint": "tint-4", "icon": "eye", "title": "Real output", "body": "Complete color, detail, and motion checks on the physical monitor."}
+      ]
+    },
+    {
+      "pattern": "split-checklist",
+      "data_title": "Before you start",
+      "kicker": "Before You Start",
+      "title": "Prepare a Stable Recording Setup",
+      "lead": "This S100 lesson verifies HDMI only; it does not include a DSI workflow.",
+      "items": [
+        "Prepare the S100, HDMI monitor, HDMI cable, and stable power",
+        "Select the correct monitor input and keep key ports clearly visible",
+        "Enter new_project and run source env.sh",
+        "Keep ROS_DOMAIN_ID at 42 and use only ports 9100–9199",
+        "Keep the GNOME / X11 desktop awake throughout recording",
+        "Keep SSH and VNC enabled; do not change networking or unrelated system projects"
+      ]
+    },
+    {
+      "pattern": "flow-5",
+      "data_title": "Verification flow",
+      "kicker": "Verification Flow",
+      "title": "Verify the S100 in Five Steps",
+      "steps": [
+        {"title": "1  Check wiring", "sub": "Confirm the connector, cable, and input source."},
+        {"title": "2  Check desktop", "sub": "Confirm GNOME/X11 and always-on status."},
+        {"title": "3  Read status", "sub": "Inspect DRM, X11, and the active mode."},
+        {"title": "4  Run the demo", "sub": "Observe color, detail, and motion pages."},
+        {"title": "5  Verify exit", "sub": "Confirm released ports and remote access."}
+      ]
+    },
+    {
+      "pattern": "cards-4",
+      "data_title": "Key concepts",
+      "kicker": "Key Concepts",
+      "title": "Four Concepts Define the Decision",
+      "cards": [
+        {"tint": "tint-1", "icon": "film", "title": "HDMI", "body": "Carries image and audio data to an external monitor."},
+        {"tint": "tint-2", "icon": "chip", "title": "DRM", "body": "The kernel display layer provides read-only connector status."},
+        {"tint": "tint-4", "icon": "terminal", "title": "GNOME / X11", "body": "The S100 graphics session supports xrandr and VNC evidence."},
+        {"tint": "tint-6", "icon": "list-check", "title": "Display mode", "body": "The measured mode is 1280×720 at 60.00 Hz."}
+      ]
+    },
+    {
+      "pattern": "cards-3",
+      "data_title": "Evidence structure",
+      "kicker": "Three Evidence Layers",
+      "title": "Three Media Types Answer Three Questions",
+      "lead": "Camera footage, clear screen capture, and logs support each other instead of relying on a single view.",
+      "cards": [
+        {"tint": "tint-1", "icon": "video", "title": "Wiring footage", "body": "Proves the HDMI cable connects the S100 to the physical monitor."},
+        {"tint": "tint-4", "icon": "eye", "title": "Screen capture", "body": "Clearly presents all six demo pages and the final PASS result."},
+        {"tint": "tint-6", "icon": "terminal", "title": "Runtime logs", "body": "Verify mode, port, service cleanup, and remote-access status."}
+      ]
+    },
+    {
+      "pattern": "code-highlight",
+      "data_title": "Reproducible commands",
+      "kicker": "Reproducible Commands",
+      "title": "Reproduce the Shortcut from a Terminal",
+      "lead": "The desktop icon simply provides a recording-friendly entry to fixed project scripts.",
+      "cards": [
+        {"title": "1  Load environment", "code": "cd /home/sunrise/workspaces/new_project; source env.sh", "note": "Confirm ROS_DOMAIN_ID=42."},
+        {"title": "2  Read inventory", "code": "bash src/lesson09_display_s100/scripts/display_inventory.sh", "note": "Read-only HDMI status and mode data."},
+        {"title": "3  Launch demo", "code": "bash src/lesson09_display_s100/scripts/launch_hdmi_demo.sh", "note": "Matches the desktop shortcut."},
+        {"title": "4  Capture screen", "code": "bash src/lesson09_display_s100/scripts/capture_screen.sh video 45", "note": "Up to 120 seconds, saved under the project log directory."}
+      ]
+    },
+    {
+      "pattern": "cards-3",
+      "data_title": "Measured result",
+      "kicker": "Actual Result",
+      "title": "Record the S100 Result Independently",
+      "lead": "Do not reuse the X5 resolution, desktop stack, or conclusions for the S100.",
+      "cards": [
+        {"tint": "tint-1", "icon": "chip", "title": "HDMI-1", "body": "Both DRM and X11 report connected."},
+        {"tint": "tint-2", "icon": "target", "title": "1280×720", "body": "Active mode at a 60.00 Hz refresh rate."},
+        {"tint": "tint-4", "icon": "layers", "title": "Eight modes", "body": "The system lists several candidates, but this lesson does not switch modes."}
+      ]
+    },
+    {
+      "pattern": "cards-4",
+      "data_title": "Visual checks",
+      "kicker": "Visual Checks",
+      "title": "Four Pages Complete the Visible Check",
+      "cards": [
+        {"tint": "tint-1", "icon": "eye", "title": "Color", "body": "RGB and CMY boundaries are clear, with no obvious color cast."},
+        {"tint": "tint-2", "icon": "layers", "title": "Grayscale", "body": "Brightness levels from black to white remain distinguishable."},
+        {"tint": "tint-4", "icon": "search", "title": "Detail", "body": "Small Chinese and English text, fine lines, checkerboards, and rings are visible."},
+        {"tint": "tint-6", "icon": "film", "title": "Motion", "body": "Motion stays continuous while page rendering remains stable."}
+      ]
+    },
+    {
+      "pattern": "split-timeline",
+      "data_title": "Always-on and remote",
+      "kicker": "Stable Recording",
+      "title": "The Recording Environment Is Part of Success",
+      "lead": "A lock screen or sleep event is not an HDMI link failure.",
+      "steps": [
+        {"badge": "Step 1", "body": "Disable GNOME idle timeout, automatic dimming, screen lock, and DPMS."},
+        {"badge": "Step 2", "body": "Attach x11vnc to the real :0 session; VNC should match HDMI."},
+        {"badge": "Step 3", "body": "Keep the desktop awake so the camera does not capture a lock screen."},
+        {"badge": "Step 4", "body": "After the demo, confirm SSH, VNC, and the desktop session still work."}
+      ]
+    },
+    {
+      "pattern": "split-checklist",
+      "data_title": "Completion checklist",
+      "kicker": "Completion Checklist",
+      "title": "Six Results Together Define a Pass",
+      "lead": "The display must look correct, reproduce reliably, and exit without side effects.",
+      "items": [
+        "DRM and X11 both report HDMI-1 as connected",
+        "The active mode is 1280×720 at 60.00 Hz",
+        "Color, grayscale, text, fine lines, geometry, and motion pages are visible",
+        "runtime.json records result=PASS",
+        "Ports 9100–9199 are released with no project process left behind",
+        "SSH, VNC, and the always-on desktop remain available"
+      ]
+    },
+    {
+      "pattern": "cards-4",
+      "data_title": "Troubleshooting",
+      "kicker": "Troubleshooting",
+      "title": "Separate Signal, Desktop, and Demo Faults",
+      "cards": [
+        {"tint": "tint-1", "icon": "search", "title": "No monitor signal", "body": "Check the input source, cable, and power before reading DRM status."},
+        {"tint": "tint-2", "icon": "eye", "title": "Screen turns black", "body": "Check screen lock, sleep, and DPMS before changing HDMI settings."},
+        {"tint": "tint-4", "icon": "terminal", "title": "Black VNC view", "body": "Confirm VNC uses the real X11 session and the correct Xauthority."},
+        {"tint": "tint-6", "icon": "wrench", "title": "Demo fails", "body": "Inspect terminal safety checks, runtime.json, and server.log."}
+      ]
+    },
+    {
+      "pattern": "closing",
+      "data_title": "Summary and practice",
+      "kicker": "Summary · Practice",
+      "title": "The S100 HDMI Verification Loop Is Complete",
+      "lead": "Remember the board-specific result, three evidence layers, and six pass criteria. This video does not include DSI.",
+      "cards": [
+        {"tint": "tint-1", "icon": "list-check", "title": "Confirm resolution", "body": "Compare the monitor menu with the active xrandr mode."},
+        {"tint": "tint-4", "icon": "video", "title": "Run it again", "body": "Start from a clean state, repeat the demo, and complete cleanup."},
+        {"tint": "tint-6", "icon": "book-open", "title": "Read the handbook", "body": "Full commands, logs, and FAQs remain in the handbook and Demo README."}
+      ]
+    }
+  ]
+}

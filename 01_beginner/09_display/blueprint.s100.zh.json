@@ -1,0 +1,173 @@
+{
+  "meta": {
+    "title": "RDK 小课堂｜第9课：RDK S100显示模块",
+    "lang": "cn",
+    "logo_key": "logo-cn",
+    "hint": "键盘：← / → / Space 切换页面"
+  },
+  "slides": [
+    {
+      "pattern": "cover",
+      "data_title": "封面",
+      "kicker": "Lesson 09 · RDK S100",
+      "title": "显示模块 [gradient]HDMI实机验证[/gradient]",
+      "lead": "在S100上从接线、系统识别到画质检查，完成可复现的HDMI显示验收。",
+      "tags": ["RDK S100", "HDMI-1", "1280×720", "GNOME / X11"],
+      "hero_nodes": ["物理连接", "系统识别", "桌面常亮", "视觉验收"],
+      "hero_center": {"strong": "HDMI", "sub": "Display Verification"}
+    },
+    {
+      "pattern": "cards-3",
+      "data_title": "课程目标",
+      "kicker": "Learning Outcome",
+      "title": "S100也要形成验证闭环",
+      "lead": "同一课程框架，板型、模式和桌面环境必须独立取证。",
+      "cards": [
+        {"tint": "tint-1", "icon": "chip", "title": "接线正确", "body": "确认S100 HDMI接口、线缆、显示器与供电。"},
+        {"tint": "tint-2", "icon": "terminal", "title": "系统识别", "body": "DRM与X11分别给出连接器和当前模式。"},
+        {"tint": "tint-4", "icon": "eye", "title": "真实可用", "body": "在实体屏完成颜色、清晰度和动态检查。"}
+      ]
+    },
+    {
+      "pattern": "split-checklist",
+      "data_title": "开始前确认",
+      "kicker": "Before You Start",
+      "title": "准备器材并固定录制环境",
+      "lead": "S100本课只验证HDMI，不包含DSI流程。",
+      "items": [
+        "S100、HDMI屏幕、HDMI线和稳定供电已准备",
+        "显示器输入源正确，关键接口与屏幕可拍清",
+        "进入new_project并执行source env.sh",
+        "ROS_DOMAIN_ID固定为42，端口仅用9100–9199",
+        "GNOME / X11桌面保持常亮，避免录制中锁屏",
+        "SSH与VNC保持启用，不修改网络和无关系统项目"
+      ]
+    },
+    {
+      "pattern": "flow-5",
+      "data_title": "整体流程",
+      "kicker": "Verification Flow",
+      "title": "五步完成S100验证",
+      "steps": [
+        {"title": "① 检查接线", "sub": "确认接口、线缆和输入源。"},
+        {"title": "② 检查桌面", "sub": "确认GNOME/X11与常亮状态。"},
+        {"title": "③ 读取状态", "sub": "检查DRM、X11和当前模式。"},
+        {"title": "④ 运行Demo", "sub": "观察颜色、清晰度和动态页。"},
+        {"title": "⑤ 退出复核", "sub": "确认端口释放和远程连接正常。"}
+      ]
+    },
+    {
+      "pattern": "cards-4",
+      "data_title": "关键概念",
+      "kicker": "Key Concepts",
+      "title": "四个概念决定怎么判断",
+      "cards": [
+        {"tint": "tint-1", "icon": "film", "title": "HDMI", "body": "负责把图像和音频数据送到外部显示器。"},
+        {"tint": "tint-2", "icon": "chip", "title": "DRM", "body": "内核显示层提供连接器的只读状态。"},
+        {"tint": "tint-4", "icon": "terminal", "title": "GNOME / X11", "body": "S100当前图形会话，便于xrandr与VNC取证。"},
+        {"tint": "tint-6", "icon": "list-check", "title": "显示模式", "body": "当前实测为1280×720 @ 60.00 Hz。"}
+      ]
+    },
+    {
+      "pattern": "cards-3",
+      "data_title": "证据结构",
+      "kicker": "Three Evidence Layers",
+      "title": "三类素材回答三个问题",
+      "lead": "接线实拍、清晰录屏和日志互相补充，避免只靠单一画面下结论。",
+      "cards": [
+        {"tint": "tint-1", "icon": "video", "title": "实拍接线", "body": "证明HDMI线确实连接S100与实体显示器。"},
+        {"tint": "tint-4", "icon": "eye", "title": "屏幕录制", "body": "清楚展示六页Demo内容和最终PASS页。"},
+        {"tint": "tint-6", "icon": "terminal", "title": "日志结果", "body": "复核模式、运行端口、服务退出与远程状态。"}
+      ]
+    },
+    {
+      "pattern": "code-highlight",
+      "data_title": "可复现命令",
+      "kicker": "Reproducible Commands",
+      "title": "一键入口仍然可在终端复现",
+      "lead": "桌面图标只负责把固定脚本变成更适合录制的入口。",
+      "cards": [
+        {"title": "① 加载环境", "code": "cd /home/sunrise/workspaces/new_project; source env.sh", "note": "确认ROS_DOMAIN_ID=42。"},
+        {"title": "② 查看清单", "code": "bash src/lesson09_display_s100/scripts/display_inventory.sh", "note": "只读HDMI状态和模式。"},
+        {"title": "③ 启动Demo", "code": "bash src/lesson09_display_s100/scripts/launch_hdmi_demo.sh", "note": "与双击桌面图标一致。"},
+        {"title": "④ 采集屏幕", "code": "bash src/lesson09_display_s100/scripts/capture_screen.sh video 45", "note": "最长120秒，保存到项目日志目录。"}
+      ]
+    },
+    {
+      "pattern": "cards-3",
+      "data_title": "实测状态",
+      "kicker": "Actual Result",
+      "title": "S100实测结果独立记录",
+      "lead": "不能把X5的分辨率、桌面栈或验证结论直接套用到S100。",
+      "cards": [
+        {"tint": "tint-1", "icon": "chip", "title": "HDMI-1", "body": "DRM与X11均报告connected。"},
+        {"tint": "tint-2", "icon": "target", "title": "1280×720", "body": "当前激活模式，刷新率60.00 Hz。"},
+        {"tint": "tint-4", "icon": "layers", "title": "8组模式", "body": "系统可枚举多组候选模式，但本课不做切换。"}
+      ]
+    },
+    {
+      "pattern": "cards-4",
+      "data_title": "视觉测试",
+      "kicker": "Visual Checks",
+      "title": "四类页面完成可见验收",
+      "cards": [
+        {"tint": "tint-1", "icon": "eye", "title": "颜色", "body": "RGB、CMY色块边界清楚，无异常偏色。"},
+        {"tint": "tint-2", "icon": "layers", "title": "灰阶", "body": "从黑到白的亮度层级能够区分。"},
+        {"tint": "tint-4", "icon": "search", "title": "清晰度", "body": "中英文小字、细线、棋盘格和圆环可见。"},
+        {"tint": "tint-6", "icon": "film", "title": "动态", "body": "运动连续，并观察页面刷新是否稳定。"}
+      ]
+    },
+    {
+      "pattern": "split-timeline",
+      "data_title": "常亮与远程",
+      "kicker": "Stable Recording",
+      "title": "录制环境也属于成功条件",
+      "lead": "黑屏若来自锁屏或休眠，就不是HDMI链路故障。",
+      "steps": [
+        {"badge": "Step 1", "body": "确认GNOME空闲延时、自动调暗、锁屏和DPMS已关闭。"},
+        {"badge": "Step 2", "body": "x11vnc附着真实:0图形会话，VNC画面应与HDMI一致。"},
+        {"badge": "Step 3", "body": "运行期间保持桌面常亮，避免相机录制中途出现锁屏。"},
+        {"badge": "Step 4", "body": "退出Demo后继续确认SSH、VNC和桌面会话正常。"}
+      ]
+    },
+    {
+      "pattern": "split-checklist",
+      "data_title": "成功标准",
+      "kicker": "Completion Checklist",
+      "title": "六项结果共同构成通过",
+      "lead": "既要看到显示效果，也要确认复现与退出没有副作用。",
+      "items": [
+        "DRM与X11都识别HDMI-1为connected",
+        "当前模式为1280×720 @ 60.00 Hz",
+        "颜色、灰阶、文字、细线、几何和动态页可见",
+        "runtime.json记录result=PASS",
+        "退出后9100–9199端口释放，无项目进程残留",
+        "SSH、VNC和常亮桌面保持正常"
+      ]
+    },
+    {
+      "pattern": "cards-4",
+      "data_title": "常见问题",
+      "kicker": "Troubleshooting",
+      "title": "先分清信号、桌面与Demo问题",
+      "cards": [
+        {"tint": "tint-1", "icon": "search", "title": "显示器无信号", "body": "检查输入源、线缆、供电，再读取DRM状态。"},
+        {"tint": "tint-2", "icon": "eye", "title": "过一会黑屏", "body": "先判断是否锁屏、休眠或DPMS，不急着改HDMI。"},
+        {"tint": "tint-4", "icon": "terminal", "title": "VNC黑屏", "body": "确认VNC附着真实X11会话与正确Xauthority。"},
+        {"tint": "tint-6", "icon": "wrench", "title": "Demo没启动", "body": "查看终端安全检查、runtime.json和server.log。"}
+      ]
+    },
+    {
+      "pattern": "closing",
+      "data_title": "小结与练习",
+      "kicker": "Summary · Practice",
+      "title": "S100 HDMI验证已经闭环",
+      "lead": "记住板型差异、三层证据和六项成功标准；S100本片不包含DSI。",
+      "cards": [
+        {"tint": "tint-1", "icon": "list-check", "title": "核对分辨率", "body": "对照显示器菜单与xrandr当前模式。"},
+        {"tint": "tint-4", "icon": "video", "title": "复跑一次", "body": "从干净状态重新启动并完成退出清理。"},
+        {"tint": "tint-6", "icon": "book-open", "title": "查阅讲义", "body": "完整命令、日志和FAQ留在讲义与Demo README。"}
+      ]
+    }
+  ]
+}

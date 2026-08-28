@@ -1,0 +1,205 @@
+{
+  "meta": {
+    "title": "RDK Course | Lesson 09: RDK X5 Display Module",
+    "lang": "en",
+    "logo_key": "logo-en",
+    "hint": "Keyboard: ← / → / Space to navigate"
+  },
+  "slides": [
+    {
+      "pattern": "cover",
+      "data_title": "Cover",
+      "kicker": "Lesson 09 · RDK X5",
+      "title": "Display Module [gradient]HDMI and DSI Verification[/gradient]",
+      "lead": "Build a complete HDMI evidence chain, then verify DSI independently with a shorter hardware, wiring, and visible-output sequence.",
+      "tags": ["RDK X5", "HDMI-1", "4.3-inch DSI", "On-device test"],
+      "hero_nodes": ["Physical link", "System detection", "Active mode", "Visual checks"],
+      "hero_center": {"strong": "DISPLAY", "sub": "HDMI + DSI"}
+    },
+    {
+      "pattern": "cards-3",
+      "data_title": "Learning outcome",
+      "kicker": "Learning Outcome",
+      "title": "A Lit Screen Is Only the Start",
+      "lead": "After this lesson, you can judge the display path at three evidence layers.",
+      "cards": [
+        {"tint": "tint-1", "icon": "chip", "title": "Trusted connection", "body": "The connector, cable, and physical monitor form a complete path."},
+        {"tint": "tint-2", "icon": "terminal", "title": "Readable status", "body": "DRM and X11 both identify the connector and active mode."},
+        {"tint": "tint-4", "icon": "eye", "title": "Visible result", "body": "Color, grayscale, text, fine lines, and motion can all be judged."}
+      ]
+    },
+    {
+      "pattern": "split-checklist",
+      "data_title": "Before you start",
+      "kicker": "Before You Start",
+      "title": "Prepare the Hardware and Set Boundaries",
+      "lead": "This lesson only reads display status and runs a local demo inside the isolated project.",
+      "items": [
+        "Prepare the X5, HDMI monitor, HDMI cable, and stable power",
+        "Select the correct monitor input and connect cables while powered off",
+        "Enter new_project and run source env.sh",
+        "Keep ROS_DOMAIN_ID at 42 and use only ports 9100–9199",
+        "Do not modify frozen XRD assets, original systemd services, or ROS Domain 0",
+        "Keep SSH and VNC enabled; do not change networking or display boot settings"
+      ]
+    },
+    {
+      "pattern": "flow-5",
+      "data_title": "Verification flow",
+      "kicker": "Verification Flow",
+      "title": "Verify the Display in Five Steps",
+      "steps": [
+        {"title": "1  Check wiring", "sub": "Confirm the connector, cable, and input source."},
+        {"title": "2  Load environment", "sub": "Enter the isolated directory and Domain 42."},
+        {"title": "3  Read status", "sub": "Inspect DRM and X11 connection data."},
+        {"title": "4  Run the demo", "sub": "Check color, detail, and motion."},
+        {"title": "5  Clean up", "sub": "Repeat the test and verify ports and services."}
+      ]
+    },
+    {
+      "pattern": "cards-4",
+      "data_title": "Key concepts",
+      "kicker": "Key Concepts",
+      "title": "Four Terms Define the Evidence",
+      "cards": [
+        {"tint": "tint-1", "icon": "film", "title": "HDMI", "body": "Carries image and audio data to an external display."},
+        {"tint": "tint-2", "icon": "chip", "title": "DRM", "body": "The Linux kernel display layer reports connector detection."},
+        {"tint": "tint-4", "icon": "terminal", "title": "X11", "body": "The X5 desktop stack; xrandr reports outputs and modes."},
+        {"tint": "tint-6", "icon": "list-check", "title": "Display mode", "body": "Resolution and refresh rate describe the active output."}
+      ]
+    },
+    {
+      "pattern": "cards-3",
+      "data_title": "Evidence method",
+      "kicker": "Three Evidence Layers",
+      "title": "All Three Evidence Layers Matter",
+      "lead": "Screen capture shows detail, camera footage proves the real setup, and logs support review.",
+      "cards": [
+        {"tint": "tint-1", "icon": "video", "title": "Camera footage", "body": "Proves the cable is attached to the X5 and the physical HDMI monitor is active."},
+        {"tint": "tint-4", "icon": "eye", "title": "Screen capture", "body": "Clearly shows color blocks, text, fine lines, and motion tests."},
+        {"tint": "tint-6", "icon": "terminal", "title": "Runtime logs", "body": "Record the connector, active mode, port, and cleanup result."}
+      ]
+    },
+    {
+      "pattern": "code-highlight",
+      "data_title": "Reproducible commands",
+      "kicker": "Reproducible Commands",
+      "title": "The Desktop Shortcut Is Not a Black Box",
+      "lead": "The one-click entry and terminal use the same project scripts.",
+      "cards": [
+        {"title": "1  Load environment", "code": "cd /home/sunrise/workspaces/new_project; source env.sh", "note": "Confirm ROS_DOMAIN_ID=42."},
+        {"title": "2  Read inventory", "code": "bash src/lesson09_display_x5/scripts/display_inventory.sh", "note": "Read-only connector and mode data."},
+        {"title": "3  Launch demo", "code": "bash src/lesson09_display_x5/scripts/launch_hdmi_demo.sh", "note": "Matches the desktop shortcut."},
+        {"title": "4  Capture screen", "code": "bash src/lesson09_display_x5/scripts/capture_screen.sh video 45", "note": "Saves media under the project log directory."}
+      ]
+    },
+    {
+      "pattern": "cards-3",
+      "data_title": "Measured result",
+      "kicker": "Actual Result",
+      "title": "Read the Measured X5 Result",
+      "lead": "These values come from the physical board; listed capabilities are not reported as verified results.",
+      "cards": [
+        {"tint": "tint-1", "icon": "chip", "title": "HDMI-1", "body": "Both DRM and X11 report connected."},
+        {"tint": "tint-2", "icon": "target", "title": "1024×600", "body": "Active mode at a 59.82 Hz refresh rate."},
+        {"tint": "tint-4", "icon": "layers", "title": "Candidate modes", "body": "1080p and 720p are also listed, but not switched in this lesson."}
+      ]
+    },
+    {
+      "pattern": "cards-4",
+      "data_title": "Visual checks",
+      "kicker": "Visual Checks",
+      "title": "Each Test Page Checks One Thing",
+      "cards": [
+        {"tint": "tint-1", "icon": "eye", "title": "Color", "body": "RGB and CMY boundaries are clear, with no obvious color cast."},
+        {"tint": "tint-2", "icon": "layers", "title": "Grayscale", "body": "Brightness levels from 0 to 100 percent remain distinguishable."},
+        {"tint": "tint-4", "icon": "search", "title": "Detail", "body": "Small text, one-pixel lines, checkerboards, and rings remain visible."},
+        {"tint": "tint-6", "icon": "film", "title": "Motion", "body": "Moving edges stay continuous; browser render rate is observed separately."}
+      ]
+    },
+    {
+      "pattern": "split-timeline",
+      "data_title": "Run and cleanup",
+      "kicker": "Run And Cleanup",
+      "title": "Startup and Cleanup Stay Controlled",
+      "lead": "The verification should not leave unrelated processes or occupied project ports.",
+      "steps": [
+        {"badge": "Step 1", "body": "Double-click RDK X5 HDMI Demo and watch the five-second countdown."},
+        {"badge": "Step 2", "body": "The launcher selects a free port from 9100–9199 and listens only on 127.0.0.1."},
+        {"badge": "Step 3", "body": "The browser cycles through six pages; arrow keys and Space also work."},
+        {"badge": "Step 4", "body": "Press Alt+F4 to close only the browser and web service started by this project."}
+      ]
+    },
+    {
+      "pattern": "split-checklist",
+      "data_title": "Completion checklist",
+      "kicker": "Completion Checklist",
+      "title": "Pass Only When All Six Checks Succeed",
+      "lead": "Success means repeatable results and a clean exit, not one momentary image.",
+      "items": [
+        "DRM and X11 both report HDMI-1 as connected",
+        "The active mode matches the physical monitor: 1024×600 at 59.82 Hz",
+        "Color, grayscale, text, fine lines, geometry, and motion pages are visible",
+        "Two runs from a clean state produce the same result",
+        "Project ports are released with no project Firefox or web service left behind",
+        "SSH and VNC work, and frozen XRD service states remain unchanged"
+      ]
+    },
+    {
+      "pattern": "cards-4",
+      "data_title": "Troubleshooting",
+      "kicker": "Troubleshooting",
+      "title": "Start with These Four Checks",
+      "cards": [
+        {"tint": "tint-1", "icon": "search", "title": "No signal", "body": "Check the input source, power, and cable before reading DRM status."},
+        {"tint": "tint-2", "icon": "terminal", "title": "Shortcut fails", "body": "Run the launch script in a terminal and read the safety checks."},
+        {"tint": "tint-4", "icon": "layers", "title": "Port in use", "body": "Keep the existing listener; the launcher selects another free port."},
+        {"tint": "tint-6", "icon": "wrench", "title": "Data check", "body": "Inspect runtime.json and server.log without restoring original services."}
+      ]
+    },
+    {
+      "pattern": "photo-evidence",
+      "data_title": "DSI hardware",
+      "kicker": "DSI · Hardware",
+      "title": "DSI Needs Fewer Parts, but the Power-Off Check Still Matters",
+      "lead": "This test uses an RDK X5, a 4.3-inch DSI display, a 40-pin ribbon cable, and stable power. HDMI is disconnected so the result remains interface-specific.",
+      "image": "x5-dsi-material.jpg",
+      "alt": "RDK X5, 4.3-inch DSI display, and 40-pin ribbon cable",
+      "caption": "Physical evidence: the board, display, and ribbon cable are visible together."
+    },
+    {
+      "pattern": "photo-evidence",
+      "data_title": "DSI wiring",
+      "kicker": "DSI · Wiring",
+      "title": "Check the Ribbon Orientation Before Applying Power",
+      "lead": "Insert both ends squarely and lock the latches. Avoid reversed, angled, or live insertion. If the screen stays dark, power off before checking orientation and contact.",
+      "image": "x5-dsi-wiring.jpg",
+      "alt": "RDK X5 connected to a 4.3-inch DSI display",
+      "caption": "Wiring evidence: one DSI ribbon cable links the X5 and display board."
+    },
+    {
+      "pattern": "cards-3",
+      "data_title": "DSI visible result",
+      "kicker": "DSI · Actual Result",
+      "title": "A Visible Physical Desktop Completes the Minimum DSI Check",
+      "lead": "The short camera clip keeps the board, ribbon cable, and physical screen in view, so a screen capture cannot be mistaken for hardware evidence.",
+      "cards": [
+        {"tint": "tint-1", "icon": "chip", "title": "Independent path", "body": "Only the 4.3-inch DSI display is connected; the HDMI result is not reused."},
+        {"tint": "tint-4", "icon": "eye", "title": "Visible output", "body": "The physical display shows the X5 desktop and icons without a persistent black screen."},
+        {"tint": "tint-6", "icon": "list-check", "title": "Bounded claim", "body": "This proves display output, not touch input, color calibration, or long-duration stability."}
+      ]
+    },
+    {
+      "pattern": "closing",
+      "data_title": "Course summary",
+      "kicker": "Summary",
+      "title": "HDMI and DSI Are Both Verified on the X5",
+      "lead": "HDMI keeps the full reproducible workflow; DSI keeps a shorter but complete hardware, wiring, and visible-output record.",
+      "cards": [
+        {"tint": "tint-1", "icon": "list-check", "title": "HDMI complete", "body": "Connection, mode, image quality, repeat runs, and cleanup are evidenced."},
+        {"tint": "tint-4", "icon": "eye", "title": "DSI complete", "body": "The 4.3-inch panel is wired correctly and shows the physical desktop."},
+        {"tint": "tint-6", "icon": "layers", "title": "Claims stay separate", "body": "Different interfaces and boards continue to use independent evidence."}
+      ]
+    }
+  ]
+}

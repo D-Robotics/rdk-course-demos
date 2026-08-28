@@ -1,0 +1,205 @@
+{
+  "meta": {
+    "title": "RDK 小课堂｜第9课：RDK X5显示模块",
+    "lang": "cn",
+    "logo_key": "logo-cn",
+    "hint": "键盘：← / → / Space 切换页面"
+  },
+  "slides": [
+    {
+      "pattern": "cover",
+      "data_title": "封面",
+      "kicker": "Lesson 09 · RDK X5",
+      "title": "显示模块 [gradient]HDMI与DSI实机验证[/gradient]",
+      "lead": "HDMI建立完整复现链路，DSI用更简洁的物料、接线和亮屏证据完成独立验证。",
+      "tags": ["RDK X5", "HDMI-1", "4.3英寸DSI", "实机验证"],
+      "hero_nodes": ["物理连接", "系统识别", "显示模式", "视觉验收"],
+      "hero_center": {"strong": "DISPLAY", "sub": "HDMI + DSI"}
+    },
+    {
+      "pattern": "cards-3",
+      "data_title": "课程目标",
+      "kicker": "Learning Outcome",
+      "title": "亮屏只是验证的起点",
+      "lead": "看完本课，你能从三个层面判断显示链路是否真正可用。",
+      "cards": [
+        {"tint": "tint-1", "icon": "chip", "title": "连接可信", "body": "接口、线缆与真实屏幕形成完整物理链路。"},
+        {"tint": "tint-2", "icon": "terminal", "title": "状态可读", "body": "DRM与X11都能识别连接器和当前模式。"},
+        {"tint": "tint-4", "icon": "eye", "title": "效果可见", "body": "颜色、灰阶、文字、细线和动态画面可判断。"}
+      ]
+    },
+    {
+      "pattern": "split-checklist",
+      "data_title": "开始前确认",
+      "kicker": "Before You Start",
+      "title": "先确认器材与安全边界",
+      "lead": "本课只在隔离项目中读取状态和运行本地Demo。",
+      "items": [
+        "X5、HDMI屏幕、HDMI线和稳定供电已准备",
+        "显示器输入源选择正确，接线时先断电",
+        "进入new_project并执行source env.sh",
+        "ROS_DOMAIN_ID固定为42，端口仅用9100–9199",
+        "不修改冻结XRD资产、原systemd服务或ROS Domain 0",
+        "SSH与VNC保持启用，不调整网络与显示启动配置"
+      ]
+    },
+    {
+      "pattern": "flow-5",
+      "data_title": "整体流程",
+      "kicker": "Verification Flow",
+      "title": "五步完成显示验证",
+      "steps": [
+        {"title": "① 检查接线", "sub": "确认接口、线缆与输入源。"},
+        {"title": "② 加载环境", "sub": "进入隔离目录与Domain 42。"},
+        {"title": "③ 读取状态", "sub": "检查DRM与X11连接信息。"},
+        {"title": "④ 运行Demo", "sub": "完成颜色、清晰度与动态测试。"},
+        {"title": "⑤ 验收清理", "sub": "复跑并确认端口与服务状态。"}
+      ]
+    },
+    {
+      "pattern": "cards-4",
+      "data_title": "关键概念",
+      "kicker": "Key Concepts",
+      "title": "先理解四个显示关键词",
+      "cards": [
+        {"tint": "tint-1", "icon": "film", "title": "HDMI", "body": "把图像和音频数据传送到外部显示设备。"},
+        {"tint": "tint-2", "icon": "chip", "title": "DRM", "body": "Linux内核显示层，回答连接器是否被识别。"},
+        {"tint": "tint-4", "icon": "terminal", "title": "X11", "body": "X5当前桌面栈，xrandr可读取输出和模式。"},
+        {"tint": "tint-6", "icon": "list-check", "title": "显示模式", "body": "分辨率与刷新率共同描述当前激活输出。"}
+      ]
+    },
+    {
+      "pattern": "cards-3",
+      "data_title": "判断方法",
+      "kicker": "Three Evidence Layers",
+      "title": "三层证据缺一不可",
+      "lead": "录屏清晰，实拍真实，日志可复核；三者各自回答不同问题。",
+      "cards": [
+        {"tint": "tint-1", "icon": "video", "title": "实拍画面", "body": "证明线缆接在X5上，真实HDMI屏确实输出。"},
+        {"tint": "tint-4", "icon": "eye", "title": "清晰录屏", "body": "让观众看清色块、文字、细线和动态测试。"},
+        {"tint": "tint-6", "icon": "terminal", "title": "运行日志", "body": "记录连接器、当前模式、端口和退出清理结果。"}
+      ]
+    },
+    {
+      "pattern": "code-highlight",
+      "data_title": "可复现命令",
+      "kicker": "Reproducible Commands",
+      "title": "桌面图标不是黑盒",
+      "lead": "一键入口与终端调用的是同一套项目脚本。",
+      "cards": [
+        {"title": "① 加载环境", "code": "cd /home/sunrise/workspaces/new_project; source env.sh", "note": "确认ROS_DOMAIN_ID=42。"},
+        {"title": "② 查看清单", "code": "bash src/lesson09_display_x5/scripts/display_inventory.sh", "note": "只读连接器和模式信息。"},
+        {"title": "③ 启动Demo", "code": "bash src/lesson09_display_x5/scripts/launch_hdmi_demo.sh", "note": "与双击桌面图标一致。"},
+        {"title": "④ 采集屏幕", "code": "bash src/lesson09_display_x5/scripts/capture_screen.sh video 45", "note": "素材保存在项目日志目录。"}
+      ]
+    },
+    {
+      "pattern": "cards-3",
+      "data_title": "实测状态",
+      "kicker": "Actual Result",
+      "title": "先读懂X5实测结果",
+      "lead": "这些数值来自本次真实板卡，不把候选能力说成已验证结果。",
+      "cards": [
+        {"tint": "tint-1", "icon": "chip", "title": "HDMI-1", "body": "DRM与X11均报告connected。"},
+        {"tint": "tint-2", "icon": "target", "title": "1024×600", "body": "当前激活模式，刷新率59.82 Hz。"},
+        {"tint": "tint-4", "icon": "layers", "title": "候选模式", "body": "另有1080p、720p等枚举项，本课没有切换。"}
+      ]
+    },
+    {
+      "pattern": "cards-4",
+      "data_title": "视觉测试",
+      "kicker": "Visual Checks",
+      "title": "四类画面各查一个问题",
+      "cards": [
+        {"tint": "tint-1", "icon": "eye", "title": "颜色", "body": "RGB与CMY纯色边界清楚，无异常偏色。"},
+        {"tint": "tint-2", "icon": "layers", "title": "灰阶", "body": "0–100%亮度级别能够逐级分辨。"},
+        {"tint": "tint-4", "icon": "search", "title": "清晰度", "body": "小字、1像素线、棋盘格与圆环可见。"},
+        {"tint": "tint-6", "icon": "film", "title": "动态", "body": "移动边缘连续，并观察浏览器渲染帧率。"}
+      ]
+    },
+    {
+      "pattern": "split-timeline",
+      "data_title": "运行与退出",
+      "kicker": "Run And Cleanup",
+      "title": "启动与退出都要可控",
+      "lead": "验证完成后，不应留下无关进程或占用项目端口。",
+      "steps": [
+        {"badge": "Step 1", "body": "双击RDK X5 HDMI一键演示，先看五秒倒计时。"},
+        {"badge": "Step 2", "body": "启动器从9100–9199选择空闲端口，并仅监听127.0.0.1。"},
+        {"badge": "Step 3", "body": "浏览器自动轮播六页，也可用方向键和空格控制。"},
+        {"badge": "Step 4", "body": "按Alt+F4退出，只回收本项目启动的浏览器和Web服务。"}
+      ]
+    },
+    {
+      "pattern": "split-checklist",
+      "data_title": "成功标准",
+      "kicker": "Completion Checklist",
+      "title": "六项都通过才算完成",
+      "lead": "成功不是单次亮屏，而是结果可重复、退出可恢复。",
+      "items": [
+        "DRM与X11都识别HDMI-1为connected",
+        "当前模式与真实屏幕一致：1024×600 @ 59.82 Hz",
+        "颜色、灰阶、文字、细线、几何和动态页可见",
+        "从干净状态连续运行两次，结果一致",
+        "退出后项目端口释放，无项目Firefox或Web服务残留",
+        "SSH、VNC正常，冻结XRD服务状态前后一致"
+      ]
+    },
+    {
+      "pattern": "cards-4",
+      "data_title": "常见问题",
+      "kicker": "Troubleshooting",
+      "title": "失败时先查这四个入口",
+      "cards": [
+        {"tint": "tint-1", "icon": "search", "title": "无信号", "body": "先查输入源、供电和线缆，再看DRM状态。"},
+        {"tint": "tint-2", "icon": "terminal", "title": "图标没启动", "body": "在终端运行启动脚本，读取安全检查信息。"},
+        {"tint": "tint-4", "icon": "layers", "title": "端口占用", "body": "保留已有监听者，让启动器自动换空闲端口。"},
+        {"tint": "tint-6", "icon": "wrench", "title": "数据检查", "body": "查看本次runtime.json和server.log，不恢复原服务。"}
+      ]
+    },
+    {
+      "pattern": "photo-evidence",
+      "data_title": "DSI完整物料",
+      "kicker": "DSI · Hardware",
+      "title": "DSI物料更少，仍要先断电核对",
+      "lead": "本次使用RDK X5、4.3英寸DSI屏、40Pin排线和稳定供电。DSI不沿用HDMI线缆，也不同时连接两块屏幕。",
+      "image": "x5-dsi-material.jpg",
+      "alt": "RDK X5、4.3英寸DSI屏和40Pin排线",
+      "caption": "实拍证据：板卡、屏幕与排线完整同框。"
+    },
+    {
+      "pattern": "photo-evidence",
+      "data_title": "DSI接线",
+      "kicker": "DSI · Wiring",
+      "title": "确认排线方向，接好后再上电",
+      "lead": "排线两端应平直插到底并锁紧卡扣。避免反插、斜插和带电插拔；如果不亮，先断电复核方向与接触。",
+      "image": "x5-dsi-wiring.jpg",
+      "alt": "RDK X5与4.3英寸DSI屏完成排线连接",
+      "caption": "接线证据：X5与屏幕背板之间只有一条DSI排线。"
+    },
+    {
+      "pattern": "cards-3",
+      "data_title": "DSI亮屏结果",
+      "kicker": "DSI · Actual Result",
+      "title": "真实桌面可见，DSI最小验证通过",
+      "lead": "短视频同时保留板卡、排线和实体屏幕，避免把录屏或静态图片误当作硬件结果。",
+      "cards": [
+        {"tint": "tint-1", "icon": "chip", "title": "链路独立", "body": "验证时只连接4.3英寸DSI屏，不复用HDMI结论。"},
+        {"tint": "tint-4", "icon": "eye", "title": "画面可见", "body": "实体屏稳定显示X5桌面与图标，未出现持续黑屏。"},
+        {"tint": "tint-6", "icon": "list-check", "title": "结论克制", "body": "本段证明显示输出，不扩展宣称触控、色准或长期稳定性。"}
+      ]
+    },
+    {
+      "pattern": "closing",
+      "data_title": "课程小结",
+      "kicker": "Summary",
+      "title": "X5的HDMI与DSI均完成实机验证",
+      "lead": "HDMI保留完整复现链路，DSI保留简洁但完整的物料、接线和亮屏证据。",
+      "cards": [
+        {"tint": "tint-1", "icon": "list-check", "title": "HDMI完成", "body": "连接、模式、画质、复跑和退出均有证据。"},
+        {"tint": "tint-4", "icon": "eye", "title": "DSI完成", "body": "4.3英寸屏接线正确，实体桌面输出可见。"},
+        {"tint": "tint-6", "icon": "layers", "title": "结论分开", "body": "不同接口、不同板卡继续分别记录，不相互套用。"}
+      ]
+    }
+  ]
+}
