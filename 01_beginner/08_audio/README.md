@@ -57,6 +57,51 @@ tinycap ./4chn_test.wav -D 0 -d 1 -c 4 -b 16 -r 48000 -p 512 -n 4 -t 5
 
 完整命令清单（WM8960 三种播放模式全套路由、srpi-config 操作路径、常见问题排查）见在线讲义。
 
+## S100 回采验证工具（可选）
+
+适用板卡：RDK S100（Audio Driver HAT REV2）。本课为命令演示课，不做独立 Demo；这个小工具只补一件事——把「麦克风拾音、回采参考信号是否正常」自动判定出来，替代在 Audacity 里逐通道人工查看。
+
+```shell
+# 1. 生成 1kHz 测试音（板端即可，纯标准库）
+python3 make_tone.py --freq 1000 --seconds 30 --out 1khz.wav
+
+# 2. 终端 A：8 通道录音（period-size 满足 64 字节对齐）
+arecord -Dhw:0,0 -c 8 -r 48000 -f S16_LE -t wav -d 30 ./8chn_capture.wav \
+    --period-size=256 --buffer-size=1024
+
+# 3. 终端 B：同时播放测试音
+aplay -Dhw:0,1 1khz.wav --period-size=1024 --buffer-size=1024
+
+# 4. 分析并判定
+python3 analyze_loopback.py 8chn_capture.wav
+```
+
+判定逻辑：
+
+| 通道 | 用途 | 判定条件 |
+|------|------|----------|
+| ch1–ch4 | 4 路模拟麦克风 | 任一通道 RMS ≥ 阈值 → `PASS: mic capture` |
+| ch5–ch6 | 未使用 | 预期静音（仅提示） |
+| ch7–ch8 | 播放回采参考 | RMS ≥ 阈值 且 主频 ≈ 播放音频率（±15%）→ `PASS: loopback` |
+
+输出示例：
+
+```text
+channel   peak      RMS        est.freq    level
+------------------------------------------------------------
+ch1          8500     5665.5       364 Hz   #########
+...
+ch7         20000    14141.7      1000 Hz   ########################
+ch8         20000    14141.7      1000 Hz   ########################
+
+[PASS] mic capture      : signal on ch1-ch4
+[PASS] loopback         : 1kHz reference on ch7-ch8
+
+Result: PASS
+```
+
+两个脚本均为 Python 标准库实现，板端直接可跑（`python3` ≥ 3.6）；FAIL 时退出码为 1，可接入自动化脚本。
+
 ## 参考资料
 
 - [RDK 音频外设入门（中文讲义）](https://d-robotics.github.io/rdk-course-demos/zh/beginner/08-audio/)
