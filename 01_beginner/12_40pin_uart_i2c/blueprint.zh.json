@@ -1,0 +1,264 @@
+{
+  "meta": {
+    "title": "RDK 小课堂｜第十二课：40pin UART 与 I2C",
+    "lang": "cn",
+    "logo_key": "logo-cn",
+    "hint": "键盘：← / → / Space 切换页面"
+  },
+  "slides": [
+    {
+      "pattern": "cover",
+      "data_title": "课程封面",
+      "kicker": "Lesson 12 · RDK X5",
+      "title": "40pin [gradient]UART 与 I2C[/gradient]",
+      "lead": "先让串口完成回环收发，再通过 I2C5 点亮一块 OLED 小屏。",
+      "tags": ["UART1", "115200 8N1", "I2C5", "SSD1306"],
+      "hero_nodes": ["Pin 8 TX", "Pin 10 RX", "Pin 3 SDA", "Pin 5 SCL"],
+      "hero_center": {
+        "strong": "40pin",
+        "sub": "两种外设通信方式"
+      }
+    },
+    {
+      "pattern": "cards-3",
+      "data_title": "课程目标",
+      "kicker": "Today’s Mission",
+      "title": "这节课只做两件事",
+      "lead": "GPIO 适合简单高低电平。连接串口模块或小屏幕，需要使用总线接口。",
+      "cards": [
+        {
+          "tint": "tint-1",
+          "icon": "terminal",
+          "title": "UART 回环",
+          "body": "短接 Pin 8 与 Pin 10，验证发送和接收都正常。"
+        },
+        {
+          "tint": "tint-4",
+          "icon": "search",
+          "title": "I2C 扫描",
+          "body": "在 I2C5 上确认 OLED 的真实设备地址。"
+        },
+        {
+          "tint": "tint-6",
+          "icon": "film",
+          "title": "点亮 OLED",
+          "body": "显示 RDK X5、演示标题和每秒刷新的时间。"
+        }
+      ]
+    },
+    {
+      "pattern": "cards-4",
+      "data_title": "UART 原理",
+      "kicker": "UART Basics",
+      "title": "UART 的通信节奏",
+      "lead": "UART 没有时钟线，通信双方必须提前约好相同参数。",
+      "cards": [
+        {
+          "tint": "tint-1",
+          "icon": "zap",
+          "title": "115200",
+          "body": "双方使用相同波特率，接收端才能按正确节奏采样。"
+        },
+        {
+          "tint": "tint-2",
+          "icon": "layers",
+          "title": "8N1",
+          "body": "8 位数据、无校验、1 位停止位，帧由硬件自动处理。"
+        },
+        {
+          "tint": "tint-4",
+          "icon": "puzzle",
+          "title": "收发交叉",
+          "body": "RDK TX 接外设 RX，RDK RX 接外设 TX，并且必须共地。"
+        },
+        {
+          "tint": "tint-6",
+          "icon": "chip",
+          "title": "3.3V 电平",
+          "body": "最大耐压 3.46V，严禁把 5V 串口信号直接接入 40pin。"
+        }
+      ]
+    },
+    {
+      "pattern": "code-highlight",
+      "data_title": "UART 管脚",
+      "kicker": "UART1 On 40pin",
+      "title": "Pin 8 发，Pin 10 收",
+      "lead": "RDK X5 的 40pin UART1 对应 /dev/ttyS1，/dev/ttyS0 是系统调试口。",
+      "cards": [
+        {
+          "title": "回环接线",
+          "code": "Pin 8 TX  ─────  Pin 10 RX",
+          "note": "关机后短接两个管脚，再重新上电。"
+        },
+        {
+          "title": "运行程序",
+          "code": "python3 uart_loopback.py",
+          "note": "每秒发送一次 AA55，并读取 4 个字节。"
+        }
+      ]
+    },
+    {
+      "pattern": "split-timeline",
+      "data_title": "UART 回环演示",
+      "kicker": "Demo 01 · UART Loopback",
+      "title": "先做最小回环实验",
+      "lead": "让串口自己对自己说话，先排除板端接口和参数问题。",
+      "steps": [
+        {
+          "badge": "Step 1",
+          "body": "开发板下电，用跳线帽短接 Pin 8 和 Pin 10。"
+        },
+        {
+          "badge": "Step 2",
+          "body": "上电后运行 uart_loopback.py。"
+        },
+        {
+          "badge": "Step 3",
+          "body": "确认 Send: AA55 与 Recv: AA55 完全一致。"
+        },
+        {
+          "badge": "Step 4",
+          "body": "拔掉跳线再次运行，Recv 为空，理解回环路径。"
+        }
+      ]
+    },
+    {
+      "pattern": "cards-4",
+      "data_title": "I2C 原理",
+      "kicker": "I2C Basics",
+      "title": "I2C 用地址完成点名",
+      "lead": "SCL 提供时钟节拍，SDA 逐位传输数据，多个设备可以共享同一组线。",
+      "cards": [
+        {
+          "tint": "tint-1",
+          "icon": "zap",
+          "title": "SCL",
+          "body": "主机输出时钟，通信双方不需要提前约定各自的节奏。"
+        },
+        {
+          "tint": "tint-2",
+          "icon": "layers",
+          "title": "SDA",
+          "body": "数据线在时钟控制下逐位传输地址、读写位和数据。"
+        },
+        {
+          "tint": "tint-4",
+          "icon": "target",
+          "title": "7 位地址",
+          "body": "OLED 常用 0x3C，部分模块使用 0x3D。"
+        },
+        {
+          "tint": "tint-6",
+          "icon": "message",
+          "title": "ACK 应答",
+          "body": "地址匹配的设备拉低 SDA 应答，随后才开始传输数据。"
+        }
+      ]
+    },
+    {
+      "pattern": "cards-4",
+      "data_title": "OLED 接线",
+      "kicker": "OLED Wiring",
+      "title": "OLED 只需要四根线",
+      "lead": "本课使用 I2C5。先断电接线，再启动开发板扫描地址。",
+      "cards": [
+        {
+          "tint": "tint-1",
+          "icon": "zap",
+          "title": "VCC → Pin 1",
+          "body": "使用 3.3V 供电，不要接到 5V。"
+        },
+        {
+          "tint": "tint-2",
+          "icon": "target",
+          "title": "GND → Pin 39",
+          "body": "建立电源与信号的共同参考地。"
+        },
+        {
+          "tint": "tint-4",
+          "icon": "message",
+          "title": "SDA → Pin 3",
+          "body": "I2C5 数据线，对应 /dev/i2c-5。"
+        },
+        {
+          "tint": "tint-6",
+          "icon": "zap",
+          "title": "SCL → Pin 5",
+          "body": "I2C5 时钟线，由 RDK 输出通信节拍。"
+        }
+      ]
+    },
+    {
+      "pattern": "code-highlight",
+      "data_title": "I2C 地址扫描",
+      "kicker": "Demo 02 · Device Discovery",
+      "title": "先扫到 3c，再运行代码",
+      "lead": "i2cdetect 逐个地址发起通信，收到 ACK 的地址会显示在表格里。",
+      "cards": [
+        {
+          "title": "扫描 I2C5",
+          "code": "i2cdetect -y 5",
+          "note": "看到 3c，说明 OLED 已在线。"
+        },
+        {
+          "title": "运行显示程序",
+          "code": "python3 i2c_display.py",
+          "note": "port=5，默认地址为 0x3C。"
+        }
+      ]
+    },
+    {
+      "pattern": "split-timeline",
+      "data_title": "OLED 点亮与排障",
+      "kicker": "OLED Demo",
+      "title": "屏幕不亮时按顺序查",
+      "lead": "程序显示三行内容并每秒更新时间。没有画面时，从最接近硬件的环节开始。",
+      "steps": [
+        {
+          "badge": "01",
+          "body": "先看 i2cdetect 能否扫到 0x3C 或 0x3D。"
+        },
+        {
+          "badge": "02",
+          "body": "核对接线使用 I2C5，因此代码中的 port 必须是 5。"
+        },
+        {
+          "badge": "03",
+          "body": "确认代码地址与扫描结果完全一致。"
+        },
+        {
+          "badge": "04",
+          "body": "确认屏幕主控是 SSD1306，SH1106 需要对应驱动。"
+        }
+      ]
+    },
+    {
+      "pattern": "closing",
+      "data_title": "课程总结",
+      "kicker": "Summary · Up Next",
+      "title": "两个接口，各记住两个关键点",
+      "lead": "完整接线表、代码和课后练习都在配套讲义与 GitHub 仓库中。",
+      "cards": [
+        {
+          "tint": "tint-1",
+          "icon": "terminal",
+          "title": "UART",
+          "body": "参数一致，收发交叉。"
+        },
+        {
+          "tint": "tint-4",
+          "icon": "search",
+          "title": "I2C",
+          "body": "总线号正确，设备地址匹配。"
+        },
+        {
+          "tint": "tint-6",
+          "icon": "rocket",
+          "title": "下一课",
+          "body": "把传感器数据搬上这块屏幕。"
+        }
+      ]
+    }
+  ]
+}

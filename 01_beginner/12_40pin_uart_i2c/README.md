@@ -6,6 +6,8 @@
 >
 > **配套代码：** [`code/uart_loopback.py`](./code/uart_loopback.py)、[`code/i2c_display.py`](./code/i2c_display.py)
 >
+> **视频演示页：** [`slides.zh.html`](./slides.zh.html)
+>
 > **飞书讲义：** [第十二课：RDK 40pin（UART / I2C）｜RDK X5](https://horizonrobotics.feishu.cn/docx/SG10deTpMoNvocxa1AccfMnmnXb)
 
 ---
