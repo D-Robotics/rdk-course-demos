@@ -1,12 +1,12 @@
-# 第 12 课：RDK X5 40pin UART 串口通信
+# 第 12 课：RDK X5 40pin UART 与 I2C
 
-> **课程定位：** 认识 RDK X5 40pin 上的 UART1，掌握串口接线、通信参数和 Python API，并完成 UART 回环收发实验。
+> **课程定位：** 认识 RDK X5 40pin 上的 UART1 与 I2C5，完成 UART 回环收发和 I2C OLED 点亮实验。
 >
 > **适用硬件：** RDK X5
 >
-> **配套代码：** [`code/uart_loopback.py`](./code/uart_loopback.py)
+> **配套代码：** [`code/uart_loopback.py`](./code/uart_loopback.py)、[`code/i2c_display.py`](./code/i2c_display.py)
 >
-> **飞书讲义：** [第 12 课　40pin 使用（2）UART 串口通信](https://horizonrobotics.feishu.cn/docx/Qjdhd8j7yoxWlSxsGJec4DojnGc)
+> **飞书讲义：** [第十二课：RDK 40pin（UART / I2C）｜RDK X5](https://horizonrobotics.feishu.cn/docx/SG10deTpMoNvocxa1AccfMnmnXb)
 
 ---
 
@@ -19,6 +19,8 @@
 3. 说明波特率和 8N1 的含义
 4. 运行系统预置示例，完成串口回环测试
 5. 使用 Python `serial` API 发送和接收数据
+6. 使用 `i2cdetect` 确认 I2C 总线号和设备地址
+7. 使用 Python 驱动 SSD1306 OLED 显示文字和实时时间
 
 ---
 
@@ -29,8 +31,17 @@
 | RDK X5 | 1 | 使用 40pin 排针上的 UART1 |
 | 杜邦线 | 1 | 连接 TXD 与 RXD，完成回环测试 |
 | 3.3V TTL 串口外设 | 选配 | GPS、串口传感器或 USB 转 TTL 模块 |
+| I2C OLED 小屏幕 | 1 | SSD1306、0.96 寸、128×64，常见地址 0x3C |
 
 > **接线前请断电。** RDK X5 UART1 使用 3.3V TTL 电平。不要把 RS-232 接口或 5V 串口信号直接接入 40pin，否则可能损坏开发板。
+
+软件依赖一次性安装：
+
+```bash
+sudo apt update
+sudo apt install -y i2c-tools python3-serial
+python3 -m pip install luma.oled
+```
 
 ---
 
@@ -212,7 +223,56 @@ print(data.decode())
 
 ---
 
-## 10. 常见问题
+## 10. I2C 总线与 OLED 实验
+
+I2C 使用 SDA 数据线和 SCL 时钟线。RDK 作为主机发起通信，从机通过 7 位地址区分。OLED 常见地址为 `0x3C`，部分模块使用 `0x3D`。
+
+RDK X5 的 Pin 3 和 Pin 5 对应 I2C5，设备节点为 `/dev/i2c-5`。
+
+| OLED 引脚 | 功能 | RDK X5 BOARD 管脚 |
+| --- | --- | --- |
+| VCC | 3.3V 电源 | Pin 1 |
+| GND | 公共地 | Pin 39 |
+| SDA | I2C 数据 | Pin 3 |
+| SCL | I2C 时钟 | Pin 5 |
+
+接线后先扫描地址：
+
+```bash
+ls /dev/i2c-*
+i2cdetect -y 5
+```
+
+扫描表中出现 `3c` 表示设备已经应答。显示 `UU` 表示该地址已被内核驱动占用。
+
+运行 OLED 示例：
+
+```bash
+cd rdk-course-demos/01_beginner/12_40pin_uart_i2c/code
+python3 i2c_display.py
+```
+
+程序默认使用 I2C5、地址 `0x3C` 和 SSD1306 驱动，显示 `RDK X5`、`I2C OLED Demo` 和每秒刷新的时间。设备地址为 `0x3D` 时运行：
+
+```bash
+python3 i2c_display.py --address 0x3D
+```
+
+## 11. 40pin 复用配置
+
+如果设备节点不存在或管脚功能不正确，运行 `sudo srpi-config`，进入 **3 Interface Options** → **I3 Peripheral bus config**，启用对应 UART 或 I2C 功能，保存后重启。
+
+同一组复用功能通常只能启用其中一种：
+
+| 接口功能 1 | 接口功能 2 |
+| --- | --- |
+| uart3 | i2c5 |
+| i2c0 | pwm2 |
+| spi2 | pwm0 |
+| spi2 | pwm1 |
+| i2c1 | pwm3 |
+
+## 12. 常见问题
 
 | 现象 | 可能原因 | 处理方法 |
 |------|----------|----------|
@@ -222,10 +282,12 @@ print(data.decode())
 | 收到乱码 | 波特率、数据位、校验或停止位不一致 | 让两端使用相同参数 |
 | 数据不稳定 | 没有共地、电平不兼容或线材接触不良 | 检查 GND、3.3V TTL 电平和线材 |
 | 数据不完整 | 读取长度、结束符或超时设置不合适 | 检查 `read()` 长度和 `timeout` |
+| I2C 扫不到设备 | SDA/SCL、供电、上拉、总线号或复用配置错误 | 断电后核对接线，再运行 `i2cdetect -y 5` |
+| OLED 不亮 | 地址或驱动型号不匹配 | 核对 0x3C/0x3D，并确认 SSD1306/SH1106 型号 |
 
 ---
 
-## 11. 本课小结
+## 13. 本课小结
 
 - RDK X5 默认在 BOARD Pin 8 和 Pin 10 上启用 UART1
 - UART1 使用 3.3V TTL 电平，真实外设需要 TX/RX 交叉并共地
@@ -233,6 +295,8 @@ print(data.decode())
 - 40pin UART1 通常对应 `/dev/ttyS1`，不要误用系统调试串口 `/dev/ttyS0`
 - 先完成 TXD 与 RXD 回环测试，再连接真实串口外设
 - Python 通过 `serial.Serial()`、`write()`、`read()` 和 `close()` 完成串口收发
+- I2C5 使用 Pin 3 和 Pin 5，设备节点为 `/dev/i2c-5`
+- I2C 实验先扫描地址，再运行 OLED 显示程序
 
 ## 参考资料
 

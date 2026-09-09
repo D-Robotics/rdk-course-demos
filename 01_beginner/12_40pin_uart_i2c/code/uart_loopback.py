@@ -5,17 +5,21 @@ import time
 import serial
 
 
-ser = serial.Serial("/dev/ttyS1", 115200, timeout=1)
+def main():
+    ser = serial.Serial("/dev/ttyS1", 115200, timeout=1)
+    try:
+        print("Starting demo now! Press CTRL+C to exit")
+        while True:
+            ser.write(b"AA55")
+            data = ser.read(4)
+            print("Send: AA55")
+            print("Recv:", data.decode("utf-8", errors="replace"))
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("\nSerial port closed")
+    finally:
+        ser.close()
 
-try:
-    while True:
-        ser.write(b"AA55")
-        data = ser.read(4)
 
-        print("发送", "AA55")
-        print("接收", data.decode())
-
-        time.sleep(1)
-except KeyboardInterrupt:
-    ser.close()
-    print("串口已关闭")
+if __name__ == "__main__":
+    main()

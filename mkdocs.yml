@@ -75,7 +75,7 @@ plugins:
             Remote access: 远程连接
             Audio peripherals: 音频外设入门
             GPIO and PWM: GPIO 与 PWM
-            UART serial communication: UART 串口通信
+            UART and I2C: UART 与 I2C
             SPI display demo: SPI 显示屏示例
             02 · ModelZoo & RoboGo: 02 · ModelZoo 与 RoboGo
             Course overview: 课程介绍
@@ -116,7 +116,7 @@ nav:
           - Boot troubleshooting: beginner/05-boot-troubleshooting-x5.md
           - Audio peripherals: beginner/08-audio.md
           - GPIO and PWM: beginner/11-40pin-gpio-pwm.md
-          - UART serial communication: beginner/12-40pin-uart.md
+          - UART and I2C: beginner/12-40pin-uart.md
           - SPI display demo: hardware/spi-display.md
       - RDK S100:
           - Flash a system image: beginner/04-flash-system-s100.md

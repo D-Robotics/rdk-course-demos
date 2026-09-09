@@ -1,6 +1,6 @@
-# Lesson 12: RDK X5 40-pin UART serial communication
+# Lesson 12: RDK X5 40-pin UART and I2C
 
-This lesson uses UART1 on the RDK X5 40-pin header to explain serial parameters, verify the hardware with a loopback test, and send data from Python.
+This lesson uses UART1 and I2C5 on the RDK X5 40-pin header. You will verify UART with a loopback test and drive an SSD1306 OLED over I2C.
 
 > **Hardware:** RDK X5
 >
@@ -15,6 +15,8 @@ After this lesson, you will be able to:
 3. Explain baud rate and the 8N1 format
 4. Run the built-in loopback sample
 5. Send and receive bytes with Python and pyserial
+6. Discover an I2C device with `i2cdetect`
+7. Display text and a live clock on an SSD1306 OLED
 
 ## UART basics
 
@@ -122,6 +124,34 @@ The program sends `AA55` once per second, reads four bytes, and closes the seria
 
 Check the peripheral manual before powering it from the board. The signal level must be compatible with 3.3 V TTL UART.
 
+## I2C OLED experiment
+
+I2C uses SDA for data and SCL for the clock. On RDK X5, physical pins 3 and 5 provide I2C5 through `/dev/i2c-5`.
+
+| OLED pin | RDK X5 BOARD pin |
+| --- | --- |
+| VCC | Pin 1, 3.3 V |
+| GND | Pin 39 |
+| SDA | Pin 3, I2C5_SDA |
+| SCL | Pin 5, I2C5_SCL |
+
+Scan the bus before running Python:
+
+```bash
+sudo apt install -y i2c-tools
+i2cdetect -y 5
+```
+
+When address `3c` appears, run the course demo:
+
+```bash
+cd rdk-course-demos/01_beginner/12_40pin_uart_i2c/code
+python3 -m pip install luma.oled
+python3 i2c_display.py
+```
+
+Use `python3 i2c_display.py --address 0x3D` if the scan reports `3d`. If the display stays blank, verify the bus number, address, and whether the controller is SSD1306 or SH1106.
+
 ## Troubleshooting
 
 | Symptom | Check |
@@ -131,6 +161,8 @@ Check the peripheral manual before powering it from the board. The signal level 
 | No received data | Check the loopback wire or verify that TX and RX are crossed |
 | Garbled text | Make both sides use the same baud rate, data bits, parity, and stop bits |
 | Unstable data | Connect common ground and verify 3.3 V TTL levels |
+| I2C device is missing | Check SDA/SCL, power, pull-ups, bus number, and pin mux settings |
+| OLED stays blank | Verify 0x3C/0x3D and the SSD1306/SH1106 controller type |
 
 ## Summary
 
@@ -139,6 +171,8 @@ Check the peripheral manual before powering it from the board. The signal level 
 - This lesson uses 115200 baud, 8N1, and no flow control
 - UART1 normally appears as `/dev/ttyS1`; do not use the `/dev/ttyS0` debug console
 - Verify the interface with a loopback test before connecting a real peripheral
+- I2C5 uses BOARD pins 3 and 5 and appears as `/dev/i2c-5`
+- Scan the I2C address before running the OLED program
 
 ## References
 
