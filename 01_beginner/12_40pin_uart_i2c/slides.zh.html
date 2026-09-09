@@ -201,6 +201,107 @@
       h1, h2 { white-space: normal; }
     }
 
+    /* Lesson 12: restrained, engineering-first visual language. */
+    body {
+      background: #f4f3ef;
+    }
+    body::before {
+      background: linear-gradient(90deg, rgba(0,0,0,.028) 1px, transparent 1px),
+                  linear-gradient(rgba(0,0,0,.025) 1px, transparent 1px);
+      background-size: 72px 72px;
+      mask-image: none;
+    }
+    body::after { display: none; }
+    .slide { padding: 6vh 7vw 7vh; }
+    .slide-inner { gap: 22px; }
+    .kicker {
+      color: #555; font-size: 14px; letter-spacing: .04em; font-weight: 650;
+      text-transform: none;
+    }
+    .kicker::before { width: 20px; height: 3px; background: var(--brand); }
+    h1 { font-size: clamp(52px, 5.5vw, 88px); line-height: 1.02; }
+    h2 { font-size: clamp(38px, 4vw, 62px); }
+    .lead { max-width: 980px; color: #444; }
+    .tag { border-radius: 4px; background: transparent; padding: 5px 8px; }
+    .card, .timeline-row {
+      border-radius: 8px; background: rgba(255,255,255,.78); box-shadow: none;
+      backdrop-filter: none;
+    }
+    .tech-panel {
+      border: 1px solid #d8d6cf; border-top: 5px solid var(--brand);
+      background: rgba(255,255,255,.82); padding: 28px; border-radius: 6px;
+    }
+    .cover-panel { min-height: 440px; display: flex; flex-direction: column; justify-content: center; gap: 18px; }
+    .panel-label { color: #777; font-size: 13px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
+    .interface-row {
+      display: grid; grid-template-columns: 88px 1fr 110px; align-items: center;
+      gap: 18px; padding: 18px 0; border-top: 1px solid #dedcd5;
+    }
+    .interface-row:last-child { border-bottom: 1px solid #dedcd5; }
+    .interface-row strong { font-size: 25px; }
+    .interface-row code { font: 700 17px var(--font-mono); color: #333; }
+    .pin-badge { justify-self: end; color: var(--brand); font: 750 15px var(--font-mono); }
+    .lesson-index { font: 800 86px/1 var(--font-mono); color: rgba(255,60,0,.16); letter-spacing: -.08em; }
+    .mission-board { display: grid; grid-template-columns: 1fr 72px 1fr; align-items: stretch; margin-top: 12px; }
+    .mission {
+      border-top: 4px solid #222; border-bottom: 1px solid #bbb; padding: 28px 8px 24px;
+    }
+    .mission .no { font: 700 14px var(--font-mono); color: var(--brand); }
+    .mission h3 { font-size: clamp(28px, 2.4vw, 40px); margin: 14px 0 10px; }
+    .mission-arrow { display: grid; place-items: center; color: var(--brand); font-size: 34px; }
+    .fact-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+    .fact-table th, .fact-table td { padding: 17px 18px; text-align: left; border-bottom: 1px solid #d9d7d0; font-size: clamp(16px,1.25vw,21px); }
+    .fact-table th { width: 23%; color: #666; font-weight: 600; }
+    .fact-table td { color: #111; font-weight: 620; }
+    .danger-line { color: #a32600; border-left: 4px solid var(--brand); padding: 10px 16px; font-size: 18px; }
+    .wiring-map { display: grid; grid-template-columns: 1fr 92px 1fr; align-items: center; gap: 16px; }
+    .port-box { border: 1px solid #bcbab3; background: #fff; padding: 26px; border-radius: 6px; }
+    .port-box strong { display: block; font-size: 26px; margin-bottom: 7px; }
+    .port-box code { font: 700 17px var(--font-mono); color: #555; }
+    .wire { position: relative; height: 2px; background: var(--brand); }
+    .wire::after { content: ""; position: absolute; right: -1px; top: -5px; border: 6px solid transparent; border-left-color: var(--brand); }
+    .terminal {
+      background: #171717; color: #eee; border-radius: 7px; padding: 22px 24px;
+      font: 17px/1.7 var(--font-mono); border-top: 30px solid #2e2e2e;
+      box-shadow: 0 14px 34px rgba(0,0,0,.12); white-space: pre-wrap;
+    }
+    .terminal::before { content: "●  ●  ●"; display: block; color: #777; margin-top: -48px; margin-bottom: 20px; letter-spacing: 5px; }
+    .prompt { color: #ff8a55; }
+    .ok { color: #86d48c; }
+    .bus-diagram { display: grid; grid-template-columns: 210px 1fr 210px; align-items: center; gap: 0; margin-top: 16px; }
+    .device { padding: 28px 18px; border: 2px solid #333; background: #fff; text-align: center; border-radius: 5px; }
+    .device strong { display: block; font-size: 25px; margin-bottom: 6px; }
+    .device span { color: #666; font: 15px var(--font-mono); }
+    .bus-lines { padding: 0 20px; display: grid; gap: 36px; }
+    .bus-line { position: relative; height: 3px; background: #333; }
+    .bus-line::before { content: attr(data-name); position: absolute; top: -25px; font: 700 14px var(--font-mono); color: var(--brand); }
+    .ack-note { text-align: center; margin-top: 14px; color: #555; font: 16px var(--font-mono); }
+    .wire-table { width: 100%; border-collapse: collapse; background: rgba(255,255,255,.72); border-top: 4px solid #222; }
+    .wire-table th, .wire-table td { text-align: left; padding: 17px 20px; border-bottom: 1px solid #d4d2cb; font-size: clamp(16px,1.25vw,21px); }
+    .wire-table th { color: #666; font-weight: 600; }
+    .wire-table td:nth-child(2) { font: 750 18px var(--font-mono); color: var(--brand); }
+    .scan-grid { display: grid; grid-template-columns: 1.25fr .75fr; gap: 28px; align-items: stretch; }
+    .command-list { border-top: 4px solid #222; }
+    .command-row { padding: 22px 4px; border-bottom: 1px solid #ccc; }
+    .command-row code { display: block; font: 700 18px var(--font-mono); color: #111; margin-bottom: 8px; }
+    .command-row p { font-size: 16px; }
+    .oled-shell { background: #222; padding: 24px; border-radius: 12px; box-shadow: 0 16px 36px rgba(0,0,0,.16); }
+    .oled-screen { min-height: 250px; background: #07121e; border: 2px solid #3c6d91; color: #d9f1ff; padding: 28px; font: 23px/1.75 var(--font-mono); }
+    .check-rows { border-top: 4px solid #222; }
+    .check-row { display: grid; grid-template-columns: 42px 1fr; gap: 12px; padding: 15px 2px; border-bottom: 1px solid #ccc; }
+    .check-row b { color: var(--brand); font: 750 15px var(--font-mono); }
+    .check-row span { color: #222; font-size: 18px; }
+    .summary-board { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 12px; }
+    .summary-item { border-top: 5px solid var(--brand); padding-top: 22px; }
+    .summary-item strong { font-size: 32px; }
+    .summary-item p { margin-top: 10px; color: #222; font-size: 22px; }
+    .next-line { margin-top: 18px; padding: 14px 0; border-top: 1px solid #bbb; color: #555; font-size: 17px; }
+    @media (max-width: 1200px) {
+      .cover-panel { min-height: 320px; }
+      .bus-diagram { grid-template-columns: 170px 1fr 170px; }
+      .scan-grid { grid-template-columns: 1fr; }
+    }
+
   </style>
 </head>
 <body>
@@ -209,110 +310,125 @@
     <section class="slide active" data-title="课程封面">
       <div class="slide-inner split">
         <div>
-          <div class="kicker">Lesson 12 · RDK X5</div>
-          <h1>40pin <span class="gradient">UART 与 I2C</span></h1>
-          <p class="lead">先让串口完成回环收发，再通过 I2C5 点亮一块 OLED 小屏。</p>
-          <div><span class="tag">UART1</span><span class="tag">115200 8N1</span><span class="tag">I2C5</span><span class="tag">SSD1306</span></div>
+          <div class="kicker">RDK 小课堂 · 第 12 课</div>
+          <h1>40pin<br><span class="gradient">UART 与 I2C</span></h1>
+          <p class="lead">从一根回环线开始，再接上四线 OLED。把 40pin 上最常用的两种通信接口跑通。</p>
+          <div><span class="tag">RDK X5</span><span class="tag">约 9 分钟</span></div>
         </div>
-        <div class="hero-panel">
-          <div class="hero-orbit"></div><div class="hero-orbit two"></div>
-          <div class="node n1">Pin 8 TX</div><div class="node n2">Pin 10 RX</div><div class="node n3">Pin 3 SDA</div><div class="node n4">Pin 5 SCL</div>
-          <div class="hero-center"><div><strong>40pin</strong><br><span>两种外设通信方式</span></div></div>
+        <div class="tech-panel cover-panel">
+          <div class="lesson-index">12</div>
+          <div class="panel-label">本课使用的 40pin 接口</div>
+          <div class="interface-row"><strong>UART1</strong><code>/dev/ttyS1</code><span class="pin-badge">8 · 10</span></div>
+          <div class="interface-row"><strong>I2C5</strong><code>/dev/i2c-5</code><span class="pin-badge">3 · 5</span></div>
         </div>
       </div>
     </section>
 
     <section class="slide" data-title="课程目标">
       <div class="slide-inner">
-        <div class="kicker">Today’s Mission</div>
+        <div class="kicker">今天要完成什么</div>
         <h2>这节课只做两件事</h2>
         <p class="lead">GPIO 适合简单高低电平。连接串口模块或小屏幕，需要使用总线接口。</p>
-        <div class="grid cols-3">
-          <div class="card themed tint-1"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8l4 4-4 4"/><path d="M12 16h6"/></svg></div><h3>UART 回环</h3><p>短接 Pin 8 与 Pin 10，验证发送和接收都正常。</p></div>
-          <div class="card themed tint-4"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg></div><h3>I2C 扫描</h3><p>在 I2C5 上确认 OLED 的真实设备地址。</p></div>
-          <div class="card themed tint-6"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 12h20"/><path d="M6 4v16M18 4v16M2 8h4M2 16h4M18 8h4M18 16h4"/></svg></div><h3>点亮 OLED</h3><p>显示 RDK X5、演示标题和每秒刷新的时间。</p></div>
+        <div class="mission-board">
+          <div class="mission"><span class="no">01 / UART</span><h3>完成一次回环收发</h3><p>短接 Pin 8 与 Pin 10，确认发送的 AA55 能原样收到。</p></div>
+          <div class="mission-arrow">→</div>
+          <div class="mission"><span class="no">02 / I2C</span><h3>扫描并点亮 OLED</h3><p>在 I2C5 找到 0x3C，再让屏幕显示当前时间。</p></div>
         </div>
       </div>
     </section>
 
     <section class="slide" data-title="UART 原理">
       <div class="slide-inner">
-        <div class="kicker">UART Basics</div>
-        <h2>UART 的通信节奏</h2>
+        <div class="kicker">先说 UART</div>
+        <h2>没有时钟线，就先约好参数</h2>
         <p class="lead">UART 没有时钟线，通信双方必须提前约好相同参数。</p>
-        <div class="grid cols-4">
-          <div class="card themed tint-1"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div><h3>115200</h3><p>双方使用相同波特率，接收端才能按正确节奏采样。</p></div>
-          <div class="card themed tint-2"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div><h3>8N1</h3><p>8 位数据、无校验、1 位停止位，帧由硬件自动处理。</p></div>
-          <div class="card themed tint-4"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h6v3.5a1.5 1.5 0 1 0 3 0V4h6v6h-3.5a1.5 1.5 0 1 0 0 3H20v6h-6v-3.5a1.5 1.5 0 1 0-3 0V20H4v-6h3.5a1.5 1.5 0 1 0 0-3H4z"/></svg></div><h3>收发交叉</h3><p>RDK TX 接外设 RX，RDK RX 接外设 TX，并且必须共地。</p></div>
-          <div class="card themed tint-6"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="5" width="14" height="14" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/></svg></div><h3>3.3V 电平</h3><p>最大耐压 3.46V，严禁把 5V 串口信号直接接入 40pin。</p></div>
-        </div>
+        <table class="fact-table"><tbody>
+          <tr><th>波特率</th><td>115200 bit/s</td></tr>
+          <tr><th>帧格式</th><td>8N1：8 位数据 · 无校验 · 1 位停止位</td></tr>
+          <tr><th>接线规则</th><td>TX 接 RX，RX 接 TX，并且共地</td></tr>
+        </tbody></table>
+        <div class="danger-line">40pin UART 是 3.3V 电平，输入最大耐压 3.46V；不要直连 5V 串口。</div>
       </div>
     </section>
 
     <section class="slide" data-title="UART 管脚">
       <div class="slide-inner">
-        <div class="kicker">UART1 On 40pin</div>
+        <div class="kicker">UART1 接线</div>
         <h2>Pin 8 发，Pin 10 收</h2>
         <p class="lead">RDK X5 的 40pin UART1 对应 /dev/ttyS1，/dev/ttyS0 是系统调试口。</p>
-        <div class="grid cols-2">
-          <div class="card"><h3>回环接线</h3><div class="code">Pin 8 TX  ─────  Pin 10 RX</div><p class="small" style="margin-top:10px;color:var(--muted)">关机后短接两个管脚，再重新上电。</p></div>
-          <div class="card"><h3>运行程序</h3><div class="code">python3 uart_loopback.py</div><p class="small" style="margin-top:10px;color:var(--muted)">每秒发送一次 AA55，并读取 4 个字节。</p></div>
+        <div class="wiring-map">
+          <div class="port-box"><strong>Pin 8 · TX</strong><code>UART1_TXD</code></div>
+          <div class="wire"></div>
+          <div class="port-box"><strong>Pin 10 · RX</strong><code>UART1_RXD</code></div>
         </div>
+        <div class="danger-line">先关机，再用跳线帽短接两个管脚；上电后运行 <code>python3 uart_loopback.py</code>。</div>
       </div>
     </section>
 
     <section class="slide" data-title="UART 回环演示">
       <div class="slide-inner split">
         <div>
-          <div class="kicker">Demo 01 · UART Loopback</div>
-          <h2>先做最小回环实验</h2>
-          <p class="lead">让串口自己对自己说话，先排除板端接口和参数问题。</p>
+          <div class="kicker">演示 01 · UART 回环</div>
+          <h2>看到收发一致，就说明链路通了</h2>
+          <p class="lead">让串口自己对自己说话，先排除板端接口和参数问题。拔掉跳线后，接收应为空。</p>
         </div>
-        <div class="timeline">
-          <div class="timeline-row"><div class="time">Step 1</div><p>开发板下电，用跳线帽短接 Pin 8 和 Pin 10。</p></div>
-          <div class="timeline-row"><div class="time">Step 2</div><p>上电后运行 uart_loopback.py。</p></div>
-          <div class="timeline-row"><div class="time">Step 3</div><p>确认 Send: AA55 与 Recv: AA55 完全一致。</p></div>
-          <div class="timeline-row"><div class="time">Step 4</div><p>拔掉跳线再次运行，Recv 为空，理解回环路径。</p></div>
-        </div>
+        <div class="terminal"><span class="prompt">$</span> python3 uart_loopback.py
+port: /dev/ttyS1
+baudrate: 115200 8N1
+
+Send: AA55
+<span class="ok">Recv: AA55</span>
+
+Send: AA55
+<span class="ok">Recv: AA55</span></div>
       </div>
     </section>
 
     <section class="slide" data-title="I2C 原理">
       <div class="slide-inner">
-        <div class="kicker">I2C Basics</div>
+        <div class="kicker">再说 I2C</div>
         <h2>I2C 用地址完成点名</h2>
         <p class="lead">SCL 提供时钟节拍，SDA 逐位传输数据，多个设备可以共享同一组线。</p>
-        <div class="grid cols-4">
-          <div class="card themed tint-1"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div><h3>SCL</h3><p>主机输出时钟，通信双方不需要提前约定各自的节奏。</p></div>
-          <div class="card themed tint-2"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div><h3>SDA</h3><p>数据线在时钟控制下逐位传输地址、读写位和数据。</p></div>
-          <div class="card themed tint-4"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg></div><h3>7 位地址</h3><p>OLED 常用 0x3C，部分模块使用 0x3D。</p></div>
-          <div class="card themed tint-6"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div><h3>ACK 应答</h3><p>地址匹配的设备拉低 SDA 应答，随后才开始传输数据。</p></div>
+        <div class="bus-diagram">
+          <div class="device"><strong>RDK X5</strong><span>主机 · I2C5</span></div>
+          <div class="bus-lines"><div class="bus-line" data-name="SCL / 时钟"></div><div class="bus-line" data-name="SDA / 数据"></div></div>
+          <div class="device"><strong>OLED</strong><span>从机 · 0x3C</span></div>
         </div>
+        <div class="ack-note">START → 7-bit address + R/W → <strong>ACK</strong> → DATA → STOP</div>
       </div>
     </section>
 
     <section class="slide" data-title="OLED 接线">
       <div class="slide-inner">
-        <div class="kicker">OLED Wiring</div>
+        <div class="kicker">OLED 接线</div>
         <h2>OLED 只需要四根线</h2>
         <p class="lead">本课使用 I2C5。先断电接线，再启动开发板扫描地址。</p>
-        <div class="grid cols-4">
-          <div class="card themed tint-1"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div><h3>VCC → Pin 1</h3><p>使用 3.3V 供电，不要接到 5V。</p></div>
-          <div class="card themed tint-2"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg></div><h3>GND → Pin 39</h3><p>建立电源与信号的共同参考地。</p></div>
-          <div class="card themed tint-4"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div><h3>SDA → Pin 3</h3><p>I2C5 数据线，对应 /dev/i2c-5。</p></div>
-          <div class="card themed tint-6"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div><h3>SCL → Pin 5</h3><p>I2C5 时钟线，由 RDK 输出通信节拍。</p></div>
-        </div>
+        <table class="wire-table"><thead><tr><th>OLED</th><th>RDK X5 物理管脚</th><th>作用</th></tr></thead><tbody>
+          <tr><td>VCC</td><td>Pin 1</td><td>3.3V 供电</td></tr>
+          <tr><td>GND</td><td>Pin 39</td><td>共同参考地</td></tr>
+          <tr><td>SDA</td><td>Pin 3</td><td>I2C5 数据线</td></tr>
+          <tr><td>SCL</td><td>Pin 5</td><td>I2C5 时钟线</td></tr>
+        </tbody></table>
       </div>
     </section>
 
     <section class="slide" data-title="I2C 地址扫描">
       <div class="slide-inner">
-        <div class="kicker">Demo 02 · Device Discovery</div>
+        <div class="kicker">演示 02 · 扫描设备地址</div>
         <h2>先扫到 3c，再运行代码</h2>
         <p class="lead">i2cdetect 逐个地址发起通信，收到 ACK 的地址会显示在表格里。</p>
-        <div class="grid cols-2">
-          <div class="card"><h3>扫描 I2C5</h3><div class="code">i2cdetect -y 5</div><p class="small" style="margin-top:10px;color:var(--muted)">看到 3c，说明 OLED 已在线。</p></div>
-          <div class="card"><h3>运行显示程序</h3><div class="code">python3 i2c_display.py</div><p class="small" style="margin-top:10px;color:var(--muted)">port=5，默认地址为 0x3C。</p></div>
+        <div class="scan-grid">
+          <div class="terminal"><span class="prompt">$</span> i2cdetect -y 5
+     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+00:          -- -- -- -- -- -- -- -- -- -- -- -- --
+10: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+20: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+30: -- -- -- -- -- -- -- -- -- -- -- -- <span class="ok">3c</span> -- -- --
+40: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --</div>
+          <div class="command-list">
+            <div class="command-row"><code>i2cdetect -y 5</code><p>扫描 I2C5；看到 3c 表示 OLED 已应答。</p></div>
+            <div class="command-row"><code>python3 i2c_display.py</code><p>代码使用 port=5、address=0x3C。</p></div>
+          </div>
         </div>
       </div>
     </section>
@@ -320,29 +436,31 @@
     <section class="slide" data-title="OLED 点亮与排障">
       <div class="slide-inner split">
         <div>
-          <div class="kicker">OLED Demo</div>
-          <h2>屏幕不亮时按顺序查</h2>
-          <p class="lead">程序显示三行内容并每秒更新时间。没有画面时，从最接近硬件的环节开始。</p>
+          <div class="kicker">OLED 点亮与排障</div>
+          <h2>先看结果，再按链路排查</h2>
+          <div class="oled-shell"><div class="oled-screen">RDK X5
+UART + I2C Demo
+14:32:08</div></div>
         </div>
-        <div class="timeline">
-          <div class="timeline-row"><div class="time">01</div><p>先看 i2cdetect 能否扫到 0x3C 或 0x3D。</p></div>
-          <div class="timeline-row"><div class="time">02</div><p>核对接线使用 I2C5，因此代码中的 port 必须是 5。</p></div>
-          <div class="timeline-row"><div class="time">03</div><p>确认代码地址与扫描结果完全一致。</p></div>
-          <div class="timeline-row"><div class="time">04</div><p>确认屏幕主控是 SSD1306，SH1106 需要对应驱动。</p></div>
+        <div class="check-rows">
+          <div class="check-row"><b>01</b><span>能否扫到 0x3C 或 0x3D</span></div>
+          <div class="check-row"><b>02</b><span>代码里的 port 是否为 5</span></div>
+          <div class="check-row"><b>03</b><span>代码地址是否与扫描结果一致</span></div>
+          <div class="check-row"><b>04</b><span>主控是 SSD1306 还是 SH1106</span></div>
         </div>
       </div>
     </section>
 
     <section class="slide" data-title="课程总结">
       <div class="slide-inner">
-        <div class="kicker">Summary · Up Next</div>
+        <div class="kicker">回顾</div>
         <h2>两个接口，各记住两个关键点</h2>
         <p class="lead">完整接线表、代码和课后练习都在配套讲义与 GitHub 仓库中。</p>
-        <div class="grid cols-3">
-          <div class="card themed tint-1"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8l4 4-4 4"/><path d="M12 16h6"/></svg></div><h3>UART</h3><p>参数一致，收发交叉。</p></div>
-          <div class="card themed tint-4"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg></div><h3>I2C</h3><p>总线号正确，设备地址匹配。</p></div>
-          <div class="card themed tint-6"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg></div><h3>下一课</h3><p>把传感器数据搬上这块屏幕。</p></div>
+        <div class="summary-board">
+          <div class="summary-item"><strong>UART</strong><p>参数一致 · 收发交叉</p></div>
+          <div class="summary-item"><strong>I2C</strong><p>总线号正确 · 设备地址匹配</p></div>
         </div>
+        <div class="next-line">下一课：把传感器数据搬上这块屏幕。</div>
       </div>
     </section>
   </main>
