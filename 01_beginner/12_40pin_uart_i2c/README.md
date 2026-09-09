@@ -8,6 +8,8 @@
 >
 > **视频演示页：** [`slides.zh.html`](./slides.zh.html)
 >
+> **UART 93 秒动画：** [`uart_explainer_93s.zh.html`](./uart_explainer_93s.zh.html)
+>
 > **飞书讲义：** [第十二课：RDK 40pin（UART / I2C）｜RDK X5](https://horizonrobotics.feishu.cn/docx/SG10deTpMoNvocxa1AccfMnmnXb)
 
 ---
