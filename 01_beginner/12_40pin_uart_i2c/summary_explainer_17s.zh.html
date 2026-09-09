@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>UART 与 I2C 课程总结｜17 秒动画</title>
+  <style>
+    :root{--brand:#ff3c00;--ink:#111;--paper:#f4f3ef;--line:#cfcdc5;--blue:#1769aa;--mono:ui-monospace,"SF Mono","JetBrains Mono",Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","PingFang SC","Microsoft YaHei UI",sans-serif;--ease:cubic-bezier(.22,1,.36,1)}
+    *{box-sizing:border-box}html,body{width:100%;height:100%;margin:0;overflow:hidden}body{background:var(--paper);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased}body::before{content:"";position:fixed;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.025) 1px,transparent 1px),linear-gradient(rgba(0,0,0,.025) 1px,transparent 1px);background-size:72px 72px;pointer-events:none}
+    .brand{position:fixed;z-index:50;right:42px;top:30px;height:42px}.lesson{position:fixed;z-index:50;left:48px;top:34px;color:#555;font:700 14px/1 var(--mono);letter-spacing:.05em}.lesson::before{content:"";display:inline-block;width:20px;height:3px;margin-right:10px;vertical-align:middle;background:var(--brand)}
+    .stage{position:relative;width:100vw;height:100vh}.scene{position:absolute;inset:0;padding:112px 8vw 100px;display:flex;flex-direction:column;justify-content:center;opacity:0;transform:translateY(14px);filter:blur(4px);transition:opacity .65s ease,transform .65s var(--ease),filter .65s ease}.scene.active{opacity:1;transform:none;filter:none;z-index:2}.scene.exit{opacity:0;transform:translateY(-12px);filter:blur(3px);z-index:1}
+    h1,h2,p{margin:0}h1{font-size:clamp(68px,7vw,118px);line-height:1.02;letter-spacing:-.06em;font-weight:800}h2{font-size:clamp(50px,5vw,82px);line-height:1.05;letter-spacing:-.045em;font-weight:780}.accent{color:var(--brand)}.sub{margin-top:22px;color:#4c4c4c;font-size:clamp(25px,2.15vw,37px);line-height:1.45}.mono{font-family:var(--mono)}
+    .progress{position:fixed;z-index:60;left:42px;right:42px;bottom:30px;height:4px;background:rgba(0,0,0,.11)}.progress span{display:block;width:0;height:100%;background:var(--brand)}.clock{position:fixed;z-index:60;right:42px;bottom:45px;color:#666;font:700 14px/1 var(--mono)}.scene-no{position:absolute;right:7.5vw;bottom:9vh;color:rgba(0,0,0,.07);font:800 150px/1 var(--mono)}
+    .rule{width:160px;height:9px;background:var(--brand);margin-bottom:38px;transform-origin:left}.scene.active .rule{animation:grow .8s var(--ease) both}@keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+    .summary{display:grid;grid-template-columns:1fr 1fr;gap:86px;margin-top:58px}.item{border-top:7px solid #222;padding-top:30px}.item.i2c{border-color:var(--brand)}.item h3{margin:0;font:900 62px/1 var(--mono)}.item p{margin-top:25px;font-size:36px;font-weight:760;line-height:1.45}.item .pair{display:flex;gap:18px;margin-top:24px}.tag{padding:11px 17px;border:3px solid #333;background:#fff;font:850 22px var(--mono)}.i2c .tag{border-color:var(--brand);color:var(--brand)}.scene.active .item{animation:rise .65s var(--ease) both}.scene.active .item.i2c{animation-delay:.25s}@keyframes rise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+    .resources{display:grid;grid-template-columns:1fr 1fr;gap:70px;margin-top:54px}.resource{border-top:6px solid #222;padding-top:28px}.resource b{display:block;font-size:34px}.resource code{display:block;margin-top:17px;color:var(--brand);font:850 24px/1.45 var(--mono)}.goodbye{position:absolute;left:8vw;right:8vw;bottom:12vh;border-top:2px solid #aaa;padding-top:22px;color:var(--brand);font-size:44px;font-weight:850;opacity:0}.scene.active .goodbye{animation:rise .65s var(--ease) 2.2s both}
+    .scene.active h1,.scene.active h2{animation:rise .7s var(--ease) both}.scene.active .sub{animation:rise .7s var(--ease) .15s both}@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+  </style>
+</head>
+<body>
+  <img class="brand" src="../../docs/assets/images/d-robotics-logo.png" alt="D-Robotics">
+  <div class="lesson">RDK 小课堂 · UART / I2C</div>
+  <main class="stage">
+    <section class="scene" data-start="0" data-end="4">
+      <div class="rule"></div><h1>这就是本节课的<span class="accent">全部内容</span></h1><p class="sub">最后把 UART 和 I2C 各自最重要的两点记牢。</p><div class="scene-no">END</div>
+    </section>
+    <section class="scene" data-start="4" data-end="12">
+      <h2>UART 与 I2C 的关键点</h2>
+      <div class="summary">
+        <div class="item"><h3>UART</h3><p>两端参数一致<br>TX 与 RX 交叉</p><div class="pair"><span class="tag">115200 · 8N1</span><span class="tag">TX ↔ RX</span></div></div>
+        <div class="item i2c"><h3>I2C</h3><p>确认 Linux 总线号<br>确认从机地址</p><div class="pair"><span class="tag">/dev/i2c-5</span><span class="tag">0x3C</span></div></div>
+      </div><div class="scene-no">KEY</div>
+    </section>
+    <section class="scene" data-start="12" data-end="17">
+      <h2>完整接线表与代码</h2><p class="sub">配套讲义保留了实验所需的全部命令、接线和 Python 示例。</p>
+      <div class="resources"><div class="resource"><b>课程讲义</b><code>README.md</code></div><div class="resource"><b>实验代码</b><code>uart_loopback.py<br>i2c_display.py</code></div></div>
+      <div class="goodbye">我们下节课见。</div><div class="scene-no">17s</div>
+    </section>
+  </main>
+  <div class="clock" id="clock">00:00 / 00:17</div><div class="progress"><span id="progress"></span></div>
+  <script>
+    (()=>{const DURATION=17;const scenes=[...document.querySelectorAll('.scene')];const progress=document.getElementById('progress');const clock=document.getElementById('clock');const params=new URLSearchParams(location.search);let offset=Math.max(0,Math.min(DURATION,Number(params.get('t'))||0));let startedAt=performance.now();let playing=params.get('autoplay')!=='0';function formatTime(v){return`00:${String(Math.floor(v%60)).padStart(2,'0')}`}function render(t){const safe=Math.max(0,Math.min(DURATION,t));scenes.forEach(scene=>{const start=Number(scene.dataset.start),end=Number(scene.dataset.end);const isLast=end===DURATION;scene.classList.toggle('active',safe>=start&&(safe<end||(isLast&&safe<=end)));scene.classList.toggle('exit',!isLast&&safe>=end&&safe<end+.8)});progress.style.width=`${safe/DURATION*100}%`;clock.textContent=`${formatTime(safe)} / 00:17`}function tick(now){if(playing)offset=Math.min(DURATION,offset+(now-startedAt)/1000);startedAt=now;render(offset);if(offset>=DURATION){playing=false;window.__videoDone=true}requestAnimationFrame(tick)}function seek(value){offset=Math.max(0,Math.min(DURATION,Number(value)||0));startedAt=performance.now();render(offset);return offset}function play(){playing=true;startedAt=performance.now()}function pause(){playing=false}window.__summaryVideo={duration:DURATION,seek,play,pause};window.__videoDone=false;document.addEventListener('keydown',e=>{if(e.key===' '){e.preventDefault();playing?pause():play()}if(e.key==='ArrowRight')seek(offset+2);if(e.key==='ArrowLeft')seek(offset-2);if(e.key==='Home')seek(0);if(e.key==='End')seek(DURATION-.01)});render(offset);requestAnimationFrame(tick)})();
+  </script>
+</body>
+</html>

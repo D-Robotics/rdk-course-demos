@@ -12,6 +12,8 @@
 >
 > **I2C 83 秒动画：** [`i2c_explainer_83s.zh.html`](./i2c_explainer_83s.zh.html)
 >
+> **课程总结 17 秒动画：** [`summary_explainer_17s.zh.html`](./summary_explainer_17s.zh.html)
+>
 > **飞书讲义：** [第十二课：RDK 40pin（UART / I2C）｜RDK X5](https://horizonrobotics.feishu.cn/docx/SG10deTpMoNvocxa1AccfMnmnXb)
 
 ---
