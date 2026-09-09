@@ -111,4 +111,3 @@ The complete wiring tables, commands, code, and practice exercises are all inclu
 Always show these terms as on-screen text so viewers can pause and copy them: `/dev/ttyS1`, `115200 8N1`, `i2cdetect -y 5`, `0x3C`, and `port=5`.
 
 Suggested B-roll includes a close-up of the jumper across Pins 8 and 10, a magnified box around `3c` in the `i2cdetect` output, and the moment the OLED lights up.
-
