@@ -14,6 +14,10 @@
 >
 > **课程总结 17 秒动画：** [`summary_explainer_17s.zh.html`](./summary_explainer_17s.zh.html)
 >
+> **English narration script:** [`script.en.md`](./script.en.md)
+>
+> **English animations:** [`UART · 73s`](./uart_explainer_73s.en.html) · [`I2C · 83s`](./i2c_explainer_83s.en.html) · [`Recap · 17s`](./summary_explainer_17s.en.html)
+>
 > **飞书讲义：** [第十二课：RDK 40pin（UART / I2C）｜RDK X5](https://horizonrobotics.feishu.cn/docx/SG10deTpMoNvocxa1AccfMnmnXb)
 
 ---
