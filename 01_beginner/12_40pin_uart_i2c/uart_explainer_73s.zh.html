@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>UART 异步通信｜93 秒动画</title>
+  <title>UART 异步通信｜73 秒动画</title>
   <style>
     :root {
       --brand:#ff3c00;
@@ -129,7 +129,7 @@
   <img class="brand" src="../../docs/assets/images/d-robotics-logo.png" alt="D-Robotics">
   <div class="lesson">RDK 小课堂 · UART</div>
   <main class="stage">
-    <section class="scene" data-start="0" data-end="14">
+    <section class="scene" data-start="0" data-end="11">
       <h1>UART <span class="accent">没有时钟线</span></h1>
       <p class="sub">两个乐手没有人打拍子，只能在开始前约好同一个速度。UART 把这个速度叫作波特率。</p>
       <div class="ensemble">
@@ -139,7 +139,7 @@
       <div class="no-clock">SCL / CLOCK</div><div class="scene-no">01</div>
     </section>
 
-    <section class="scene" data-start="14" data-end="29">
+    <section class="scene" data-start="11" data-end="23">
       <h2>一个字节，打包成一帧</h2>
       <p class="sub">起始位开头，8 位数据居中，停止位收尾。线路按位发送。</p>
       <div class="frame">
@@ -151,7 +151,7 @@
       <div class="frame-note"><span>低位先发</span><span>8N1：8 数据位，无校验，1 停止位</span></div><div class="scene-no">02</div>
     </section>
 
-    <section class="scene" data-start="29" data-end="39">
+    <section class="scene" data-start="23" data-end="31">
       <h2>打包和拆包由硬件完成</h2>
       <p class="sub">程序只需要写入字节，UART 外设负责生成起始位、数据位和停止位。</p>
       <div class="packet-flow">
@@ -161,7 +161,7 @@
       </div><div class="scene-no">03</div>
     </section>
 
-    <section class="scene" data-start="39" data-end="53">
+    <section class="scene" data-start="31" data-end="42">
       <h2>两端参数必须完全一致</h2>
       <p class="sub">波特率、数据位、校验位或停止位错一项，接收端就会在错误的位置采样。</p>
       <div class="param-line">
@@ -171,7 +171,7 @@
       <div class="garble">Recv: ��?▒</div><div class="scene-no">04</div>
     </section>
 
-    <section class="scene" data-start="53" data-end="66">
+    <section class="scene" data-start="42" data-end="52">
       <h2>TX 与 RX 交叉，并且共地</h2>
       <p class="sub">我的发送接你的接收。GND 为两端信号建立同一个电压参考。</p>
       <div class="wire-layout">
@@ -182,7 +182,7 @@
       <div class="wire-caption"><span>TX ↔ RX</span><span>GND ↔ GND</span></div><div class="scene-no">05</div>
     </section>
 
-    <section class="scene" data-start="66" data-end="80">
+    <section class="scene" data-start="52" data-end="63">
       <h2>RDK X5 的 UART1</h2>
       <p class="sub">8 号管脚发送，10 号管脚接收。Linux 设备节点为 /dev/ttyS1。</p>
       <div class="pinout-wrap">
@@ -192,7 +192,7 @@
       </div><div class="scene-no">06</div>
     </section>
 
-    <section class="scene" data-start="80" data-end="93">
+    <section class="scene" data-start="63" data-end="73">
       <h2>40pin UART 使用 3.3V 电平</h2>
       <div class="voltage">
         <div class="voltage-side safe"><b>3.3V</b><p>RDK X5 UART 正常信号电平</p><div class="max">输入最大耐压 3.46V</div></div>
@@ -201,11 +201,11 @@
       <div class="final-warning">5V 串口直接接入，可能永久损坏开发板。</div><div class="scene-no">07</div>
     </section>
   </main>
-  <div class="clock" id="clock">00:00 / 01:33</div>
+  <div class="clock" id="clock">00:00 / 01:13</div>
   <div class="progress"><span id="progress"></span></div>
   <script>
     (() => {
-      const DURATION = 93;
+      const DURATION = 73;
       const scenes = [...document.querySelectorAll('.scene')];
       const progress = document.getElementById('progress');
       const clock = document.getElementById('clock');
@@ -228,7 +228,7 @@
           scene.classList.toggle('exit', safe >= end && safe < end + 1);
         });
         progress.style.width = `${safe / DURATION * 100}%`;
-        clock.textContent = `${formatTime(safe)} / 01:33`;
+        clock.textContent = `${formatTime(safe)} / 01:13`;
       }
       function tick(now){
         if (playing) offset = Math.min(DURATION, offset + (now - startedAt) / 1000);
