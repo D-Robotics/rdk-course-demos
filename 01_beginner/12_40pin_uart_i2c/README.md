@@ -258,6 +258,33 @@ cd rdk-course-demos/01_beginner/12_40pin_uart_i2c/code
 python3 i2c_display.py
 ```
 
+OLED 显示程序的核心代码如下：
+
+```python
+#!/usr/bin/env python3
+import time
+
+from luma.core.interface.serial import i2c
+from luma.oled.device import ssd1306
+from PIL import Image, ImageDraw, ImageFont
+
+# 初始化 I2C OLED：port 是总线号（管脚 3/5 对应总线 5），地址 0x3C
+serial = i2c(port=5, address=0x3C)
+device = ssd1306(serial)
+font = ImageFont.load_default()
+
+while True:
+    image = Image.new("1", (128, 64))
+    draw = ImageDraw.Draw(image)
+
+    draw.text((0, 0), "RDK X5", font=font, fill=255)
+    draw.text((0, 18), "I2C OLED Demo", font=font, fill=255)
+    draw.text((0, 36), time.strftime("%H:%M:%S"), font=font, fill=255)
+
+    device.display(image)
+    time.sleep(1)
+```
+
 程序默认使用 I2C5、地址 `0x3C` 和 SSD1306 驱动，显示 `RDK X5`、`I2C OLED Demo` 和每秒刷新的时间。设备地址为 `0x3D` 时运行：
 
 ```bash

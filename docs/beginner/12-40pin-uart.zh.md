@@ -169,6 +169,33 @@ python3 -m pip install luma.oled
 python3 i2c_display.py
 ```
 
+OLED 显示程序的核心代码如下：
+
+```python
+#!/usr/bin/env python3
+import time
+
+from luma.core.interface.serial import i2c
+from luma.oled.device import ssd1306
+from PIL import Image, ImageDraw, ImageFont
+
+# 初始化 I2C OLED：port 是总线号（管脚 3/5 对应总线 5），地址 0x3C
+serial = i2c(port=5, address=0x3C)
+device = ssd1306(serial)
+font = ImageFont.load_default()
+
+while True:
+    image = Image.new("1", (128, 64))
+    draw = ImageDraw.Draw(image)
+
+    draw.text((0, 0), "RDK X5", font=font, fill=255)
+    draw.text((0, 18), "I2C OLED Demo", font=font, fill=255)
+    draw.text((0, 36), time.strftime("%H:%M:%S"), font=font, fill=255)
+
+    device.display(image)
+    time.sleep(1)
+```
+
 设备地址为 `0x3D` 时使用 `python3 i2c_display.py --address 0x3D`。屏幕不亮时，依次核对扫描结果、总线号、设备地址和 SSD1306/SH1106 驱动型号。
 
 ## 10. 常见问题

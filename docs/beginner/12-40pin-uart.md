@@ -150,6 +150,33 @@ python3 -m pip install luma.oled
 python3 i2c_display.py
 ```
 
+The core OLED display code is shown below:
+
+```python
+#!/usr/bin/env python3
+import time
+
+from luma.core.interface.serial import i2c
+from luma.oled.device import ssd1306
+from PIL import Image, ImageDraw, ImageFont
+
+# Initialize the OLED on I2C5 at address 0x3C.
+serial = i2c(port=5, address=0x3C)
+device = ssd1306(serial)
+font = ImageFont.load_default()
+
+while True:
+    image = Image.new("1", (128, 64))
+    draw = ImageDraw.Draw(image)
+
+    draw.text((0, 0), "RDK X5", font=font, fill=255)
+    draw.text((0, 18), "I2C OLED Demo", font=font, fill=255)
+    draw.text((0, 36), time.strftime("%H:%M:%S"), font=font, fill=255)
+
+    device.display(image)
+    time.sleep(1)
+```
+
 Use `python3 i2c_display.py --address 0x3D` if the scan reports `3d`. If the display stays blank, verify the bus number, address, and whether the controller is SSD1306 or SH1106.
 
 ## Troubleshooting
