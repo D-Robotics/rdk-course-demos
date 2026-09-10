@@ -1,0 +1,423 @@
+{
+  "meta": {
+    "title": "RDK 小课堂｜第十课：RDK S100 硬件编解码闭环",
+    "lang": "cn",
+    "logo_key": "logo-cn"
+  },
+  "slides": [
+    {
+      "pattern": "cover",
+      "data_title": "RDK S100 硬件编解码闭环",
+      "kicker": "Lesson 10 · Video Codec",
+      "title": "RDK S100 [gradient]硬件编解码闭环[/gradient]",
+      "lead": "用两个 C++ 程序打通 Camera、硬件编码、RTSP、硬件解码、VPS 与 HDMI 显示",
+      "tags": ["H.264", "1080p30", "RTSP", "NV12", "800×480 HDMI"],
+      "hero_nodes": ["MIPI Camera", "Hardware Codec", "RTSP / RTP", "VPS / Display"],
+      "hero_center": {
+        "strong": "S100",
+        "sub": "Codec Loop"
+      }
+    },
+    {
+      "pattern": "cards-4",
+      "data_title": "本课要完成什么",
+      "kicker": "Lesson Mission",
+      "title": "本课要完成什么",
+      "cards": [
+        {
+          "tint": "tint-1",
+          "icon": "chip",
+          "title": "RDK S100",
+          "body": "适用于 RDK S100；Camera、VPU 与 HDMI 驱动均由 BSP 提供"
+        },
+        {
+          "tint": "tint-2",
+          "icon": "eye",
+          "title": "Camera 输入",
+          "body": "以 IMX219 为例，采集 1920×1080@30fps NV12"
+        },
+        {
+          "tint": "tint-4",
+          "icon": "film",
+          "title": "H.264 传输",
+          "body": "硬件编码目标 8000 kbit/s，经本机 RTSP/TCP 传输"
+        },
+        {
+          "tint": "tint-6",
+          "icon": "target",
+          "title": "可见结果",
+          "body": "VPS 缩放为 800×480，由 Display channel 11 输出到 HDMI"
+        }
+      ]
+    },
+    {
+      "pattern": "flow-5",
+      "data_title": "一条完整的视频链路",
+      "kicker": "End-to-End Pipeline",
+      "title": "一条完整的视频链路",
+      "steps": [
+        {
+          "title": "Camera / ISP",
+          "sub": "Bayer RAW → NV12"
+        },
+        {
+          "title": "硬件编码",
+          "sub": "NV12 → H.264"
+        },
+        {
+          "title": "RTSP / RTP",
+          "sub": "127.0.0.1:8554/live"
+        },
+        {
+          "title": "硬件解码",
+          "sub": "H.264 → NV12"
+        },
+        {
+          "title": "VPS / HDMI",
+          "sub": "1080p → 800×480"
+        }
+      ]
+    },
+    {
+      "pattern": "split-checklist",
+      "data_title": "完成后你能做到",
+      "kicker": "What You'll Learn",
+      "title": "完成后你能做到",
+      "lead": "不仅能跑通 Demo，还能说清每一段数据格式和接口职责",
+      "items": [
+        "定位 Bayer RAW、NV12、H.264、RTP 与 RTSP",
+        "解释编码降低带宽、解码恢复图像的原因",
+        "用 libspcdev 打开 Camera 并创建硬件编码通道",
+        "用 GStreamer 完成 RTP 打包、RTSP 会话与解包",
+        "用硬件解码器、VPS 和 Display 输出实时画面",
+        "根据日志把故障定位到 Camera、Codec、RTSP 或 Display"
+      ]
+    },
+    {
+      "pattern": "cards-4",
+      "data_title": "开始前准备好这些",
+      "kicker": "Before You Start",
+      "title": "开始前准备好这些",
+      "cards": [
+        {
+          "tint": "tint-1",
+          "icon": "chip",
+          "title": "板卡与系统",
+          "body": "RDK S100 与受支持的 RDK OS，BSP 编解码驱动可用"
+        },
+        {
+          "tint": "tint-2",
+          "icon": "eye",
+          "title": "MIPI Camera",
+          "body": "使用 BSP 支持的传感器和 Camera 扩展板；调整排线前先断电"
+        },
+        {
+          "tint": "tint-4",
+          "icon": "film",
+          "title": "HDMI 屏幕",
+          "body": "支持 800×480；先给屏幕供电并选中 HDMI，再启动 S100"
+        },
+        {
+          "tint": "tint-6",
+          "icon": "terminal",
+          "title": "两个终端",
+          "body": "一个运行 Server，另一个运行 Client，便于独立观察日志"
+        }
+      ]
+    },
+    {
+      "pattern": "code-highlight",
+      "data_title": "四项环境检查",
+      "kicker": "Preflight Checks",
+      "title": "四项环境检查",
+      "lead": "先确认板卡、驱动、显示模式和开发接口，再进入编译",
+      "cards": [
+        {
+          "title": "① 型号与驱动",
+          "code": "cat /proc/device-tree/model && ls -l /dev/vpu /dev/jpu 2>/dev/null",
+          "note": "型号应包含 RDK S100，编解码设备节点应存在"
+        },
+        {
+          "title": "② HDMI 模式",
+          "code": "cat /sys/class/drm/card0-HDMI-A-1/status && grep -x '800x480' /sys/class/drm/card0-HDMI-A-1/modes",
+          "note": "HDMI connector 应为 connected，并且模式列表包含 800x480"
+        },
+        {
+          "title": "③ BSP 接口",
+          "code": "test -f /usr/include/sp_codec.h && ldconfig -p | grep libspcdev",
+          "note": "确认头文件与 libspcdev 已由 BSP 提供"
+        },
+        {
+          "title": "④ GStreamer",
+          "code": "gst-inspect-1.0 appsrc && gst-inspect-1.0 rtspsrc && gst-inspect-1.0 rtph264pay",
+          "note": "继续检查 appsink、h264parse 与 rtph264depay"
+        }
+      ]
+    },
+    {
+      "pattern": "code-highlight",
+      "data_title": "在板端完成编译",
+      "kicker": "Build on Board",
+      "title": "在板端完成编译",
+      "lead": "在 S100 本机重新配置和链接，不复制其他架构的可执行文件或动态库",
+      "cards": [
+        {
+          "title": "① 安装依赖",
+          "code": "sudo apt install -y build-essential cmake pkg-config libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgstrtspserver-1.0-dev",
+          "note": "补齐编译工具、GStreamer 与 RTSP Server 开发包"
+        },
+        {
+          "title": "② 配置",
+          "code": "cmake -S . -B build -DCMAKE_BUILD_TYPE=Release",
+          "note": "在 01_beginner/10_codec 目录执行"
+        },
+        {
+          "title": "③ 编译",
+          "code": "cmake --build build -j2",
+          "note": "本课程序较小，使用 -j2 即可稳定完成编译"
+        },
+        {
+          "title": "④ 验证产物",
+          "code": "./build/codec_rtsp_server --help && ./build/codec_rtsp_client --help",
+          "note": "应生成 Server 与 Client 两个可执行程序"
+        }
+      ]
+    },
+    {
+      "pattern": "cards-3",
+      "data_title": "为什么要编解码",
+      "kicker": "Why Codec Matters",
+      "title": "为什么要编解码",
+      "cards": [
+        {
+          "tint": "tint-1",
+          "icon": "film",
+          "title": "原始数据很大",
+          "body": "1080p NV12 每帧 3,110,400 bytes，30fps 约 746.5 Mbit/s"
+        },
+        {
+          "tint": "tint-2",
+          "icon": "zap",
+          "title": "编码降低带宽",
+          "body": "硬件编码压缩到约 8 Mbit/s，并生成 SPS、PPS 与 IDR"
+        },
+        {
+          "tint": "tint-4",
+          "icon": "layers",
+          "title": "解码恢复图像",
+          "body": "压缩码流不能进入 VPS；先 RTP depay，再硬件解码为 NV12"
+        }
+      ]
+    },
+    {
+      "pattern": "cards-6",
+      "data_title": "每一层只做一件事",
+      "kicker": "API Responsibilities",
+      "title": "每一层只做一件事",
+      "cards": [
+        {
+          "tint": "tint-1",
+          "icon": "eye",
+          "title": "Camera / VIO",
+          "body": "sp_open_camera_v2 打开 Camera、ISP 与 NV12 输出"
+        },
+        {
+          "tint": "tint-2",
+          "icon": "chip",
+          "title": "Encoder",
+          "body": "sp_start_encode 创建 H.264 硬件编码通道"
+        },
+        {
+          "tint": "tint-3",
+          "icon": "globe",
+          "title": "GStreamer",
+          "body": "负责 RTP 打包、RTSP 会话、拉流与解包，不解码图像"
+        },
+        {
+          "tint": "tint-4",
+          "icon": "film",
+          "title": "Decoder",
+          "body": "sp_decoder_set_image 把 H.264 访问单元送入 VDEC"
+        },
+        {
+          "tint": "tint-5",
+          "icon": "layers",
+          "title": "VPS",
+          "body": "sp_open_vps 将 1920×1080 NV12 缩放为 800×480"
+        },
+        {
+          "tint": "tint-6",
+          "icon": "target",
+          "title": "Display",
+          "body": "sp_start_display 通过 S100 channel 11 输出 HDMI"
+        }
+      ]
+    },
+    {
+      "pattern": "cards-3",
+      "data_title": "三组参数不能混淆",
+      "kicker": "Parameter Boundaries",
+      "title": "三组参数不能混淆",
+      "lead": "码流尺寸必须前后一致，屏幕适配由 VPS 完成",
+      "cards": [
+        {
+          "tint": "tint-1",
+          "icon": "eye",
+          "title": "Sensor 尺寸",
+          "body": "Server --sensor-width/--sensor-height：Camera RAW 输入尺寸"
+        },
+        {
+          "tint": "tint-4",
+          "icon": "film",
+          "title": "Codec 尺寸",
+          "body": "两端 --width/--height：编码和解码都保持 1920×1080"
+        },
+        {
+          "tint": "tint-6",
+          "icon": "target",
+          "title": "Display 尺寸",
+          "body": "Client --display-width/--display-height：最终输出 800×480"
+        }
+      ]
+    },
+    {
+      "pattern": "code-highlight",
+      "data_title": "先启动编码端",
+      "kicker": "RTSP Server",
+      "title": "先启动编码端",
+      "cards": [
+        {
+          "title": "启动 Server",
+          "code": "sudo ./build/codec_rtsp_server --codec h264 --width 1920 --height 1080 --sensor-width 1920 --sensor-height 1080 --fps 30 --bitrate 8000 --camera-index -1 --pipe-id 0 --port 8554 --mount /live",
+          "note": "在第一个 S100 终端运行；-1 表示自动探测 Camera"
+        },
+        {
+          "title": "本机拉流地址",
+          "code": "rtsp://127.0.0.1:8554/live",
+          "note": "课程首次验收固定使用回环地址"
+        },
+        {
+          "title": "Camera 日志",
+          "code": "[camera] sensor=1920x1080 output=1920x1080 fps=30",
+          "note": "确认分辨率、帧率和编码器配置正确"
+        },
+        {
+          "title": "发布指标",
+          "code": "published ↑   push-fail=0   SPS/PPS/IDR > 0",
+          "note": "Client 连接前 no-client 增加属于正常现象"
+        }
+      ]
+    },
+    {
+      "pattern": "split-timeline",
+      "data_title": "再启动解码显示端",
+      "kicker": "RTSP Client",
+      "title": "再启动解码显示端",
+      "lead": "保持 Server 运行，在第二个终端接管 HDMI 显示资源",
+      "steps": [
+        {
+          "badge": "Step 1",
+          "body": "确认 HDMI 为 connected，模式列表包含 800x480"
+        },
+        {
+          "badge": "Step 2",
+          "body": "执行 sudo systemctl stop display-manager"
+        },
+        {
+          "badge": "Step 3",
+          "body": "运行 Client：--url rtsp://127.0.0.1:8554/live --width 1920 --height 1080 --display-channel 11 --display-width 800 --display-height 480 --duration 30"
+        },
+        {
+          "badge": "Step 4",
+          "body": "等待 30 秒测试自然结束，再停止 Server"
+        }
+      ]
+    },
+    {
+      "pattern": "split-checklist",
+      "data_title": "这样才算真正成功",
+      "kicker": "Completion Checklist",
+      "title": "这样才算真正成功",
+      "lead": "PASS 只说明管线已初始化并提交数据，最终结果必须用 HDMI 画面验收",
+      "items": [
+        "Server 的 encoded 与 published 按约 30 次/秒增长",
+        "push-fail=0，H.264 的 SPS、PPS、IDR 均大于 0",
+        "Client 出现 linked H264 RTP pad",
+        "received 与 submitted 按约 30 buffer/s 增长",
+        "DRM/GBM 初始化成功，日志显示 Display 800x480 channel=11",
+        "屏幕连续显示实时画面，比例、方向、颜色正确且无持续黑屏"
+      ]
+    },
+    {
+      "pattern": "cards-6",
+      "data_title": "按链路定位故障",
+      "kicker": "Troubleshooting",
+      "title": "按链路定位故障",
+      "cards": [
+        {
+          "tint": "tint-1",
+          "icon": "wrench",
+          "title": "传感器探测告警",
+          "body": "找到 imx219 且初始化成功后，其他 Chip ID 告警可忽略"
+        },
+        {
+          "tint": "tint-2",
+          "icon": "eye",
+          "title": "Camera 打不开",
+          "body": "断电检查排线、传感器支持和 VIO 占用"
+        },
+        {
+          "tint": "tint-3",
+          "icon": "chip",
+          "title": "VPU 初始化失败",
+          "body": "检查设备节点、内核模块、dmesg 与 BSP 版本"
+        },
+        {
+          "tint": "tint-4",
+          "icon": "globe",
+          "title": "Connection refused",
+          "body": "确认 Server 监听 8554，URL 完整匹配 /live"
+        },
+        {
+          "tint": "tint-5",
+          "icon": "film",
+          "title": "PASS 但黑屏",
+          "body": "停止桌面服务，并显式指定 channel 11 与 800×480"
+        },
+        {
+          "tint": "tint-6",
+          "icon": "list-check",
+          "title": "提前收到 EOS",
+          "body": "保持 Server 运行，等待 Client 自然结束后再停止"
+        }
+      ]
+    },
+    {
+      "pattern": "closing",
+      "data_title": "把闭环变成能力",
+      "kicker": "Summary & Next Steps",
+      "title": "把闭环变成能力",
+      "lead": "Camera 产生 NV12，BSP 完成硬件编解码，GStreamer 管理 RTSP/RTP，VPS 与 Display 负责最终画面",
+      "cards": [
+        {
+          "tint": "tint-1",
+          "icon": "flask",
+          "title": "比较码率与画质",
+          "body": "把 8000 kbit/s 改为 4000，记录实际码率与屏幕质量"
+        },
+        {
+          "tint": "tint-4",
+          "icon": "film",
+          "title": "切换编码与传输",
+          "body": "两端同时改用 H.265，或比较 RTSP/TCP 与 UDP"
+        },
+        {
+          "tint": "tint-6",
+          "icon": "target",
+          "title": "让 PASS 更可靠",
+          "body": "增加解码输出帧与 Display 提交帧统计，覆盖真实输出进度"
+        }
+      ]
+    }
+  ]
+}

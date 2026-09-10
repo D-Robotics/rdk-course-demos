@@ -1,0 +1,423 @@
+{
+  "meta": {
+    "title": "RDK Course | Lesson 10: RDK S100 Hardware Codec Loop",
+    "lang": "en",
+    "logo_key": "logo-en"
+  },
+  "slides": [
+    {
+      "pattern": "cover",
+      "data_title": "RDK S100 Hardware Codec Loop",
+      "kicker": "Lesson 10 · Video Codec",
+      "title": "RDK S100 [gradient]Codec Loop[/gradient]",
+      "lead": "Use two C++ programs to connect Camera, hardware encoding, RTSP, hardware decoding, VPS, and HDMI display",
+      "tags": ["H.264", "1080p30", "RTSP", "NV12", "800×480 HDMI"],
+      "hero_nodes": ["MIPI Camera", "Hardware Codec", "RTSP / RTP", "VPS / Display"],
+      "hero_center": {
+        "strong": "S100",
+        "sub": "Codec Loop"
+      }
+    },
+    {
+      "pattern": "cards-4",
+      "data_title": "What This Lesson Builds",
+      "kicker": "Lesson Mission",
+      "title": "What This Lesson Builds",
+      "cards": [
+        {
+          "tint": "tint-1",
+          "icon": "chip",
+          "title": "RDK S100",
+          "body": "RDK S100 with a supported RDK OS; BSP provides Camera, VPU, and HDMI drivers"
+        },
+        {
+          "tint": "tint-2",
+          "icon": "eye",
+          "title": "Camera Input",
+          "body": "IMX219 example captures 1920×1080@30fps NV12"
+        },
+        {
+          "tint": "tint-4",
+          "icon": "film",
+          "title": "H.264 Transport",
+          "body": "Hardware encoder targets 8000 kbit/s over local RTSP/TCP"
+        },
+        {
+          "tint": "tint-6",
+          "icon": "target",
+          "title": "Visible Result",
+          "body": "VPS scales to 800×480; Display channel 11 outputs through HDMI"
+        }
+      ]
+    },
+    {
+      "pattern": "flow-5",
+      "data_title": "One Complete Video Pipeline",
+      "kicker": "End-to-End Pipeline",
+      "title": "One Complete Video Pipeline",
+      "steps": [
+        {
+          "title": "Camera / ISP",
+          "sub": "Bayer RAW → NV12"
+        },
+        {
+          "title": "Hardware Encode",
+          "sub": "NV12 → H.264"
+        },
+        {
+          "title": "RTSP / RTP",
+          "sub": "127.0.0.1:8554/live"
+        },
+        {
+          "title": "Hardware Decode",
+          "sub": "H.264 → NV12"
+        },
+        {
+          "title": "VPS / HDMI",
+          "sub": "1080p → 800×480"
+        }
+      ]
+    },
+    {
+      "pattern": "split-checklist",
+      "data_title": "What You Will Be Able to Do",
+      "kicker": "What You'll Learn",
+      "title": "What You Will Be Able to Do",
+      "lead": "Run the demo and explain the format and responsibility at every stage",
+      "items": [
+        "Place Bayer RAW, NV12, H.264, RTP, and RTSP in the pipeline",
+        "Explain why encoding reduces bandwidth and decoding restores images",
+        "Open Camera and create a hardware encoder with libspcdev",
+        "Use GStreamer for RTP packetization, RTSP sessions, and depacketization",
+        "Use hardware Decoder, VPS, and Display for live HDMI output",
+        "Locate faults in Camera, Codec, RTSP, VPS, or Display from logs"
+      ]
+    },
+    {
+      "pattern": "cards-4",
+      "data_title": "Get the Hardware Ready",
+      "kicker": "Before You Start",
+      "title": "Get the Hardware Ready",
+      "cards": [
+        {
+          "tint": "tint-1",
+          "icon": "chip",
+          "title": "Board and OS",
+          "body": "RDK S100 with a supported RDK OS and working BSP codec drivers"
+        },
+        {
+          "tint": "tint-2",
+          "icon": "eye",
+          "title": "MIPI Camera",
+          "body": "Use a BSP-supported sensor and Camera expansion board; power off before adjusting cables"
+        },
+        {
+          "tint": "tint-4",
+          "icon": "film",
+          "title": "HDMI Display",
+          "body": "Must support 800×480; power and select HDMI before booting S100"
+        },
+        {
+          "tint": "tint-6",
+          "icon": "terminal",
+          "title": "Two Terminals",
+          "body": "Run Server and Client separately so each log remains visible"
+        }
+      ]
+    },
+    {
+      "pattern": "code-highlight",
+      "data_title": "Run Four Preflight Checks",
+      "kicker": "Preflight Checks",
+      "title": "Run Four Preflight Checks",
+      "lead": "Verify the board, drivers, display mode, and development interface before building",
+      "cards": [
+        {
+          "title": "① Model and Drivers",
+          "code": "cat /proc/device-tree/model && ls -l /dev/vpu /dev/jpu 2>/dev/null",
+          "note": "The model should contain RDK S100 and codec device nodes should exist"
+        },
+        {
+          "title": "② HDMI Mode",
+          "code": "cat /sys/class/drm/card0-HDMI-A-1/status && grep -x '800x480' /sys/class/drm/card0-HDMI-A-1/modes",
+          "note": "The HDMI connector must be connected and its mode list must include 800x480"
+        },
+        {
+          "title": "③ BSP Interface",
+          "code": "test -f /usr/include/sp_codec.h && ldconfig -p | grep libspcdev",
+          "note": "Confirm that the BSP provides the header and libspcdev"
+        },
+        {
+          "title": "④ GStreamer",
+          "code": "gst-inspect-1.0 appsrc && gst-inspect-1.0 rtspsrc && gst-inspect-1.0 rtph264pay",
+          "note": "Also check appsink, h264parse, and rtph264depay"
+        }
+      ]
+    },
+    {
+      "pattern": "code-highlight",
+      "data_title": "Build Directly on the Board",
+      "kicker": "Build on Board",
+      "title": "Build Directly on the Board",
+      "lead": "Configure and link on the S100 itself; do not copy binaries or libraries from another architecture",
+      "cards": [
+        {
+          "title": "① Install Dependencies",
+          "code": "sudo apt install -y build-essential cmake pkg-config libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgstrtspserver-1.0-dev",
+          "note": "Install the compiler, GStreamer, and RTSP Server development packages"
+        },
+        {
+          "title": "② Configure",
+          "code": "cmake -S . -B build -DCMAKE_BUILD_TYPE=Release",
+          "note": "Run inside 01_beginner/10_codec"
+        },
+        {
+          "title": "③ Build",
+          "code": "cmake --build build -j2",
+          "note": "This small project builds reliably with -j2"
+        },
+        {
+          "title": "④ Verify Outputs",
+          "code": "./build/codec_rtsp_server --help && ./build/codec_rtsp_client --help",
+          "note": "Both Server and Client executables should be present"
+        }
+      ]
+    },
+    {
+      "pattern": "cards-3",
+      "data_title": "Why Encoding and Decoding Matter",
+      "kicker": "Why Codec Matters",
+      "title": "Why Encoding and Decoding Matter",
+      "cards": [
+        {
+          "tint": "tint-1",
+          "icon": "film",
+          "title": "Raw Video Is Large",
+          "body": "One 1080p NV12 frame is 3,110,400 bytes; 30fps is about 746.5 Mbit/s"
+        },
+        {
+          "tint": "tint-2",
+          "icon": "zap",
+          "title": "Encoding Cuts Bandwidth",
+          "body": "Hardware encoding targets about 8 Mbit/s and emits SPS, PPS, and IDR"
+        },
+        {
+          "tint": "tint-4",
+          "icon": "layers",
+          "title": "Decoding Restores Images",
+          "body": "Compressed data cannot enter VPS; depay RTP, then decode to NV12"
+        }
+      ]
+    },
+    {
+      "pattern": "cards-6",
+      "data_title": "One Job for Every Layer",
+      "kicker": "API Responsibilities",
+      "title": "One Job for Every Layer",
+      "cards": [
+        {
+          "tint": "tint-1",
+          "icon": "eye",
+          "title": "Camera / VIO",
+          "body": "sp_open_camera_v2 opens Camera, ISP, and NV12 output"
+        },
+        {
+          "tint": "tint-2",
+          "icon": "chip",
+          "title": "Encoder",
+          "body": "sp_start_encode creates the H.264 hardware encoder"
+        },
+        {
+          "tint": "tint-3",
+          "icon": "globe",
+          "title": "GStreamer",
+          "body": "Handles RTP, RTSP, reception, and depay—not image decoding"
+        },
+        {
+          "tint": "tint-4",
+          "icon": "film",
+          "title": "Decoder",
+          "body": "sp_decoder_set_image submits H.264 access units to VDEC"
+        },
+        {
+          "tint": "tint-5",
+          "icon": "layers",
+          "title": "VPS",
+          "body": "sp_open_vps scales 1920×1080 NV12 to 800×480"
+        },
+        {
+          "tint": "tint-6",
+          "icon": "target",
+          "title": "Display",
+          "body": "sp_start_display outputs HDMI through S100 channel 11"
+        }
+      ]
+    },
+    {
+      "pattern": "cards-3",
+      "data_title": "Keep These Parameters Separate",
+      "kicker": "Parameter Boundaries",
+      "title": "Keep These Parameters Separate",
+      "lead": "Codec dimensions stay consistent end to end; VPS adapts the image to the display",
+      "cards": [
+        {
+          "tint": "tint-1",
+          "icon": "eye",
+          "title": "Sensor Size",
+          "body": "Server --sensor-width/--sensor-height: Camera RAW input"
+        },
+        {
+          "tint": "tint-4",
+          "icon": "film",
+          "title": "Codec Size",
+          "body": "Both --width/--height pairs remain 1920×1080 for encode and decode"
+        },
+        {
+          "tint": "tint-6",
+          "icon": "target",
+          "title": "Display Size",
+          "body": "Client --display-width/--display-height: final 800×480 output"
+        }
+      ]
+    },
+    {
+      "pattern": "code-highlight",
+      "data_title": "Start the Encoding Endpoint",
+      "kicker": "RTSP Server",
+      "title": "Start the Encoding Endpoint",
+      "cards": [
+        {
+          "title": "Start Server",
+          "code": "sudo ./build/codec_rtsp_server --codec h264 --width 1920 --height 1080 --sensor-width 1920 --sensor-height 1080 --fps 30 --bitrate 8000 --camera-index -1 --pipe-id 0 --port 8554 --mount /live",
+          "note": "Run in the first S100 terminal; -1 enables Camera auto-detection"
+        },
+        {
+          "title": "Local Stream URL",
+          "code": "rtsp://127.0.0.1:8554/live",
+          "note": "Use loopback for the first lesson validation"
+        },
+        {
+          "title": "Camera Log",
+          "code": "[camera] sensor=1920x1080 output=1920x1080 fps=30",
+          "note": "Confirm resolution, frame rate, and encoder setup"
+        },
+        {
+          "title": "Publish Metrics",
+          "code": "published ↑   push-fail=0   SPS/PPS/IDR > 0",
+          "note": "A rising no-client count is normal before Client connects"
+        }
+      ]
+    },
+    {
+      "pattern": "split-timeline",
+      "data_title": "Start Decode and HDMI Output",
+      "kicker": "RTSP Client",
+      "title": "Start Decode and HDMI Output",
+      "lead": "Keep Server running and take control of HDMI resources from the second terminal",
+      "steps": [
+        {
+          "badge": "Step 1",
+          "body": "Confirm HDMI is connected and the mode list includes 800x480"
+        },
+        {
+          "badge": "Step 2",
+          "body": "Run sudo systemctl stop display-manager"
+        },
+        {
+          "badge": "Step 3",
+          "body": "Start Client with --url rtsp://127.0.0.1:8554/live --width 1920 --height 1080 --display-channel 11 --display-width 800 --display-height 480 --duration 30"
+        },
+        {
+          "badge": "Step 4",
+          "body": "Let the 30-second test finish, then stop Server"
+        }
+      ]
+    },
+    {
+      "pattern": "split-checklist",
+      "data_title": "Success Must Be Visible",
+      "kicker": "Completion Checklist",
+      "title": "Success Must Be Visible",
+      "lead": "PASS confirms initialization and submissions; final acceptance still requires a visible HDMI image",
+      "items": [
+        "Server encoded and published counters grow at about 30 per second",
+        "push-fail=0 and H.264 SPS, PPS, and IDR are nonzero",
+        "Client reports linked H264 RTP pad",
+        "received and submitted grow at about 30 buffers per second",
+        "DRM/GBM initializes and the log reports Display 800x480 channel=11",
+        "Live video stays visible with correct aspect, orientation, and color"
+      ]
+    },
+    {
+      "pattern": "cards-6",
+      "data_title": "Debug the Pipeline by Stage",
+      "kicker": "Troubleshooting",
+      "title": "Debug the Pipeline by Stage",
+      "cards": [
+        {
+          "tint": "tint-1",
+          "icon": "wrench",
+          "title": "Sensor Probe Warnings",
+          "body": "Ignore other Chip ID warnings once imx219 is found and initializes"
+        },
+        {
+          "tint": "tint-2",
+          "icon": "eye",
+          "title": "Camera Will Not Open",
+          "body": "Power off; check ribbon orientation, sensor support, and VIO ownership"
+        },
+        {
+          "tint": "tint-3",
+          "icon": "chip",
+          "title": "VPU Init Fails",
+          "body": "Check device nodes, kernel modules, dmesg, and BSP version"
+        },
+        {
+          "tint": "tint-4",
+          "icon": "globe",
+          "title": "Connection Refused",
+          "body": "Confirm Server listens on 8554 and the URL includes /live"
+        },
+        {
+          "tint": "tint-5",
+          "icon": "film",
+          "title": "PASS but Black Screen",
+          "body": "Stop the desktop and explicitly set channel 11 and 800×480"
+        },
+        {
+          "tint": "tint-6",
+          "icon": "list-check",
+          "title": "Early EOS",
+          "body": "Keep Server running until Client exits naturally"
+        }
+      ]
+    },
+    {
+      "pattern": "closing",
+      "data_title": "Turn the Loop into a Skill",
+      "kicker": "Summary & Next Steps",
+      "title": "Turn the Loop into a Skill",
+      "lead": "Camera produces NV12, the BSP owns hardware codec work, GStreamer owns RTSP/RTP, and VPS plus Display produce the final image",
+      "cards": [
+        {
+          "tint": "tint-1",
+          "icon": "flask",
+          "title": "Compare Bitrate and Quality",
+          "body": "Change 8000 kbit/s to 4000 and record bitrate and screen quality"
+        },
+        {
+          "tint": "tint-4",
+          "icon": "film",
+          "title": "Change Codec or Transport",
+          "body": "Switch both endpoints to H.265, or compare RTSP/TCP with UDP"
+        },
+        {
+          "tint": "tint-6",
+          "icon": "target",
+          "title": "Make PASS Stronger",
+          "body": "Count decoded output and Display submissions to cover real progress"
+        }
+      ]
+    }
+  ]
+}
