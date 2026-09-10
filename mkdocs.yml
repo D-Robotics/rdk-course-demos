@@ -74,6 +74,7 @@ plugins:
             Boot troubleshooting: 启动问题排查
             Remote access: 远程连接
             Audio peripherals: 音频外设入门
+            Video codec: 编解码
             GPIO and PWM: GPIO 与 PWM
             UART and I2C: UART 与 I2C
             SPI display demo: SPI 显示屏示例
@@ -115,6 +116,7 @@ nav:
           - Flash a system image: beginner/04-flash-system-x5.md
           - Boot troubleshooting: beginner/05-boot-troubleshooting-x5.md
           - Audio peripherals: beginner/08-audio.md
+          - Video codec: beginner/10-codec-x5.md
           - GPIO and PWM: beginner/11-40pin-gpio-pwm.md
           - UART and I2C: beginner/12-40pin-uart.md
           - SPI display demo: hardware/spi-display.md
@@ -123,6 +125,7 @@ nav:
           - Boot troubleshooting: beginner/05-boot-troubleshooting-s100.md
           - Remote access: beginner/06-remote-connection-s100.md
           - Audio Driver HAT: beginner/08-audio-s100.md
+          - Video codec: beginner/10-codec-s100.md
   - 02 · ModelZoo & RoboGo:
       - Course overview: modelzoo/index.md
   - 03 · TROS:
