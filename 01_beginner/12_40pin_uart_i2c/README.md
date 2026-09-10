@@ -18,6 +18,8 @@
 >
 > **English animations:** [`UART · 73s`](./uart_explainer_73s.en.html) · [`I2C · 83s`](./i2c_explainer_83s.en.html) · [`Recap · 17s`](./summary_explainer_17s.en.html)
 >
+> **English HTML slide deck:** [`slides.en.html`](./slides.en.html)
+>
 > **飞书讲义：** [第十二课：RDK 40pin（UART / I2C）｜RDK X5](https://horizonrobotics.feishu.cn/docx/SG10deTpMoNvocxa1AccfMnmnXb)
 
 ---
