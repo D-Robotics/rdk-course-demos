@@ -9,7 +9,6 @@ h1{font-size:76px;line-height:1.08;font-weight:800;letter-spacing:-2.6px;margin:
 #diagram{position:absolute;left:0;top:232px;width:1660px;height:580px;overflow:visible;font-family:var(--sans)}
 #note{position:absolute;bottom:-5px;left:0;margin:0;font-size:30px;line-height:1.3;font-weight:600;color:var(--brand)}
 #number{position:absolute;bottom:80px;right:75px;font:800 105px var(--mono);color:rgba(0,0,0,.055);pointer-events:none}
-.progress{position:absolute;left:42px;right:42px;bottom:30px;height:4px;background:#d8d7d1}.progress span{height:100%;display:block;background:var(--brand)}
-.clock{position:absolute;right:44px;bottom:48px;font:700 18px var(--mono);color:#666}
+.progress,.clock{display:none}
 #controls{position:fixed;left:50%;bottom:13px;transform:translateX(-50%);display:flex;gap:12px;align-items:center;background:#fff;border:1px solid #ccc;padding:8px 14px;border-radius:5px;opacity:0;transition:opacity .2s;z-index:100}body:hover #controls,#controls:focus-within{opacity:1}#controls button{border:0;background:none;font-size:16px;cursor:pointer}#controls input{width:300px;accent-color:var(--brand)}
 body.export #controls{display:none}
