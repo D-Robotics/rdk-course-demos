@@ -1,0 +1,15 @@
+:root{--paper:#f4f3ef;--ink:#111;--brand:#ff3c00;--muted:#555;--blue:#1769aa;--sans:Arial,"Microsoft YaHei UI","Microsoft YaHei",sans-serif;--mono:Consolas,"SF Mono",monospace}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden}body{background:#202020;font-family:var(--sans);color:var(--ink)}
+#stage{width:1920px;height:1080px;position:absolute;left:50%;top:50%;transform-origin:center;background:var(--paper);overflow:hidden}
+.grid{position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.024) 1px,transparent 1px),linear-gradient(rgba(0,0,0,.024) 1px,transparent 1px);background-size:72px 72px}
+.brand{position:absolute;right:44px;top:30px;height:42px;width:auto}.lesson{position:absolute;left:48px;top:35px;font:700 16px var(--mono);color:#555;letter-spacing:1px}.lesson::before{content:"";display:inline-block;width:20px;height:3px;background:var(--brand);margin-right:12px;vertical-align:middle}
+#scene{position:absolute;left:130px;top:148px;width:1660px;height:830px}
+.kicker{font:700 21px var(--mono);color:var(--brand);letter-spacing:2px;margin-bottom:16px}
+h1{font-size:76px;line-height:1.08;font-weight:800;letter-spacing:-2.6px;margin:0;white-space:nowrap}.sub{font-size:33px;line-height:1.35;color:#4c4c4c;margin:22px 0 0;min-height:46px}
+#diagram{position:absolute;left:0;top:232px;width:1660px;height:580px;overflow:visible;font-family:var(--sans)}
+#note{position:absolute;bottom:-5px;left:0;margin:0;font-size:30px;line-height:1.3;font-weight:600;color:var(--brand)}
+#number{position:absolute;bottom:80px;right:75px;font:800 105px var(--mono);color:rgba(0,0,0,.055);pointer-events:none}
+.progress{position:absolute;left:42px;right:42px;bottom:30px;height:4px;background:#d8d7d1}.progress span{height:100%;display:block;background:var(--brand)}
+.clock{position:absolute;right:44px;bottom:48px;font:700 18px var(--mono);color:#666}
+#controls{position:fixed;left:50%;bottom:13px;transform:translateX(-50%);display:flex;gap:12px;align-items:center;background:#fff;border:1px solid #ccc;padding:8px 14px;border-radius:5px;opacity:0;transition:opacity .2s;z-index:100}body:hover #controls,#controls:focus-within{opacity:1}#controls button{border:0;background:none;font-size:16px;cursor:pointer}#controls input{width:300px;accent-color:var(--brand)}
+body.export #controls{display:none}

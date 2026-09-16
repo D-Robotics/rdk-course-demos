@@ -4,6 +4,8 @@
 > **适用硬件：** RDK X5 + 2.0 寸 240×320 SPI LCD（驱动 IC：ST7789）  
 > **配套代码目录：** `[code/](./code/)`
 
+> **SPI 原理动画：** [中文 · 49 秒](./spi_explainer_49s.zh.html) · [English · 55 seconds](./spi_explainer_55s.en.html) · [播放与视频导出说明](./SPI_ANIMATIONS.md)
+
 ---
 
 ## 效果展示
