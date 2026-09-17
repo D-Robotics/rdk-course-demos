@@ -1,12 +1,77 @@
 /* Deterministic 41-second animation. No wall-clock or random visual state. */
 (() => {
   'use strict';
+  const en = document.body.dataset.language === 'en';
+  const english = {
+    '通信原理': 'How SPI works',
+    '选中设备': 'Select the device',
+    '点亮 SPI 小屏幕': 'Bring the display to life',
+    '原理 → 接线 → 显示': 'Basics → Wiring → Display',
+    '终端 · 检查设备节点': 'TERMINAL · DEVICE NODE',
+    '先检查配置，再重新确认': 'Check the configuration, then retry.',
+    '节点出现后，继续显示测试': 'Node found. Continue with the display test.',
+    '开启 SPI1': 'Enable SPI1',
+    '完成重启': 'Reboot the board',
+    '重新检查节点': 'Check the node again',
+    '背光不亮': 'Backlight off',
+    '3.3V 供电': '3.3V power',
+    '物理 Pin 1 / 17': 'Physical pin 1 / 17',
+    '共地': 'Common ground',
+    '物理 Pin 6': 'Physical pin 6',
+    '背光控制': 'Backlight control',
+    '默认物理 Pin 33': 'Default: physical pin 33',
+    '背光亮，画面空白': 'Backlight on, no image',
+    '数据': 'Data',
+    '时钟': 'Clock',
+    '片选': 'Chip select',
+    '命令 / 数据': 'Command / data',
+    '复位': 'Reset',
+    '信号': 'Signal',
+    '作用': 'Function',
+    '物理管脚': 'Physical pin',
+    '红': 'RED',
+    '绿': 'GREEN',
+    '蓝': 'BLUE',
+    '红蓝颠倒时，尝试 --rgb 后重新测试': 'Red and blue swapped? Try --rgb and test again.',
+    '静态图正常': 'Static image OK',
+    '再检查动画': 'Check animation',
+    '动画参数': 'Animation settings',
+    '颜色、方向、背光设置': 'Color, rotation, backlight',
+    '刷新速度': 'Refresh speed',
+    '本课回顾': 'LESSON RECAP',
+    '从 SPI 原理，到点亮屏幕': 'From SPI basics to a working display',
+    '这节课，我们先讲到这里。': 'That wraps up this lesson.',
+    '理解通信信号，完成屏幕显示实验。': 'Understand the signals. Get the display running.',
+    '排查 01 · 设备节点': 'CHECK 01 · DEVICE NODE',
+    '找不到设备节点？': 'Device node missing?',
+    '先确认 SPI 配置，再确认已经重启。': 'Make sure SPI is enabled and the board has been rebooted.',
+    '本课使用 /dev/spidev1.1；节点存在不代表屏幕已接好。': 'We use /dev/spidev1.1. A device node alone does not confirm correct wiring.',
+    '排查 02 · 背光': 'CHECK 02 · BACKLIGHT',
+    '背光不亮，先检查这三项': 'No backlight? Check these three.',
+    '供电、地和 BL，逐项核对。': 'Check power, ground, and the BL connection.',
+    '检查或调整接线前，先关机并断开电源。': 'Shut down and disconnect power before checking or changing the wiring.',
+    '排查 03 · 图像': 'CHECK 03 · IMAGE',
+    '背光亮了，为什么没有图像？': 'Backlight on, but no image?',
+    '核对数据线、时钟、片选、DC 和复位线。': 'Check data, clock, chip select, DC, and reset.',
+    '背光亮起，只能说明背光已经点亮。': 'A lit backlight does not confirm that image data reached the display.',
+    '排查 04 · 颜色': 'CHECK 04 · COLORS',
+    '颜色不对，先做三色测试': 'Wrong colors? Test red, green, blue.',
+    '依次显示红、绿、蓝，确认颜色是否对应。': 'Display each solid color and check that it matches.',
+    '每次纯色测试结束后，再运行下一条命令。': 'Stop each color test before running the next command.',
+    '排查 05 · 动画': 'CHECK 05 · ANIMATION',
+    '静态图正常，再检查动画': 'Static image fine? Check animation.',
+    '确认动画参数，并调整目标帧率与 SPI 时钟。': 'Check the settings, target frame rate, and SPI clock speed.',
+    '--fps 设置目标帧率；实际刷新速度还取决于绘图与传输。': '--fps sets a target. Actual refresh speed also depends on drawing and transfer.',
+    '暂停': 'Pause',
+    '播放': 'Play'
+  };
+  const tr = value => en ? (english[value] ?? value) : value;
   const duration = 41;
   const starts = [0, 8, 17, 23, 31, 35, 41];
   const orange = '#ff3c00', ink = '#111', gray = '#777970', blue = '#1769aa';
   const $ = id => document.getElementById(id);
   const esc = value => String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
-  const text = (x, y, value, size = 36, color = ink, anchor = 'start', weight = 700) => `<text x="${x}" y="${y}" font-size="${size}" fill="${color}" text-anchor="${anchor}" font-weight="${weight}">${esc(value)}</text>`;
+  const text = (x, y, value, size = 36, color = ink, anchor = 'start', weight = 700) => `<text x="${x}" y="${y}" font-size="${size}" fill="${color}" text-anchor="${anchor}" font-weight="${weight}">${esc(tr(value))}</text>`;
   const rect = (x, y, w, h, fill = '#fff', stroke = ink, sw = 3) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}"/>`;
   const line = (x1, y1, x2, y2, color = ink, width = 4, dash = '') => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${color}" stroke-width="${width}" ${dash ? `stroke-dasharray="${dash}"` : ''}/>`;
   const clamp = t => Math.max(0, Math.min(1, t));
@@ -120,7 +185,7 @@
     let i = starts.findIndex((s, j) => j < scenes.length && current >= s && current < starts[j + 1]);
     if (i < 0) i = scenes.length - 1;
     const [kicker, title, sub, note, draw] = scenes[i], local = current - starts[i];
-    $('kicker').textContent = kicker; $('title').textContent = title; $('sub').textContent = sub; $('note').textContent = note;
+    $('kicker').textContent = tr(kicker); $('title').textContent = tr(title); $('sub').textContent = tr(sub); $('note').textContent = tr(note);
     const a = i === 0 ? 1 : ease(local / .35);
     $('scene').style.opacity = .18 + .82 * a;
     $('scene').style.transform = `translateY(${(1 - a) * 12}px)`;
@@ -129,7 +194,7 @@
     return current;
   }
   function seek(t) { last = performance.now(); return render(Number(t) || 0); }
-  function button() { $('play').textContent = playing ? '暂停' : '播放'; }
+  function button() { $('play').textContent = tr(playing ? '暂停' : '播放'); }
   function pause() { playing = false; button(); }
   function play() { if (current >= duration) seek(0); playing = true; last = performance.now(); button(); }
   function tick(now) { if (playing) { render(current + (now - last) / 1000); if (current >= duration) pause(); } last = now; requestAnimationFrame(tick); }

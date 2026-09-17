@@ -7,10 +7,11 @@ Silent animations for the Lesson 13 voice-over, using the Lesson 12 paper-grid t
 | English | [Open animation](spi_explainer_55s.en.html) | 55 seconds |
 | 中文 | [打开动画](spi_explainer_49s.zh.html) | 49 秒 |
 | 中文课堂总结与排查 | [打开动画](spi_summary_41s.zh.html) | 41 秒 |
+| English recap and troubleshooting | [Open animation](spi_summary_41s.en.html) | 41 seconds |
 
-The 41-second recap uses `spi_summary.js` and the shared `spi_explainer.css`. It follows the supplied Chinese narration: recap (0–8s), missing device node (8–17s), backlight off (17–23s), blank image (23–31s), color test (31–35s), and animation settings/speed (35–41s). There is no burned-in timeline or time counter. It is silent, for editing underneath the recorded voice-over; timings can be adjusted in `spi_summary.js`.
+Both 41-second recaps use `spi_summary.js` and the shared `spi_explainer.css`. They follow the same sequence: recap (0–8s), missing device node (8–17s), backlight off (17–23s), blank image (23–31s), color test (31–35s), and animation settings/speed (35–41s). The English version translates all visible labels, hints and playback controls. There is no burned-in timeline or time counter. They are silent, for editing underneath the recorded voice-over; timings can be adjusted in `spi_summary.js`.
 
-Open either HTML file in a browser. Keep `spi_explainer.css`, `spi_explainer.js` and the repository logo available at their relative paths. The 1920×1080 design scales uniformly to fit the window; it does not reflow at smaller sizes.
+Open an HTML file in a browser. Keep `spi_explainer.css`, the relevant script (`spi_explainer.js` or `spi_summary.js`) and the repository logo available at their relative paths. The 1920×1080 design scales uniformly to fit the window; it does not reflow at smaller sizes.
 
 Space pauses or resumes, arrow keys seek by two seconds, Home restarts, and End jumps to the end. Hover near the bottom to reveal the playback controls. URL parameters support `?autoplay=0&t=35` for a paused frame and `&export=1` to hide controls.
 
@@ -39,8 +40,9 @@ Run from this lesson directory, using a new output directory or filenames that d
 node tools/render-spi-video.cjs en /path/to/output
 node tools/render-spi-video.cjs zh /path/to/output
 node tools/render-spi-video.cjs summary-zh /path/to/output
+node tools/render-spi-video.cjs summary-en /path/to/output
 ```
 
-Outputs are H.264 MP4, 1920×1080, 30 fps, without audio. Every frame renders at an explicit timeline timestamp before encoding. Export does not record the desktop, depend on real-time playback, or rescale the video after capture. The English explainer contains exactly 1,650 frames; the Chinese explainer contains 1,470 frames; the Chinese recap contains 1,230 frames.
+Outputs are H.264 MP4, 1920×1080, 30 fps, without audio. Every frame renders at an explicit timeline timestamp before encoding. Export does not record the desktop, depend on real-time playback, or rescale the video after capture. The English explainer contains exactly 1,650 frames; the Chinese explainer contains 1,470 frames; each recap contains 1,230 frames.
 
 Add `--review` to render scene and signal-state previews instead of a video. The renderer also checks text bounds and logo loading.
