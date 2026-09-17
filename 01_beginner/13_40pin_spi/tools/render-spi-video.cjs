@@ -1,5 +1,5 @@
 // Install playwright, provide CHROME_PATH if needed, and put ffmpeg on PATH.
-// node tools/render-spi-video.cjs en|zh output-directory [--review]
+// node tools/render-spi-video.cjs en|zh|summary-zh output-directory [--review]
 // Each frame is rendered at an explicit time, never captured from a desktop.
 const fs = require('fs');
 const path = require('path');
@@ -10,11 +10,11 @@ const { chromium } = require('playwright');
 
 async function main() {
   const language = process.argv[2];
-  if (!['en', 'zh'].includes(language) || !process.argv[3]) throw new Error('Usage: node render-spi-video.cjs en|zh output-directory [--review]');
+  if (!['en', 'zh', 'summary-zh'].includes(language) || !process.argv[3]) throw new Error('Usage: node render-spi-video.cjs en|zh|summary-zh output-directory [--review]');
   const out = path.resolve(process.argv[3]);
   fs.mkdirSync(out, { recursive: true });
-  const duration = language === 'en' ? 55 : 49;
-  const stem = `spi_explainer_${duration}s.${language}`;
+  const duration = language === 'summary-zh' ? 41 : language === 'en' ? 55 : 49;
+  const stem = language === 'summary-zh' ? 'spi_summary_41s.zh' : `spi_explainer_${duration}s.${language}`;
   const html = path.resolve(__dirname, '..', `${stem}.html`);
   const executablePath = process.env.CHROME_PATH || (process.platform === 'win32' ? 'C:/Program Files/Google/Chrome/Application/chrome.exe' : undefined);
   const browser = await chromium.launch({ executablePath, headless: true, args: ['--hide-scrollbars', '--force-device-scale-factor=1'] });
@@ -27,10 +27,13 @@ async function main() {
     const resources = await page.evaluate(() => [...document.images].every(img => img.complete && img.naturalWidth > 0));
     if (!resources) throw new Error('An image did not load');
     const starts = await page.evaluate(() => window.__spiVideo.starts);
+    const actualDuration = await page.evaluate(() => window.__spiVideo.duration);
+    if (actualDuration !== duration || starts.at(-1) !== duration) throw new Error('HTML and renderer timing disagree');
     if (process.argv.includes('--review')) {
       const samples = starts.slice(0, -1).map((s, i) => s + (starts[i + 1] - s) * .55);
       // Review all three DC states and both reset/backlight states as well.
-      samples.push(starts[5] + .7, starts[5] + (starts[6] - starts[5]) * .85, starts[6] + .6, starts[6] + (starts[7] - starts[6]) * .85);
+      if (language === 'summary-zh') samples.push(.5, 7.5, 9, 16, 18, 22, 24, 30, 31.6, 34.6, 40.9);
+      else samples.push(starts[5] + .7, starts[5] + (starts[6] - starts[5]) * .85, starts[6] + .6, starts[6] + (starts[7] - starts[6]) * .85);
       const findings = [];
       for (let i = 0; i < samples.length; i++) {
         await page.evaluate(t => window.__spiVideo.seek(t), samples[i]);

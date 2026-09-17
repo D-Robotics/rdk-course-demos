@@ -1,11 +1,14 @@
 # SPI signal explainer animations
 
-Two silent animations for the Lesson 13 voice-over, using the Lesson 12 paper-grid template.
+Silent animations for the Lesson 13 voice-over, using the Lesson 12 paper-grid template.
 
 | Version | HTML | Duration |
 | --- | --- | --- |
 | English | [Open animation](spi_explainer_55s.en.html) | 55 seconds |
 | 中文 | [打开动画](spi_explainer_49s.zh.html) | 49 秒 |
+| 中文课堂总结与排查 | [打开动画](spi_summary_41s.zh.html) | 41 秒 |
+
+The 41-second recap uses `spi_summary.js` and the shared `spi_explainer.css`. It follows the supplied Chinese narration: recap (0–8s), missing device node (8–17s), backlight off (17–23s), blank image (23–31s), color test (31–35s), and animation settings/speed (35–41s). There is no burned-in timeline or time counter. It is silent, for editing underneath the recorded voice-over; timings can be adjusted in `spi_summary.js`.
 
 Open either HTML file in a browser. Keep `spi_explainer.css`, `spi_explainer.js` and the repository logo available at their relative paths. The 1920×1080 design scales uniformly to fit the window; it does not reflow at smaller sizes.
 
@@ -35,8 +38,9 @@ Run from this lesson directory, using a new output directory or filenames that d
 ```bash
 node tools/render-spi-video.cjs en /path/to/output
 node tools/render-spi-video.cjs zh /path/to/output
+node tools/render-spi-video.cjs summary-zh /path/to/output
 ```
 
-Outputs are H.264 MP4, 1920×1080, 30 fps, without audio. Every frame renders at an explicit timeline timestamp before encoding. Export does not record the desktop, depend on real-time playback, or rescale the video after capture. English contains exactly 1,650 frames; Chinese contains 1,470 frames.
+Outputs are H.264 MP4, 1920×1080, 30 fps, without audio. Every frame renders at an explicit timeline timestamp before encoding. Export does not record the desktop, depend on real-time playback, or rescale the video after capture. The English explainer contains exactly 1,650 frames; the Chinese explainer contains 1,470 frames; the Chinese recap contains 1,230 frames.
 
 Add `--review` to render scene and signal-state previews instead of a video. The renderer also checks text bounds and logo loading.
