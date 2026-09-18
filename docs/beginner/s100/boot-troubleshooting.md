@@ -43,6 +43,6 @@ Include the board revision, image version, flashing result, power setup, LED sta
 
 ## Resources
 
-- [Course code and materials](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/05_boot_troubleshooting)
+- [Course code and materials](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/05_boot_troubleshooting)
 - [RDK S100 hardware documentation](https://developer.d-robotics.cc/rdk_doc/rdk_s/Quick_start/hardware_introduction/rdk_s100/)
 - [RDK FAQ](https://developer.d-robotics.cc/rdk_doc/FAQ)
