@@ -1,4 +1,4 @@
-# Audio Driver HAT on RDK S100
+# Audio Peripherals on RDK S100
 
 > **About this lesson:** Install the Audio Driver HAT REV2 on the RDK S100, load its drivers, identify the sound card, complete a record → playback loop, and go further with 8-channel capture and playback loopback (the AEC reference signal).
 >

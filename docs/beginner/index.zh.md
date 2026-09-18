@@ -45,7 +45,7 @@
 | [烧录系统镜像](s100/flash-system.md) | — |
 | [启动问题排查](s100/boot-troubleshooting.md) | — |
 | [远程连接](s100/remote-connection.md) | [GitHub 资料](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/06_remote_connection) |
-| [S100 音频子板](s100/audio.md) | [GitHub 资料](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/08_audio) |
+| [音频外设入门](s100/audio.md) | [GitHub 资料](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/08_audio) |
 | [编解码与 RTSP](s100/codec.md) | [GitHub 资料](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/10_codec) |
 | [40-pin 接口 GPIO 与 PWM](s100/40pin-gpio-pwm.md) | [GitHub 资料](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/11_40pin_gpio_pwm) |
 | [40-pin 接口 UART 与 I2C](s100/40pin-uart-i2c.md) | [GitHub 资料](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/12_40pin_uart_i2c) |

@@ -74,7 +74,6 @@ plugins:
             Boot troubleshooting: 启动问题排查
             Remote access: 远程连接
             Audio peripherals: 音频外设入门
-            Audio Driver HAT: S100 音频子板
             Video codec: 编解码
             GPIO and PWM: GPIO 与 PWM
             UART and I2C: UART 与 I2C
@@ -161,7 +160,7 @@ nav:
           - Flash a system image: beginner/s100/flash-system.md
           - Boot troubleshooting: beginner/s100/boot-troubleshooting.md
           - Remote access: beginner/s100/remote-connection.md
-          - Audio Driver HAT: beginner/s100/audio.md
+          - Audio peripherals: beginner/s100/audio.md
           - Video codec: beginner/s100/codec.md
           - GPIO and PWM: beginner/s100/40pin-gpio-pwm.md
           - UART and I2C: beginner/s100/40pin-uart-i2c.md

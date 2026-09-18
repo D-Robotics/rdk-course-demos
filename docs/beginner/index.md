@@ -41,7 +41,7 @@ Follow this sequence if you are developing on RDK S100.
 | [Flash a system image](s100/flash-system.md) | — |
 | [Boot troubleshooting](s100/boot-troubleshooting.md) | — |
 | [Remote access](s100/remote-connection.md) | [GitHub materials](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/06_remote_connection) |
-| [Audio Driver HAT](s100/audio.md) | [GitHub materials](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/08_audio) |
+| [Audio peripherals](s100/audio.md) | [GitHub materials](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/08_audio) |
 | [Video codec and RTSP](s100/codec.md) | [GitHub materials](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/10_codec) |
 | [40-pin: GPIO and PWM](s100/40pin-gpio-pwm.md) | [GitHub materials](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/11_40pin_gpio_pwm) |
 | [40-pin: UART and I2C](s100/40pin-uart-i2c.md) | [GitHub materials](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/12_40pin_uart_i2c) |
