@@ -24,8 +24,8 @@ rdk-course-demos/
 ├── 01_beginner/            # 入门篇：RDK 的基础使用（共 14 课）
 │   ├── 00_course_overview/       # 整个 RDK 小课堂的课程介绍与中英文页面源文件
 │   ├── 01_community_ecosystem/   # 社区与生态入门
-│   ├── 02_product_intro/         # RDK 产品简介
-│   ├── 03_rdk_studio/            # RDK Studio 介绍
+│   ├── 02_product_intro/         # RDK 硬件全家桶
+│   ├── 03_rdk_studio/            # RDK Studio 入门
 │   ├── 04_flash_system/          # 烧录说明
 │   ├── 05_boot_troubleshooting/  # 启动说明与问题排查
 │   ├── 06_remote_connection/     # 远程连接
@@ -33,8 +33,8 @@ rdk-course-demos/
 │   ├── 08_audio/                 # 音频使用
 │   ├── 09_display/               # 显示模块使用
 │   ├── 10_codec/                 # 编解码使用
-│   ├── 11_40pin_gpio_pwm/        # 40pin 使用（1）
-│   ├── 12_40pin_uart_i2c/        # 40pin 使用（2）
+│   ├── 11_40pin_gpio_pwm/        # 40-pin GPIO 与 PWM
+│   ├── 12_40pin_uart_i2c/        # 40-pin UART 与 I2C
 │   ├── 13_40pin_spi/             # SPI 驱动屏幕（含点亮与动画 Demo）
 │   └── 14_can/                   # CAN 口使用
 ├── 02_modelzoo/            # 进阶篇：ModelZoo 开发指南

@@ -1,4 +1,4 @@
-# RDK S100 UART and I2C
+# RDK S100 40-pin UART and I2C
 
 This handbook follows the recorded course slides, including wiring, commands, measured results, and the scope of verification.
 

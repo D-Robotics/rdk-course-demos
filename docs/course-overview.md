@@ -144,20 +144,20 @@ After completing this module, you should be able to use an RDK board independent
 
 | Lesson | Main Video Topics | Materials |
 |---|---|---|
-| RDK Community and Ecosystem Introduction | RDK community, documentation entry points, NodeHub as an additional application-case entry, and forum guidelines | Video / Handbook |
-| RDK Product Overview | Product families, hardware capabilities, roadmap, and typical use cases | Video / Handbook |
-| Getting Started with RDK Studio | Meet the AI-native development workspace for RDK devices; use Moss for a read-only X5 health check and BPU YOLO real-time detection, and discover the terminal, files, code-server, remote desktop, system flashing, and on-device agents | Video / Handbook |
-| RDK System Flashing | System image flashing, MiniBoot updates, and post-flash checks | Video / Handbook |
-| RDK Boot Process and Troubleshooting | Boot process, indicator status, boot logs, and typical boot issues | Video / Handbook |
-| Remote Connection to RDK | Serial connection, SSH, networking, VNC, and remote development | Video / Handbook |
+| RDK community and ecosystem | RDK community, documentation entry points, NodeHub as an additional application-case entry, and forum guidelines | Video / Handbook |
+| RDK hardware portfolio | Product families, hardware capabilities, roadmap, and typical use cases | Video / Handbook |
+| Getting started with RDK Studio | Meet the AI-native development workspace for RDK devices; use Moss for a read-only X5 health check and BPU YOLO real-time detection, and discover the terminal, files, code-server, remote desktop, system flashing, and on-device agents | Video / Handbook |
+| Flash a system image | System image flashing, MiniBoot updates, and post-flash checks | Video / Handbook |
+| Boot troubleshooting | Boot process, indicator status, boot logs, and typical boot issues | Video / Handbook |
+| Remote access | Serial connection, SSH, networking, VNC, and remote development | Video / Handbook |
 | Using Cameras with RDK | USB cameras, MIPI cameras, C/Python access, and quick TROS use | Video / Handbook / Demo |
-| Audio Peripherals on RDK X5 | Onboard earphone interface, audio boards, and USB audio-device validation | Video / Handbook / Demo |
+| Audio peripherals | Onboard earphone interface, audio boards, and USB audio-device validation | Video / Handbook / Demo |
 | Using Display Modules with RDK | HDMI and DSI display modules, display configuration, and result validation | Video / Handbook / Demo |
-| RDK Codec Usage | Encoding, decoding, BSP interfaces, RTSP streaming, and decoding | Video / Handbook / Demo |
-| RDK 40pin Usage (1) | GPIO, interrupts, and PWM basics, plus button-input and servo-control demos | Video / Handbook / Demo |
-| RDK 40pin Usage (2) | UART loopback, I2C address discovery, and an SSD1306 OLED display demo | Video / Handbook / Demo |
-| RDK 40pin Usage (3) | SPI basics and an SPI display-driving demo | Video / Handbook / Demo |
-| Using the RDK CAN Interface | CAN FD basics, can-utils, CAN loopback testing, CAN motor-control demos, and a CAN logic-analyzer demo | Video / Handbook / Demo |
+| Video codec | Encoding, decoding, BSP interfaces, RTSP streaming, and decoding | Video / Handbook / Demo |
+| 40-pin GPIO and PWM | GPIO, interrupts, and PWM basics, plus button-input and servo-control demos | Video / Handbook / Demo |
+| 40-pin UART and I2C | UART loopback, I2C address discovery, and an SSD1306 OLED display demo | Video / Handbook / Demo |
+| 40-pin SPI | SPI basics and an SPI display-driving demo | Video / Handbook / Demo |
+| CAN communication | CAN FD basics, can-utils, CAN loopback testing, CAN motor-control demos, and a CAN logic-analyzer demo | Video / Handbook / Demo |
 
 ---
 

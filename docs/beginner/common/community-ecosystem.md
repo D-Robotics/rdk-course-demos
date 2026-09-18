@@ -1,4 +1,4 @@
-# RDK Community and Ecosystem Introduction
+# RDK community and ecosystem
 
 RDK resources extend beyond board manuals. They also include source repositories, model examples, robotics documentation, development tools, application cases, and technical communities.
 

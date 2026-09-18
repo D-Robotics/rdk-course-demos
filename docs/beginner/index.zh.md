@@ -14,10 +14,10 @@
 
 | 课程讲义 | 配套资料 |
 | --- | --- |
-| [RDK 小课堂课程结构与学习方式](../course-overview.md) | [GitHub 资料](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/00_course_overview) |
-| [RDK 社区与生态](common/community-ecosystem.md) | [GitHub 资料](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/01_community_ecosystem) |
+| [RDK 小课堂课程介绍](../course-overview.md) | [GitHub 资料](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/00_course_overview) |
+| [RDK 社区与生态入门](common/community-ecosystem.md) | [GitHub 资料](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/01_community_ecosystem) |
 | [RDK 硬件全家桶](common/product-intro.md) | [GitHub 资料](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/02_product_intro) |
-| [RDK Studio 介绍](common/rdk-studio.md) | [GitHub 资料](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/03_rdk_studio) |
+| [RDK Studio 入门](common/rdk-studio.md) | [GitHub 资料](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/03_rdk_studio) |
 
 ## RDK X5 课程
 
@@ -29,13 +29,13 @@
 | [启动问题排查](x5/boot-troubleshooting.md) | — |
 | [音频外设入门](x5/audio.md) | [GitHub 资料](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/08_audio) |
 | [编解码](x5/codec.md) | [GitHub 资料](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/10_codec) |
-| [40-pin 接口 GPIO 与 PWM](x5/40pin-gpio-pwm.md) | [GitHub 资料](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/11_40pin_gpio_pwm) |
+| [40-pin GPIO 与 PWM](x5/40pin-gpio-pwm.md) | [GitHub 资料](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/11_40pin_gpio_pwm) |
 | [40-pin UART 与 I2C](x5/40pin-uart.md) | [GitHub 资料](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/12_40pin_uart_i2c) |
-| [40-pin 接口 SPI](x5/spi-display.md) | [GitHub 资料](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/13_40pin_spi) |
-| [CAN 使用](x5/can.md) | [GitHub 资料](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/14_can) |
-
+| [40-pin SPI](x5/spi-display.md) | [GitHub 资料](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/13_40pin_spi) |
+| [CAN 通信](x5/can.md) | [GitHub 资料](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/14_can) |
 
 **待发布讲义：** 远程连接、Camera 使用、显示模块使用。
+
 ## RDK S100 课程
 
 使用 RDK S100 的学员沿着相同的任务顺序学习，但烧录方式、调试接口和部分硬件操作以 S100 课程为准。
@@ -46,10 +46,10 @@
 | [启动问题排查](s100/boot-troubleshooting.md) | — |
 | [远程连接](s100/remote-connection.md) | [GitHub 资料](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/06_remote_connection) |
 | [音频外设入门](s100/audio.md) | [GitHub 资料](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/08_audio) |
-| [编解码与 RTSP](s100/codec.md) | [GitHub 资料](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/10_codec) |
-| [40-pin 接口 GPIO 与 PWM](s100/40pin-gpio-pwm.md) | [GitHub 资料](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/11_40pin_gpio_pwm) |
-| [40-pin 接口 UART 与 I2C](s100/40pin-uart-i2c.md) | [GitHub 资料](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/12_40pin_uart_i2c) |
-| [40-pin 接口 SPI](s100/40pin-spi.md) | [GitHub 资料](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/13_40pin_spi) |
-| [CAN 使用](s100/can.md) | [GitHub 资料](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/14_can) |
+| [编解码](s100/codec.md) | [GitHub 资料](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/10_codec) |
+| [40-pin GPIO 与 PWM](s100/40pin-gpio-pwm.md) | [GitHub 资料](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/11_40pin_gpio_pwm) |
+| [40-pin UART 与 I2C](s100/40pin-uart-i2c.md) | [GitHub 资料](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/12_40pin_uart_i2c) |
+| [40-pin SPI](s100/40pin-spi.md) | [GitHub 资料](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/13_40pin_spi) |
+| [CAN 通信](s100/can.md) | [GitHub 资料](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/14_can) |
 
 **待发布讲义：** Camera 使用、显示模块使用。

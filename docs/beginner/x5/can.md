@@ -1,4 +1,4 @@
-# RDK X5 CAN Communication
+# RDK X5 CAN communication
 
 This handbook follows the recorded course slides, including wiring, commands, measured results, and the scope of verification.
 

@@ -1,4 +1,4 @@
-# RDK S100 GPIO and PWM
+# RDK S100 40-pin GPIO and PWM
 
 This handbook follows the recorded course slides, including wiring, commands, measured results, and the scope of verification.
 

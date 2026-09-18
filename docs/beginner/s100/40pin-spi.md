@@ -1,4 +1,4 @@
-# RDK S100 SPI0 Loopback
+# RDK S100 40-pin SPI
 
 This handbook follows the recorded course slides, including wiring, commands, measured results, and the scope of verification.
 

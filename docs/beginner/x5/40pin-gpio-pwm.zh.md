@@ -1,4 +1,4 @@
-# RDK X5 40pin GPIO 与 PWM
+# RDK X5 40-pin GPIO 与 PWM
 
 ## 1. 学习目标
 

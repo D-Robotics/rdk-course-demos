@@ -1,4 +1,4 @@
-# Flash a system image on RDK X5
+# RDK X5 Flash a system image
 
 This tutorial covers the RDK X5 flashing workflow. Use the X5 image package and the flashing method documented for your software release.
 

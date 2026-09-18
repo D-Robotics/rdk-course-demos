@@ -1,4 +1,4 @@
-# RDK X5 40pin GPIO 与 PWM
+# RDK X5 40-pin GPIO 与 PWM
 
 > **课程定位：** 认识 RDK X5 的 40pin 排针，学习 GPIO 输入、中断和硬件 PWM，并完成按键读取与舵机控制两个实验。
 >

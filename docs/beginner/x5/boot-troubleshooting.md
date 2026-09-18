@@ -1,4 +1,4 @@
-# Boot troubleshooting on RDK X5
+# RDK X5 Boot troubleshooting
 
 **Goal:** Find where the RDK X5 boot path stops after flashing and collect a useful debug log.  
 **Estimated time:** 5 minutes

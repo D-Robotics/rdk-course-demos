@@ -65,21 +65,20 @@ plugins:
             01 · Fundamentals: 01 · 基础入门
             Course outline: 课程大纲
             Common foundation: 通用基础
-            Community & ecosystem: 社区与生态
-            RDK hardware portfolio: RDK 硬件全家桶
-            RDK Studio: RDK Studio
-            RDK X5: RDK X5
-            RDK S100: RDK S100
             Flash a system image: 烧录系统镜像
             Boot troubleshooting: 启动问题排查
             Remote access: 远程连接
             Audio peripherals: 音频外设入门
             Video codec: 编解码
-            GPIO and PWM: GPIO 与 PWM
-            UART and I2C: UART 与 I2C
-            SPI display demo: SPI 显示屏示例
-            SPI loopback: SPI 回环
+            40-pin GPIO and PWM: 40-pin GPIO 与 PWM
+            40-pin UART and I2C: 40-pin UART 与 I2C
+            40-pin SPI: 40-pin SPI
             CAN communication: CAN 通信
+            RDK community and ecosystem: RDK 社区与生态入门
+            RDK hardware portfolio: RDK 硬件全家桶
+            Getting started with RDK Studio: RDK Studio 入门
+            RDK X5: RDK X5
+            RDK S100: RDK S100
             02 · ModelZoo & RoboGo: 02 · ModelZoo 与 RoboGo
             Course overview: 课程介绍
             03 · TROS: 03 · TROS
@@ -144,17 +143,17 @@ nav:
   - 01 · Fundamentals:
       - Course outline: beginner/index.md
       - Common foundation:
-          - Community & ecosystem: beginner/common/community-ecosystem.md
+          - RDK community and ecosystem: beginner/common/community-ecosystem.md
           - RDK hardware portfolio: beginner/common/product-intro.md
-          - RDK Studio: beginner/common/rdk-studio.md
+          - Getting started with RDK Studio: beginner/common/rdk-studio.md
       - RDK X5:
           - Flash a system image: beginner/x5/flash-system.md
           - Boot troubleshooting: beginner/x5/boot-troubleshooting.md
           - Audio peripherals: beginner/x5/audio.md
           - Video codec: beginner/x5/codec.md
-          - GPIO and PWM: beginner/x5/40pin-gpio-pwm.md
-          - UART and I2C: beginner/x5/40pin-uart.md
-          - SPI display demo: beginner/x5/spi-display.md
+          - 40-pin GPIO and PWM: beginner/x5/40pin-gpio-pwm.md
+          - 40-pin UART and I2C: beginner/x5/40pin-uart.md
+          - 40-pin SPI: beginner/x5/spi-display.md
           - CAN communication: beginner/x5/can.md
       - RDK S100:
           - Flash a system image: beginner/s100/flash-system.md
@@ -162,9 +161,9 @@ nav:
           - Remote access: beginner/s100/remote-connection.md
           - Audio peripherals: beginner/s100/audio.md
           - Video codec: beginner/s100/codec.md
-          - GPIO and PWM: beginner/s100/40pin-gpio-pwm.md
-          - UART and I2C: beginner/s100/40pin-uart-i2c.md
-          - SPI loopback: beginner/s100/40pin-spi.md
+          - 40-pin GPIO and PWM: beginner/s100/40pin-gpio-pwm.md
+          - 40-pin UART and I2C: beginner/s100/40pin-uart-i2c.md
+          - 40-pin SPI: beginner/s100/40pin-spi.md
           - CAN communication: beginner/s100/can.md
   - 02 · ModelZoo & RoboGo:
       - Course overview: modelzoo/index.md

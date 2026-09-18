@@ -1,4 +1,4 @@
-# 在 RDK X5 上完成硬件编解码与 800×480 HDMI 显示
+# RDK X5 编解码
 
 本课使用两个 C++ 程序，在同一块 RDK X5 上完成一条完整、可观察的编解码闭环。Server 从 MIPI Camera 获取 NV12 图像，调用 X5 BSP 硬件编码器生成 H.264 码流并提供本机 RTSP 服务；Client 通过回环地址拉流，调用 X5 BSP 硬件解码器恢复 NV12，再由 VPS 缩放为 800×480，通过 HDMI 屏幕显示实时 Camera 画面。
 

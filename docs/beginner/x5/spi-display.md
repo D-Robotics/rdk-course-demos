@@ -1,4 +1,4 @@
-# RDK X5 SPI display and animation
+# RDK X5 40-pin SPI
 
 Connect a two-inch ST7789 color LCD to the RDK X5, display a static test image, then run a bouncing ball animation. This page contains the wiring, setup commands, expected results, and the driver code that explains how a frame reaches the display.
 

@@ -1,4 +1,4 @@
-# RDK S100 CAN Communication
+# RDK S100 CAN communication
 
 This handbook follows the recorded course slides, including wiring, commands, measured results, and the scope of verification.
 

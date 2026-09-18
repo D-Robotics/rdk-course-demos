@@ -1,6 +1,6 @@
 <!-- markdownlint-disable MD013 -->
 
-# 认识 RDK 硬件全家桶
+# RDK 硬件全家桶
 
 > 适用产品：RDK X3、RDK X3 Module、RDK X5、RDK X5 Module、RDK S100、RDK S100P、RDK S100 SIP、RDK S600、RDK S600 Module  
 > 课程主题：RDK 硬件产品与关键能力介绍  

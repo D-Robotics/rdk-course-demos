@@ -1,4 +1,4 @@
-# Boot troubleshooting on RDK S100
+# RDK S100 Boot troubleshooting
 
 **Goal:** Find where the RDK S100 boot path stops after flashing and collect a useful debug log.  
 **Estimated time:** 5 minutes

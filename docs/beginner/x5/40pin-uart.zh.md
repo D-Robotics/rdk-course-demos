@@ -1,4 +1,4 @@
-# RDK X5 40pin UART 与 I2C
+# RDK X5 40-pin UART 与 I2C
 
 本课使用 RDK X5 40pin 排针上的 UART1 与 I2C5，完成 UART 回环测试和 I2C OLED 点亮实验。
 

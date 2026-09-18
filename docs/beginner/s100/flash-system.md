@@ -1,4 +1,4 @@
-# Flash a system image on RDK S100
+# RDK S100 Flash a system image
 
 This tutorial covers the RDK S100 flashing workflow. Use the S100 image package and the flashing method documented for your software release.
 

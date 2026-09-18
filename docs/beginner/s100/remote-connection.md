@@ -1,4 +1,4 @@
-# Remote Access for RDK S100
+# RDK S100 Remote access
 
 After flashing the system image, you can perform most daily development tasks from your computer. A remote terminal lets you edit code, transfer files, run programs, and inspect logs without keeping a monitor, keyboard, and mouse connected to the board.
 

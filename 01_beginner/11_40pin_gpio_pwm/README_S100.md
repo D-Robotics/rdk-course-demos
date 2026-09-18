@@ -1,4 +1,4 @@
-# RDK S100 40-pin GPIO / PWM courseware
+# RDK S100 40-pin GPIO and PWM courseware
 
 This directory keeps the existing RDK X5 lesson unchanged and adds a minimal RDK S100 variant used for the course video.
 

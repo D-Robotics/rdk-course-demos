@@ -1,4 +1,4 @@
-# RDK S100 40-pin UART / I2C courseware
+# RDK S100 40-pin UART and I2C courseware
 
 This directory keeps the existing RDK X5 lesson unchanged and adds a minimal RDK S100 variant used for the course video.
 
