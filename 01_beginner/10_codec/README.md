@@ -1,4 +1,4 @@
-# Lesson 10: Hardware Codec and RTSP Demo
+# Hardware Codec and RTSP Demo
 
 [中文说明](README_cn.md)
 

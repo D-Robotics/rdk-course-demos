@@ -1,12 +1,12 @@
 <!-- markdownlint-disable MD013 -->
 
-# 第 2 课：认识 RDK 硬件全家桶
+# 认识 RDK 硬件全家桶
 
 > 适用产品：RDK X3、RDK X3 Module、RDK X5、RDK X5 Module、RDK S100、RDK S100P、RDK S100 SIP、RDK S600、RDK S600 Module  
 > 课程主题：RDK 硬件产品与关键能力介绍  
-> 配套课件：[打开中文 HTML 演示页](./rdk_hardware_family.html) · [Open English slides](./rdk_hardware_family_en.html)
+> 配套课件：[打开中文 HTML 演示页](rdk_hardware_family.html) · [Open English slides](rdk_hardware_family_en.html)
 
-![RDK X3、RDK X5、RDK S100 与 RDK S600 系列硬件实物合照](./images/rdk_family_lineup.jpg)
+![RDK X3、RDK X5、RDK S100 与 RDK S600 系列硬件实物合照](images/rdk_family_lineup.jpg)
 
 ## 课程目标
 

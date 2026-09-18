@@ -74,15 +74,51 @@ plugins:
             Boot troubleshooting: 启动问题排查
             Remote access: 远程连接
             Audio peripherals: 音频外设入门
+            Audio Driver HAT: S100 音频子板
             Video codec: 编解码
             GPIO and PWM: GPIO 与 PWM
             UART and I2C: UART 与 I2C
             SPI display demo: SPI 显示屏示例
+            SPI loopback: SPI 回环
+            CAN communication: CAN 通信
             02 · ModelZoo & RoboGo: 02 · ModelZoo 与 RoboGo
             Course overview: 课程介绍
             03 · TROS: 03 · TROS
             04 · System & drivers: 04 · 系统与驱动
             05 · LLMs & embodied AI: 05 · 大模型与具身智能
+
+  - redirects:
+      redirect_maps:
+        beginner/01-community-ecosystem.md: beginner/common/community-ecosystem.md
+        zh/beginner/01-community-ecosystem.md: https://d-robotics.github.io/rdk-course-demos/zh/beginner/common/community-ecosystem/
+        beginner/02-product-intro.md: beginner/common/product-intro.md
+        zh/beginner/02-product-intro.md: https://d-robotics.github.io/rdk-course-demos/zh/beginner/common/product-intro/
+        beginner/03-rdk-studio.md: beginner/common/rdk-studio.md
+        zh/beginner/03-rdk-studio.md: https://d-robotics.github.io/rdk-course-demos/zh/beginner/common/rdk-studio/
+        beginner/04-flash-system-s100.md: beginner/s100/flash-system.md
+        zh/beginner/04-flash-system-s100.md: https://d-robotics.github.io/rdk-course-demos/zh/beginner/s100/flash-system/
+        beginner/04-flash-system-x5.md: beginner/x5/flash-system.md
+        zh/beginner/04-flash-system-x5.md: https://d-robotics.github.io/rdk-course-demos/zh/beginner/x5/flash-system/
+        beginner/05-boot-troubleshooting-s100.md: beginner/s100/boot-troubleshooting.md
+        zh/beginner/05-boot-troubleshooting-s100.md: https://d-robotics.github.io/rdk-course-demos/zh/beginner/s100/boot-troubleshooting/
+        beginner/05-boot-troubleshooting-x5.md: beginner/x5/boot-troubleshooting.md
+        zh/beginner/05-boot-troubleshooting-x5.md: https://d-robotics.github.io/rdk-course-demos/zh/beginner/x5/boot-troubleshooting/
+        beginner/06-remote-connection-s100.md: beginner/s100/remote-connection.md
+        zh/beginner/06-remote-connection-s100.md: https://d-robotics.github.io/rdk-course-demos/zh/beginner/s100/remote-connection/
+        beginner/08-audio-s100.md: beginner/s100/audio.md
+        zh/beginner/08-audio-s100.md: https://d-robotics.github.io/rdk-course-demos/zh/beginner/s100/audio/
+        beginner/08-audio.md: beginner/x5/audio.md
+        zh/beginner/08-audio.md: https://d-robotics.github.io/rdk-course-demos/zh/beginner/x5/audio/
+        beginner/10-codec-s100.md: beginner/s100/codec.md
+        zh/beginner/10-codec-s100.md: https://d-robotics.github.io/rdk-course-demos/zh/beginner/s100/codec/
+        beginner/10-codec-x5.md: beginner/x5/codec.md
+        zh/beginner/10-codec-x5.md: https://d-robotics.github.io/rdk-course-demos/zh/beginner/x5/codec/
+        beginner/11-40pin-gpio-pwm.md: beginner/x5/40pin-gpio-pwm.md
+        zh/beginner/11-40pin-gpio-pwm.md: https://d-robotics.github.io/rdk-course-demos/zh/beginner/x5/40pin-gpio-pwm/
+        beginner/12-40pin-uart.md: beginner/x5/40pin-uart.md
+        zh/beginner/12-40pin-uart.md: https://d-robotics.github.io/rdk-course-demos/zh/beginner/x5/40pin-uart/
+        hardware/spi-display.md: beginner/x5/spi-display.md
+        zh/hardware/spi-display.md: https://d-robotics.github.io/rdk-course-demos/zh/beginner/x5/spi-display/
 
 markdown_extensions:
   - admonition
@@ -109,23 +145,28 @@ nav:
   - 01 · Fundamentals:
       - Course outline: beginner/index.md
       - Common foundation:
-          - Community & ecosystem: beginner/01-community-ecosystem.md
-          - RDK hardware portfolio: beginner/02-product-intro.md
-          - RDK Studio: beginner/03-rdk-studio.md
+          - Community & ecosystem: beginner/common/community-ecosystem.md
+          - RDK hardware portfolio: beginner/common/product-intro.md
+          - RDK Studio: beginner/common/rdk-studio.md
       - RDK X5:
-          - Flash a system image: beginner/04-flash-system-x5.md
-          - Boot troubleshooting: beginner/05-boot-troubleshooting-x5.md
-          - Audio peripherals: beginner/08-audio.md
-          - Video codec: beginner/10-codec-x5.md
-          - GPIO and PWM: beginner/11-40pin-gpio-pwm.md
-          - UART and I2C: beginner/12-40pin-uart.md
-          - SPI display demo: hardware/spi-display.md
+          - Flash a system image: beginner/x5/flash-system.md
+          - Boot troubleshooting: beginner/x5/boot-troubleshooting.md
+          - Audio peripherals: beginner/x5/audio.md
+          - Video codec: beginner/x5/codec.md
+          - GPIO and PWM: beginner/x5/40pin-gpio-pwm.md
+          - UART and I2C: beginner/x5/40pin-uart.md
+          - SPI display demo: beginner/x5/spi-display.md
+          - CAN communication: beginner/x5/can.md
       - RDK S100:
-          - Flash a system image: beginner/04-flash-system-s100.md
-          - Boot troubleshooting: beginner/05-boot-troubleshooting-s100.md
-          - Remote access: beginner/06-remote-connection-s100.md
-          - Audio Driver HAT: beginner/08-audio-s100.md
-          - Video codec: beginner/10-codec-s100.md
+          - Flash a system image: beginner/s100/flash-system.md
+          - Boot troubleshooting: beginner/s100/boot-troubleshooting.md
+          - Remote access: beginner/s100/remote-connection.md
+          - Audio Driver HAT: beginner/s100/audio.md
+          - Video codec: beginner/s100/codec.md
+          - GPIO and PWM: beginner/s100/40pin-gpio-pwm.md
+          - UART and I2C: beginner/s100/40pin-uart-i2c.md
+          - SPI loopback: beginner/s100/40pin-spi.md
+          - CAN communication: beginner/s100/can.md
   - 02 · ModelZoo & RoboGo:
       - Course overview: modelzoo/index.md
   - 03 · TROS:

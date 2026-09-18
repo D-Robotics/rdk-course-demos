@@ -14,7 +14,7 @@ This tutorial covers the RDK S100 flashing workflow. Use the S100 image package 
 
 Return `SW2` to the normal boot position before power-cycling the board. If the red `DOWNLOAD` indicator remains on, the S100 is still in DFU flashing mode and will not perform a normal Linux boot.
 
-If `DOWNLOAD` is off but the system does not start normally, open the [RDK S100 boot troubleshooting](05-boot-troubleshooting-s100.md) tutorial and capture the Main-domain boot log before flashing again.
+If `DOWNLOAD` is off but the system does not start normally, open the [RDK S100 boot troubleshooting](boot-troubleshooting.md) tutorial and capture the Main-domain boot log before flashing again.
 
 !!! note
     Flashing tools, image layouts, and switch behavior can change between releases. Treat the current official RDK S100 documentation as the source of truth for the complete procedure.

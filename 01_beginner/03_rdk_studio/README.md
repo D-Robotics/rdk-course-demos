@@ -1,9 +1,9 @@
-# Lesson 03 Sources
+# RDK Studio Sources
 
-This directory stores the standalone bilingual HTML pages and blueprints for Lesson 03.
+This directory stores the standalone bilingual HTML pages and blueprints for the RDK Studio tutorial.
 
-- English handbook: [`docs/beginner/03-rdk-studio.md`](../../docs/beginner/03-rdk-studio.md)
-- Chinese handbook: [`docs/beginner/03-rdk-studio.zh.md`](../../docs/beginner/03-rdk-studio.zh.md)
+- English handbook: [`docs/beginner/common/rdk-studio.md`](../../docs/beginner/common/rdk-studio.md)
+- Chinese handbook: [`docs/beginner/common/rdk-studio.zh.md`](../../docs/beginner/common/rdk-studio.zh.md)
 - English slide source: `lesson-03.html`
 - Chinese slide source: `lesson-03.zh.html`
 

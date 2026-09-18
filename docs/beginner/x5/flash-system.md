@@ -14,7 +14,7 @@ This tutorial covers the RDK X5 flashing workflow. Use the X5 image package and 
 
 Power-cycle the X5 and check its indicators. A successful write only confirms that the image reached the storage device; it does not prove that the board completed its first boot.
 
-If the X5 has no display or network connection, do not immediately flash it again. Open the [RDK X5 boot troubleshooting](05-boot-troubleshooting-x5.md) tutorial and capture the early boot log first.
+If the X5 has no display or network connection, do not immediately flash it again. Open the [RDK X5 boot troubleshooting](boot-troubleshooting.md) tutorial and capture the early boot log first.
 
 !!! note
     Flashing tools, image layouts, and device modes can change between releases. Treat the current official RDK X5 documentation as the source of truth for button sequences and tool options.

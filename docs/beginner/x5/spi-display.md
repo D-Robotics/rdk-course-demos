@@ -1,10 +1,10 @@
-# Lesson 13: RDK X5 SPI display and animation
+# RDK X5 SPI display and animation
 
 Connect a two-inch ST7789 color LCD to the RDK X5, display a static test image, then run a bouncing ball animation. This page contains the wiring, setup commands, expected results, and the driver code that explains how a frame reaches the display.
 
 > **Hardware:** RDK X5 + 2.0-inch 240 × 320 ST7789 SPI LCD with VCC/GND/DIN/CLK/CS/DC/RST/BL pins.
 >
-> **Course code:** [Lesson 13 on the develop branch](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/13_40pin_spi).
+> **Course code:** [on the develop branch](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/13_40pin_spi).
 >
 > These pin numbers and defaults are for **X5**. The repository's `README_S100.md` covers a different board. Other display controllers or panel sizes may require different initialization and dimensions.
 
@@ -12,7 +12,7 @@ Connect a two-inch ST7789 color LCD to the RDK X5, display a static test image, 
 
 First, use `rdk_x5_lcd_st7789.py` to display a gradient, color bars, text, and a timestamp. Then use `lcd_animate.py` to draw a bouncing ball, a pulsing title, and a clock that updates.
 
-![ST7789 LCD running the RDK X5 bouncing ball demo](../assets/images/beginner/rdk-x5-spi-lcd-animation.jpg){ width="280" }
+![ST7789 LCD running the RDK X5 bouncing ball demo](../../assets/images/beginner/rdk-x5-spi-lcd-animation.jpg){ width="280" }
 
 Complete the static image and color checks before starting the animation. This separates basic wiring and initialization problems from refresh-rate issues.
 
@@ -83,7 +83,7 @@ cd rdk-course-demos/01_beginner/13_40pin_spi/code
 ls rdk_x5_lcd_st7789.py lcd_animate.py
 ```
 
-If you already have a checkout, use the Lesson 13 `code` directory from its `develop` branch. Keep both Python files in the same directory: the animation imports the driver.
+If you already have a checkout, use the `code` directory from its `develop` branch. Keep both Python files in the same directory: the animation imports the driver.
 
 All remaining demo commands run **from that `code` directory**. Use `sudo python3` for the SPI and GPIO access used here. Check imports with the same interpreter:
 
@@ -268,6 +268,6 @@ The system sample `/app/40pin_samples/test_spi.py` is a separate bus test. Read 
 3. Compare the animation at different target frame rates and SPI clock speeds.
 4. Change `ball_r`, `gravity`, or the title in `make_frame()`, then run the animation again.
 
-- [Lesson 13 code and README](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/13_40pin_spi)
+- [code and README](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/13_40pin_spi)
 - [English and Chinese SPI animation sources and export instructions](https://github.com/D-Robotics/rdk-course-demos/blob/develop/01_beginner/13_40pin_spi/SPI_ANIMATIONS.md)
-- [Previous lesson: UART and I2C](../beginner/12-40pin-uart.md)
+- [Previous lesson: UART and I2C](40pin-uart.md)

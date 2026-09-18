@@ -1,4 +1,4 @@
-# 第 11 课：RDK X5 40pin GPIO 与 PWM
+# RDK X5 40pin GPIO 与 PWM
 
 ## 1. 学习目标
 
@@ -29,7 +29,7 @@
 
 本课统一使用 **BOARD 编号**。BOARD 编号就是 40pin 排针上的物理位置：代码中的 `37` 表示物理 37 号脚，不是 BCM、CVM 或 SoC 编号。
 
-![RDK X5 40pin 引脚功能对照图](../assets/images/beginner/rdk-x5-40pin-pinout.jpg)
+![RDK X5 40pin 引脚功能对照图](../../assets/images/beginner/rdk-x5-40pin-pinout.jpg)
 
 本课只使用下面几个引脚：
 

@@ -1,4 +1,4 @@
-# Lesson 10: Hardware Video Codec and 800×480 HDMI Display on RDK X5
+# Hardware Video Codec and 800×480 HDMI Display on RDK X5
 
 This lesson uses two C++ programs to build a complete, observable codec loop on one RDK X5. The Server captures NV12 images from a MIPI camera, produces H.264 with the X5 BSP hardware encoder, and publishes a local RTSP stream. The Client receives that stream through the loopback interface, restores NV12 with the X5 hardware decoder, scales it to 800×480 with VPS, and displays the live camera image over HDMI.
 

@@ -1,10 +1,10 @@
-# Lesson 12: RDK X5 40-pin UART and I2C
+# RDK X5 40-pin UART and I2C
 
 This lesson uses UART1 and I2C5 on the RDK X5 40-pin header. You will verify UART with a loopback test and drive an SSD1306 OLED over I2C.
 
 > **Hardware:** RDK X5
 >
-> **Code and full lesson:** [Lesson 12 directory](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/12_40pin_uart_i2c)
+> **Code and full lesson:** [directory](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/12_40pin_uart_i2c)
 
 ## Learning objectives
 
@@ -38,7 +38,7 @@ For a real peripheral, connect RDK TX to peripheral RX, RDK RX to peripheral TX,
 
 RDK X5 enables UART1 on physical pins 8 and 10 by default. The logic level is 3.3 V.
 
-![RDK X5 40-pin function map](../assets/images/beginner/rdk-x5-40pin-pinout.jpg)
+![RDK X5 40-pin function map](../../assets/images/beginner/rdk-x5-40pin-pinout.jpg)
 
 | BOARD pin | Signal | Purpose |
 | --- | --- | --- |

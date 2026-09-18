@@ -1,4 +1,4 @@
-# 第十课：硬件编解码与 RTSP Demo
+# 硬件编解码与 RTSP Demo
 
 [English](README.md)
 

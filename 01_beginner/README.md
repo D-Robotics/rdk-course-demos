@@ -1,18 +1,54 @@
 # 入门篇：RDK 基础使用
 
-| 序号 | 课程名称 | 视频内容重点 | 配套资料 | 目录 |
-|------|----------|--------------|----------|------|
-| 第 1 课 | 社区与生态入门 | RDK 社区、资料入口、NodeHub 工具、论坛使用规范 | 视频 / 讲义 | [01_community_ecosystem](./01_community_ecosystem/) |
-| 第 2 课 | RDK 产品简介 | 产品系列、硬件特性、Roadmap、典型使用场景 | 视频 / 讲义 | [02_product_intro](./02_product_intro/) |
-| 第 3 课 | RDK Studio 介绍 | 使用 RDK Studio 完成板卡连接、镜像烧录、终端访问和 Agent 板端开发入门 | 视频 / 讲义 | [03_rdk_studio](./03_rdk_studio/) |
-| 第 4 课 | 烧录说明 | 系统镜像烧录、MiniBoot 更新、烧录后检查 | 视频 / 讲义 | [04_flash_system](./04_flash_system/) |
-| 第 5 课 | RDK 启动说明与问题排查 | 启动流程、灯状态、启动日志、典型启动问题 | 视频 / 讲义 | [05_boot_troubleshooting](./05_boot_troubleshooting/) |
-| 第 6 课 | RDK 远程连接 | 串口连接、SSH、网络连接、VNC、远程开发 | 视频 / 讲义 | [06_remote_connection](./06_remote_connection/) |
-| 第 7 课 | RDK Camera 使用 | USB Camera、MIPI Camera、C/Python 调用、TROS 快速使用 | 视频 / 讲义 / Demo | [07_camera](./07_camera/) |
-| 第 8 课 | RDK 音频使用 | 板载 Earphone、音频板、USB 音频设备验证 | 视频 / 讲义 / Demo | [08_audio](./08_audio/) |
-| 第 9 课 | RDK 显示模块使用 | HDMI、DSI 显示模块、显示配置与效果验证 | 视频 / 讲义 / Demo | [09_display](./09_display/) |
-| 第 10 课 | 编解码使用 | 编码能力、解码能力、BSP 接口、RTSP 推流解码 | 视频 / 讲义 / Demo | [10_codec](./10_codec/) |
-| 第 11 课 | RDK 40pin 使用（1） | GPIO、中断、PWM 基础、按键读取、舵机控制 Demo | 视频 / 讲义 / Demo | [11_40pin_gpio_pwm](./11_40pin_gpio_pwm/) |
-| 第 12 课 | RDK 40pin 使用（2） | UART 回环收发、I2C 地址扫描、SSD1306 OLED 显示 | 视频 / 讲义 / Demo | [12_40pin_uart_i2c](./12_40pin_uart_i2c/) |
-| 第 13 课 | RDK 40pin 使用（3） | SPI 基础、SPI 驱动屏幕 demo（**点亮屏幕与动画 Demo 已配套**） | 视频 / 讲义 / Demo | [13_40pin_spi](./13_40pin_spi/) |
-| 第 14 课 | RDK CAN 口使用 | CAN FD 基础、can-utils、CAN 回环测试、CAN 电机控制 demo、CAN 逻辑分析仪制作 demo | 视频 / 讲义 / Demo | [14_can](./14_can/) |
+**适用板卡** RDK X5、RDK S100
+
+**课程目标** 完成系统烧录、启动检查、远程连接和常用外设操作，为后续的模型部署与机器人应用做好准备。
+
+基础入门课程从认识 RDK 开始。通用基础课程介绍社区资源、产品和 RDK Studio。进入系统操作以后，请按照手中的开发板选择 RDK X5 或 RDK S100 课程，并沿着对应路线继续学习。
+
+## 先认识 RDK
+
+第一次接触 RDK 时，先花一点时间熟悉资料入口、产品区别和开发工具。后面遇到系统或硬件问题时，你会知道去哪里查文档，也能确认当前操作是否适用于自己的开发板。
+
+| 课程 | 代码示例 |
+| --- | --- |
+| [RDK 小课堂课程结构与学习方式](../docs/course-overview.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/00_course_overview) |
+| [RDK 社区与生态](../docs/beginner/common/community-ecosystem.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/01_community_ecosystem) |
+| [RDK 硬件全家桶](../docs/beginner/common/product-intro.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/02_product_intro) |
+| [RDK Studio 介绍](../docs/beginner/common/rdk-studio.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/03_rdk_studio) |
+
+## RDK X5 课程
+
+使用 RDK X5 的学员从系统烧录开始，随后检查启动状态、建立远程连接，再依次完成摄像头、音频、显示、编解码和 40-pin 外设实验。
+
+| 课程 | 代码示例 |
+| --- | --- |
+| [烧录系统镜像](../docs/beginner/x5/flash-system.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/04_flash_system) |
+| [启动问题排查](../docs/beginner/x5/boot-troubleshooting.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/05_boot_troubleshooting) |
+| 远程连接 | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/06_remote_connection) |
+| Camera 使用 | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/07_camera) |
+| [音频外设入门](../docs/beginner/x5/audio.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/08_audio) |
+| 显示模块使用 | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/09_display) |
+| [编解码](../docs/beginner/x5/codec.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/10_codec) |
+| [40-pin 接口 GPIO 与 PWM](../docs/beginner/x5/40pin-gpio-pwm.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/11_40pin_gpio_pwm) |
+| [40-pin UART 串口通信](../docs/beginner/x5/40pin-uart.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/12_40pin_uart_i2c) |
+| [40-pin 接口 SPI](../docs/beginner/x5/spi-display.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/13_40pin_spi) |
+| [CAN 使用](../docs/beginner/x5/can.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/14_can) |
+
+## RDK S100 课程
+
+使用 RDK S100 的学员沿着相同的任务顺序学习，但烧录方式、调试接口和部分硬件操作以 S100 课程为准。
+
+| 课程 | 代码示例 |
+| --- | --- |
+| [烧录系统镜像](../docs/beginner/s100/flash-system.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/04_flash_system) |
+| [启动问题排查](../docs/beginner/s100/boot-troubleshooting.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/05_boot_troubleshooting) |
+| [远程连接](../docs/beginner/s100/remote-connection.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/06_remote_connection) |
+| Camera 使用 | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/07_camera) |
+| [S100 音频子板](../docs/beginner/s100/audio.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/08_audio) |
+| 显示模块使用 | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/09_display) |
+| [编解码与 RTSP](../docs/beginner/s100/codec.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/10_codec) |
+| [40-pin 接口 GPIO 与 PWM](../docs/beginner/s100/40pin-gpio-pwm.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/11_40pin_gpio_pwm) |
+| [40-pin 接口 UART 与 I2C](../docs/beginner/s100/40pin-uart-i2c.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/12_40pin_uart_i2c) |
+| [40-pin 接口 SPI](../docs/beginner/s100/40pin-spi.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/13_40pin_spi) |
+| [CAN 使用](../docs/beginner/s100/can.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/14_can) |

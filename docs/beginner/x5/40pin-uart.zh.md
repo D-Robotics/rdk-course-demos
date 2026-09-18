@@ -1,12 +1,12 @@
-# 第 12 课：RDK X5 40pin UART 与 I2C
+# RDK X5 40pin UART 与 I2C
 
 本课使用 RDK X5 40pin 排针上的 UART1 与 I2C5，完成 UART 回环测试和 I2C OLED 点亮实验。
 
 > **适用硬件：** RDK X5
 >
-> **代码与完整讲义：** [第 12 课课程目录](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/12_40pin_uart_i2c)
+> **代码与完整讲义：** [课程目录](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/12_40pin_uart_i2c)
 >
-> **飞书讲义：** [第十二课：RDK 40pin（UART / I2C）｜RDK X5](https://horizonrobotics.feishu.cn/docx/SG10deTpMoNvocxa1AccfMnmnXb)
+> **飞书讲义：** [RDK 40pin（UART / I2C）｜RDK X5](https://horizonrobotics.feishu.cn/docx/SG10deTpMoNvocxa1AccfMnmnXb)
 
 ## 1. 学习目标
 
@@ -42,7 +42,7 @@ UART 没有共享时钟线，因此通信两端必须使用相同的参数：
 
 RDK X5 默认在 40pin 接口上启用 UART1，使用 BOARD Pin 8 和 Pin 10，IO 电平为 3.3V。
 
-![RDK X5 40pin 引脚功能对照图](../assets/images/beginner/rdk-x5-40pin-pinout.jpg)
+![RDK X5 40pin 引脚功能对照图](../../assets/images/beginner/rdk-x5-40pin-pinout.jpg)
 
 | BOARD 引脚 | 信号 | 本课用途 |
 |-----------|------|----------|

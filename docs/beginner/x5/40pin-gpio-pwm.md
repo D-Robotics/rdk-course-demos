@@ -1,10 +1,10 @@
-# Lesson 11: RDK X5 40-pin GPIO and PWM
+# RDK X5 40-pin GPIO and PWM
 
 This lesson introduces the RDK X5 40-pin header, GPIO input, edge events, and hardware PWM. The two hands-on demos read a push button and control a hobby servo.
 
 > **Hardware:** RDK X5
 >
-> **Code:** [Lesson 11 source and demos](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/11_40pin_gpio_pwm)
+> **Code:** [source and demos](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/11_40pin_gpio_pwm)
 
 ## Learning objectives
 
@@ -18,7 +18,7 @@ After this lesson, you will be able to:
 
 ## RDK X5 pins used in this lesson
 
-![RDK X5 40-pin function map](../assets/images/beginner/rdk-x5-40pin-pinout.jpg)
+![RDK X5 40-pin function map](../../assets/images/beginner/rdk-x5-40pin-pinout.jpg)
 
 | BOARD pin | Function | Lesson use |
 |-----------|----------|------------|

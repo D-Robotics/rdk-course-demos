@@ -1,12 +1,12 @@
-# 第 11 课：RDK X5 40pin GPIO 与 PWM
+# RDK X5 40pin GPIO 与 PWM
 
 > **课程定位：** 认识 RDK X5 的 40pin 排针，学习 GPIO 输入、中断和硬件 PWM，并完成按键读取与舵机控制两个实验。
 >
 > **适用硬件：** RDK X5
 >
-> **配套代码：** [`code/`](./code/)
+> **配套代码：** [`code/`](code)
 >
-> **飞书讲义：** [第十一课：RDK 40pin（GPIO / PWM）｜RDK X5](https://horizonrobotics.feishu.cn/docx/MJa5dvns3oM3xsxyskocTd34nLb)
+> **飞书讲义：** [RDK 40pin（GPIO / PWM）｜RDK X5](https://horizonrobotics.feishu.cn/docx/MJa5dvns3oM3xsxyskocTd34nLb)
 
 ---
 
@@ -39,7 +39,7 @@
 
 本课统一使用 **BOARD 编号**。BOARD 编号就是 40pin 排针上的物理位置：代码中的 `37` 表示物理 37 号脚，不是 BCM、CVM 或 SoC 编号。
 
-![RDK X5 40pin 引脚功能对照图](./assets/rdk_x5_40pin_pinout.jpg)
+![RDK X5 40pin 引脚功能对照图](assets/rdk_x5_40pin_pinout.jpg)
 
 本课只使用下面几个引脚：
 

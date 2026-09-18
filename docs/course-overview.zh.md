@@ -142,22 +142,22 @@ Demo 中可能包含：
 
 完成本篇后，你应能够独立完成 RDK 板卡的基础使用、常见外设验证和基础问题排查。
 
-| 序号 | 课程名称 | 视频内容重点 | 配套资料 |
-|---|---|---|---|
-| 第 1 课 | RDK 第一课：RDK 社区与生态入门 | RDK 社区、资料入口、NodeHub 应用案例补充入口、论坛使用规范 | 视频 / 讲义 |
-| 第 2 课 | RDK 产品简介 | 产品系列、硬件特性、Roadmap、典型使用场景 | 视频 / 讲义 |
-| 第 3 课 | RDK Studio 入门 | 认识面向 RDK 设备的 AI 原生开发工作台；使用 Moss 完成 X5 只读体检和 BPU YOLO 实时检测，并了解终端、文件、code-server、远程桌面、系统烧录与板端 Agent | 视频 / 讲义 |
-| 第 4 课 | RDK 第四课：烧录说明 | 系统镜像烧录、MiniBoot 更新、烧录后检查 | 视频 / 讲义 |
-| 第 5 课 | RDK 启动说明与问题排查 | 启动流程、灯状态、启动日志、典型启动问题 | 视频 / 讲义 |
-| 第 6 课 | RDK 远程连接 | 串口连接、SSH、网络连接、VNC、远程开发 | 视频 / 讲义 |
-| 第 7 课 | RDK Camera 使用 | USB Camera、MIPI Camera、C/Python 调用、TROS 快速使用 | 视频 / 讲义 / Demo |
-| 第 8 课 | RDK 音频外设入门 | 板载 Earphone、音频板、USB 音频设备验证 | 视频 / 讲义 / Demo |
-| 第 9 课 | RDK 显示模块使用 | HDMI、DSI 显示模块、显示配置与效果验证 | 视频 / 讲义 / Demo |
-| 第 10 课 | RDK 第十课：编解码使用 | 编码能力、解码能力、BSP 接口、RTSP 推流解码 | 视频 / 讲义 / Demo |
-| 第 11 课 | RDK 40pin 使用（1） | GPIO、中断、PWM 基础、按键读取、舵机控制 Demo | 视频 / 讲义 / Demo |
-| 第 12 课 | RDK 40pin 使用（2） | UART 回环、I2C 地址扫描、SSD1306 OLED 显示 Demo | 视频 / 讲义 / Demo |
-| 第 13 课 | RDK 40pin 使用（3） | SPI 基础、SPI 驱动屏幕 Demo | 视频 / 讲义 / Demo |
-| 第 14 课 | RDK CAN 口使用 | CAN FD 基础、can-utils、CAN 回环测试、CAN 电机控制 Demo、CAN 逻辑分析仪制作 Demo | 视频 / 讲义 / Demo |
+| 课程名称 | 视频内容重点 | 配套资料 |
+|---|---|---|
+| RDK RDK 社区与生态入门 | RDK 社区、资料入口、NodeHub 应用案例补充入口、论坛使用规范 | 视频 / 讲义 |
+| RDK 产品简介 | 产品系列、硬件特性、Roadmap、典型使用场景 | 视频 / 讲义 |
+| RDK Studio 入门 | 认识面向 RDK 设备的 AI 原生开发工作台；使用 Moss 完成 X5 只读体检和 BPU YOLO 实时检测，并了解终端、文件、code-server、远程桌面、系统烧录与板端 Agent | 视频 / 讲义 |
+| RDK 烧录说明 | 系统镜像烧录、MiniBoot 更新、烧录后检查 | 视频 / 讲义 |
+| RDK 启动说明与问题排查 | 启动流程、灯状态、启动日志、典型启动问题 | 视频 / 讲义 |
+| RDK 远程连接 | 串口连接、SSH、网络连接、VNC、远程开发 | 视频 / 讲义 |
+| RDK Camera 使用 | USB Camera、MIPI Camera、C/Python 调用、TROS 快速使用 | 视频 / 讲义 / Demo |
+| RDK 音频外设入门 | 板载 Earphone、音频板、USB 音频设备验证 | 视频 / 讲义 / Demo |
+| RDK 显示模块使用 | HDMI、DSI 显示模块、显示配置与效果验证 | 视频 / 讲义 / Demo |
+| RDK 编解码使用 | 编码能力、解码能力、BSP 接口、RTSP 推流解码 | 视频 / 讲义 / Demo |
+| RDK 40pin 使用（1） | GPIO、中断、PWM 基础、按键读取、舵机控制 Demo | 视频 / 讲义 / Demo |
+| RDK 40pin 使用（2） | UART 回环、I2C 地址扫描、SSD1306 OLED 显示 Demo | 视频 / 讲义 / Demo |
+| RDK 40pin 使用（3） | SPI 基础、SPI 驱动屏幕 Demo | 视频 / 讲义 / Demo |
+| RDK CAN 口使用 | CAN FD 基础、can-utils、CAN 回环测试、CAN 电机控制 Demo、CAN 逻辑分析仪制作 Demo | 视频 / 讲义 / Demo |
 
 ---
 
@@ -167,18 +167,18 @@ Demo 中可能包含：
 
 完成本篇后，你应能够理解 RDK Model Zoo 的基本结构，并能基于已有 Demo 完成模型推理实验，同时能够学会 Robogo 云平台的使用，进行模型的云端训练与转化。
 
-| 序号 | 课程名称 | 本课主要解决的问题 | 配套资料 |
-|---|---|---|---|
-| 第 1 课 | ModelZoo 使用指南 | 了解官方 Model Zoo 仓库、支持模型、分支说明、快速运行已有 Sample | 视频 / 讲义 / GitHub 代码 |
-| 第 2 课 | ModelZoo Sample 结构说明 | 讲解典型 Sample 中 conversion、model、runtime、evaluator、test_data 等目录的作用 | 视频 / 讲义 |
-| 第 3 课 | 算法工具链与量化环境准备 | 介绍本地工具链、Docker 环境、RoboGo 云桌面 / 云主机 / 在线量化环境的使用方式 | 视频 / 讲义 |
-| 第 4 课 | ResNet 分类模型训练与量化 | 以 ResNet 为例，完成分类模型训练、模型导出、量化、校验和板端推理验证（云 + 本地） | 视频 / 讲义 / GitHub 代码 |
-| 第 5 课 | YOLO 检测模型训练与量化 | 以 YOLO 为例，完成检测模型训练、ONNX 导出、量化、校验和板端推理验证（云 + 本地） | 视频 / 讲义 / GitHub 代码 |
-| 第 6 课 | Featuremap 模型量化说明 | 以需要配置 Featuremap 的模型为例，说明 Featuremap 配置方式、适用场景和常见问题（云 + 本地） | 视频 / 讲义 |
-| 第 7 课 | 板端 Python Runtime 推理 | 讲解 hbm_runtime 的模型加载、输入构造、推理执行、输出解析和结果可视化 | 视频 / 讲义 / GitHub 代码 |
-| 第 8 课 | 板端 C/C++ Runtime 推理 | 讲解 C/C++ 推理接口、模型加载、前处理、BPU 推理、后处理和编译运行方式 | 视频 / 讲义 / GitHub 代码 |
-| 第 9 课 | YOLO 后处理与 Demo 改造 | 以 YOLO Runtime 为例，讲解检测框解析、阈值设置、NMS、类别映射和自定义模型适配 | 视频 / 讲义 / GitHub 代码 |
-| 第 10 课 | ModelZoo 开发共建 | 讲解新 Sample 的目录规范、命名规则、README 要求、测试数据、运行脚本和提交方式 | 视频 / 讲义 |
+| 课程名称 | 本课主要解决的问题 | 配套资料 |
+|---|---|---|
+| ModelZoo 使用指南 | 了解官方 Model Zoo 仓库、支持模型、分支说明、快速运行已有 Sample | 视频 / 讲义 / GitHub 代码 |
+| ModelZoo Sample 结构说明 | 讲解典型 Sample 中 conversion、model、runtime、evaluator、test_data 等目录的作用 | 视频 / 讲义 |
+| 算法工具链与量化环境准备 | 介绍本地工具链、Docker 环境、RoboGo 云桌面 / 云主机 / 在线量化环境的使用方式 | 视频 / 讲义 |
+| ResNet 分类模型训练与量化 | 以 ResNet 为例，完成分类模型训练、模型导出、量化、校验和板端推理验证（云 + 本地） | 视频 / 讲义 / GitHub 代码 |
+| YOLO 检测模型训练与量化 | 以 YOLO 为例，完成检测模型训练、ONNX 导出、量化、校验和板端推理验证（云 + 本地） | 视频 / 讲义 / GitHub 代码 |
+| Featuremap 模型量化说明 | 以需要配置 Featuremap 的模型为例，说明 Featuremap 配置方式、适用场景和常见问题（云 + 本地） | 视频 / 讲义 |
+| 板端 Python Runtime 推理 | 讲解 hbm_runtime 的模型加载、输入构造、推理执行、输出解析和结果可视化 | 视频 / 讲义 / GitHub 代码 |
+| 板端 C/C++ Runtime 推理 | 讲解 C/C++ 推理接口、模型加载、前处理、BPU 推理、后处理和编译运行方式 | 视频 / 讲义 / GitHub 代码 |
+| YOLO 后处理与 Demo 改造 | 以 YOLO Runtime 为例，讲解检测框解析、阈值设置、NMS、类别映射和自定义模型适配 | 视频 / 讲义 / GitHub 代码 |
+| ModelZoo 开发共建 | 讲解新 Sample 的目录规范、命名规则、README 要求、测试数据、运行脚本和提交方式 | 视频 / 讲义 |
 
 ---
 

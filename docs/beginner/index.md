@@ -6,45 +6,45 @@ Start with the common foundation, then choose the learning path for your board. 
 
 These lessons apply across the RDK platform family.
 
-| Lesson | Tutorial | Code examples |
-| --- | --- | --- |
-| Guide | [RDK Classroom course introduction](../course-overview.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/00_course_overview) |
-| 01 | [RDK community and ecosystem](01-community-ecosystem.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/01_community_ecosystem) |
-| 02 | [RDK hardware portfolio](02-product-intro.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/02_product_intro) |
-| 03 | [RDK Studio](03-rdk-studio.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/03_rdk_studio) |
+| Tutorial | Code examples |
+| --- | --- |
+| [RDK Classroom course introduction](../course-overview.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/00_course_overview) |
+| [RDK community and ecosystem](common/community-ecosystem.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/01_community_ecosystem) |
+| [RDK hardware portfolio](common/product-intro.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/02_product_intro) |
+| [RDK Studio](common/rdk-studio.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/03_rdk_studio) |
 
 ## RDK X5 learning path
 
 Follow this sequence if you are developing on RDK X5.
 
-| Lesson | Tutorial | Code examples |
-| --- | --- | --- |
-| 04 | [Flash a system image](04-flash-system-x5.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/04_flash_system) |
-| 05 | [Boot troubleshooting](05-boot-troubleshooting-x5.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/05_boot_troubleshooting) |
-| 06 | Remote access | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/06_remote_connection) |
-| 07 | Camera | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/07_camera) |
-| 08 | Audio | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/08_audio) |
-| 09 | Display | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/09_display) |
-| 10 | [Video codec](10-codec-x5.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/10_codec) |
-| 11 | [40-pin: GPIO and PWM](11-40pin-gpio-pwm.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/11_40pin_gpio_pwm) |
-| 12 | [40-pin UART serial communication](12-40pin-uart.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/12_40pin_uart_i2c) |
-| 13 | [40-pin: SPI](../hardware/spi-display.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/13_40pin_spi) |
-| 14 | CAN | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/14_can) |
+| Tutorial | Code examples |
+| --- | --- |
+| [Flash a system image](x5/flash-system.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/04_flash_system) |
+| [Boot troubleshooting](x5/boot-troubleshooting.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/05_boot_troubleshooting) |
+| Remote access | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/06_remote_connection) |
+| Camera | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/07_camera) |
+| [Audio peripherals](x5/audio.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/08_audio) |
+| Display | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/09_display) |
+| [Video codec](x5/codec.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/10_codec) |
+| [40-pin: GPIO and PWM](x5/40pin-gpio-pwm.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/11_40pin_gpio_pwm) |
+| [40-pin UART serial communication](x5/40pin-uart.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/12_40pin_uart_i2c) |
+| [40-pin: SPI](x5/spi-display.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/13_40pin_spi) |
+| [CAN](x5/can.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/14_can) |
 
 ## RDK S100 learning path
 
 Follow this sequence if you are developing on RDK S100.
 
-| Lesson | Tutorial | Code examples |
-| --- | --- | --- |
-| 04 | [Flash a system image](04-flash-system-s100.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/04_flash_system) |
-| 05 | [Boot troubleshooting](05-boot-troubleshooting-s100.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/05_boot_troubleshooting) |
-| 06 | [Remote access](06-remote-connection-s100.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/06_remote_connection) |
-| 07 | Camera | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/07_camera) |
-| 08 | Audio | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/08_audio) |
-| 09 | Display | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/09_display) |
-| 10 | [Video codec and RTSP](10-codec-s100.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/10_codec) |
-| 11 | 40-pin: GPIO and PWM | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/11_40pin_gpio_pwm) |
-| 12 | 40-pin: UART and I2C | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/12_40pin_uart_i2c) |
-| 13 | 40-pin: SPI | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/13_40pin_spi) |
-| 14 | CAN | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/14_can) |
+| Tutorial | Code examples |
+| --- | --- |
+| [Flash a system image](s100/flash-system.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/04_flash_system) |
+| [Boot troubleshooting](s100/boot-troubleshooting.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/05_boot_troubleshooting) |
+| [Remote access](s100/remote-connection.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/06_remote_connection) |
+| Camera | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/07_camera) |
+| [Audio Driver HAT](s100/audio.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/08_audio) |
+| Display | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/09_display) |
+| [Video codec and RTSP](s100/codec.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/10_codec) |
+| [40-pin: GPIO and PWM](s100/40pin-gpio-pwm.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/11_40pin_gpio_pwm) |
+| [40-pin: UART and I2C](s100/40pin-uart-i2c.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/12_40pin_uart_i2c) |
+| [40-pin: SPI](s100/40pin-spi.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/13_40pin_spi) |
+| [CAN](s100/can.md) | [GitHub](https://github.com/D-Robotics/rdk-course-demos/tree/main/01_beginner/14_can) |

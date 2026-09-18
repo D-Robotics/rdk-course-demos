@@ -14,7 +14,7 @@
 
 重新上电之前，把 `SW2` 拨回正常启动位置。红色 `DOWNLOAD` 指示灯持续亮起时，S100 仍处于 DFU 烧录模式，Linux 不会正常启动。
 
-如果 `DOWNLOAD` 已经熄灭，但系统仍未正常启动，打开 [RDK S100 启动问题排查](05-boot-troubleshooting-s100.md)，先保存 Main 域启动日志，再决定是否重新烧录。
+如果 `DOWNLOAD` 已经熄灭，但系统仍未正常启动，打开 [RDK S100 启动问题排查](boot-troubleshooting.md)，先保存 Main 域启动日志，再决定是否重新烧录。
 
 !!! note
     烧录工具、镜像布局和开关行为可能随版本变化。完整步骤请以当前版本的 RDK S100 官方文档为准。

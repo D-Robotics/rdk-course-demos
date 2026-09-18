@@ -1,10 +1,10 @@
-# 第 13 课：RDK X5 SPI 彩屏与动画显示
+# RDK X5 SPI 彩屏与动画显示
 
 本课用 RDK X5 驱动一块两寸 ST7789 彩屏，先显示静态测试图，再运行弹跳小球动画。本页包含完整接线、环境准备、实验命令、预期结果和驱动代码解析，可以直接按顺序操作。
 
 > **适用硬件：** RDK X5 + 2.0 寸 240 × 320 ST7789 SPI LCD，8 针接口为 VCC/GND/DIN/CLK/CS/DC/RST/BL。
 >
-> **配套代码：** [develop 分支第 13 课](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/13_40pin_spi)。
+> **配套代码：** [develop 分支](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/13_40pin_spi)。
 >
 > 本页管脚和默认参数适用于 **X5**。仓库中的 `README_S100.md` 属于另一块板卡。其他驱动芯片或分辨率的屏幕，需要另行核对初始化方式和尺寸参数。
 
@@ -12,7 +12,7 @@
 
 先运行 `rdk_x5_lcd_st7789.py`，显示渐变背景、色条、文字和时间戳；再运行 `lcd_animate.py`，显示弹跳小球、明暗变化的标题和持续更新的时钟。
 
-![RDK X5 驱动 ST7789 运行小球动画的实拍](../assets/images/beginner/rdk-x5-spi-lcd-animation.jpg){ width="280" }
+![RDK X5 驱动 ST7789 运行小球动画的实拍](../../assets/images/beginner/rdk-x5-spi-lcd-animation.jpg){ width="280" }
 
 先通过静态点亮和颜色检查，再进入动画实验，这样能把接线、初始化问题与刷新速度问题分开排查。
 
@@ -83,7 +83,7 @@ cd rdk-course-demos/01_beginner/13_40pin_spi/code
 ls rdk_x5_lcd_st7789.py lcd_animate.py
 ```
 
-已有仓库时，进入其 `develop` 分支下第 13 课的 `code` 目录。两个 Python 文件必须放在一起，因为动画程序会导入驱动文件。
+已有仓库时，进入其 `develop` 分支下的 `code` 目录。两个 Python 文件必须放在一起，因为动画程序会导入驱动文件。
 
 下面的实验命令都在这个 **`code` 目录**中执行。本课统一使用 `sudo python3` 访问 SPI 和 GPIO，先用同一个解释器检查依赖：
 
@@ -268,6 +268,6 @@ def show(self, image: Image.Image) -> None:
 3. 比较不同目标帧率与 SPI 时钟下的动画效果。
 4. 修改 `ball_r`、`gravity`，或 `make_frame()` 中的标题，然后重新运行动画。
 
-- [第 13 课完整代码与 README](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/13_40pin_spi)
+- [完整代码与 README](https://github.com/D-Robotics/rdk-course-demos/tree/develop/01_beginner/13_40pin_spi)
 - [中英文 SPI 原理动画源码与导出说明](https://github.com/D-Robotics/rdk-course-demos/blob/develop/01_beginner/13_40pin_spi/SPI_ANIMATIONS.md)
-- [上一课：UART 与 I2C](../beginner/12-40pin-uart.md)
+- [上一课：UART 与 I2C](40pin-uart.md)

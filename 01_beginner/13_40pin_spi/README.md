@@ -1,10 +1,10 @@
-# 第 13 课配套 Demo：SPI 屏幕点亮与动画显示
+# 配套 Demo：SPI 屏幕点亮与动画显示
 
 > **课程定位：** 40pin 外设实战 — 在掌握 GPIO / UART / I2C 基础后，通过 SPI 驱动 ST7789 屏幕，完成「接线 → 点亮 → 动画刷新」完整链路。  
 > **适用硬件：** RDK X5 + 2.0 寸 240×320 SPI LCD（驱动 IC：ST7789）  
-> **配套代码目录：** `[code/](./code/)`
+> **配套代码目录：** `[code/](code)`
 
-> **SPI 原理动画：** [中文 · 49 秒](./spi_explainer_49s.zh.html) · [English · 55 seconds](./spi_explainer_55s.en.html) · [播放与视频导出说明](./SPI_ANIMATIONS.md)
+> **SPI 原理动画：** [中文 · 49 秒](spi_explainer_49s.zh.html) · [English · 55 seconds](spi_explainer_55s.en.html) · [播放与视频导出说明](SPI_ANIMATIONS.md)
 
 ---
 
@@ -12,7 +12,7 @@
 
 运行 `lcd_animate.py` 后，2.0 寸 SPI LCD 模块将显示弹跳小球动画，效果如下：
 
-![SPI 屏幕动画 Demo 效果](./assets/lcd_animation_demo_thumb.jpg)
+![SPI 屏幕动画 Demo 效果](assets/lcd_animation_demo_thumb.jpg)
 
 ---
 
@@ -260,7 +260,7 @@ sudo python3 lcd_animate.py
 - 顶部标题 `RDK X5 LCD` 呼吸闪烁
 - 底部实时时钟
 
-![动画运行实拍](./assets/lcd_animation_demo_thumb.jpg)
+![动画运行实拍](assets/lcd_animation_demo_thumb.jpg)
 
 按 `Ctrl+C` 停止动画。
 
@@ -346,8 +346,8 @@ show(image)   ->  PIL RGB888 -> RGB565 -> SPI 分块写入
 
 | 已学内容            | 本课关联                    |
 | --------------- | ----------------------- |
-| 第 11 课 GPIO/PWM | DC/RST/BL 本质是 GPIO 输出   |
-| 第 12 课 UART/I2C | 可与 SPI 对比，理解不同总线适用场景 |
+| GPIO/PWM | DC/RST/BL 本质是 GPIO 输出   |
+| UART/I2C | 可与 SPI 对比，理解不同总线适用场景 |
 
 
 **官方参考示例：**

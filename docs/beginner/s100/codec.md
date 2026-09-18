@@ -1,4 +1,4 @@
-# Lesson 10: Hardware Video Codec and 800×480 HDMI Display on RDK S100
+# Hardware Video Codec and 800×480 HDMI Display on RDK S100
 
 This lesson uses two C++ programs to build a complete, observable codec loop on one RDK S100. The Server captures NV12 images from a MIPI camera, uses the S100 BSP hardware encoder to produce H.264, and publishes a local RTSP stream. The Client receives that stream through the loopback interface, restores NV12 with the S100 hardware decoder, scales it to 800×480 with VPS, and displays the live camera image over HDMI.
 

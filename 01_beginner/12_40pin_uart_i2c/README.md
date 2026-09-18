@@ -1,26 +1,26 @@
-# 第 12 课：RDK X5 40pin UART 与 I2C
+# RDK X5 40pin UART 与 I2C
 
 > **课程定位：** 认识 RDK X5 40pin 上的 UART1 与 I2C5，完成 UART 回环收发和 I2C OLED 点亮实验。
 >
 > **适用硬件：** RDK X5
 >
-> **配套代码：** [`code/uart_loopback.py`](./code/uart_loopback.py)、[`code/i2c_display.py`](./code/i2c_display.py)
+> **配套代码：** [`code/uart_loopback.py`](code/uart_loopback.py)、[`code/i2c_display.py`](code/i2c_display.py)
 >
-> **视频演示页：** [`slides.zh.html`](./slides.zh.html)
+> **视频演示页：** [`slides.zh.html`](slides.zh.html)
 >
-> **UART 73 秒动画：** [`uart_explainer_73s.zh.html`](./uart_explainer_73s.zh.html)
+> **UART 73 秒动画：** [`uart_explainer_73s.zh.html`](uart_explainer_73s.zh.html)
 >
-> **I2C 83 秒动画：** [`i2c_explainer_83s.zh.html`](./i2c_explainer_83s.zh.html)
+> **I2C 83 秒动画：** [`i2c_explainer_83s.zh.html`](i2c_explainer_83s.zh.html)
 >
-> **课程总结 17 秒动画：** [`summary_explainer_17s.zh.html`](./summary_explainer_17s.zh.html)
+> **课程总结 17 秒动画：** [`summary_explainer_17s.zh.html`](summary_explainer_17s.zh.html)
 >
-> **English narration script:** [`script.en.md`](./script.en.md)
+> **English narration script:** [`script.en.md`](script.en.md)
 >
-> **English animations:** [`UART · 73s`](./uart_explainer_73s.en.html) · [`I2C · 83s`](./i2c_explainer_83s.en.html) · [`Recap · 17s`](./summary_explainer_17s.en.html)
+> **English animations:** [`UART · 73s`](uart_explainer_73s.en.html) · [`I2C · 83s`](i2c_explainer_83s.en.html) · [`Recap · 17s`](summary_explainer_17s.en.html)
 >
-> **English HTML slide deck:** [`slides.en.html`](./slides.en.html)
+> **English HTML slide deck:** [`slides.en.html`](slides.en.html)
 >
-> **飞书讲义：** [第十二课：RDK 40pin（UART / I2C）｜RDK X5](https://horizonrobotics.feishu.cn/docx/SG10deTpMoNvocxa1AccfMnmnXb)
+> **飞书讲义：** [RDK 40pin（UART / I2C）｜RDK X5](https://horizonrobotics.feishu.cn/docx/SG10deTpMoNvocxa1AccfMnmnXb)
 
 ---
 
@@ -91,7 +91,7 @@ TX 和 RX 交叉后，RDK 发送的数据才能进入外设接收端。两端还
 
 RDK X5 默认在 40pin 接口上启用 UART1，使用 BOARD Pin 8 和 Pin 10，IO 电平为 3.3V。
 
-![RDK X5 40pin 引脚功能对照图](./assets/rdk_x5_40pin_pinout.jpg)
+![RDK X5 40pin 引脚功能对照图](assets/rdk_x5_40pin_pinout.jpg)
 
 本课使用下面三个引脚：
 

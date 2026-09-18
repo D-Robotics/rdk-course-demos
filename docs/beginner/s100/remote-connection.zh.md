@@ -80,7 +80,7 @@ RDK S100 提供两个千兆 RJ45 网口。两个网口的默认配置不同，�
 
 开发板靠外侧的 RJ45 网口对应 eth1。把网线插入这个网口，另一端直接连接电脑。
 
-![RDK S100 eth1 网口位置](../assets/images/beginner/rdk-s100-eth1-port.jpg)
+![RDK S100 eth1 网口位置](../../assets/images/beginner/rdk-s100-eth1-port.jpg)
 
 eth1 的默认网络参数如下。
 

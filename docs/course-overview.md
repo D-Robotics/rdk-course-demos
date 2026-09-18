@@ -142,22 +142,22 @@ This module is designed for new RDK users and focuses on how to boot the board, 
 
 After completing this module, you should be able to use an RDK board independently, validate common peripherals, and troubleshoot basic issues.
 
-| No. | Lesson | Main Video Topics | Materials |
-|---|---|---|---|
-| Lesson 1 | RDK Community and Ecosystem Introduction | RDK community, documentation entry points, NodeHub as an additional application-case entry, and forum guidelines | Video / Handbook |
-| Lesson 2 | RDK Product Overview | Product families, hardware capabilities, roadmap, and typical use cases | Video / Handbook |
-| Lesson 3 | Getting Started with RDK Studio | Meet the AI-native development workspace for RDK devices; use Moss for a read-only X5 health check and BPU YOLO real-time detection, and discover the terminal, files, code-server, remote desktop, system flashing, and on-device agents | Video / Handbook |
-| Lesson 4 | RDK Lesson 4: System Flashing | System image flashing, MiniBoot updates, and post-flash checks | Video / Handbook |
-| Lesson 5 | RDK Boot Process and Troubleshooting | Boot process, indicator status, boot logs, and typical boot issues | Video / Handbook |
-| Lesson 6 | Remote Connection to RDK | Serial connection, SSH, networking, VNC, and remote development | Video / Handbook |
-| Lesson 7 | Using Cameras with RDK | USB cameras, MIPI cameras, C/Python access, and quick TROS use | Video / Handbook / Demo |
-| Lesson 8 | Audio Peripherals on RDK X5 | Onboard earphone interface, audio boards, and USB audio-device validation | Video / Handbook / Demo |
-| Lesson 9 | Using Display Modules with RDK | HDMI and DSI display modules, display configuration, and result validation | Video / Handbook / Demo |
-| Lesson 10 | RDK Lesson 10: Codec Usage | Encoding, decoding, BSP interfaces, RTSP streaming, and decoding | Video / Handbook / Demo |
-| Lesson 11 | RDK 40pin Usage (1) | GPIO, interrupts, and PWM basics, plus button-input and servo-control demos | Video / Handbook / Demo |
-| Lesson 12 | RDK 40pin Usage (2) | UART loopback, I2C address discovery, and an SSD1306 OLED display demo | Video / Handbook / Demo |
-| Lesson 13 | RDK 40pin Usage (3) | SPI basics and an SPI display-driving demo | Video / Handbook / Demo |
-| Lesson 14 | Using the RDK CAN Interface | CAN FD basics, can-utils, CAN loopback testing, CAN motor-control demos, and a CAN logic-analyzer demo | Video / Handbook / Demo |
+| Lesson | Main Video Topics | Materials |
+|---|---|---|
+| RDK Community and Ecosystem Introduction | RDK community, documentation entry points, NodeHub as an additional application-case entry, and forum guidelines | Video / Handbook |
+| RDK Product Overview | Product families, hardware capabilities, roadmap, and typical use cases | Video / Handbook |
+| Getting Started with RDK Studio | Meet the AI-native development workspace for RDK devices; use Moss for a read-only X5 health check and BPU YOLO real-time detection, and discover the terminal, files, code-server, remote desktop, system flashing, and on-device agents | Video / Handbook |
+| RDK System Flashing | System image flashing, MiniBoot updates, and post-flash checks | Video / Handbook |
+| RDK Boot Process and Troubleshooting | Boot process, indicator status, boot logs, and typical boot issues | Video / Handbook |
+| Remote Connection to RDK | Serial connection, SSH, networking, VNC, and remote development | Video / Handbook |
+| Using Cameras with RDK | USB cameras, MIPI cameras, C/Python access, and quick TROS use | Video / Handbook / Demo |
+| Audio Peripherals on RDK X5 | Onboard earphone interface, audio boards, and USB audio-device validation | Video / Handbook / Demo |
+| Using Display Modules with RDK | HDMI and DSI display modules, display configuration, and result validation | Video / Handbook / Demo |
+| RDK Codec Usage | Encoding, decoding, BSP interfaces, RTSP streaming, and decoding | Video / Handbook / Demo |
+| RDK 40pin Usage (1) | GPIO, interrupts, and PWM basics, plus button-input and servo-control demos | Video / Handbook / Demo |
+| RDK 40pin Usage (2) | UART loopback, I2C address discovery, and an SSD1306 OLED display demo | Video / Handbook / Demo |
+| RDK 40pin Usage (3) | SPI basics and an SPI display-driving demo | Video / Handbook / Demo |
+| Using the RDK CAN Interface | CAN FD basics, can-utils, CAN loopback testing, CAN motor-control demos, and a CAN logic-analyzer demo | Video / Handbook / Demo |
 
 ---
 
@@ -167,18 +167,18 @@ This module is designed for developers who want to run AI models on RDK. It cove
 
 After completing this module, you should understand the basic structure of RDK Model Zoo, be able to run model-inference experiments from existing demos, and use the Robogo cloud platform for cloud-based model training and conversion.
 
-| No. | Lesson | Problem Addressed | Materials |
-|---|---|---|---|
-| Lesson 1 | ModelZoo Usage Guide | Understand the official Model Zoo repository, supported models, branch information, and how to run an existing sample quickly | Video / Handbook / GitHub Code |
-| Lesson 2 | ModelZoo Sample Structure | Understand the purpose of directories such as conversion, model, runtime, evaluator, and test_data in a typical sample | Video / Handbook |
-| Lesson 3 | Algorithm Toolchain and Quantization Environment | Use the local toolchain, Docker environment, and RoboGo cloud desktop, cloud host, or online quantization environment | Video / Handbook |
-| Lesson 4 | ResNet Classification Training and Quantization | Train, export, quantize, validate, and run on-device inference for a ResNet classification model using cloud and local environments | Video / Handbook / GitHub Code |
-| Lesson 5 | YOLO Detection Training and Quantization | Train a YOLO model, export ONNX, quantize, validate, and verify on-device inference using cloud and local environments | Video / Handbook / GitHub Code |
-| Lesson 6 | Featuremap Model Quantization | Configure Featuremap-based models and understand their use cases and common issues in cloud and local environments | Video / Handbook |
-| Lesson 7 | On-device Python Runtime Inference | Load a model with hbm_runtime, construct inputs, run inference, parse outputs, and visualize results | Video / Handbook / GitHub Code |
-| Lesson 8 | On-device C/C++ Runtime Inference | Use C/C++ inference interfaces, model loading, preprocessing, BPU inference, post-processing, compilation, and execution | Video / Handbook / GitHub Code |
-| Lesson 9 | YOLO Post-processing and Demo Adaptation | Parse detection boxes, configure thresholds and NMS, map classes, and adapt a YOLO Runtime demo to a custom model | Video / Handbook / GitHub Code |
-| Lesson 10 | ModelZoo Collaborative Development | Follow the directory, naming, README, test-data, run-script, and submission requirements for a new sample | Video / Handbook |
+| Lesson | Problem Addressed | Materials |
+|---|---|---|
+| ModelZoo Usage Guide | Understand the official Model Zoo repository, supported models, branch information, and how to run an existing sample quickly | Video / Handbook / GitHub Code |
+| ModelZoo Sample Structure | Understand the purpose of directories such as conversion, model, runtime, evaluator, and test_data in a typical sample | Video / Handbook |
+| Algorithm Toolchain and Quantization Environment | Use the local toolchain, Docker environment, and RoboGo cloud desktop, cloud host, or online quantization environment | Video / Handbook |
+| ResNet Classification Training and Quantization | Train, export, quantize, validate, and run on-device inference for a ResNet classification model using cloud and local environments | Video / Handbook / GitHub Code |
+| YOLO Detection Training and Quantization | Train a YOLO model, export ONNX, quantize, validate, and verify on-device inference using cloud and local environments | Video / Handbook / GitHub Code |
+| Featuremap Model Quantization | Configure Featuremap-based models and understand their use cases and common issues in cloud and local environments | Video / Handbook |
+| On-device Python Runtime Inference | Load a model with hbm_runtime, construct inputs, run inference, parse outputs, and visualize results | Video / Handbook / GitHub Code |
+| On-device C/C++ Runtime Inference | Use C/C++ inference interfaces, model loading, preprocessing, BPU inference, post-processing, compilation, and execution | Video / Handbook / GitHub Code |
+| YOLO Post-processing and Demo Adaptation | Parse detection boxes, configure thresholds and NMS, map classes, and adapt a YOLO Runtime demo to a custom model | Video / Handbook / GitHub Code |
+| ModelZoo Collaborative Development | Follow the directory, naming, README, test-data, run-script, and submission requirements for a new sample | Video / Handbook |
 
 ---
 

@@ -23,20 +23,20 @@ RDK Classroom 是面向海外开发者的 D-Robotics RDK 教程与实践平台�
 rdk-course-demos/
 ├── 01_beginner/            # 入门篇：RDK 的基础使用（共 14 课）
 │   ├── 00_course_overview/       # 整个 RDK 小课堂的课程介绍与中英文页面源文件
-│   ├── 01_community_ecosystem/   # 第 1 课：社区与生态入门
-│   ├── 02_product_intro/         # 第 2 课：RDK 产品简介
-│   ├── 03_rdk_studio/            # 第 3 课：RDK Studio 介绍
-│   ├── 04_flash_system/          # 第 4 课：烧录说明
-│   ├── 05_boot_troubleshooting/  # 第 5 课：启动说明与问题排查
-│   ├── 06_remote_connection/     # 第 6 课：远程连接
-│   ├── 07_camera/                # 第 7 课：Camera 使用
-│   ├── 08_audio/                 # 第 8 课：音频使用
-│   ├── 09_display/               # 第 9 课：显示模块使用
-│   ├── 10_codec/                 # 第 10 课：编解码使用
-│   ├── 11_40pin_gpio_pwm/        # 第 11 课：40pin 使用（1）
-│   ├── 12_40pin_uart_i2c/        # 第 12 课：40pin 使用（2）
-│   ├── 13_40pin_spi/             # 第 13 课：SPI 驱动屏幕（含点亮与动画 Demo）
-│   └── 14_can/                   # 第 14 课：CAN 口使用
+│   ├── 01_community_ecosystem/   # 社区与生态入门
+│   ├── 02_product_intro/         # RDK 产品简介
+│   ├── 03_rdk_studio/            # RDK Studio 介绍
+│   ├── 04_flash_system/          # 烧录说明
+│   ├── 05_boot_troubleshooting/  # 启动说明与问题排查
+│   ├── 06_remote_connection/     # 远程连接
+│   ├── 07_camera/                # Camera 使用
+│   ├── 08_audio/                 # 音频使用
+│   ├── 09_display/               # 显示模块使用
+│   ├── 10_codec/                 # 编解码使用
+│   ├── 11_40pin_gpio_pwm/        # 40pin 使用（1）
+│   ├── 12_40pin_uart_i2c/        # 40pin 使用（2）
+│   ├── 13_40pin_spi/             # SPI 驱动屏幕（含点亮与动画 Demo）
+│   └── 14_can/                   # CAN 口使用
 ├── 02_modelzoo/            # 进阶篇：ModelZoo 开发指南
 └── 03_tros/                # 进阶篇：TROS 开发指南
 ```
@@ -60,3 +60,5 @@ cd rdk-course-demos
 4. 代码以教学演示为主，不替代官方文档。
 5. 板卡能力、接口说明和系统差异以 RDK 官方文档为准。
 6. 每篇 Markdown 教程应给出对应代码目录和官方文档链接。
+
+讲义按板卡维护在 `docs/beginner/common/`、`docs/beginner/x5/` 和 `docs/beginner/s100/`，中英文采用 `.md` / `.zh.md` 成对维护。标题与课程表不标课次，顺序由 `mkdocs.yml` 和课程大纲维护。

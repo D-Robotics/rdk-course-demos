@@ -1,12 +1,12 @@
 <!-- markdownlint-disable MD013 -->
 
-# Lesson 02: Meet the RDK Hardware Portfolio
+# Meet the RDK Hardware Portfolio
 
 > Products: RDK X3, RDK X3 Module, RDK X5, RDK X5 Module, RDK S100, RDK S100P, RDK S100 SIP, RDK S600, and RDK S600 Module  
 > Topic: RDK hardware products and key capabilities  
-> Slides: [Open English HTML slides](./rdk_hardware_family_en.html) · [打开中文课件](./rdk_hardware_family.html)
+> Slides: [Open English HTML slides](rdk_hardware_family_en.html) · [打开中文课件](rdk_hardware_family.html)
 
-![RDK X3, RDK X5, RDK S100, and RDK S600 hardware lineup](./images/rdk_family_lineup.jpg)
+![RDK X3, RDK X5, RDK S100, and RDK S600 hardware lineup](images/rdk_family_lineup.jpg)
 
 ## Course goal
 

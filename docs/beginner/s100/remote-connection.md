@@ -79,7 +79,7 @@ The RDK S100 has two Gigabit Ethernet ports. Their default configurations are di
 
 The outer RJ45 port on the board corresponds to eth1. Connect the Ethernet cable to this port and connect the other end directly to the computer.
 
-![Location of the RDK S100 eth1 port](../assets/images/beginner/rdk-s100-eth1-port.jpg)
+![Location of the RDK S100 eth1 port](../../assets/images/beginner/rdk-s100-eth1-port.jpg)
 
 The default eth1 network settings are shown below.
 

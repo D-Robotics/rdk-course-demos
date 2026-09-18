@@ -1,4 +1,4 @@
-# 第 6 课录课素材：RDK S100 远程连接
+# 录课素材：RDK S100 远程连接
 
 本目录保存 RDK S100 远程连接课程的中文演示页、讲课稿、预览图和动效视频。
 
@@ -18,4 +18,4 @@
 ## 在线入口
 
 - [课程讲义](https://d-robotics.github.io/rdk-course-demos/zh/beginner/06-remote-connection-s100/)
-- [中文演示页源文件](./slides-s100.zh.html)
+- [中文演示页源文件](slides-s100.zh.html)
