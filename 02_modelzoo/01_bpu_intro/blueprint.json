@@ -1,0 +1,4492 @@
+{
+ "meta": {
+  "title": "RDK Classroom | Chapter 2, Lesson 1: Getting to Know the BPU",
+  "lang": "en",
+  "mode": "deck",
+  "tag": "RDK Classroom 2-01",
+  "footer": "Getting to Know the BPU",
+  "theme": {},
+  "logo_full": "d-robotics-logo-full-en.png"
+ },
+ "slides": [
+  {
+   "layout": "cover",
+   "title": "Cover",
+   "eyebrow": "<style>\n.slide[data-title=\"Cover\"]{background:#F4F5F7}\n.slide[data-title=\"Cover\"] .bg-white{background:#F4F5F7}\n.slide[data-title=\"Cover\"] .blob,.slide[data-title=\"Cover\"] .logo,.slide[data-title=\"Cover\"] .tag-tr,.slide[data-title=\"Cover\"] .hero .ring,.slide[data-title=\"Cover\"] .eyebrow>svg{display:none}\n.slide[data-title=\"Cover\"] .bg::before{content:\"\";position:absolute;left:960px;top:0;width:960px;height:1080px;\n  background-image:radial-gradient(#DADCE0 2.2px,transparent 2.6px);background-size:36px 36px;\n  -webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 30%,#000 100%);mask-image:linear-gradient(90deg,transparent 0%,#000 30%,#000 100%)}\n.slide[data-title=\"Cover\"] .bg::after{content:\"\";position:absolute;left:1060px;top:180px;width:720px;height:720px;border-radius:50%;\n  background:radial-gradient(circle,rgba(255,90,0,.20) 0%,rgba(0,0,0,0) 68%)}\n.slide[data-title=\"Cover\"] .cv-left{left:0;top:0;bottom:0;width:1920px;padding:40px 0 0 280px;justify-content:center;align-items:flex-start}\n.slide[data-title=\"Cover\"] .eyebrow.lg{display:flex;align-items:center;gap:18px;height:56px;font:600 46px/1 var(--dg-font-display);letter-spacing:0;color:#3C4043;white-space:nowrap}\n.slide[data-title=\"Cover\"] .eyebrow.lg::before{content:\"\";width:14px;height:56px;border-radius:7px;background:#FF5A00;flex:none}\n.slide[data-title=\"Cover\"] .eyebrow .cv-ln{color:#FF3C00}\n.slide[data-title=\"Cover\"] .eyebrow .cv-dot{color:#5F6368}\n.slide[data-title=\"Cover\"] .cv-title{margin-top:34px;max-width:760px;font:700 184px/1.0 var(--dg-font-display);letter-spacing:0;white-space:nowrap;color:#202124}\n.slide[data-title=\"Cover\"] .cv-title .hl{font-weight:800;color:#FF3C00}\n.slide[data-title=\"Cover\"] .cv-lead{margin-top:40px;max-width:760px;font:600 54px/1.25 var(--dg-font-display);color:#3C4043;white-space:nowrap}\n.slide[data-title=\"Cover\"] .cv-lead::before{content:\"\";display:block;width:120px;height:10px;border-radius:5px;background:#FF5A00;margin-bottom:34px}\n.slide[data-title=\"Cover\"] .cv-tags{position:absolute;left:0;top:0;width:1920px;height:0;margin:0}\n.slide[data-title=\"Cover\"] .cv-tags .pill{position:absolute;top:96px;height:68px;display:flex;align-items:center;padding:0;border:0;border-radius:0;background:none}\n.slide[data-title=\"Cover\"] .cv-tags .pill:nth-child(1){left:280px}\n.slide[data-title=\"Cover\"] .cv-lock{display:flex;align-items:center;gap:28px;height:68px}\n.slide[data-title=\"Cover\"] .cv-lock img{height:56px;width:auto;display:block}\n.slide[data-title=\"Cover\"] .cv-lock .bar{width:3px;height:52px;background:#DADCE0}\n.slide[data-title=\"Cover\"] .cv-lock .ser{font:700 52px/1 var(--dg-font-display);letter-spacing:.5px;color:#202124}\n.slide[data-title=\"Cover\"] .cv-tags .pill:nth-child(2){right:280px;padding:0 30px;border-radius:16px;background:#FF5A00;color:#FFFFFF;font:800 46px/1 var(--dg-font-display);letter-spacing:1px}\n.slide[data-title=\"Cover\"] .hero{left:1070px;top:270px;width:600px;height:600px;filter:drop-shadow(0 30px 50px rgba(0,0,0,.16))}\n.slide[data-title=\"Cover\"] .hero .hc{left:0;top:0;width:600px;height:600px;border-radius:0;background:none;box-shadow:none;display:block}\n.slide[data-title=\"Cover\"] .hero .hc b,.slide[data-title=\"Cover\"] .cv-chip{display:block;width:600px;height:600px}\n.slide[data-title=\"Cover\"] .hero .hc span{display:none}\n</style><span>Chapter 2</span><span class=\"cv-dot\">·</span><span>Model Zoo</span><span class=\"cv-dot\">|</span><span class=\"cv-ln\">Lesson 1</span>",
+   "heading": "Meet the<br>==BPU==",
+   "lead": "Why convert + quantize first?",
+   "tags": [
+    {
+     "text": "<span class=\"cv-lock\"><img src=\"data:image/png;base64,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\" alt=\"D-Robotics\"><i class=\"bar\"></i><span class=\"ser\">RDK Classroom</span></span>"
+    },
+    "2-01"
+   ],
+   "hero": {
+    "center": "<svg class=\"cv-chip\" viewBox=\"0 0 600 600\" xmlns=\"http://www.w3.org/2000/svg\"><defs><filter id=\"cv-ps\" x=\"-20%\" y=\"-30%\" width=\"140%\" height=\"160%\"><feDropShadow dx=\"0\" dy=\"6\" stdDeviation=\"10\" flood-color=\"#000\" flood-opacity=\".22\"/></filter></defs><rect x=\"124\" y=\"22\" width=\"16\" height=\"44\" rx=\"5\" fill=\"#C4C8CE\"/><rect x=\"124\" y=\"534\" width=\"16\" height=\"44\" rx=\"5\" fill=\"#C4C8CE\"/><rect x=\"534\" y=\"124\" width=\"44\" height=\"16\" rx=\"5\" fill=\"#C4C8CE\"/><rect x=\"166\" y=\"22\" width=\"16\" height=\"44\" rx=\"5\" fill=\"#C4C8CE\"/><rect x=\"166\" y=\"534\" width=\"16\" height=\"44\" rx=\"5\" fill=\"#C4C8CE\"/><rect x=\"534\" y=\"166\" width=\"44\" height=\"16\" rx=\"5\" fill=\"#C4C8CE\"/><rect x=\"208\" y=\"22\" width=\"16\" height=\"44\" rx=\"5\" fill=\"#C4C8CE\"/><rect x=\"208\" y=\"534\" width=\"16\" height=\"44\" rx=\"5\" fill=\"#C4C8CE\"/><rect x=\"534\" y=\"208\" width=\"44\" height=\"16\" rx=\"5\" fill=\"#C4C8CE\"/><rect x=\"250\" y=\"22\" width=\"16\" height=\"44\" rx=\"5\" fill=\"#C4C8CE\"/><rect x=\"250\" y=\"534\" width=\"16\" height=\"44\" rx=\"5\" fill=\"#C4C8CE\"/><rect x=\"534\" y=\"250\" width=\"44\" height=\"16\" rx=\"5\" fill=\"#C4C8CE\"/><rect x=\"292\" y=\"22\" width=\"16\" height=\"44\" rx=\"5\" fill=\"#C4C8CE\"/><rect x=\"292\" y=\"534\" width=\"16\" height=\"44\" rx=\"5\" fill=\"#C4C8CE\"/><rect x=\"534\" y=\"292\" width=\"44\" height=\"16\" rx=\"5\" fill=\"#C4C8CE\"/><rect x=\"334\" y=\"22\" width=\"16\" height=\"44\" rx=\"5\" fill=\"#C4C8CE\"/><rect x=\"334\" y=\"534\" width=\"16\" height=\"44\" rx=\"5\" fill=\"#C4C8CE\"/><rect x=\"534\" y=\"334\" width=\"44\" height=\"16\" rx=\"5\" fill=\"#C4C8CE\"/><rect x=\"376\" y=\"22\" width=\"16\" height=\"44\" rx=\"5\" fill=\"#C4C8CE\"/><rect x=\"376\" y=\"534\" width=\"16\" height=\"44\" rx=\"5\" fill=\"#C4C8CE\"/><rect x=\"534\" y=\"376\" width=\"44\" height=\"16\" rx=\"5\" fill=\"#C4C8CE\"/><rect x=\"418\" y=\"22\" width=\"16\" height=\"44\" rx=\"5\" fill=\"#C4C8CE\"/><rect x=\"418\" y=\"534\" width=\"16\" height=\"44\" rx=\"5\" fill=\"#C4C8CE\"/><rect x=\"534\" y=\"418\" width=\"44\" height=\"16\" rx=\"5\" fill=\"#C4C8CE\"/><rect x=\"460\" y=\"22\" width=\"16\" height=\"44\" rx=\"5\" fill=\"#C4C8CE\"/><rect x=\"460\" y=\"534\" width=\"16\" height=\"44\" rx=\"5\" fill=\"#C4C8CE\"/><rect x=\"534\" y=\"460\" width=\"44\" height=\"16\" rx=\"5\" fill=\"#C4C8CE\"/><rect x=\"22\" y=\"124\" width=\"44\" height=\"16\" rx=\"5\" fill=\"#C4C8CE\"/><rect x=\"22\" y=\"166\" width=\"44\" height=\"16\" rx=\"5\" fill=\"#C4C8CE\"/><rect x=\"22\" y=\"208\" width=\"44\" height=\"16\" rx=\"5\" fill=\"#C4C8CE\"/><rect x=\"22\" y=\"250\" width=\"44\" height=\"16\" rx=\"5\" fill=\"#1A73E8\"/><rect x=\"22\" y=\"292\" width=\"44\" height=\"16\" rx=\"5\" fill=\"#1A73E8\"/><rect x=\"22\" y=\"334\" width=\"44\" height=\"16\" rx=\"5\" fill=\"#1A73E8\"/><rect x=\"22\" y=\"376\" width=\"44\" height=\"16\" rx=\"5\" fill=\"#C4C8CE\"/><rect x=\"22\" y=\"418\" width=\"44\" height=\"16\" rx=\"5\" fill=\"#C4C8CE\"/><rect x=\"22\" y=\"460\" width=\"44\" height=\"16\" rx=\"5\" fill=\"#C4C8CE\"/><rect x=\"60\" y=\"60\" width=\"480\" height=\"480\" rx=\"56\" fill=\"#FFFFFF\" stroke=\"#E3E5E8\" stroke-width=\"3\"/><rect x=\"112\" y=\"112\" width=\"376\" height=\"376\" rx=\"30\" fill=\"#FFF3EA\" stroke=\"#FF5A00\" stroke-width=\"4\"/><rect x=\"133.5\" y=\"133.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"167.5\" y=\"133.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"201.5\" y=\"133.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"235.5\" y=\"133.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"269.5\" y=\"133.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF8A3D\"/><rect x=\"303.5\" y=\"133.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF8A3D\"/><rect x=\"337.5\" y=\"133.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FFD9C2\"/><rect x=\"371.5\" y=\"133.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"405.5\" y=\"133.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"439.5\" y=\"133.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"133.5\" y=\"167.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"167.5\" y=\"167.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"201.5\" y=\"167.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"235.5\" y=\"167.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF8A3D\"/><rect x=\"269.5\" y=\"167.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF8A3D\"/><rect x=\"303.5\" y=\"167.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FFD9C2\"/><rect x=\"337.5\" y=\"167.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"371.5\" y=\"167.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"405.5\" y=\"167.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"439.5\" y=\"167.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"133.5\" y=\"201.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"167.5\" y=\"201.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"201.5\" y=\"201.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF8A3D\"/><rect x=\"235.5\" y=\"201.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF8A3D\"/><rect x=\"269.5\" y=\"201.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FFD9C2\"/><rect x=\"303.5\" y=\"201.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"337.5\" y=\"201.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"371.5\" y=\"201.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"405.5\" y=\"201.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"439.5\" y=\"201.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF8A3D\"/><rect x=\"133.5\" y=\"235.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"167.5\" y=\"235.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF8A3D\"/><rect x=\"201.5\" y=\"235.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF8A3D\"/><rect x=\"235.5\" y=\"235.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FFD9C2\"/><rect x=\"269.5\" y=\"235.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"303.5\" y=\"235.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"337.5\" y=\"235.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"371.5\" y=\"235.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"405.5\" y=\"235.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF8A3D\"/><rect x=\"439.5\" y=\"235.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF8A3D\"/><rect x=\"133.5\" y=\"269.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF8A3D\"/><rect x=\"167.5\" y=\"269.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF8A3D\"/><rect x=\"201.5\" y=\"269.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FFD9C2\"/><rect x=\"235.5\" y=\"269.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"269.5\" y=\"269.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"303.5\" y=\"269.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"337.5\" y=\"269.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"371.5\" y=\"269.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF8A3D\"/><rect x=\"405.5\" y=\"269.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF8A3D\"/><rect x=\"439.5\" y=\"269.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FFD9C2\"/><rect x=\"133.5\" y=\"303.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF8A3D\"/><rect x=\"167.5\" y=\"303.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FFD9C2\"/><rect x=\"201.5\" y=\"303.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"235.5\" y=\"303.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"269.5\" y=\"303.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"303.5\" y=\"303.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"337.5\" y=\"303.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF8A3D\"/><rect x=\"371.5\" y=\"303.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF8A3D\"/><rect x=\"405.5\" y=\"303.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FFD9C2\"/><rect x=\"439.5\" y=\"303.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"133.5\" y=\"337.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FFD9C2\"/><rect x=\"167.5\" y=\"337.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"201.5\" y=\"337.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"235.5\" y=\"337.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"269.5\" y=\"337.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"303.5\" y=\"337.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF8A3D\"/><rect x=\"337.5\" y=\"337.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF8A3D\"/><rect x=\"371.5\" y=\"337.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FFD9C2\"/><rect x=\"405.5\" y=\"337.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"439.5\" y=\"337.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"133.5\" y=\"371.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"167.5\" y=\"371.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"201.5\" y=\"371.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"235.5\" y=\"371.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"269.5\" y=\"371.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF8A3D\"/><rect x=\"303.5\" y=\"371.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF8A3D\"/><rect x=\"337.5\" y=\"371.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FFD9C2\"/><rect x=\"371.5\" y=\"371.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"405.5\" y=\"371.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"439.5\" y=\"371.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"133.5\" y=\"405.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"167.5\" y=\"405.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"201.5\" y=\"405.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"235.5\" y=\"405.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF8A3D\"/><rect x=\"269.5\" y=\"405.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF8A3D\"/><rect x=\"303.5\" y=\"405.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FFD9C2\"/><rect x=\"337.5\" y=\"405.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"371.5\" y=\"405.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"405.5\" y=\"405.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"439.5\" y=\"405.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"133.5\" y=\"439.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"167.5\" y=\"439.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"201.5\" y=\"439.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF8A3D\"/><rect x=\"235.5\" y=\"439.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF8A3D\"/><rect x=\"269.5\" y=\"439.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FFD9C2\"/><rect x=\"303.5\" y=\"439.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"337.5\" y=\"439.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"371.5\" y=\"439.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"405.5\" y=\"439.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF5A00\"/><rect x=\"439.5\" y=\"439.5\" width=\"27\" height=\"27\" rx=\"6\" fill=\"#FF8A3D\"/><rect x=\"196\" y=\"250\" width=\"208\" height=\"100\" rx=\"22\" fill=\"#FFFFFF\" filter=\"url(#cv-ps)\"/><text x=\"300\" y=\"322\" text-anchor=\"middle\" font-family=\"DG Sans, Outfit, sans-serif\" font-weight=\"800\" font-size=\"70\" fill=\"#FF3C00\" letter-spacing=\"2\">BPU</text></svg>",
+    "caption": "",
+    "nodes": []
+   },
+   "notes": "Hi everyone, and welcome to Chapter 2 of RDK Classroom. This chapter is all about Model Zoo, and in this first lesson, we'll get to know the BPU. In Chapter 1, we got the board up and running, and we used the camera and the display. So what's next? How do we get the board to actually understand what it sees? That's the job of a dedicated unit on the chip that runs neural networks: the BPU. In this one video, we'll cover four boards at once: RDK X5, S100, S100P and S600."
+  },
+  {
+   "layout": "cards",
+   "title": "This lesson",
+   "eyebrow": "Why This Lesson",
+   "heading": "This lesson answers ==three questions==",
+   "lead": "Same ResNet-18: about 2.7 ms of pure inference on X5, about 0.39 ms on S600. So why can't you just copy the .pt from your PC to the board and run it?",
+   "cols": 3,
+   "cards": [
+    {
+     "num": "01",
+     "title": "What is the BPU?",
+     "text": "A unit built to run neural networks. How does it split the work with the CPU?"
+    },
+    {
+     "num": "02",
+     "title": "Why convert + quantize?",
+     "text": "Why must a float model be quantized and compiled before it runs on the board?"
+    },
+    {
+     "num": "03",
+     "title": "How to see the BPU at work",
+     "text": "One command on the board shows model info and inference speed."
+    }
+   ],
+   "notes": "Let's start with a contrast. Take the same ResNet-18 classification model. On RDK X5, pure inference takes about 2.7 milliseconds. On S600, it takes only about 0.39 milliseconds. But here's the thing: why can't you just copy the .pt file you trained on your computer onto the board and run it? Keep that question in mind. In this lesson, we'll answer three questions. First, what is the BPU? Second, why does a model have to be converted and quantized before it can run on the board? And third, how can you see the BPU at work, right there on the board?"
+  },
+  {
+   "layout": "links",
+   "title": "Resources",
+   "eyebrow": "Resources",
+   "heading": "Course materials and official links",
+   "items": [
+    {
+     "k": "RDK Model Zoo",
+     "d": "The star of this chapter: converted models, inference code and conversion recipes",
+     "url": "https://github.com/D-Robotics/rdk_model_zoo"
+    },
+    {
+     "k": "RDK Resource Center",
+     "d": "Board manuals and algorithm toolchain docs",
+     "url": "https://developer.d-robotics.cc/rdk_doc_center/en"
+    },
+    {
+     "k": "X5 · PTQ workflow",
+     "d": "Five stages, quantization, calibration, op checks",
+     "url": "https://developer.d-robotics.cc/oe_x5_doc/en/oe_mapper/source/ptq/ptq_workflow.html"
+    },
+    {
+     "k": "S series · hb_compile",
+     "d": "Model validation and compiling for S100 / S100P / S600",
+     "url": "https://developer.d-robotics.cc/oe_s_doc/en/guide/ptq/ptq_tool/hb_compile"
+    },
+    {
+     "k": "hrt_model_exec guide",
+     "d": "View model info and test performance on the board",
+     "url": "https://developer.d-robotics.cc/oe_s_doc/en/guide/ucp/runtime/tool_introduction/hrt_model_exec"
+    },
+    {
+     "k": "RDK Classroom",
+     "d": "English tutorials and course demos",
+     "url": "https://d-robotics.github.io/rdk-course-demos/"
+    }
+   ],
+   "notes": "Before we start, let's get our resources ready. The star of this chapter is RDK Model Zoo, on GitHub. For concept questions, head to the RDK Resource Center and check the algorithm toolchain docs. For X5, read \"PTQ Conversion Principle and Process\". For the S series, read the hb_compile tool page. And for how to use the on-board commands, see the hrt_model_exec tool guide. For this lesson, you don't need the toolchain on your computer. All you need is a board you can log into over SSH, with internet access."
+  },
+  {
+   "layout": "section",
+   "title": "Section 01",
+   "num": "01",
+   "heading": "What is the BPU?",
+   "sub": "CPU vs. BPU roles, and each board's architecture"
+  },
+  {
+   "layout": "cards",
+   "title": "Division of labor",
+   "eyebrow": "Division of Labor",
+   "heading": "CPU, BPU and GPU: who does what",
+   "lead": "The BPU (Brain Processing Unit) is the unit on D-Robotics chips built to accelerate neural network inference.",
+   "cols": 3,
+   "cards": [
+    {
+     "icon": "terminal",
+     "tone": "blue",
+     "title": "CPU",
+     "text": "General logic, preprocessing and postprocessing, like resizing, drawing boxes and NMS."
+    },
+    {
+     "icon": "network",
+     "tone": "orange",
+     "title": "BPU",
+     "text": "Massive, repetitive fixed-point math like convolutions and matrix multiplications.",
+     "focus": true
+    },
+    {
+     "icon": "film",
+     "tone": "green",
+     "title": "GPU",
+     "text": "S100 has a Mali-G78AE. It's not the focus of this chapter."
+    }
+   ],
+   "notes": "First, what is the BPU? BPU stands for Brain Processing Unit. It's the unit on D-Robotics chips that's built to accelerate neural network inference. And Model Zoo is a set of AI model deployment examples that run on the BPU. So how does the BPU split the work with the CPU? Put simply, the CPU handles general logic, plus preprocessing and postprocessing, like resizing images, drawing boxes and running NMS. The BPU handles the massive, repetitive fixed-point math, like convolutions and matrix multiplications. S100 also has a Mali GPU, but that's not the focus of this chapter. On the next slide, let's watch how they work together."
+  },
+  {
+   "layout": "diagram",
+   "title": "CPU + BPU",
+   "eyebrow": "Division of Labor",
+   "heading": "How the CPU and BPU ==work together==",
+   "height": 560,
+   "scene": [
+    {
+     "type": "box",
+     "id": "cpu",
+     "x": 40,
+     "y": 30,
+     "w": 600,
+     "h": 500,
+     "label": "CPU",
+     "kind": "cpu",
+     "sub": "General logic · pre/postprocessing",
+     "align": "tl",
+     "icon": "terminal",
+     "size": 34
+    },
+    {
+     "type": "box",
+     "id": "bpu",
+     "x": 960,
+     "y": 30,
+     "w": 600,
+     "h": 500,
+     "label": "BPU",
+     "kind": "bpu",
+     "sub": "Neural network inference · fixed-point math",
+     "align": "tl",
+     "icon": "network",
+     "size": 34
+    },
+    {
+     "type": "box",
+     "id": "c1",
+     "x": 80,
+     "y": 160,
+     "w": 250,
+     "h": 150,
+     "label": "Resize",
+     "kind": "neutral",
+     "sub": "Preprocess",
+     "icon": "search"
+    },
+    {
+     "type": "box",
+     "id": "c2",
+     "x": 350,
+     "y": 160,
+     "w": 250,
+     "h": 150,
+     "label": "To NV12",
+     "kind": "neutral",
+     "sub": "Preprocess",
+     "icon": "layers"
+    },
+    {
+     "type": "box",
+     "id": "c3",
+     "x": 80,
+     "y": 340,
+     "w": 250,
+     "h": 150,
+     "label": "NMS",
+     "kind": "neutral",
+     "sub": "Postprocess",
+     "icon": "list-checks"
+    },
+    {
+     "type": "box",
+     "id": "c4",
+     "x": 350,
+     "y": 340,
+     "w": 250,
+     "h": 150,
+     "label": "Draw boxes",
+     "kind": "neutral",
+     "sub": "Postprocess",
+     "icon": "grid"
+    },
+    {
+     "type": "grid",
+     "id": "mac",
+     "x": 1012,
+     "y": 160,
+     "cols": 14,
+     "rows": 8,
+     "cell": 28,
+     "gap": 8
+    },
+    {
+     "type": "text",
+     "id": "mact",
+     "x": 1260,
+     "y": 490,
+     "text": "MAC array: multiply-adds for conv and matmul",
+     "size": 24,
+     "color": "accent",
+     "weight": 700
+    },
+    {
+     "type": "arrow",
+     "id": "a1",
+     "points": [
+      [
+       640,
+       220
+      ],
+      [
+       958,
+       220
+      ]
+     ],
+     "mode": "flow",
+     "color": "orange",
+     "label": "Input tensor",
+     "label_at": [
+      800,
+      280
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "a2",
+     "points": [
+      [
+       960,
+       400
+      ],
+      [
+       642,
+       400
+      ]
+     ],
+     "mode": "flow",
+     "color": "blue",
+     "label": "Output tensor",
+     "label_at": [
+      800,
+      460
+     ]
+    },
+    {
+     "type": "token",
+     "id": "t1",
+     "x": 700,
+     "y": 220,
+     "label": "NV12",
+     "w": 118,
+     "mono": true,
+     "kind": "dark"
+    },
+    {
+     "type": "token",
+     "id": "t2",
+     "x": 900,
+     "y": 400,
+     "label": "Output",
+     "w": 100,
+     "kind": "bpu"
+    }
+   ],
+   "steps": [
+    {
+     "at": 0,
+     "show": [
+      "cpu",
+      "bpu"
+     ],
+     "caption": "On one chip, the CPU and BPU split the work"
+    },
+    {
+     "at": 1100,
+     "show": [
+      "c1",
+      "c2",
+      "c3",
+      "c4",
+      "mac",
+      "mact"
+     ]
+    },
+    {
+     "at": 2300,
+     "camera": [
+      20,
+      15,
+      640,
+      530
+     ],
+     "focus": [
+      "cpu",
+      "c1",
+      "c2"
+     ],
+     "state": {
+      "c1": "cpu",
+      "c2": "cpu"
+     },
+     "on": [
+      "c1",
+      "c2"
+     ],
+     "caption": "First, the CPU preprocesses: it resizes the image and converts it to NV12"
+    },
+    {
+     "at": 4800,
+     "camera": "home",
+     "focus": null,
+     "show": [
+      "a1",
+      "t1"
+     ],
+     "move": [
+      {
+       "id": "t1",
+       "path": [
+        [
+         700,
+         220
+        ],
+        [
+         890,
+         220
+        ]
+       ],
+       "speed": 0.25
+      }
+     ],
+     "caption": "The prepared tensor goes to the BPU"
+    },
+    {
+     "at": 6600,
+     "camera": [
+      940,
+      15,
+      640,
+      530
+     ],
+     "focus": [
+      "bpu",
+      "mac",
+      "mact"
+     ],
+     "on": [
+      "mac"
+     ],
+     "caption": "The BPU runs the repetitive fixed-point math: many multiply-add units work at once"
+    },
+    {
+     "at": 9800,
+     "camera": "home",
+     "focus": null,
+     "show": [
+      "a2",
+      "t2"
+     ],
+     "move": [
+      {
+       "id": "t2",
+       "path": [
+        [
+         900,
+         400
+        ],
+        [
+         710,
+         400
+        ]
+       ],
+       "speed": 0.25
+      }
+     ],
+     "caption": "The inference result goes back to the CPU"
+    },
+    {
+     "at": 11500,
+     "focus": [
+      "cpu",
+      "c3",
+      "c4",
+      "a2",
+      "t2"
+     ],
+     "state": {
+      "c3": "cpu",
+      "c4": "cpu"
+     },
+     "on": [
+      "c3",
+      "c4"
+     ],
+     "caption": "Then the CPU postprocesses: NMS and drawing boxes"
+    },
+    {
+     "at": 13600,
+     "focus": null,
+     "caption": "CPU: general logic and pre/postprocessing. BPU: the heaviest fixed-point math"
+    }
+   ],
+   "notes": "Let's see this division of labor in action. On the left is the CPU, and on the right is the BPU. When a frame comes in, the CPU preprocesses it first: it resizes the image and converts it to NV12 format. Then the prepared tensor is handed to the BPU. Inside the BPU are whole arrays of multiply-add units. That's where the massive, repetitive fixed-point math, like convolutions and matrix multiplications, all happens at the same time. The inference result then goes back to the CPU for postprocessing, like NMS and drawing boxes. So remember: the CPU handles general logic plus pre- and postprocessing, and the BPU focuses on the heaviest fixed-point math."
+  },
+  {
+   "layout": "diagram",
+   "title": "Pipeline",
+   "eyebrow": "Pipeline",
+   "heading": "The journey of ==one frame==",
+   "height": 560,
+   "scene": [
+    {
+     "type": "arrow",
+     "id": "track",
+     "points": [
+      [
+       100,
+       470
+      ],
+      [
+       1500,
+       470
+      ]
+     ],
+     "mode": "flow",
+     "head": true
+    },
+    {
+     "type": "box",
+     "id": "s1",
+     "x": 40,
+     "y": 150,
+     "w": 230,
+     "h": 200,
+     "label": "Camera",
+     "kind": "neutral",
+     "sub": "Captures image",
+     "icon": "video"
+    },
+    {
+     "type": "box",
+     "id": "s2",
+     "x": 330,
+     "y": 150,
+     "w": 260,
+     "h": 200,
+     "label": "CPU preprocess",
+     "kind": "cpu",
+     "sub": "Resize, to NV12",
+     "icon": "terminal"
+    },
+    {
+     "type": "box",
+     "id": "s3",
+     "x": 650,
+     "y": 95,
+     "w": 330,
+     "h": 310,
+     "label": "BPU inference",
+     "kind": "bpu",
+     "sub": "BPU subgraph",
+     "align": "tl",
+     "icon": "network",
+     "size": 30
+    },
+    {
+     "type": "grid",
+     "id": "g3",
+     "x": 683,
+     "y": 205,
+     "cols": 8,
+     "rows": 5,
+     "cell": 26,
+     "gap": 8
+    },
+    {
+     "type": "box",
+     "id": "s4",
+     "x": 1040,
+     "y": 150,
+     "w": 260,
+     "h": 200,
+     "label": "CPU postprocess",
+     "kind": "cpu",
+     "sub": "Draw boxes, NMS",
+     "icon": "list-checks"
+    },
+    {
+     "type": "box",
+     "id": "s5",
+     "x": 1360,
+     "y": 150,
+     "w": 200,
+     "h": 200,
+     "label": "Screen",
+     "kind": "neutral",
+     "sub": "Shows result",
+     "icon": "eye"
+    },
+    {
+     "type": "arrow",
+     "id": "b1",
+     "points": [
+      [
+       272,
+       250
+      ],
+      [
+       326,
+       250
+      ]
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "b2",
+     "points": [
+      [
+       592,
+       250
+      ],
+      [
+       646,
+       250
+      ]
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "b3",
+     "points": [
+      [
+       982,
+       250
+      ],
+      [
+       1036,
+       250
+      ]
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "b4",
+     "points": [
+      [
+       1302,
+       250
+      ],
+      [
+       1356,
+       250
+      ]
+     ]
+    },
+    {
+     "type": "band",
+     "id": "band",
+     "x": 632,
+     "y": 77,
+     "w": 366,
+     "h": 346,
+     "label": "The heaviest part",
+     "label_at": [
+      815,
+      62
+     ],
+     "anchor": "middle"
+    },
+    {
+     "type": "token",
+     "id": "tk",
+     "x": 155,
+     "y": 470,
+     "label": "Image",
+     "w": 180,
+     "h": 48,
+     "size": 22
+    }
+   ],
+   "steps": [
+    {
+     "at": 0,
+     "show": [
+      "s1",
+      "s2",
+      "s3",
+      "g3",
+      "s4",
+      "s5",
+      "b1",
+      "b2",
+      "b3",
+      "b4"
+     ],
+     "caption": "Each frame goes through five stages in order"
+    },
+    {
+     "at": 1400,
+     "show": [
+      "track",
+      "tk"
+     ],
+     "focus": [
+      "s1",
+      "tk",
+      "track"
+     ],
+     "caption": "The camera captures a frame"
+    },
+    {
+     "at": 2800,
+     "focus": [
+      "s2",
+      "tk",
+      "track"
+     ],
+     "move": [
+      {
+       "id": "tk",
+       "path": [
+        [
+         155,
+         470
+        ],
+        [
+         460,
+         470
+        ]
+       ]
+      }
+     ],
+     "on": [
+      "s2"
+     ],
+     "caption": "The CPU resizes it and converts it to NV12"
+    },
+    {
+     "at": 3600,
+     "text": {
+      "tk": "NV12"
+     }
+    },
+    {
+     "at": 5000,
+     "focus": [
+      "s3",
+      "g3",
+      "tk",
+      "track"
+     ],
+     "move": [
+      {
+       "id": "tk",
+       "path": [
+        [
+         460,
+         470
+        ],
+        [
+         815,
+         470
+        ]
+       ]
+      }
+     ],
+     "camera": [
+      560,
+      40,
+      520,
+      480
+     ],
+     "caption": "Then the BPU runs inference"
+    },
+    {
+     "at": 5900,
+     "on": [
+      "g3"
+     ]
+    },
+    {
+     "at": 8200,
+     "camera": "home",
+     "text": {
+      "tk": "Output tensor"
+     },
+     "focus": [
+      "s4",
+      "tk",
+      "track"
+     ],
+     "on": [
+      "s4"
+     ],
+     "move": [
+      {
+       "id": "tk",
+       "path": [
+        [
+         815,
+         470
+        ],
+        [
+         1170,
+         470
+        ]
+       ]
+      }
+     ],
+     "caption": "The result goes back to the CPU: draw boxes, NMS"
+    },
+    {
+     "at": 10200,
+     "text": {
+      "tk": "Detections"
+     },
+     "focus": [
+      "s5",
+      "tk",
+      "track"
+     ],
+     "move": [
+      {
+       "id": "tk",
+       "path": [
+        [
+         1170,
+         470
+        ],
+        [
+         1460,
+         470
+        ]
+       ]
+      }
+     ],
+     "caption": "Finally, it's shown on the screen"
+    },
+    {
+     "at": 12000,
+     "focus": null,
+     "show": [
+      "band"
+     ],
+     "caption": "The BPU only handles the heaviest part, in the middle"
+    }
+   ],
+   "notes": "Now let's follow a single frame through this division of labor. It's a pipeline. Follow this little tag. The camera captures a frame. The CPU resizes it and converts it to NV12 format. Then it's handed to the BPU for inference. Watch the multiply-add units in the BPU light up together. The result goes back to the CPU for postprocessing, like drawing boxes and NMS. And finally, it's shown on the screen. Notice that the BPU only handles the heaviest part in the middle. Both ends are still handled by the CPU."
+  },
+  {
+   "layout": "diagram",
+   "title": "Heterogeneous model",
+   "eyebrow": "Heterogeneous Model",
+   "heading": "Not all of a model runs on the BPU",
+   "height": 600,
+   "scene": [
+    {
+     "type": "text",
+     "id": "la",
+     "x": 40,
+     "y": 62,
+     "text": "Split by the toolchain",
+     "size": 26,
+     "weight": 700,
+     "anchor": "start"
+    },
+    {
+     "type": "arrow",
+     "id": "eA",
+     "points": [
+      [
+       60,
+       160
+      ],
+      [
+       1580,
+       160
+      ]
+     ],
+     "mode": "flow",
+     "head": false
+    },
+    {
+     "type": "box",
+     "id": "a0",
+     "x": 32,
+     "y": 115,
+     "w": 166,
+     "h": 90,
+     "label": "Input",
+     "kind": "neutral",
+     "size": 26,
+     "sub_size": 18
+    },
+    {
+     "type": "box",
+     "id": "a1",
+     "x": 207,
+     "y": 115,
+     "w": 166,
+     "h": 90,
+     "label": "Quantize",
+     "kind": "neutral",
+     "size": 26,
+     "sub_size": 18
+    },
+    {
+     "type": "box",
+     "id": "a2",
+     "x": 382,
+     "y": 115,
+     "w": 166,
+     "h": 90,
+     "label": "Conv",
+     "kind": "neutral",
+     "size": 26,
+     "sub_size": 18
+    },
+    {
+     "type": "box",
+     "id": "a3",
+     "x": 557,
+     "y": 115,
+     "w": 166,
+     "h": 90,
+     "label": "Conv",
+     "kind": "neutral",
+     "size": 26,
+     "sub_size": 18
+    },
+    {
+     "type": "box",
+     "id": "a4",
+     "x": 732,
+     "y": 115,
+     "w": 166,
+     "h": 90,
+     "label": "Conv",
+     "kind": "neutral",
+     "size": 26,
+     "sub_size": 18
+    },
+    {
+     "type": "box",
+     "id": "a5",
+     "x": 907,
+     "y": 115,
+     "w": 166,
+     "h": 90,
+     "label": "fc7",
+     "kind": "neutral",
+     "size": 26,
+     "sub_size": 18
+    },
+    {
+     "type": "box",
+     "id": "a6",
+     "x": 1082,
+     "y": 115,
+     "w": 166,
+     "h": 90,
+     "label": "Dequantize",
+     "kind": "neutral",
+     "size": 26,
+     "sub_size": 18
+    },
+    {
+     "type": "box",
+     "id": "a7",
+     "x": 1257,
+     "y": 115,
+     "w": 166,
+     "h": 90,
+     "label": "Softmax",
+     "kind": "neutral",
+     "sub": "prob",
+     "size": 26,
+     "sub_size": 18
+    },
+    {
+     "type": "box",
+     "id": "a8",
+     "x": 1432,
+     "y": 115,
+     "w": 166,
+     "h": 90,
+     "label": "Output",
+     "kind": "neutral",
+     "size": 26,
+     "sub_size": 18
+    },
+    {
+     "type": "band",
+     "id": "bA",
+     "x": 376,
+     "y": 100,
+     "w": 703,
+     "h": 120,
+     "label": "BPU subgraph",
+     "label_at": [
+      392,
+      88
+     ]
+    },
+    {
+     "type": "text",
+     "id": "swA",
+     "x": 1580,
+     "y": 62,
+     "text": "CPU ↔ BPU switches: 2",
+     "size": 24,
+     "weight": 700,
+     "anchor": "end",
+     "color": "blue"
+    },
+    {
+     "type": "text",
+     "id": "lb",
+     "x": 40,
+     "y": 328,
+     "text": "More fragmented: one op in the middle exceeds a limit and falls back to the CPU",
+     "size": 26,
+     "weight": 700,
+     "anchor": "start"
+    },
+    {
+     "type": "arrow",
+     "id": "eB",
+     "points": [
+      [
+       60,
+       434
+      ],
+      [
+       1580,
+       434
+      ]
+     ],
+     "mode": "flow",
+     "head": false
+    },
+    {
+     "type": "box",
+     "id": "b0",
+     "x": 32,
+     "y": 389,
+     "w": 166,
+     "h": 90,
+     "label": "Input",
+     "kind": "neutral",
+     "size": 26,
+     "sub_size": 18
+    },
+    {
+     "type": "box",
+     "id": "b1",
+     "x": 207,
+     "y": 389,
+     "w": 166,
+     "h": 90,
+     "label": "Quantize",
+     "kind": "neutral",
+     "size": 26,
+     "sub_size": 18
+    },
+    {
+     "type": "box",
+     "id": "b2",
+     "x": 382,
+     "y": 389,
+     "w": 166,
+     "h": 90,
+     "label": "Conv",
+     "kind": "neutral",
+     "size": 26,
+     "sub_size": 18
+    },
+    {
+     "type": "box",
+     "id": "b3",
+     "x": 557,
+     "y": 389,
+     "w": 166,
+     "h": 90,
+     "label": "Over limit",
+     "kind": "neutral",
+     "sub": "CPU fallback",
+     "size": 26,
+     "sub_size": 18
+    },
+    {
+     "type": "box",
+     "id": "b4",
+     "x": 732,
+     "y": 389,
+     "w": 166,
+     "h": 90,
+     "label": "Conv",
+     "kind": "neutral",
+     "size": 26,
+     "sub_size": 18
+    },
+    {
+     "type": "box",
+     "id": "b5",
+     "x": 907,
+     "y": 389,
+     "w": 166,
+     "h": 90,
+     "label": "fc7",
+     "kind": "neutral",
+     "size": 26,
+     "sub_size": 18
+    },
+    {
+     "type": "box",
+     "id": "b6",
+     "x": 1082,
+     "y": 389,
+     "w": 166,
+     "h": 90,
+     "label": "Dequantize",
+     "kind": "neutral",
+     "size": 26,
+     "sub_size": 18
+    },
+    {
+     "type": "box",
+     "id": "b7",
+     "x": 1257,
+     "y": 389,
+     "w": 166,
+     "h": 90,
+     "label": "Softmax",
+     "kind": "neutral",
+     "sub": "prob",
+     "size": 26,
+     "sub_size": 18
+    },
+    {
+     "type": "box",
+     "id": "b8",
+     "x": 1432,
+     "y": 389,
+     "w": 166,
+     "h": 90,
+     "label": "Output",
+     "kind": "neutral",
+     "size": 26,
+     "sub_size": 18
+    },
+    {
+     "type": "band",
+     "id": "bB1",
+     "x": 376,
+     "y": 374,
+     "w": 178,
+     "h": 120,
+     "label": "BPU subgraph 1",
+     "label_at": [
+      392,
+      362
+     ]
+    },
+    {
+     "type": "band",
+     "id": "bB2",
+     "x": 726,
+     "y": 374,
+     "w": 353,
+     "h": 120,
+     "label": "BPU subgraph 2",
+     "label_at": [
+      742,
+      362
+     ]
+    },
+    {
+     "type": "text",
+     "id": "swB",
+     "x": 1580,
+     "y": 336,
+     "text": "CPU ↔ BPU switches: 4",
+     "size": 24,
+     "weight": 700,
+     "anchor": "end",
+     "color": "blue"
+    },
+    {
+     "type": "token",
+     "id": "tA",
+     "x": 115,
+     "y": 248,
+     "label": "Data",
+     "w": 76,
+     "h": 36,
+     "size": 18,
+     "kind": "light",
+     "rest": "hide"
+    },
+    {
+     "type": "token",
+     "id": "tB",
+     "x": 115,
+     "y": 518,
+     "label": "Data",
+     "w": 76,
+     "h": 36,
+     "size": 18,
+     "kind": "light",
+     "rest": "hide"
+    },
+    {
+     "type": "box",
+     "id": "lg1",
+     "x": 1100,
+     "y": 552,
+     "w": 22,
+     "h": 22,
+     "label": "",
+     "kind": "bpu",
+     "on": true,
+     "shadow": false,
+     "r": 6
+    },
+    {
+     "type": "text",
+     "id": "lg1t",
+     "x": 1132,
+     "y": 571,
+     "text": "BPU subgraph",
+     "size": 22,
+     "anchor": "start",
+     "color": "ink3"
+    },
+    {
+     "type": "box",
+     "id": "lg2",
+     "x": 1318,
+     "y": 552,
+     "w": 22,
+     "h": 22,
+     "label": "",
+     "kind": "cpu",
+     "on": true,
+     "shadow": false,
+     "r": 6
+    },
+    {
+     "type": "text",
+     "id": "lg2t",
+     "x": 1350,
+     "y": 571,
+     "text": "CPU node",
+     "size": 22,
+     "anchor": "start",
+     "color": "ink3"
+    }
+   ],
+   "steps": [
+    {
+     "at": 0,
+     "show": [
+      "la",
+      "eA",
+      "a0",
+      "a1",
+      "a2",
+      "a3",
+      "a4",
+      "a5",
+      "a6",
+      "a7",
+      "a8"
+     ],
+     "caption": "The compute graph of a classification model"
+    },
+    {
+     "at": 1400,
+     "state": {
+      "a0": "ghost",
+      "a1": "cpu",
+      "a2": "bpu",
+      "a3": "bpu",
+      "a4": "bpu",
+      "a5": "bpu",
+      "a6": "cpu",
+      "a7": "cpu",
+      "a8": "ghost"
+     },
+     "on": [
+      "a1",
+      "a2",
+      "a3",
+      "a4",
+      "a5",
+      "a6",
+      "a7"
+     ],
+     "show": [
+      "lg1",
+      "lg1t",
+      "lg2",
+      "lg2t"
+     ],
+     "caption": "The toolchain splits it into BPU subgraphs and CPU nodes"
+    },
+    {
+     "at": 2600,
+     "show": [
+      "bA"
+     ],
+     "caption": "From the convs to fc7, it all runs on the BPU; Softmax (prob) runs on the CPU"
+    },
+    {
+     "at": 4600,
+     "camera": [
+      20,
+      30,
+      560,
+      230
+     ],
+     "focus": [
+      "a0",
+      "a1",
+      "a2",
+      "eA",
+      "bA"
+     ],
+     "caption": "At the input end, the CPU takes part in quantization"
+    },
+    {
+     "at": 6300,
+     "camera": [
+      1030,
+      30,
+      560,
+      230
+     ],
+     "focus": [
+      "a6",
+      "a7",
+      "a8",
+      "a5",
+      "eA",
+      "bA"
+     ],
+     "caption": "At the output end: dequantization, and the final Softmax is on the CPU too"
+    },
+    {
+     "at": 8300,
+     "camera": "home",
+     "focus": null,
+     "show": [
+      "lb",
+      "eB",
+      "b0",
+      "b1",
+      "b2",
+      "b3",
+      "b4",
+      "b5",
+      "b6",
+      "b7",
+      "b8"
+     ],
+     "caption": "What if an op in the middle exceeds a limit…"
+    },
+    {
+     "at": 9600,
+     "state": {
+      "b0": "ghost",
+      "b1": "cpu",
+      "b2": "bpu",
+      "b3": "cpu",
+      "b4": "bpu",
+      "b5": "bpu",
+      "b6": "cpu",
+      "b7": "cpu",
+      "b8": "ghost"
+     },
+     "on": [
+      "b1",
+      "b2",
+      "b3",
+      "b4",
+      "b5",
+      "b6",
+      "b7"
+     ],
+     "show": [
+      "bB1",
+      "bB2"
+     ],
+     "caption": "It falls back to the CPU, and the BPU subgraph splits in two"
+    },
+    {
+     "at": 11300,
+     "show": [
+      "swA",
+      "swB",
+      "tA",
+      "tB"
+     ],
+     "move": [
+      {
+       "id": "tA",
+       "path": [
+        [
+         115,
+         248
+        ],
+        [
+         377,
+         248,
+         700
+        ],
+        [
+         1077,
+         248,
+         700
+        ],
+        [
+         1515,
+         248
+        ]
+       ],
+       "speed": 0.45
+      },
+      {
+       "id": "tB",
+       "path": [
+        [
+         115,
+         518
+        ],
+        [
+         377,
+         518,
+         700
+        ],
+        [
+         552,
+         518,
+         700
+        ],
+        [
+         727,
+         518,
+         700
+        ],
+        [
+         1077,
+         518,
+         700
+        ],
+        [
+         1515,
+         518
+        ]
+       ],
+       "speed": 0.45
+      }
+     ],
+     "caption": "Each CPU / BPU boundary crossing is a switch, so the lower row is slower"
+    },
+    {
+     "at": 17000,
+     "focus": null,
+     "caption": "More CPU nodes and a more fragmented BPU subgraph mean slower speed"
+    }
+   ],
+   "notes": "One more thing to watch for: a model doesn't always run entirely on the BPU. The toolchain splits the model into BPU subgraphs and CPU nodes. This is called a hybrid heterogeneous model. Look at the top row. Everything from the convolutions all the way to the fully connected layer, fc7, runs on the BPU as one solid BPU subgraph. The quantization at the input end, the dequantization at the output end, and the final Softmax all run on the CPU. Now look at the bottom row. If an operator in the middle exceeds a limit and falls back to the CPU, the BPU subgraph gets split in two. Every time data crosses the boundary between the CPU and the BPU, there's a switch, so the bottom row is noticeably slower. The model checker tells you, operator by operator, which ones go on the BPU and which go on the CPU. That tool runs on your computer, so we'll try it hands-on in Part 3 of this chapter."
+  },
+  {
+   "layout": "diagram",
+   "title": "Four boards",
+   "eyebrow": "Four Boards",
+   "heading": "The BPU on ==all four boards==",
+   "height": 615,
+   "scene": [
+    {
+     "type": "photo",
+     "id": "p_x5",
+     "x": 97.0,
+     "y": 138,
+     "w": 206,
+     "h": 162,
+     "src": "assets/boards/rdk_x5.png"
+    },
+    {
+     "type": "text",
+     "id": "n_x5",
+     "x": 200,
+     "y": 350,
+     "text": "RDK X5",
+     "size": 32,
+     "weight": 700
+    },
+    {
+     "type": "text",
+     "id": "a_x5",
+     "x": 200,
+     "y": 388,
+     "text": "Bayes-e · 1 core",
+     "size": 24,
+     "color": "ink3"
+    },
+    {
+     "type": "text",
+     "id": "m_x5",
+     "x": 200,
+     "y": 418,
+     "text": "march bayes-e",
+     "size": 20,
+     "font": "mono",
+     "color": "ink3"
+    },
+    {
+     "type": "box",
+     "id": "c_x50",
+     "x": 180,
+     "y": 436,
+     "w": 40,
+     "h": 40,
+     "label": "",
+     "kind": "bpu",
+     "shadow": false,
+     "r": 10
+    },
+    {
+     "type": "text",
+     "id": "t_x5",
+     "x": 200,
+     "y": 530,
+     "text": "10 TOPS",
+     "size": 40,
+     "weight": 800,
+     "color": "accent"
+    },
+    {
+     "type": "text",
+     "id": "f_x5",
+     "x": 200,
+     "y": 592,
+     "text": "hb_mapper → .bin",
+     "size": 21,
+     "font": "mono",
+     "color": "accent",
+     "weight": 700
+    },
+    {
+     "type": "photo",
+     "id": "p_s100",
+     "x": 462.0,
+     "y": 108,
+     "w": 276,
+     "h": 192,
+     "src": "assets/boards/rdk_s100.png"
+    },
+    {
+     "type": "text",
+     "id": "n_s100",
+     "x": 600,
+     "y": 350,
+     "text": "RDK S100",
+     "size": 32,
+     "weight": 700
+    },
+    {
+     "type": "text",
+     "id": "a_s100",
+     "x": 600,
+     "y": 388,
+     "text": "Nash-e · 1 core",
+     "size": 24,
+     "color": "ink3"
+    },
+    {
+     "type": "text",
+     "id": "m_s100",
+     "x": 600,
+     "y": 418,
+     "text": "march nash-e",
+     "size": 20,
+     "font": "mono",
+     "color": "ink3"
+    },
+    {
+     "type": "box",
+     "id": "c_s1000",
+     "x": 580,
+     "y": 436,
+     "w": 40,
+     "h": 40,
+     "label": "",
+     "kind": "bpu",
+     "shadow": false,
+     "r": 10
+    },
+    {
+     "type": "text",
+     "id": "t_s100",
+     "x": 600,
+     "y": 530,
+     "text": "80 TOPS",
+     "size": 40,
+     "weight": 800,
+     "color": "accent"
+    },
+    {
+     "type": "text",
+     "id": "f_s100",
+     "x": 600,
+     "y": 592,
+     "text": "hb_compile → .hbm",
+     "size": 21,
+     "font": "mono",
+     "color": "blue",
+     "weight": 700
+    },
+    {
+     "type": "photo",
+     "id": "p_s100p",
+     "x": 862.0,
+     "y": 108,
+     "w": 276,
+     "h": 192,
+     "src": "assets/boards/rdk_s100p.png"
+    },
+    {
+     "type": "text",
+     "id": "n_s100p",
+     "x": 1000,
+     "y": 350,
+     "text": "RDK S100P",
+     "size": 32,
+     "weight": 700
+    },
+    {
+     "type": "text",
+     "id": "a_s100p",
+     "x": 1000,
+     "y": 388,
+     "text": "Nash-m · 1 core",
+     "size": 24,
+     "color": "ink3"
+    },
+    {
+     "type": "text",
+     "id": "m_s100p",
+     "x": 1000,
+     "y": 418,
+     "text": "march nash-m",
+     "size": 20,
+     "font": "mono",
+     "color": "ink3"
+    },
+    {
+     "type": "box",
+     "id": "c_s100p0",
+     "x": 980,
+     "y": 436,
+     "w": 40,
+     "h": 40,
+     "label": "",
+     "kind": "bpu",
+     "shadow": false,
+     "r": 10
+    },
+    {
+     "type": "text",
+     "id": "t_s100p",
+     "x": 1000,
+     "y": 530,
+     "text": "128 TOPS",
+     "size": 40,
+     "weight": 800,
+     "color": "accent"
+    },
+    {
+     "type": "text",
+     "id": "f_s100p",
+     "x": 1000,
+     "y": 592,
+     "text": "hb_compile → .hbm",
+     "size": 21,
+     "font": "mono",
+     "color": "blue",
+     "weight": 700
+    },
+    {
+     "type": "photo",
+     "id": "p_s600",
+     "x": 1242.0,
+     "y": 16,
+     "w": 316,
+     "h": 284,
+     "src": "assets/boards/rdk_s600.png"
+    },
+    {
+     "type": "text",
+     "id": "n_s600",
+     "x": 1400,
+     "y": 350,
+     "text": "RDK S600",
+     "size": 32,
+     "weight": 700
+    },
+    {
+     "type": "text",
+     "id": "a_s600",
+     "x": 1400,
+     "y": 388,
+     "text": "Nash-p · 4 cores",
+     "size": 24,
+     "color": "ink3"
+    },
+    {
+     "type": "text",
+     "id": "m_s600",
+     "x": 1400,
+     "y": 418,
+     "text": "march nash-p",
+     "size": 20,
+     "font": "mono",
+     "color": "ink3"
+    },
+    {
+     "type": "box",
+     "id": "c_s6000",
+     "x": 1302,
+     "y": 436,
+     "w": 40,
+     "h": 40,
+     "label": "",
+     "kind": "bpu",
+     "shadow": false,
+     "r": 10
+    },
+    {
+     "type": "text",
+     "id": "cl_s6000",
+     "x": 1322,
+     "y": 496,
+     "text": "bpu0",
+     "size": 16,
+     "font": "mono",
+     "color": "ink3"
+    },
+    {
+     "type": "box",
+     "id": "c_s6001",
+     "x": 1354,
+     "y": 436,
+     "w": 40,
+     "h": 40,
+     "label": "",
+     "kind": "bpu",
+     "shadow": false,
+     "r": 10
+    },
+    {
+     "type": "text",
+     "id": "cl_s6001",
+     "x": 1374,
+     "y": 496,
+     "text": "bpu1",
+     "size": 16,
+     "font": "mono",
+     "color": "ink3"
+    },
+    {
+     "type": "box",
+     "id": "c_s6002",
+     "x": 1406,
+     "y": 436,
+     "w": 40,
+     "h": 40,
+     "label": "",
+     "kind": "bpu",
+     "shadow": false,
+     "r": 10
+    },
+    {
+     "type": "text",
+     "id": "cl_s6002",
+     "x": 1426,
+     "y": 496,
+     "text": "bpu2",
+     "size": 16,
+     "font": "mono",
+     "color": "ink3"
+    },
+    {
+     "type": "box",
+     "id": "c_s6003",
+     "x": 1458,
+     "y": 436,
+     "w": 40,
+     "h": 40,
+     "label": "",
+     "kind": "bpu",
+     "shadow": false,
+     "r": 10
+    },
+    {
+     "type": "text",
+     "id": "cl_s6003",
+     "x": 1478,
+     "y": 496,
+     "text": "bpu3",
+     "size": 16,
+     "font": "mono",
+     "color": "ink3"
+    },
+    {
+     "type": "text",
+     "id": "t_s600",
+     "x": 1400,
+     "y": 548,
+     "text": "Up to 560 TOPS",
+     "size": 40,
+     "weight": 800,
+     "color": "accent"
+    },
+    {
+     "type": "text",
+     "id": "f_s600",
+     "x": 1400,
+     "y": 592,
+     "text": "hb_compile → .hbm",
+     "size": 21,
+     "font": "mono",
+     "color": "blue",
+     "weight": 700
+    }
+   ],
+   "steps": [
+    {
+     "at": 0,
+     "show": [
+      "p_x5",
+      "n_x5"
+     ],
+     "caption": "Same name, BPU, but the four boards differ in architecture and compute"
+    },
+    {
+     "at": 1000,
+     "show": [
+      "p_s100",
+      "n_s100"
+     ]
+    },
+    {
+     "at": 2000,
+     "show": [
+      "p_s100p",
+      "n_s100p"
+     ]
+    },
+    {
+     "at": 3000,
+     "show": [
+      "p_s600",
+      "n_s600"
+     ]
+    },
+    {
+     "at": 4500,
+     "show": [
+      "a_x5",
+      "m_x5"
+     ],
+     "caption": "X5 is Bayes-e; S boards are Nash-e / Nash-m / Nash-p. Configs use the march name"
+    },
+    {
+     "at": 5700,
+     "show": [
+      "c_x50"
+     ],
+     "caption": "Each square is one BPU core"
+    },
+    {
+     "at": 7200,
+     "on": [
+      "c_x50"
+     ],
+     "show": [
+      "t_x5"
+     ],
+     "focus": [
+      "p_x5",
+      "n_x5",
+      "a_x5",
+      "m_x5",
+      "t_x5",
+      "c_x50",
+      "f_x5"
+     ],
+     "caption": "RDK X5: 1 core, 10 TOPS"
+    },
+    {
+     "at": 8400,
+     "show": [
+      "f_x5"
+     ]
+    },
+    {
+     "at": 10000,
+     "show": [
+      "a_s100",
+      "m_s100"
+     ],
+     "focus": [
+      "p_s100",
+      "n_s100",
+      "a_s100",
+      "m_s100",
+      "t_s100",
+      "c_s1000"
+     ],
+     "caption": "RDK S100: 1 core, 80 TOPS"
+    },
+    {
+     "at": 11200,
+     "show": [
+      "c_s1000",
+      "t_s100"
+     ],
+     "on": [
+      "c_s1000"
+     ]
+    },
+    {
+     "at": 12600,
+     "show": [
+      "a_s100p",
+      "m_s100p"
+     ],
+     "focus": [
+      "p_s100p",
+      "n_s100p",
+      "a_s100p",
+      "m_s100p",
+      "t_s100p",
+      "c_s100p0"
+     ],
+     "caption": "RDK S100P: 1 core, 128 TOPS"
+    },
+    {
+     "at": 13800,
+     "show": [
+      "c_s100p0",
+      "t_s100p"
+     ],
+     "on": [
+      "c_s100p0"
+     ]
+    },
+    {
+     "at": 15200,
+     "camera": [
+      1000,
+      0,
+      600,
+      615
+     ],
+     "show": [
+      "a_s600",
+      "m_s600"
+     ],
+     "focus": [
+      "p_s600",
+      "n_s600",
+      "a_s600",
+      "m_s600",
+      "c_s6000",
+      "cl_s6000",
+      "c_s6001",
+      "cl_s6001",
+      "c_s6002",
+      "cl_s6002",
+      "c_s6003",
+      "cl_s6003"
+     ],
+     "caption": "RDK S600 has 4 BPU cores: bpu0–bpu3"
+    },
+    {
+     "at": 16400,
+     "show": [
+      "c_s6000",
+      "cl_s6000",
+      "c_s6001",
+      "cl_s6001",
+      "c_s6002",
+      "cl_s6002",
+      "c_s6003",
+      "cl_s6003"
+     ]
+    },
+    {
+     "at": 17800,
+     "on": [
+      "c_s6000",
+      "c_s6001",
+      "c_s6002",
+      "c_s6003"
+     ],
+     "show": [
+      "t_s600"
+     ],
+     "focus": [
+      "p_s600",
+      "n_s600",
+      "a_s600",
+      "m_s600",
+      "t_s600",
+      "c_s6000",
+      "cl_s6000",
+      "c_s6001",
+      "cl_s6001",
+      "c_s6002",
+      "cl_s6002",
+      "c_s6003",
+      "cl_s6003"
+     ],
+     "caption": "4 BPU cores, up to 560 TOPS in total"
+    },
+    {
+     "at": 21000,
+     "camera": "home",
+     "focus": null,
+     "show": [
+      "f_s100",
+      "f_s100p",
+      "f_s600"
+     ],
+     "caption": "X5 uses hb_mapper to produce .bin; the S series uses hb_compile to produce .hbm"
+    },
+    {
+     "at": 23300,
+     "caption": "Remember your board's march and model format. Every lesson after this uses them"
+    }
+   ],
+   "notes": "Next, let's meet the BPU on each of the four boards. RDK X5 uses the Bayes-e architecture, with one core and 10 tops. You convert models for it with hb_mapper, and the on-board model is a .bin file. S100 is Nash-e, with one core and 80 tops. S100P is Nash-m, with one core and 128 tops. And S600 is Nash-p, with four BPU cores and up to 560 tops. All three S-series boards convert models with hb_compile, the on-board model is a .hbm file, and they share the same toolchain image. As for toolchain version numbers, see the toolchain docs."
+  },
+  {
+   "layout": "diagram",
+   "title": "Model formats",
+   "eyebrow": "Model Format",
+   "heading": "Model formats ==can't be mixed==",
+   "height": 620,
+   "scene": [
+    {
+     "type": "box",
+     "id": "bS100",
+     "x": 60,
+     "y": 92,
+     "w": 430,
+     "h": 150,
+     "label": "RDK S100",
+     "kind": "neutral",
+     "sub": "nash-e · needs .hbm",
+     "icon": "chip",
+     "size": 30,
+     "sub_size": 21
+    },
+    {
+     "type": "box",
+     "id": "bS100P",
+     "x": 585,
+     "y": 92,
+     "w": 430,
+     "h": 150,
+     "label": "RDK S100P",
+     "kind": "neutral",
+     "sub": "nash-m · needs a nash-m .hbm",
+     "icon": "chip",
+     "size": 30,
+     "sub_size": 21
+    },
+    {
+     "type": "box",
+     "id": "bX5",
+     "x": 1110,
+     "y": 92,
+     "w": 430,
+     "h": 150,
+     "label": "RDK X5",
+     "kind": "neutral",
+     "sub": "bayes-e · needs .bin",
+     "icon": "chip",
+     "size": 30,
+     "sub_size": 21
+    },
+    {
+     "type": "token",
+     "id": "k1",
+     "x": 275,
+     "y": 18,
+     "label": "X5's .bin",
+     "w": 170,
+     "h": 42,
+     "size": 21,
+     "kind": "bpu"
+    },
+    {
+     "type": "token",
+     "id": "k2",
+     "x": 800,
+     "y": 18,
+     "label": "S100's .hbm",
+     "w": 190,
+     "h": 42,
+     "size": 21,
+     "kind": "cpu"
+    },
+    {
+     "type": "token",
+     "id": "k3",
+     "x": 1325,
+     "y": 18,
+     "label": ".hbm",
+     "w": 170,
+     "h": 42,
+     "size": 21,
+     "kind": "cpu",
+     "mono": true
+    },
+    {
+     "type": "text",
+     "id": "x1",
+     "x": 275,
+     "y": 284,
+     "text": "✗ X5's .bin won't run on the S series",
+     "size": 23,
+     "weight": 700,
+     "color": "red"
+    },
+    {
+     "type": "text",
+     "id": "x2",
+     "x": 800,
+     "y": 284,
+     "text": "✗ S100P can't use S100's .hbm either",
+     "size": 23,
+     "weight": 700,
+     "color": "red"
+    },
+    {
+     "type": "text",
+     "id": "x3",
+     "x": 1325,
+     "y": 284,
+     "text": "✗ Never rename .hbm to pass as .bin",
+     "size": 23,
+     "weight": 700,
+     "color": "red"
+    },
+    {
+     "type": "text",
+     "id": "inl",
+     "x": 60,
+     "y": 345,
+     "text": "Inputs differ too (Model Zoo ResNet-18)",
+     "size": 26,
+     "weight": 700,
+     "anchor": "start"
+    },
+    {
+     "type": "box",
+     "id": "iX",
+     "x": 60,
+     "y": 375,
+     "w": 560,
+     "h": 150,
+     "label": "data",
+     "kind": "bpu",
+     "sub": "1×3×224×224 · one packed NV12 tensor",
+     "mono": true,
+     "size": 30,
+     "sub_size": 21
+    },
+    {
+     "type": "text",
+     "id": "iXt",
+     "x": 340,
+     "y": 560,
+     "text": "RDK X5: 1 input",
+     "size": 22,
+     "color": "ink3"
+    },
+    {
+     "type": "box",
+     "id": "iY",
+     "x": 720,
+     "y": 375,
+     "w": 400,
+     "h": 150,
+     "label": "data_y",
+     "kind": "cpu",
+     "sub": "Y plane · (1, 224, 224, 1)",
+     "mono": true,
+     "size": 30,
+     "sub_size": 21
+    },
+    {
+     "type": "box",
+     "id": "iUV",
+     "x": 1140,
+     "y": 375,
+     "w": 400,
+     "h": 150,
+     "label": "data_uv",
+     "kind": "cpu",
+     "sub": "UV plane · (1, 112, 112, 2)",
+     "mono": true,
+     "size": 30,
+     "sub_size": 21
+    },
+    {
+     "type": "text",
+     "id": "iSt",
+     "x": 1130,
+     "y": 560,
+     "text": "S series: 2 inputs, Y and UV",
+     "size": 22,
+     "color": "ink3"
+    },
+    {
+     "type": "text",
+     "id": "qat",
+     "x": 800,
+     "y": 604,
+     "text": "Exception: X5 via QAT produces .hbm (not covered in this chapter)",
+     "size": 19,
+     "color": "ink4"
+    }
+   ],
+   "steps": [
+    {
+     "at": 0,
+     "show": [
+      "bS100",
+      "bS100P",
+      "bX5"
+     ],
+     "caption": "Models can't be mixed across the four boards"
+    },
+    {
+     "at": 1200,
+     "show": [
+      "k1"
+     ],
+     "move": [
+      {
+       "id": "k1",
+       "path": [
+        [
+         275,
+         18
+        ],
+        [
+         275,
+         18,
+         300
+        ],
+        [
+         275,
+         92
+        ]
+       ],
+       "speed": 0.3
+      }
+     ],
+     "focus": [
+      "bS100",
+      "k1"
+     ],
+     "caption": "Take X5's .bin to an S100…"
+    },
+    {
+     "at": 2500,
+     "state": {
+      "bS100": "bad"
+     },
+     "show": [
+      "x1"
+     ],
+     "focus": [
+      "bS100",
+      "k1",
+      "x1"
+     ],
+     "caption": "It won't run: X5's .bin can't run on the S series"
+    },
+    {
+     "at": 4200,
+     "show": [
+      "k2"
+     ],
+     "move": [
+      {
+       "id": "k2",
+       "path": [
+        [
+         800,
+         18
+        ],
+        [
+         800,
+         18,
+         300
+        ],
+        [
+         800,
+         92
+        ]
+       ],
+       "speed": 0.3
+      }
+     ],
+     "focus": [
+      "bS100P",
+      "k2"
+     ],
+     "caption": "Both are S series, so give S100's .hbm to an S100P…"
+    },
+    {
+     "at": 5500,
+     "state": {
+      "bS100P": "bad"
+     },
+     "show": [
+      "x2"
+     ],
+     "focus": [
+      "bS100P",
+      "k2",
+      "x2"
+     ],
+     "caption": "No luck: the march is different (nash-e ≠ nash-m)"
+    },
+    {
+     "at": 7200,
+     "show": [
+      "k3"
+     ],
+     "focus": [
+      "bX5",
+      "k3"
+     ],
+     "caption": "Rename a .hbm to pass it off as a .bin…"
+    },
+    {
+     "at": 8300,
+     "text": {
+      "k3": ".bin ?"
+     },
+     "state": {
+      "k3": "bad"
+     }
+    },
+    {
+     "at": 9000,
+     "move": [
+      {
+       "id": "k3",
+       "path": [
+        [
+         1325,
+         18
+        ],
+        [
+         1325,
+         92
+        ]
+       ],
+       "speed": 0.3
+      }
+     ],
+     "focus": [
+      "bX5",
+      "k3"
+     ]
+    },
+    {
+     "at": 9700,
+     "state": {
+      "bX5": "bad"
+     },
+     "show": [
+      "x3"
+     ],
+     "focus": [
+      "bX5",
+      "k3",
+      "x3"
+     ],
+     "caption": "Strictly forbidden: renaming doesn't change the model"
+    },
+    {
+     "at": 11500,
+     "focus": null,
+     "show": [
+      "inl",
+      "iX",
+      "iXt"
+     ],
+     "camera": [
+      0,
+      300,
+      800,
+      330
+     ],
+     "caption": "X5 input: one packed NV12 tensor, data, 1×3×224×224"
+    },
+    {
+     "at": 14000,
+     "show": [
+      "iY",
+      "iUV",
+      "iSt"
+     ],
+     "camera": [
+      680,
+      300,
+      920,
+      330
+     ],
+     "caption": "S series: separate Y and UV tensors, data_y and data_uv"
+    },
+    {
+     "at": 16500,
+     "camera": "home",
+     "show": [
+      "qat"
+     ],
+     "caption": "One march, one format; S boards share a toolchain image. Versions: see the toolchain docs"
+    }
+   ],
+   "notes": "There are a few things you really need to remember here. First, models can't be mixed across the four boards. X5's .bin won't run on the S series, and S100P can't directly use S100's .hbm either. Second, never rename a .hbm file to pass it off as a .bin. That's strictly forbidden. Third, the inputs are different too. In Model Zoo's ResNet-18, the X5 model takes one packed NV12 tensor, called data, with a shape of 1 by 3 by 224 by 224. The S series takes two separate tensors for Y and UV: data_y is 1, 224, 224, 1, and data_uv is 1, 112, 112, 2. One exception worth mentioning: this course focuses on PTQ, and on X5, PTQ produces a .bin. If you take the QAT route on X5 instead, you get a .hbm. That's a different workflow, and we won't cover it in this chapter."
+  },
+  {
+   "layout": "code",
+   "title": "Board check",
+   "eyebrow": "Board Check",
+   "heading": "First, identify your board",
+   "lead": "Both commands work on all four boards and read the same files Model Zoo uses to detect the board.",
+   "blocks": [
+    {
+     "label": "① How many BPU cores",
+     "lines": [
+      "$ cat /sys/devices/system/bpu/core_num",
+      "$ ls /sys/devices/system/bpu/"
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "X5, S100 and S100P print 1. S600 prints 4, and you can see bpu0..bpu3."
+     }
+    },
+    {
+     "label": "② Which board",
+     "lines": [
+      "$ cat /sys/class/boardinfo/soc_name \\",
+      "  /sys/class/socinfo/soc_name \\",
+      "  2>/dev/null | tr -d '\\0'"
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "X5 prints X5U, X5H or X5M; the S&nbsp;series prints S100 / S100P / S600. <span style=\"white-space:nowrap\">--target auto</span> relies on it."
+     }
+    }
+   ],
+   "notes": "So how do you check which board you have? Two commands. The first one cats core_num to see how many BPU cores there are. X5, S100 and S100P all show 1. S600 shows 4, and you'll also see four directories, bpu0 through bpu3. The second command reads soc_name. X5 prints one of X5U, X5H or X5M, and the S-series boards print S100, S100P and S600. This command reads the same files, in the same order, that Model Zoo uses to detect the board automatically. So when you run a sample, just set target to auto and it works out the board on its own. You usually don't need to set it by hand."
+  },
+  {
+   "layout": "section",
+   "title": "Section 02",
+   "num": "02",
+   "heading": "Why convert and quantize?",
+   "sub": "float32 → int8, PTQ and QAT"
+  },
+  {
+   "layout": "diagram",
+   "title": "Quantization",
+   "eyebrow": "Quantization",
+   "heading": "Why ==convert + quantize==",
+   "height": 540,
+   "scene": [
+    {
+     "type": "images",
+     "id": "qimg",
+     "x": 40,
+     "y": 70,
+     "n": 10,
+     "cols": 5,
+     "w": 64,
+     "h": 48,
+     "gap": 10
+    },
+    {
+     "type": "text",
+     "id": "qimt",
+     "x": 40,
+     "y": 210,
+     "text": "Calibration images",
+     "size": 24,
+     "weight": 700,
+     "anchor": "start"
+    },
+    {
+     "type": "text",
+     "id": "qimt2",
+     "x": 40,
+     "y": 244,
+     "text": "X5 docs suggest 20–100",
+     "size": 20,
+     "anchor": "start",
+     "color": "ink3"
+    },
+    {
+     "type": "text",
+     "id": "qimt3",
+     "x": 40,
+     "y": 274,
+     "text": "Model Zoo ResNet: a fixed 200",
+     "size": 20,
+     "anchor": "start",
+     "color": "ink3"
+    },
+    {
+     "type": "arrow",
+     "id": "qa1",
+     "points": [
+      [
+       420,
+       140
+      ],
+      [
+       455,
+       140
+      ]
+     ]
+    },
+    {
+     "type": "text",
+     "id": "qht",
+     "x": 470,
+     "y": 40,
+     "text": "float32 values of one layer (illustrative)",
+     "size": 22,
+     "weight": 700,
+     "anchor": "start"
+    },
+    {
+     "type": "hist",
+     "id": "qh",
+     "x": 470,
+     "y": 70,
+     "w": 640,
+     "h": 200,
+     "values": [
+      6,
+      7,
+      8,
+      10,
+      13,
+      16,
+      20,
+      25,
+      31,
+      38,
+      45,
+      53,
+      61,
+      70,
+      78,
+      85,
+      92,
+      97,
+      101,
+      103,
+      103,
+      101,
+      97,
+      92,
+      85,
+      78,
+      70,
+      61,
+      53,
+      45,
+      38,
+      31,
+      25,
+      20,
+      16,
+      13,
+      10,
+      8,
+      7,
+      6
+     ],
+     "gap": 4
+    },
+    {
+     "type": "band",
+     "id": "qr",
+     "x": 456,
+     "y": 60,
+     "w": 668,
+     "h": 222,
+     "label": "Value range found by calibration",
+     "label_at": [
+      790.0,
+      322
+     ],
+     "anchor": "middle"
+    },
+    {
+     "type": "arrow",
+     "id": "qm1",
+     "points": [
+      [
+       456,
+       340
+      ],
+      [
+       456,
+       392
+      ]
+     ],
+     "color": "orange"
+    },
+    {
+     "type": "arrow",
+     "id": "qm2",
+     "points": [
+      [
+       1124,
+       340
+      ],
+      [
+       1124,
+       392
+      ]
+     ],
+     "color": "orange"
+    },
+    {
+     "type": "levels",
+     "id": "ql",
+     "x": 456,
+     "y": 400,
+     "w": 668,
+     "h": 46,
+     "n": 256
+    },
+    {
+     "type": "text",
+     "id": "qlt",
+     "x": 790.0,
+     "y": 484,
+     "text": "int8: 256 levels",
+     "size": 24,
+     "weight": 700,
+     "color": "accent"
+    },
+    {
+     "type": "text",
+     "id": "qlt2",
+     "x": 456,
+     "y": 484,
+     "text": "-128",
+     "size": 18,
+     "font": "mono",
+     "color": "ink3",
+     "anchor": "start"
+    },
+    {
+     "type": "text",
+     "id": "qlt3",
+     "x": 1124,
+     "y": 484,
+     "text": "127",
+     "size": 18,
+     "font": "mono",
+     "color": "ink3",
+     "anchor": "end"
+    },
+    {
+     "type": "text",
+     "id": "qbt",
+     "x": 1380,
+     "y": 70,
+     "text": "Each number",
+     "size": 24,
+     "weight": 700
+    },
+    {
+     "type": "bytes",
+     "id": "qf",
+     "x": 1255,
+     "y": 100,
+     "n": 4,
+     "cell": 50,
+     "gap": 10,
+     "label": "float32 · 4 bytes",
+     "kind": "f32"
+    },
+    {
+     "type": "arrow",
+     "id": "qa2",
+     "points": [
+      [
+       1380,
+       196
+      ],
+      [
+       1380,
+       236
+      ]
+     ],
+     "color": "orange"
+    },
+    {
+     "type": "bytes",
+     "id": "qi",
+     "x": 1355,
+     "y": 250,
+     "n": 1,
+     "cell": 50,
+     "gap": 10,
+     "label": "int8 · 1 byte",
+     "kind": "i8"
+    },
+    {
+     "type": "text",
+     "id": "qacc",
+     "x": 1380,
+     "y": 420,
+     "text": "Accuracy cost",
+     "size": 26,
+     "weight": 700
+    },
+    {
+     "type": "text",
+     "id": "qacc2",
+     "x": 1380,
+     "y": 456,
+     "text": "≤ 1% for most typical models",
+     "size": 21,
+     "color": "ink3"
+    }
+   ],
+   "steps": [
+    {
+     "at": 0,
+     "show": [
+      "qht",
+      "qh"
+     ],
+     "caption": "A trained model is float32. Here's one layer's value distribution (illustrative)"
+    },
+    {
+     "at": 1800,
+     "show": [
+      "qimg",
+      "qimt",
+      "qimt2",
+      "qimt3",
+      "qa1"
+     ],
+     "focus": [
+      "qimg",
+      "qimt",
+      "qimt2",
+      "qimt3",
+      "qa1",
+      "qh",
+      "qht"
+     ],
+     "caption": "Calibration: run a small batch of representative images"
+    },
+    {
+     "at": 4000,
+     "show": [
+      "qr"
+     ],
+     "focus": [
+      "qr",
+      "qh",
+      "qht"
+     ],
+     "caption": "Find this layer's value range"
+    },
+    {
+     "at": 5800,
+     "show": [
+      "qm1",
+      "qm2",
+      "ql",
+      "qlt",
+      "qlt2",
+      "qlt3"
+     ],
+     "focus": [
+      "qr",
+      "qh",
+      "qm1",
+      "qm2",
+      "ql",
+      "qlt",
+      "qlt2",
+      "qlt3"
+     ],
+     "caption": "Then map that range onto int8's 256 levels"
+    },
+    {
+     "at": 7600,
+     "on": [
+      "qh"
+     ],
+     "caption": "Each float32 value snaps to the nearest level: that's quantization"
+    },
+    {
+     "at": 9400,
+     "focus": [
+      "qbt",
+      "qf",
+      "qa2",
+      "qi"
+     ],
+     "show": [
+      "qbt",
+      "qf"
+     ],
+     "camera": [
+      1100,
+      20,
+      500,
+      500
+     ],
+     "caption": "Each number shrinks from 4 bytes to 1 byte"
+    },
+    {
+     "at": 10400,
+     "show": [
+      "qa2",
+      "qi"
+     ]
+    },
+    {
+     "at": 12200,
+     "show": [
+      "qacc",
+      "qacc2"
+     ],
+     "focus": [
+      "qacc",
+      "qacc2",
+      "qbt",
+      "qf",
+      "qa2",
+      "qi"
+     ],
+     "caption": "Far less compute. The cost: accuracy, with ≤ 1% loss for most typical models"
+    },
+    {
+     "at": 14600,
+     "camera": "home",
+     "focus": null,
+     "caption": "Quantization = set the range with calibration data, map float32 to int8"
+    }
+   ],
+   "notes": "OK, question two: why convert and quantize? A trained model is float32, so each number takes 4 bytes. After quantizing to int8, each number takes just 1 byte, which cuts the compute a lot. The trade-off is that accuracy may drop. According to the official docs, for most typical models, the accuracy loss can be kept within 1 percent. So how are the quantization parameters set? Through calibration: you run a small batch of representative images and record the value range of each layer. The X5 docs suggest preparing 20 to 100 images. Model Zoo's ResNet uses a fixed set of 200 images from COCO."
+  },
+  {
+   "layout": "cards",
+   "title": "Accuracy",
+   "eyebrow": "Accuracy",
+   "heading": "Checking accuracy after quantization",
+   "cols": 2,
+   "row": true,
+   "cards": [
+    {
+     "icon": "target",
+     "tone": "orange",
+     "title": "Cosine similarity",
+     "text": "Aim for ≥ 0.999 on every output node, and never below 0.99."
+    },
+    {
+     "icon": "list-checks",
+     "tone": "blue",
+     "title": "ResNet-18 example",
+     "text": "Float Top-1 59.35%; on-board X5 58.91%; on-board S100 58.79%."
+    },
+    {
+     "icon": "zap",
+     "tone": "green",
+     "title": "PTQ: post-training quantization",
+     "text": "The main path in this chapter. Start with PTQ by default."
+    },
+    {
+     "icon": "graduation-cap",
+     "tone": "yellow",
+     "title": "QAT: quantization-aware training",
+     "text": "Needs retraining and is harder. Consider it only if tuned PTQ still falls short."
+    }
+   ],
+   "notes": "Once you've quantized, how do you check accuracy? Model Zoo recommends a cosine similarity of 0.999 or higher for every output node, and never below 0.99. Here's an example. The float ResNet-18 model has a Top-1 accuracy of 59.35 percent. On X5, it's 58.91 percent, and on S100, 58.79 percent. That's a very small drop. There are two ways to quantize. PTQ, post-training quantization, is the main path in this chapter, and it's where you start by default. QAT, quantization-aware training, means retraining the model, and the bar is higher. Only consider it when you clearly need it, or when PTQ still isn't good enough after tuning."
+  },
+  {
+   "layout": "diagram",
+   "title": "Workflow",
+   "eyebrow": "Workflow",
+   "heading": "The official workflow: ==five stages==",
+   "height": 646,
+   "scene": [
+    {
+     "type": "box",
+     "id": "st0",
+     "x": 30,
+     "y": 22,
+     "w": 284,
+     "h": 96,
+     "label": "Float model prep",
+     "kind": "neutral",
+     "sub": "Train in PyTorch etc.",
+     "size": 26,
+     "sub_size": 19
+    },
+    {
+     "type": "box",
+     "id": "st1",
+     "x": 344,
+     "y": 22,
+     "w": 284,
+     "h": 96,
+     "label": "Model validation",
+     "kind": "neutral",
+     "sub": "Check op placement",
+     "size": 26,
+     "sub_size": 19
+    },
+    {
+     "type": "box",
+     "id": "st2",
+     "x": 658,
+     "y": 22,
+     "w": 284,
+     "h": 96,
+     "label": "Model conversion",
+     "kind": "neutral",
+     "sub": "Optimize, quantize, compile",
+     "size": 26,
+     "sub_size": 19
+    },
+    {
+     "type": "box",
+     "id": "st3",
+     "x": 972,
+     "y": 22,
+     "w": 284,
+     "h": 96,
+     "label": "Performance eval",
+     "kind": "neutral",
+     "sub": "Measured on board",
+     "size": 26,
+     "sub_size": 19
+    },
+    {
+     "type": "box",
+     "id": "st4",
+     "x": 1286,
+     "y": 22,
+     "w": 284,
+     "h": 96,
+     "label": "Accuracy eval",
+     "kind": "neutral",
+     "sub": "Compare with float",
+     "size": 26,
+     "sub_size": 19
+    },
+    {
+     "type": "arrow",
+     "id": "sa0",
+     "points": [
+      [
+       316,
+       70
+      ],
+      [
+       340,
+       70
+      ]
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "sa1",
+     "points": [
+      [
+       630,
+       70
+      ],
+      [
+       654,
+       70
+      ]
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "sa2",
+     "points": [
+      [
+       944,
+       70
+      ],
+      [
+       968,
+       70
+      ]
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "sa3",
+     "points": [
+      [
+       1258,
+       70
+      ],
+      [
+       1282,
+       70
+      ]
+     ]
+    },
+    {
+     "type": "text",
+     "id": "stn",
+     "x": 1570,
+     "y": 150,
+     "text": "The toolchain doesn't do training",
+     "size": 19,
+     "color": "ink3",
+     "anchor": "end"
+    },
+    {
+     "type": "arrow",
+     "id": "zl",
+     "points": [
+      [
+       658,
+       120
+      ],
+      [
+       40,
+       174
+      ]
+     ],
+     "head": false,
+     "color": "orange"
+    },
+    {
+     "type": "arrow",
+     "id": "zr",
+     "points": [
+      [
+       942,
+       120
+      ],
+      [
+       1245,
+       174
+      ]
+     ],
+     "head": false,
+     "color": "orange"
+    },
+    {
+     "type": "box",
+     "id": "dock",
+     "x": 30,
+     "y": 176,
+     "w": 1225,
+     "h": 459,
+     "label": "x86 PC · official Docker",
+     "kind": "frame",
+     "sub": "All conversion happens here",
+     "align": "tl",
+     "icon": "terminal",
+     "size": 28,
+     "sub_size": 20,
+     "sub_dx": 420,
+     "sub_dy": 0,
+     "shadow": false
+    },
+    {
+     "type": "box",
+     "id": "n1",
+     "x": 60,
+     "y": 266,
+     "w": 210,
+     "h": 126,
+     "label": ".pt / ONNX",
+     "kind": "neutral",
+     "sub": "float32 model",
+     "mono": true,
+     "size": 28
+    },
+    {
+     "type": "box",
+     "id": "n2",
+     "x": 300,
+     "y": 266,
+     "w": 210,
+     "h": 126,
+     "label": "Calibrate",
+     "kind": "neutral",
+     "sub": "Per-layer ranges",
+     "icon": "target",
+     "size": 28
+    },
+    {
+     "type": "box",
+     "id": "n3",
+     "x": 540,
+     "y": 266,
+     "w": 210,
+     "h": 126,
+     "label": "Quantize",
+     "kind": "neutral",
+     "sub": "float32 → int8",
+     "icon": "zap",
+     "size": 28
+    },
+    {
+     "type": "box",
+     "id": "n4",
+     "x": 780,
+     "y": 266,
+     "w": 180,
+     "h": 126,
+     "label": "Compile",
+     "kind": "neutral",
+     "sub": "Built per march",
+     "icon": "code",
+     "size": 28
+    },
+    {
+     "type": "arrow",
+     "id": "c12",
+     "points": [
+      [
+       272,
+       329
+      ],
+      [
+       296,
+       329
+      ]
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "c23",
+     "points": [
+      [
+       512,
+       329
+      ],
+      [
+       536,
+       329
+      ]
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "c34",
+     "points": [
+      [
+       752,
+       329
+      ],
+      [
+       776,
+       329
+      ]
+     ]
+    },
+    {
+     "type": "box",
+     "id": "o1",
+     "x": 1005,
+     "y": 226,
+     "w": 225,
+     "h": 108,
+     "label": ".bin",
+     "kind": "bpu",
+     "sub": "RDK X5 · bayes-e",
+     "mono": true,
+     "size": 30,
+     "sub_size": 19
+    },
+    {
+     "type": "box",
+     "id": "o2",
+     "x": 1005,
+     "y": 356,
+     "w": 225,
+     "h": 126,
+     "label": ".hbm",
+     "kind": "bpu",
+     "sub": "S100 / S100P / S600\nnash-e / nash-m / nash-p",
+     "mono": true,
+     "size": 30,
+     "sub_size": 18
+    },
+    {
+     "type": "arrow",
+     "id": "c4a",
+     "points": [
+      [
+       962,
+       311
+      ],
+      [
+       982,
+       311
+      ],
+      [
+       982,
+       280
+      ],
+      [
+       1001,
+       280
+      ]
+     ],
+     "color": "orange"
+    },
+    {
+     "type": "arrow",
+     "id": "c4b",
+     "points": [
+      [
+       962,
+       347
+      ],
+      [
+       982,
+       347
+      ],
+      [
+       982,
+       419
+      ],
+      [
+       1001,
+       419
+      ]
+     ],
+     "color": "orange"
+    },
+    {
+     "type": "images",
+     "id": "imgs",
+     "x": 70,
+     "y": 464,
+     "n": 10,
+     "cols": 5,
+     "w": 70,
+     "h": 46,
+     "gap": 10
+    },
+    {
+     "type": "text",
+     "id": "calt",
+     "x": 255,
+     "y": 608,
+     "text": "Representative images · 20–100 (X5 docs)",
+     "size": 21,
+     "color": "ink3"
+    },
+    {
+     "type": "text",
+     "id": "qt",
+     "x": 760,
+     "y": 471,
+     "text": "Each number: 4 bytes → 1 byte",
+     "size": 22,
+     "weight": 700,
+     "color": "accent"
+    },
+    {
+     "type": "bytes",
+     "id": "f32",
+     "x": 545,
+     "y": 509,
+     "n": 4,
+     "cell": 48,
+     "gap": 10,
+     "label": "float32",
+     "kind": "f32"
+    },
+    {
+     "type": "arrow",
+     "id": "qa",
+     "points": [
+      [
+       790,
+       531
+      ],
+      [
+       850,
+       531
+      ]
+     ],
+     "color": "orange"
+    },
+    {
+     "type": "bytes",
+     "id": "i8",
+     "x": 880,
+     "y": 509,
+     "n": 1,
+     "cell": 48,
+     "gap": 10,
+     "label": "int8",
+     "kind": "i8"
+    },
+    {
+     "type": "box",
+     "id": "board",
+     "x": 1295,
+     "y": 176,
+     "w": 275,
+     "h": 459,
+     "label": "RDK board",
+     "kind": "frame",
+     "sub": "Inference only",
+     "align": "tl",
+     "icon": "chip",
+     "size": 28,
+     "sub_size": 20,
+     "shadow": false
+    },
+    {
+     "type": "box",
+     "id": "r1",
+     "x": 1320,
+     "y": 284,
+     "w": 225,
+     "h": 135,
+     "label": "Inference",
+     "kind": "bpu",
+     "sub": "hbm_runtime",
+     "icon": "rocket",
+     "size": 26,
+     "sub_size": 20
+    },
+    {
+     "type": "box",
+     "id": "r2",
+     "x": 1320,
+     "y": 446,
+     "w": 225,
+     "h": 135,
+     "label": "Info & perf",
+     "kind": "neutral",
+     "sub": "hrt_model_exec",
+     "icon": "terminal",
+     "size": 24,
+     "sub_size": 19
+    },
+    {
+     "type": "arrow",
+     "id": "co1",
+     "points": [
+      [
+       1232,
+       280
+      ],
+      [
+       1262,
+       280
+      ],
+      [
+       1262,
+       342
+      ],
+      [
+       1316,
+       342
+      ]
+     ],
+     "color": "orange"
+    },
+    {
+     "type": "arrow",
+     "id": "co2",
+     "points": [
+      [
+       1232,
+       428
+      ],
+      [
+       1262,
+       428
+      ],
+      [
+       1262,
+       360
+      ],
+      [
+       1316,
+       360
+      ]
+     ],
+     "color": "orange"
+    }
+   ],
+   "steps": [
+    {
+     "at": 0,
+     "show": [
+      "st0",
+      "sa0"
+     ],
+     "caption": "The official development workflow has five stages"
+    },
+    {
+     "at": 350,
+     "show": [
+      "st1",
+      "sa1"
+     ]
+    },
+    {
+     "at": 700,
+     "show": [
+      "st2",
+      "sa2"
+     ]
+    },
+    {
+     "at": 1050,
+     "show": [
+      "st3",
+      "sa3"
+     ]
+    },
+    {
+     "at": 1400,
+     "show": [
+      "st4",
+      "stn"
+     ]
+    },
+    {
+     "at": 2300,
+     "state": {
+      "st2": "bpu"
+     },
+     "on": [
+      "st2"
+     ],
+     "focus": [
+      "st2"
+     ],
+     "caption": "Stage 3, model conversion = optimize + quantize + compile. Let's open it up"
+    },
+    {
+     "at": 3300,
+     "show": [
+      "zl",
+      "zr"
+     ],
+     "focus": [
+      "st2",
+      "zl",
+      "zr"
+     ]
+    },
+    {
+     "at": 3600,
+     "show": [
+      "dock",
+      "n1"
+     ],
+     "caption": "Start: a trained float model, exported from PyTorch to ONNX (float32)"
+    },
+    {
+     "at": 5100,
+     "show": [
+      "c12",
+      "n2",
+      "imgs",
+      "calt"
+     ],
+     "camera": [
+      30,
+      221,
+      640,
+      423
+     ],
+     "focus": [
+      "n2",
+      "imgs",
+      "calt",
+      "n1",
+      "c12",
+      "st2",
+      "zl",
+      "zr"
+     ],
+     "caption": "Calibration: a small batch of representative images sets each layer's range"
+    },
+    {
+     "at": 7900,
+     "show": [
+      "c23",
+      "n3",
+      "qt",
+      "f32"
+     ],
+     "camera": [
+      420,
+      221,
+      640,
+      423
+     ],
+     "focus": [
+      "n3",
+      "qt",
+      "f32",
+      "c23",
+      "st2",
+      "zl",
+      "zr"
+     ],
+     "caption": "Quantization: float32 → int8"
+    },
+    {
+     "at": 9200,
+     "show": [
+      "qa",
+      "i8"
+     ],
+     "focus": [
+      "n3",
+      "qt",
+      "f32",
+      "qa",
+      "i8",
+      "st2",
+      "zl",
+      "zr"
+     ],
+     "caption": "Each number goes from 4 bytes to 1 byte, which cuts the compute a lot"
+    },
+    {
+     "at": 11200,
+     "camera": "home",
+     "focus": null,
+     "show": [
+      "c34",
+      "n4"
+     ],
+     "caption": "Compilation: build the on-board model for the target board's march"
+    },
+    {
+     "at": 12600,
+     "show": [
+      "c4a",
+      "o1",
+      "c4b",
+      "o2"
+     ],
+     "focus": [
+      "n4",
+      "c4a",
+      "o1",
+      "c4b",
+      "o2",
+      "st2",
+      "zl",
+      "zr"
+     ],
+     "caption": "X5 (bayes-e) gets .bin; S series (nash-e / nash-m / nash-p) gets .hbm"
+    },
+    {
+     "at": 14900,
+     "focus": [
+      "dock",
+      "n1",
+      "n2",
+      "n3",
+      "n4",
+      "o1",
+      "o2",
+      "c12",
+      "c23",
+      "c34",
+      "c4a",
+      "c4b",
+      "imgs",
+      "calt",
+      "qt",
+      "f32",
+      "qa",
+      "i8",
+      "st2",
+      "zl",
+      "zr"
+     ],
+     "caption": "All of this runs in the official Docker on an x86 PC, not on the board"
+    },
+    {
+     "at": 16600,
+     "show": [
+      "board",
+      "r1",
+      "r2",
+      "co1",
+      "co2"
+     ],
+     "focus": [
+      "board",
+      "r1",
+      "r2",
+      "co1",
+      "co2",
+      "st2",
+      "zl",
+      "zr"
+     ],
+     "caption": "The board only infers: hbm_runtime to run, hrt_model_exec for info and perf"
+    },
+    {
+     "at": 19000,
+     "focus": null,
+     "caption": "Convert on the PC, infer on the board; then evaluate performance and accuracy"
+    }
+   ],
+   "notes": "To put it all together, the official workflow has five stages: float model preparation, model validation, model conversion, performance evaluation and accuracy evaluation. Model conversion itself has three steps: optimization, quantization and compilation. Note that the toolchain doesn't do training. Training is still done in a framework like PyTorch. Let's open up the model conversion stage. The starting point is a trained float model: you export ONNX from PyTorch, and everything in it is float32. Step one is calibration: run a small batch of representative images through the model and record the value range of each layer. The X5 docs suggest preparing 20 to 100 images. Step two is quantization: float32 becomes int8, so each number goes from 4 bytes to 1 byte, which cuts the compute a lot. Step three is compilation: you compile for the target board's architecture, which is called the march. X5 is bayes-e and gets a .bin. The S series is nash-e, nash-m and nash-p, and gets a .hbm. Keep in mind, all of this happens in the official Docker on an x86 computer, not on the board. You then copy the converted model to the board, and the board only runs inference: hbm_runtime runs the inference, and hrt_model_exec shows the model info and measures performance. After conversion, we're back to the last two stages of the workflow: evaluate performance on the board, then compare with the float model to evaluate accuracy."
+  },
+  {
+   "layout": "table",
+   "title": "Toolchains",
+   "eyebrow": "Toolchain",
+   "heading": "Tools for the two board lines",
+   "lead": "Conversion runs in the official Docker on an x86 PC, not on the board.",
+   "head": [
+    {
+     "html": "Step",
+     "style": "width:250px"
+    },
+    "RDK X5",
+    "S series (S100 / S100P / S600)"
+   ],
+   "row_header": true,
+   "rows": [
+    [
+     "Export",
+     {
+      "html": "Same for all four boards: export ONNX from PyTorch.",
+      "colspan": 2
+     }
+    ],
+    [
+     "Model check",
+     "<span class=\"cmd\">hb_mapper checker --march bayes-e</span>",
+     "<span class=\"cmd\">hb_compile -m &lt;model&gt; --march nash-*</span>"
+    ],
+    [
+     "Quantize + compile",
+     "<span class=\"cmd\">hb_mapper makertbin</span> → .bin",
+     "<span class=\"cmd\">hb_config_generator</span> + <span class=\"cmd\">hb_compile -c</span> → .hbm"
+    ],
+    [
+     "On-board inference",
+     {
+      "html": "All four boards use Python hbm_runtime, or the C/C++ API.",
+      "colspan": 2
+     }
+    ]
+   ],
+   "notes": "Now for the actual tools. There are two board lines. The export step is the same for both: export ONNX from PyTorch. For the model check, X5 uses hb_mapper checker, and the S series uses hb_compile with the march parameter. For quantizing and compiling, X5 uses hb_mapper makertbin to produce a .bin. The S series first uses hb_config_generator to create a config file, then hb_compile to produce a .hbm. All of this conversion happens in the official Docker on an x86 computer, not on the board. For on-board inference, all four boards can use Python's hbm_runtime, and this course uses hbm_runtime throughout."
+  },
+  {
+   "layout": "cards",
+   "title": "Model Zoo",
+   "eyebrow": "Model Zoo",
+   "heading": "What Model Zoo saves you",
+   "lead": "Take `samples/vision/resnet/` as an example: three folders, `model/`, `conversion/` and `runtime/`.",
+   "cols": 3,
+   "cards": [
+    {
+     "icon": "grid",
+     "tone": "orange",
+     "title": "Converted models",
+     "text": "Most samples offer .bin / .hbm downloads, ready to run."
+    },
+    {
+     "icon": "code",
+     "tone": "blue",
+     "title": "On-board inference code",
+     "text": "Preprocessing, inference and postprocessing code, already written."
+    },
+    {
+     "icon": "book-open",
+     "tone": "green",
+     "title": "Conversion recipes",
+     "text": "Follow the conversion/ folder to convert your own model."
+    }
+   ],
+   "notes": "So where does Model Zoo help? It saves you three things. First, most samples come with converted .bin and .hbm models, so you can just download and run. Second, they include the on-board preprocessing, inference and postprocessing code. Third, the conversion folder has recipes you can follow to convert your own models. Take ResNet as an example: it has three folders, model, conversion and runtime. These three things line up with the three parts coming up later in this chapter."
+  },
+  {
+   "layout": "diagram",
+   "title": "Operator placement",
+   "eyebrow": "Operators",
+   "heading": "Does an op go to the BPU or the CPU?",
+   "height": 600,
+   "scene": [
+    {
+     "type": "band",
+     "id": "oA",
+     "x": 226,
+     "y": 86,
+     "w": 1008,
+     "h": 128,
+     "label": "BPU subgraph",
+     "label_at": [
+      242,
+      74
+     ]
+    },
+    {
+     "type": "band",
+     "id": "oB1",
+     "x": 226,
+     "y": 86,
+     "w": 388,
+     "h": 128,
+     "label": "BPU subgraph 1",
+     "label_at": [
+      242,
+      74
+     ]
+    },
+    {
+     "type": "band",
+     "id": "oB2",
+     "x": 846,
+     "y": 86,
+     "w": 388,
+     "h": 128,
+     "label": "BPU subgraph 2",
+     "label_at": [
+      862,
+      74
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "oeL",
+     "points": [
+      [
+       60,
+       150
+      ],
+      [
+       640,
+       150
+      ]
+     ],
+     "mode": "flow",
+     "head": false
+    },
+    {
+     "type": "arrow",
+     "id": "oeM",
+     "points": [
+      [
+       640,
+       150
+      ],
+      [
+       850,
+       150
+      ]
+     ],
+     "mode": "flow",
+     "head": false
+    },
+    {
+     "type": "arrow",
+     "id": "oeR",
+     "points": [
+      [
+       850,
+       150
+      ],
+      [
+       1262,
+       150
+      ]
+     ],
+     "mode": "flow",
+     "head": false
+    },
+    {
+     "type": "box",
+     "id": "o0",
+     "x": 40,
+     "y": 105,
+     "w": 160,
+     "h": 90,
+     "label": "Quantize",
+     "kind": "neutral",
+     "sub": "CPU",
+     "size": 26,
+     "sub_size": 18
+    },
+    {
+     "type": "box",
+     "id": "o1",
+     "x": 250,
+     "y": 105,
+     "w": 160,
+     "h": 90,
+     "label": "Conv",
+     "kind": "neutral",
+     "size": 26
+    },
+    {
+     "type": "box",
+     "id": "o2",
+     "x": 440,
+     "y": 105,
+     "w": 160,
+     "h": 90,
+     "label": "Conv",
+     "kind": "neutral",
+     "size": 26
+    },
+    {
+     "type": "box",
+     "id": "o4",
+     "x": 870,
+     "y": 105,
+     "w": 160,
+     "h": 90,
+     "label": "Conv",
+     "kind": "neutral",
+     "size": 26
+    },
+    {
+     "type": "box",
+     "id": "o5",
+     "x": 1050,
+     "y": 105,
+     "w": 160,
+     "h": 90,
+     "label": "Conv",
+     "kind": "neutral",
+     "size": 26
+    },
+    {
+     "type": "box",
+     "id": "o6",
+     "x": 1260,
+     "y": 105,
+     "w": 160,
+     "h": 90,
+     "label": "Dequantize",
+     "kind": "neutral",
+     "sub": "CPU",
+     "size": 26,
+     "sub_size": 18
+    },
+    {
+     "type": "token",
+     "id": "oX",
+     "x": 725,
+     "y": 150,
+     "label": "Op X",
+     "w": 170,
+     "h": 90,
+     "size": 26,
+     "kind": "bpu"
+    },
+    {
+     "type": "text",
+     "id": "olim",
+     "x": 725,
+     "y": 44,
+     "text": "shape (C×H×W) is over 8192",
+     "size": 22,
+     "weight": 700,
+     "color": "red"
+    },
+    {
+     "type": "arrow",
+     "id": "odn",
+     "points": [
+      [
+       600,
+       168
+      ],
+      [
+       618,
+       168
+      ],
+      [
+       618,
+       345
+      ],
+      [
+       636,
+       345
+      ]
+     ],
+     "color": "blue"
+    },
+    {
+     "type": "arrow",
+     "id": "oup",
+     "points": [
+      [
+       814,
+       345
+      ],
+      [
+       832,
+       345
+      ],
+      [
+       832,
+       168
+      ],
+      [
+       866,
+       168
+      ]
+     ],
+     "color": "blue"
+    },
+    {
+     "type": "band",
+     "id": "ocpu",
+     "x": 628,
+     "y": 292,
+     "w": 194,
+     "h": 106,
+     "label": "C×H×W > 8192 → falls back to CPU",
+     "label_at": [
+      725,
+      424
+     ],
+     "anchor": "middle",
+     "color": "blue"
+    },
+    {
+     "type": "text",
+     "id": "osw",
+     "x": 1560,
+     "y": 40,
+     "text": "CPU ↔ BPU switches: 2",
+     "size": 24,
+     "weight": 700,
+     "anchor": "end",
+     "color": "blue"
+    },
+    {
+     "type": "box",
+     "id": "oun",
+     "x": 40,
+     "y": 478,
+     "w": 250,
+     "h": 104,
+     "label": "Unsupported op",
+     "kind": "bad",
+     "size": 26
+    },
+    {
+     "type": "arrow",
+     "id": "oua",
+     "points": [
+      [
+       292,
+       530
+      ],
+      [
+       342,
+       530
+      ]
+     ],
+     "color": "orange"
+    },
+    {
+     "type": "box",
+     "id": "oer",
+     "x": 350,
+     "y": 478,
+     "w": 900,
+     "h": 104,
+     "label": "HorizonRT not support these cpu operators",
+     "kind": "bad",
+     "sub": "The checker errors out → check the op constraint list, or use a custom op",
+     "mono": true,
+     "size": 24,
+     "sub_size": 19
+    }
+   ],
+   "steps": [
+    {
+     "at": 0,
+     "show": [
+      "oeL",
+      "oeM",
+      "oeR",
+      "o0",
+      "o1",
+      "o2",
+      "oX",
+      "o4",
+      "o5",
+      "o6"
+     ],
+     "caption": "One model: CPU quantize / dequantize at the ends, BPU ops in the middle"
+    },
+    {
+     "at": 1200,
+     "state": {
+      "o0": "cpu",
+      "o6": "cpu",
+      "o1": "bpu",
+      "o2": "bpu",
+      "o4": "bpu",
+      "o5": "bpu"
+     },
+     "on": [
+      "o0",
+      "o6",
+      "o1",
+      "o2",
+      "o4",
+      "o5"
+     ],
+     "show": [
+      "oA",
+      "osw"
+     ],
+     "caption": "Ideal: one solid BPU subgraph in the middle, only 2 CPU ↔ BPU switches"
+    },
+    {
+     "at": 3400,
+     "show": [
+      "olim"
+     ],
+     "focus": [
+      "oX",
+      "olim",
+      "oA"
+     ],
+     "camera": [
+      420,
+      0,
+      640,
+      430
+     ],
+     "caption": "But op X has a shape (C×H×W) over 8192…"
+    },
+    {
+     "at": 5600,
+     "move": [
+      {
+       "id": "oX",
+       "path": [
+        [
+         725,
+         150
+        ],
+        [
+         725,
+         345
+        ]
+       ],
+       "speed": 0.22
+      }
+     ],
+     "state": {
+      "oX": "cpu"
+     },
+     "hide": [
+      "oeM",
+      "oA",
+      "olim"
+     ],
+     "show": [
+      "ocpu",
+      "oB1",
+      "oB2"
+     ],
+     "focus": [
+      "oX",
+      "ocpu",
+      "oB1",
+      "oB2"
+     ],
+     "caption": "It falls back to run on the CPU"
+    },
+    {
+     "at": 7600,
+     "camera": "home",
+     "show": [
+      "odn",
+      "oup"
+     ],
+     "focus": null,
+     "text": {
+      "osw": "CPU ↔ BPU switches: 4"
+     },
+     "caption": "The subgraph splits in two; switches go from 2 to 4. More pieces, slower"
+    },
+    {
+     "at": 10400,
+     "show": [
+      "oun",
+      "oua",
+      "oer"
+     ],
+     "focus": [
+      "oun",
+      "oua",
+      "oer"
+     ],
+     "caption": "If an op isn't supported at all, the checker errors out right away"
+    },
+    {
+     "at": 13000,
+     "focus": null,
+     "caption": "Running on the board and running fast are two different things"
+    }
+   ],
+   "notes": "Here's another common pitfall for beginners: operator placement. When the checker hits an unsupported operator, it errors out right away. When that happens, check the operator constraint list, or use a custom operator. There's another case, too: an operator that exceeds a limit falls back to the CPU. For example, if its shape, that is, C times H times W, is over 8192, it falls back to the CPU. That splits the BPU subgraph in two, and the number of switches between the CPU and the BPU goes up. Also, even when a model runs mostly on the BPU, there's usually CPU-side quantization and dequantization at the input and output ends. Just like in the animation earlier, the more CPU nodes and the more fragmented the BPU subgraph, the slower it runs. Whether a model can run on the board, and whether it runs fast once it's there, are two different things."
+  },
+  {
+   "layout": "section",
+   "title": "Section 03",
+   "num": "03",
+   "heading": "The BPU at work",
+   "sub": "Download a model · View info · Test perf"
+  },
+  {
+   "layout": "code",
+   "title": "Download model",
+   "eyebrow": "Demo · Model",
+   "heading": "Download a model and view its info",
+   "lead": "Run from the repo root. On other boards, change x5 to s100 / s100p / s600.",
+   "blocks": [
+    {
+     "label": "① Download ResNet-18",
+     "lines": [
+      "$ git clone https://github.com/D-Robotics/rdk_model_zoo.git",
+      "$ cd rdk_model_zoo",
+      {
+       "text": "$ bash samples/vision/resnet/model/download.sh x5 18",
+       "hl": true
+      }
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "X5 gets resnet18_<wbr>bayese_<wbr>224x224_<wbr>nv12.bin; the S series gets the matching .hbm (nashe / nashm / nashp)."
+     }
+    },
+    {
+     "label": "② View model info",
+     "lines": [
+      "$ hrt_model_exec model_info \\",
+      "  --model_file <model_file>"
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "hrt_model_exec is preinstalled on all four boards. Nothing to install."
+     }
+    }
+   ],
+   "notes": "OK, question three: let's get on the board and watch the BPU at work. First, clone Model Zoo, go to the repo root, and use the download script to get ResNet-18. On X5, pass x5. On other boards, change it to s100, s100p or s600. X5 gets a .bin file, and each S-series board gets its matching .hbm file. Then run hrt_model_exec model_info to look at the model info. You'll see the inputs and outputs, the NV12 input, and so on. This tool comes preinstalled on all four boards, so there's nothing extra to install."
+  },
+  {
+   "layout": "code",
+   "title": "Perf test",
+   "eyebrow": "Demo · Perf",
+   "heading": "Measure BPU inference performance",
+   "lead": "Same syntax on all four boards. Watch BPU usage in a second terminal.",
+   "blocks": [
+    {
+     "label": "③ Pure inference performance",
+     "lines": [
+      "$ hrt_model_exec perf \\",
+      "  --model_file <model_file> \\",
+      "  --frame_count=200"
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "--thread_num=&lt;N&gt; sets concurrent test threads, not cores: X5 1–8, S&nbsp;series 1–32. A multi-core model needs --core_id with as many cores as its core_num."
+     }
+    },
+    {
+     "label": "④ BPU usage",
+     "lines": [
+      "$ hrut_somstatus",
+      "$ hrut_somstatus | grep -A4 -i \"bpu status\"",
+      "$ hrut_somstatus | grep -A6 -i \"bpu status\""
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "Line 1: X5. Line 2: S100 / S100P. Line 3: S600 (lists bpu0..bpu3)."
+     }
+    }
+   ],
+   "notes": "Next, let's measure the BPU's pure inference performance. It's hrt_model_exec again, but this time with the perf subcommand, running 200 frames. The syntax is exactly the same on all four boards. To test peak throughput under concurrency, add the thread_num parameter. It's the number of test threads submitting tasks at the same time, not the number of BPU cores. On X5 you can set it from 1 to 8, and on the S series from 1 to 32. How many cores one inference uses is set by core_num at conversion time. For a multi-core model, with core_num greater than 1, you also need to list the same number of cores with core_id. core_id starts at 1, so 1 means bpu0. While it runs, open another terminal and run hrut_somstatus to see BPU usage. On X5, just look at the bpu status section. On the S series, the output is longer, so filter it with grep. S600 lists the usage of each of its four cores, bpu0 through bpu3."
+  },
+  {
+   "layout": "diagram",
+   "title": "Perf reference",
+   "eyebrow": "Demo · Result",
+   "heading": "ResNet-18 ==performance reference==",
+   "height": 560,
+   "scene": [
+    {
+     "type": "text",
+     "id": "pft",
+     "x": 40,
+     "y": 40,
+     "text": "ResNet-18 avg. latency per frame (Model Zoo README reference)",
+     "size": 24,
+     "weight": 700,
+     "anchor": "start"
+    },
+    {
+     "type": "meter",
+     "id": "pl0",
+     "x": 230,
+     "y": 90,
+     "w": 540,
+     "h": 44,
+     "value": 1.0,
+     "label": "RDK X5",
+     "vlabel": "2.740 ms",
+     "kind": "bpu",
+     "size": 24
+    },
+    {
+     "type": "meter",
+     "id": "pl1",
+     "x": 230,
+     "y": 172,
+     "w": 540,
+     "h": 44,
+     "value": 0.2302919708029197,
+     "label": "RDK S100",
+     "vlabel": "0.631 ms",
+     "kind": "cpu",
+     "size": 24
+    },
+    {
+     "type": "meter",
+     "id": "pl2",
+     "x": 230,
+     "y": 254,
+     "w": 540,
+     "h": 44,
+     "value": 0.1948905109489051,
+     "label": "RDK S100P",
+     "vlabel": "0.534 ms",
+     "kind": "cpu",
+     "size": 24
+    },
+    {
+     "type": "meter",
+     "id": "pl3",
+     "x": 230,
+     "y": 336,
+     "w": 540,
+     "h": 44,
+     "value": 0.1437956204379562,
+     "label": "RDK S600",
+     "vlabel": "0.394 ms",
+     "kind": "cpu",
+     "size": 24
+    },
+    {
+     "type": "text",
+     "id": "pfn",
+     "x": 40,
+     "y": 452,
+     "text": "Shorter bar = faster · measured with the CPU governor in performance mode",
+     "size": 20,
+     "color": "ink3",
+     "anchor": "start"
+    },
+    {
+     "type": "text",
+     "id": "pfr",
+     "x": 935,
+     "y": 66,
+     "text": "Measured on S600 · ResNet-18",
+     "size": 26,
+     "weight": 700,
+     "anchor": "start"
+    },
+    {
+     "type": "meter",
+     "id": "pt0",
+     "x": 1075,
+     "y": 140,
+     "w": 330,
+     "h": 40,
+     "value": 0.2004475703324808,
+     "label": "1 thread",
+     "vlabel": "2508 FPS",
+     "kind": "bpu",
+     "size": 22
+    },
+    {
+     "type": "text",
+     "id": "pm0",
+     "x": 1057,
+     "y": 212,
+     "text": "0.387 ms",
+     "size": 22,
+     "font": "mono",
+     "weight": 700,
+     "color": "ink2",
+     "anchor": "end"
+    },
+    {
+     "type": "meter",
+     "id": "pt1",
+     "x": 1075,
+     "y": 252,
+     "w": 330,
+     "h": 40,
+     "value": 0.5946291560102301,
+     "label": "4 threads",
+     "vlabel": "7440 FPS",
+     "kind": "bpu",
+     "size": 22
+    },
+    {
+     "type": "text",
+     "id": "pm1",
+     "x": 1057,
+     "y": 324,
+     "text": "0.522 ms",
+     "size": 22,
+     "font": "mono",
+     "weight": 700,
+     "color": "ink2",
+     "anchor": "end"
+    },
+    {
+     "type": "meter",
+     "id": "pt2",
+     "x": 1075,
+     "y": 364,
+     "w": 330,
+     "h": 40,
+     "value": 1.0,
+     "label": "12 threads",
+     "vlabel": "12512 FPS",
+     "kind": "bpu",
+     "size": 22
+    },
+    {
+     "type": "text",
+     "id": "pm2",
+     "x": 1057,
+     "y": 436,
+     "text": "0.927 ms",
+     "size": 22,
+     "font": "mono",
+     "weight": 700,
+     "color": "ink2",
+     "anchor": "end"
+    }
+   ],
+   "steps": [
+    {
+     "at": 0,
+     "show": [
+      "pft",
+      "pl0",
+      "pl1",
+      "pl2",
+      "pl3"
+     ],
+     "caption": "Compare with the Model Zoo README: look at Average latency and Frame rate"
+    },
+    {
+     "at": 900,
+     "on": [
+      "pl0"
+     ]
+    },
+    {
+     "at": 1500,
+     "on": [
+      "pl1"
+     ]
+    },
+    {
+     "at": 2100,
+     "on": [
+      "pl2"
+     ]
+    },
+    {
+     "at": 2700,
+     "on": [
+      "pl3"
+     ]
+    },
+    {
+     "at": 4400,
+     "show": [
+      "pfn"
+     ],
+     "caption": "X5 2.740 ms, S600 0.394 ms. Far off? First check the CPU is in performance mode"
+    },
+    {
+     "at": 6800,
+     "show": [
+      "pfr",
+      "pt0",
+      "pt1",
+      "pt2"
+     ],
+     "camera": [
+      880,
+      0,
+      720,
+      560
+     ],
+     "focus": [
+      "pfr",
+      "pt0",
+      "pm0",
+      "pt1",
+      "pm1",
+      "pt2",
+      "pm2"
+     ],
+     "caption": "Now our S600 measurements: ResNet-18 perf at different thread counts"
+    },
+    {
+     "at": 7800,
+     "on": [
+      "pt0"
+     ],
+     "show": [
+      "pm0"
+     ],
+     "caption": "1 thread: 0.387 ms, 2508 FPS"
+    },
+    {
+     "at": 9400,
+     "on": [
+      "pt1"
+     ],
+     "show": [
+      "pm1"
+     ],
+     "caption": "4 threads: 0.522 ms, 7440 FPS"
+    },
+    {
+     "at": 11000,
+     "on": [
+      "pt2"
+     ],
+     "show": [
+      "pm2"
+     ],
+     "caption": "12 threads: 0.927 ms, 12512 FPS"
+    },
+    {
+     "at": 13200,
+     "camera": "home",
+     "focus": null,
+     "caption": "More threads, higher throughput; per-inference latency rises slightly"
+    }
+   ],
+   "notes": "When perf finishes, focus on two numbers: Average latency, which is the average time per frame, and Frame rate. Compare them with the reference data in the Model Zoo README. ResNet-18 takes 2.740 milliseconds on X5, 0.631 milliseconds on S100, 0.534 milliseconds on S100P, and 0.394 milliseconds on S600. These numbers were measured with the CPU frequency governor in performance mode. If your results are way off, check that first. Next, here are our own measurements on RDK S600 with ResNet-18, changing the number of perf threads. With 1 thread: 0.387 milliseconds per inference, and 2508 frames per second. With 4 threads: 0.522 milliseconds, and 7440 frames per second. With 12 threads: 0.927 milliseconds, and 12512 frames per second. More threads give higher throughput, while the latency of each inference goes up slightly."
+  },
+  {
+   "layout": "section",
+   "title": "Section 04",
+   "num": "04",
+   "heading": "Rules & next lesson",
+   "sub": "Five rules · Lesson 2-02 preview"
+  },
+  {
+   "layout": "bullets",
+   "title": "Five rules",
+   "eyebrow": "Rules",
+   "heading": "Five ==rules== for beginners",
+   "lead": "Check these five before every conversion.",
+   "variant": "numbered",
+   "items": [
+    "One march, one format: never reuse models, runtimes or wheels across platforms",
+    "Start with PTQ by default; consider QAT only if PTQ falls short",
+    "Use the official toolchain Docker and convert on an x86 PC",
+    "Run the checker for op placement first, then prepare calibration data and YAML",
+    "Test performance and accuracy after every conversion; use the board's built-in hbm_runtime"
+   ],
+   "notes": "Finally, here are five rules every beginner should remember. One: each march has its own format. Never reuse models, runtimes or wheel packages across platforms. Two: start with PTQ by default, and only consider QAT if PTQ doesn't meet your target. Three: use the official toolchain Docker and convert on an x86 computer. The board only runs inference. Four: run the checker first to see the operator placement, then prepare the calibration data and the YAML config. Five: after every conversion, test both performance and accuracy. Don't stop at \"conversion succeeded\". And on the board, use the hbm_runtime that ships with the system. Don't install the package with the same name from PyPI."
+  },
+  {
+   "layout": "closing",
+   "title": "Up next",
+   "eyebrow": "Up Next · Lesson 2-02",
+   "heading": "Next: ==open Model Zoo==",
+   "lead": "The BPU only runs quantized, compiled models: X5 uses .bin, the S series uses .hbm, and Model Zoo already has the models and inference code ready.",
+   "cards": [
+    {
+     "icon": "grid",
+     "tone": "orange",
+     "k": "One codebase, 4 boards",
+     "d": "See how the main branch supports all four boards."
+    },
+    {
+     "icon": "rocket",
+     "tone": "green",
+     "k": "Run your first sample",
+     "d": "Run the same model with Model Zoo's Python program."
+    },
+    {
+     "icon": "eye",
+     "tone": "yellow",
+     "k": "See real results",
+     "d": "ResNet-18 outputs \"white wolf\"."
+    }
+   ],
+   "full_logo": true,
+   "notes": "To recap in one sentence: the BPU only runs models that have been quantized and compiled. X5 uses .bin, the S series uses .hbm, and Model Zoo already has the converted models and inference code ready for you. In the next lesson, we'll open up Model Zoo for real. We'll see how one codebase supports all four boards, run our first sample, and watch ResNet-18 output \"white wolf\" with our own eyes. See you in the next lesson!"
+  }
+ ]
+}
