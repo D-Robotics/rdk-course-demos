@@ -1,0 +1,4491 @@
+{
+ "meta": {
+  "title": "RDK 小课堂｜第二章 第 1 课：认识 BPU",
+  "lang": "zh-CN",
+  "mode": "deck",
+  "tag": "RDK 小课堂 2-01",
+  "footer": "认识 BPU",
+  "theme": {}
+ },
+ "slides": [
+  {
+   "layout": "series-cover",
+   "title": "封面",
+   "theme": "light",
+   "series": "RDK 小课堂",
+   "code": "2-01",
+   "chapter": 2,
+   "chapter_name": "Model Zoo",
+   "lesson": 1,
+   "heading": "认识 BPU",
+   "accent": "BPU",
+   "subtitle": "为什么要先转换 + 量化才能上板",
+   "visual": "bpu",
+   "notes": "大家好，欢迎来到 RDK 小课堂第二章。这一章我们讲 Model Zoo，第一节课，先来认识 BPU。第一章里，我们已经把板子跑起来了，也用过摄像头和屏幕。那接下来，怎么让板子真正\"看懂\"画面呢？靠的就是芯片里专门跑神经网络的单元：BPU。这节课一个视频，同时讲四块板：RDK X5、S100、S100P 和 S600。"
+  },
+  {
+   "layout": "cards",
+   "title": "本课问题",
+   "eyebrow": "Why This Lesson",
+   "heading": "本课回答==三个问题==",
+   "lead": "同一个 ResNet-18：X5 上纯推理约 2.7 ms，S600 上约 0.39 ms。电脑上的 .pt 为什么不能直接拷到板上跑？",
+   "cols": 3,
+   "cards": [
+    {
+     "num": "01",
+     "title": "BPU 是什么",
+     "text": "专门跑神经网络的单元，它和 CPU 怎么分工？"
+    },
+    {
+     "num": "02",
+     "title": "为什么要转换 + 量化",
+     "text": "浮点模型为什么要先量化、编译，才能上板？"
+    },
+    {
+     "num": "03",
+     "title": "怎么看到 BPU 干活",
+     "text": "在板上用一条命令看模型信息和推理速度。"
+    }
+   ],
+   "notes": "先看一个反差。同一个 ResNet-18 分类模型，在 RDK X5 上纯推理大约 2.7 毫秒，在 S600 上大约只要 0.39 毫秒。可是，你在电脑上训练好的 .pt 文件，为什么不能直接拷到板子上跑呢？带着这个疑问，这节课我们回答三个问题：第一，BPU 是什么；第二，为什么模型要先经过转换和量化，才能上板；第三，怎么在板子上，亲眼看到 BPU 在干活。"
+  },
+  {
+   "layout": "links",
+   "title": "配套资源",
+   "eyebrow": "Resources",
+   "heading": "课程资料与官方入口",
+   "items": [
+    {
+     "k": "RDK Model Zoo",
+     "d": "本章主角：转换好的模型、推理代码和转换配方",
+     "url": "https://github.com/D-Robotics/rdk_model_zoo"
+    },
+    {
+     "k": "RDK 文档资源中心",
+     "d": "各板卡手册与算法工具链文档",
+     "url": "https://developer.d-robotics.cc/rdk_doc_center/"
+    },
+    {
+     "k": "X5 · PTQ 转换原理及流程",
+     "d": "五个阶段、量化、校准、算子检查",
+     "url": "https://developer.d-robotics.cc/oe_x5_doc/cn/oe_mapper/source/ptq/ptq_workflow.html"
+    },
+    {
+     "k": "S 系列 · hb_compile 工具",
+     "d": "S100 / S100P / S600 的模型验证与编译",
+     "url": "https://developer.d-robotics.cc/oe_s_doc/guide/ptq/ptq_tool/hb_compile"
+    },
+    {
+     "k": "hrt_model_exec 工具介绍",
+     "d": "板端查看模型信息、测性能",
+     "url": "https://developer.d-robotics.cc/oe_s_doc/guide/ucp/runtime/tool_introduction/hrt_model_exec"
+    },
+    {
+     "k": "RDK 课程 Demo（中文）",
+     "d": "中文讲义和课程 Demo",
+     "url": "https://d-robotics.github.io/rdk-course-demos/zh/"
+    }
+   ],
+   "notes": "开始之前，先把资料准备好。本章的主角，是 GitHub 上的 RDK Model Zoo。遇到概念问题，就去文档资源中心，查算法工具链的文档：X5 看\"PTQ 转换原理及流程\"，S 系列看\"hb_compile 工具\"这一页；板端命令的用法，在\"hrt_model_exec 工具介绍\"里。这节课不需要电脑端的工具链，只要你的板子能 SSH 登录、能联网就可以。"
+  },
+  {
+   "layout": "section",
+   "title": "章节 01",
+   "num": "01",
+   "heading": "BPU 是什么",
+   "sub": "CPU 和 BPU 怎么分工，四块板各是什么架构"
+  },
+  {
+   "layout": "cards",
+   "title": "分工",
+   "eyebrow": "Division of Labor",
+   "heading": "CPU、BPU、GPU 怎么分工",
+   "lead": "BPU（Brain Processing Unit）是 D-Robotics 芯片里专门加速神经网络推理的单元。",
+   "cols": 3,
+   "cards": [
+    {
+     "icon": "terminal",
+     "tone": "blue",
+     "title": "CPU",
+     "text": "通用逻辑、前处理和后处理，比如缩放、画框、NMS。"
+    },
+    {
+     "icon": "network",
+     "tone": "orange",
+     "title": "BPU",
+     "text": "卷积、矩阵乘这类大量重复的定点计算。",
+     "focus": true
+    },
+    {
+     "icon": "film",
+     "tone": "green",
+     "title": "GPU",
+     "text": "S100 上有 Mali-G78AE，不是本章重点。"
+    }
+   ],
+   "notes": "先说 BPU 是什么。BPU，全称 Brain Processing Unit，是 D-Robotics 芯片里，专门加速神经网络推理的单元。Model Zoo 的定位，就是运行在 BPU 上的 AI 模型部署示例。那它和 CPU 怎么分工呢？简单说：CPU 负责通用逻辑，还有前处理和后处理，比如缩放图片、画框、做 NMS；BPU 负责卷积、矩阵乘这类大量重复的定点计算。S100 上还有一块 Mali GPU，不过它不是本章的重点。下一页，我们用一张动图看看它们是怎么配合的。"
+  },
+  {
+   "layout": "diagram",
+   "title": "分工",
+   "eyebrow": "Division of Labor",
+   "heading": "CPU 和 BPU ==怎么配合==",
+   "height": 560,
+   "scene": [
+    {
+     "type": "box",
+     "id": "cpu",
+     "x": 40,
+     "y": 30,
+     "w": 600,
+     "h": 500,
+     "label": "CPU",
+     "kind": "cpu",
+     "sub": "通用逻辑 · 前处理 / 后处理",
+     "align": "tl",
+     "icon": "terminal",
+     "size": 34
+    },
+    {
+     "type": "box",
+     "id": "bpu",
+     "x": 960,
+     "y": 30,
+     "w": 600,
+     "h": 500,
+     "label": "BPU",
+     "kind": "bpu",
+     "sub": "神经网络推理 · 定点计算",
+     "align": "tl",
+     "icon": "network",
+     "size": 34
+    },
+    {
+     "type": "box",
+     "id": "c1",
+     "x": 80,
+     "y": 160,
+     "w": 250,
+     "h": 150,
+     "label": "缩放",
+     "kind": "neutral",
+     "sub": "前处理",
+     "icon": "search"
+    },
+    {
+     "type": "box",
+     "id": "c2",
+     "x": 350,
+     "y": 160,
+     "w": 250,
+     "h": 150,
+     "label": "转 NV12",
+     "kind": "neutral",
+     "sub": "前处理",
+     "icon": "layers"
+    },
+    {
+     "type": "box",
+     "id": "c3",
+     "x": 80,
+     "y": 340,
+     "w": 250,
+     "h": 150,
+     "label": "NMS",
+     "kind": "neutral",
+     "sub": "后处理",
+     "icon": "list-checks"
+    },
+    {
+     "type": "box",
+     "id": "c4",
+     "x": 350,
+     "y": 340,
+     "w": 250,
+     "h": 150,
+     "label": "画框",
+     "kind": "neutral",
+     "sub": "后处理",
+     "icon": "grid"
+    },
+    {
+     "type": "grid",
+     "id": "mac",
+     "x": 1012,
+     "y": 160,
+     "cols": 14,
+     "rows": 8,
+     "cell": 28,
+     "gap": 8
+    },
+    {
+     "type": "text",
+     "id": "mact",
+     "x": 1260,
+     "y": 490,
+     "text": "MAC 阵列：卷积、矩阵乘的乘加运算",
+     "size": 24,
+     "color": "accent",
+     "weight": 700
+    },
+    {
+     "type": "arrow",
+     "id": "a1",
+     "points": [
+      [
+       640,
+       220
+      ],
+      [
+       958,
+       220
+      ]
+     ],
+     "mode": "flow",
+     "color": "orange",
+     "label": "输入张量",
+     "label_at": [
+      800,
+      280
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "a2",
+     "points": [
+      [
+       960,
+       400
+      ],
+      [
+       642,
+       400
+      ]
+     ],
+     "mode": "flow",
+     "color": "blue",
+     "label": "输出张量",
+     "label_at": [
+      800,
+      460
+     ]
+    },
+    {
+     "type": "token",
+     "id": "t1",
+     "x": 700,
+     "y": 220,
+     "label": "NV12",
+     "w": 118,
+     "mono": true,
+     "kind": "dark"
+    },
+    {
+     "type": "token",
+     "id": "t2",
+     "x": 900,
+     "y": 400,
+     "label": "输出",
+     "w": 100,
+     "kind": "bpu"
+    }
+   ],
+   "steps": [
+    {
+     "at": 0,
+     "show": [
+      "cpu",
+      "bpu"
+     ],
+     "caption": "同一颗芯片里，CPU 和 BPU 分工合作"
+    },
+    {
+     "at": 1100,
+     "show": [
+      "c1",
+      "c2",
+      "c3",
+      "c4",
+      "mac",
+      "mact"
+     ]
+    },
+    {
+     "at": 2300,
+     "camera": [
+      20,
+      15,
+      640,
+      530
+     ],
+     "focus": [
+      "cpu",
+      "c1",
+      "c2"
+     ],
+     "state": {
+      "c1": "cpu",
+      "c2": "cpu"
+     },
+     "on": [
+      "c1",
+      "c2"
+     ],
+     "caption": "CPU 先做前处理：缩放图片、转成 NV12 格式"
+    },
+    {
+     "at": 4800,
+     "camera": "home",
+     "focus": null,
+     "show": [
+      "a1",
+      "t1"
+     ],
+     "move": [
+      {
+       "id": "t1",
+       "path": [
+        [
+         700,
+         220
+        ],
+        [
+         890,
+         220
+        ]
+       ],
+       "speed": 0.25
+      }
+     ],
+     "caption": "处理好的张量交给 BPU"
+    },
+    {
+     "at": 6600,
+     "camera": [
+      940,
+      15,
+      640,
+      530
+     ],
+     "focus": [
+      "bpu",
+      "mac",
+      "mact"
+     ],
+     "on": [
+      "mac"
+     ],
+     "caption": "BPU 做卷积、矩阵乘这类大量重复的定点计算，成片的乘加单元同时工作"
+    },
+    {
+     "at": 9800,
+     "camera": "home",
+     "focus": null,
+     "show": [
+      "a2",
+      "t2"
+     ],
+     "move": [
+      {
+       "id": "t2",
+       "path": [
+        [
+         900,
+         400
+        ],
+        [
+         710,
+         400
+        ]
+       ],
+       "speed": 0.25
+      }
+     ],
+     "caption": "推理结果回到 CPU"
+    },
+    {
+     "at": 11500,
+     "focus": [
+      "cpu",
+      "c3",
+      "c4",
+      "a2",
+      "t2"
+     ],
+     "state": {
+      "c3": "cpu",
+      "c4": "cpu"
+     },
+     "on": [
+      "c3",
+      "c4"
+     ],
+     "caption": "CPU 再做后处理：NMS、画框"
+    },
+    {
+     "at": 13600,
+     "focus": null,
+     "caption": "CPU 管通用逻辑和前后处理，BPU 专做最重的定点计算"
+    }
+   ],
+   "notes": "用一张动图把分工看清楚。左边是 CPU，右边是 BPU。一帧数据进来，CPU 先做前处理：缩放图片、转成 NV12 格式；处理好的张量交给 BPU。BPU 里是成片的乘加单元，卷积、矩阵乘这类大量重复的定点计算，就在这里同时完成。推理结果再回到 CPU，做 NMS、画框这些后处理。所以记住：CPU 管通用逻辑和前后处理，BPU 专做最重的那部分定点计算。"
+  },
+  {
+   "layout": "diagram",
+   "title": "流水线",
+   "eyebrow": "Pipeline",
+   "heading": "一帧画面怎么==走完==",
+   "height": 560,
+   "scene": [
+    {
+     "type": "arrow",
+     "id": "track",
+     "points": [
+      [
+       100,
+       470
+      ],
+      [
+       1500,
+       470
+      ]
+     ],
+     "mode": "flow",
+     "head": true
+    },
+    {
+     "type": "box",
+     "id": "s1",
+     "x": 40,
+     "y": 150,
+     "w": 230,
+     "h": 200,
+     "label": "摄像头",
+     "kind": "neutral",
+     "sub": "采集图像",
+     "icon": "video"
+    },
+    {
+     "type": "box",
+     "id": "s2",
+     "x": 330,
+     "y": 150,
+     "w": 260,
+     "h": 200,
+     "label": "CPU 前处理",
+     "kind": "cpu",
+     "sub": "缩放、转 NV12",
+     "icon": "terminal"
+    },
+    {
+     "type": "box",
+     "id": "s3",
+     "x": 650,
+     "y": 95,
+     "w": 330,
+     "h": 310,
+     "label": "BPU 推理",
+     "kind": "bpu",
+     "sub": "BPU 子图",
+     "align": "tl",
+     "icon": "network",
+     "size": 30
+    },
+    {
+     "type": "grid",
+     "id": "g3",
+     "x": 683,
+     "y": 205,
+     "cols": 8,
+     "rows": 5,
+     "cell": 26,
+     "gap": 8
+    },
+    {
+     "type": "box",
+     "id": "s4",
+     "x": 1040,
+     "y": 150,
+     "w": 260,
+     "h": 200,
+     "label": "CPU 后处理",
+     "kind": "cpu",
+     "sub": "画框、NMS",
+     "icon": "list-checks"
+    },
+    {
+     "type": "box",
+     "id": "s5",
+     "x": 1360,
+     "y": 150,
+     "w": 200,
+     "h": 200,
+     "label": "屏幕",
+     "kind": "neutral",
+     "sub": "显示结果",
+     "icon": "eye"
+    },
+    {
+     "type": "arrow",
+     "id": "b1",
+     "points": [
+      [
+       272,
+       250
+      ],
+      [
+       326,
+       250
+      ]
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "b2",
+     "points": [
+      [
+       592,
+       250
+      ],
+      [
+       646,
+       250
+      ]
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "b3",
+     "points": [
+      [
+       982,
+       250
+      ],
+      [
+       1036,
+       250
+      ]
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "b4",
+     "points": [
+      [
+       1302,
+       250
+      ],
+      [
+       1356,
+       250
+      ]
+     ]
+    },
+    {
+     "type": "band",
+     "id": "band",
+     "x": 632,
+     "y": 77,
+     "w": 366,
+     "h": 346,
+     "label": "最重的一段",
+     "label_at": [
+      815,
+      62
+     ],
+     "anchor": "middle"
+    },
+    {
+     "type": "token",
+     "id": "tk",
+     "x": 155,
+     "y": 470,
+     "label": "图像",
+     "w": 150,
+     "h": 48,
+     "size": 22
+    }
+   ],
+   "steps": [
+    {
+     "at": 0,
+     "show": [
+      "s1",
+      "s2",
+      "s3",
+      "g3",
+      "s4",
+      "s5",
+      "b1",
+      "b2",
+      "b3",
+      "b4"
+     ],
+     "caption": "一帧画面要依次经过五个环节"
+    },
+    {
+     "at": 1400,
+     "show": [
+      "track",
+      "tk"
+     ],
+     "focus": [
+      "s1",
+      "tk",
+      "track"
+     ],
+     "caption": "摄像头采集到一帧图像"
+    },
+    {
+     "at": 2800,
+     "focus": [
+      "s2",
+      "tk",
+      "track"
+     ],
+     "move": [
+      {
+       "id": "tk",
+       "path": [
+        [
+         155,
+         470
+        ],
+        [
+         460,
+         470
+        ]
+       ]
+      }
+     ],
+     "on": [
+      "s2"
+     ],
+     "caption": "CPU 先做缩放，转成 NV12 格式"
+    },
+    {
+     "at": 3600,
+     "text": {
+      "tk": "NV12"
+     }
+    },
+    {
+     "at": 5000,
+     "focus": [
+      "s3",
+      "g3",
+      "tk",
+      "track"
+     ],
+     "move": [
+      {
+       "id": "tk",
+       "path": [
+        [
+         460,
+         470
+        ],
+        [
+         815,
+         470
+        ]
+       ]
+      }
+     ],
+     "camera": [
+      560,
+      40,
+      520,
+      480
+     ],
+     "caption": "交给 BPU 做推理"
+    },
+    {
+     "at": 5900,
+     "on": [
+      "g3"
+     ]
+    },
+    {
+     "at": 8200,
+     "camera": "home",
+     "text": {
+      "tk": "输出张量"
+     },
+     "focus": [
+      "s4",
+      "tk",
+      "track"
+     ],
+     "on": [
+      "s4"
+     ],
+     "move": [
+      {
+       "id": "tk",
+       "path": [
+        [
+         815,
+         470
+        ],
+        [
+         1170,
+         470
+        ]
+       ]
+      }
+     ],
+     "caption": "推理结果回到 CPU：画框、NMS"
+    },
+    {
+     "at": 10200,
+     "text": {
+      "tk": "检测结果"
+     },
+     "focus": [
+      "s5",
+      "tk",
+      "track"
+     ],
+     "move": [
+      {
+       "id": "tk",
+       "path": [
+        [
+         1170,
+         470
+        ],
+        [
+         1460,
+         470
+        ]
+       ]
+      }
+     ],
+     "caption": "最后显示到屏幕上"
+    },
+    {
+     "at": 12000,
+     "focus": null,
+     "show": [
+      "band"
+     ],
+     "caption": "BPU 只负责中间最重的那一段"
+    }
+   ],
+   "notes": "把这个分工放到一帧画面里看，就是这样一条流水线。跟着这个小标签走：摄像头采到一帧图像；CPU 先做缩放，转成 NV12 格式；然后交给 BPU 做推理，你看 BPU 里的乘加单元一起亮起来；推理结果回到 CPU 做后处理，比如画框和 NMS；最后显示到屏幕上。你会发现，BPU 只负责中间最重的那一段，前后两头都还是 CPU 在做。"
+  },
+  {
+   "layout": "diagram",
+   "title": "异构模型",
+   "eyebrow": "Heterogeneous Model",
+   "heading": "模型不一定全在 BPU 上",
+   "height": 600,
+   "scene": [
+    {
+     "type": "text",
+     "id": "la",
+     "x": 40,
+     "y": 62,
+     "text": "按工具链切分后的模型",
+     "size": 26,
+     "weight": 700,
+     "anchor": "start"
+    },
+    {
+     "type": "arrow",
+     "id": "eA",
+     "points": [
+      [
+       60,
+       160
+      ],
+      [
+       1580,
+       160
+      ]
+     ],
+     "mode": "flow",
+     "head": false
+    },
+    {
+     "type": "box",
+     "id": "a0",
+     "x": 40,
+     "y": 115,
+     "w": 150,
+     "h": 90,
+     "label": "输入",
+     "kind": "neutral",
+     "size": 26,
+     "sub_size": 18
+    },
+    {
+     "type": "box",
+     "id": "a1",
+     "x": 215,
+     "y": 115,
+     "w": 150,
+     "h": 90,
+     "label": "量化",
+     "kind": "neutral",
+     "sub": "Quantize",
+     "size": 26,
+     "sub_size": 18
+    },
+    {
+     "type": "box",
+     "id": "a2",
+     "x": 390,
+     "y": 115,
+     "w": 150,
+     "h": 90,
+     "label": "Conv",
+     "kind": "neutral",
+     "size": 26,
+     "sub_size": 18
+    },
+    {
+     "type": "box",
+     "id": "a3",
+     "x": 565,
+     "y": 115,
+     "w": 150,
+     "h": 90,
+     "label": "Conv",
+     "kind": "neutral",
+     "size": 26,
+     "sub_size": 18
+    },
+    {
+     "type": "box",
+     "id": "a4",
+     "x": 740,
+     "y": 115,
+     "w": 150,
+     "h": 90,
+     "label": "Conv",
+     "kind": "neutral",
+     "size": 26,
+     "sub_size": 18
+    },
+    {
+     "type": "box",
+     "id": "a5",
+     "x": 915,
+     "y": 115,
+     "w": 150,
+     "h": 90,
+     "label": "fc7",
+     "kind": "neutral",
+     "size": 26,
+     "sub_size": 18
+    },
+    {
+     "type": "box",
+     "id": "a6",
+     "x": 1090,
+     "y": 115,
+     "w": 150,
+     "h": 90,
+     "label": "反量化",
+     "kind": "neutral",
+     "sub": "Dequantize",
+     "size": 26,
+     "sub_size": 18
+    },
+    {
+     "type": "box",
+     "id": "a7",
+     "x": 1265,
+     "y": 115,
+     "w": 150,
+     "h": 90,
+     "label": "Softmax",
+     "kind": "neutral",
+     "sub": "prob",
+     "size": 26,
+     "sub_size": 18
+    },
+    {
+     "type": "box",
+     "id": "a8",
+     "x": 1440,
+     "y": 115,
+     "w": 150,
+     "h": 90,
+     "label": "输出",
+     "kind": "neutral",
+     "size": 26,
+     "sub_size": 18
+    },
+    {
+     "type": "band",
+     "id": "bA",
+     "x": 376,
+     "y": 100,
+     "w": 703,
+     "h": 120,
+     "label": "BPU 子图",
+     "label_at": [
+      392,
+      88
+     ]
+    },
+    {
+     "type": "text",
+     "id": "swA",
+     "x": 1580,
+     "y": 62,
+     "text": "CPU ↔ BPU 切换 2 次",
+     "size": 24,
+     "weight": 700,
+     "anchor": "end",
+     "color": "blue"
+    },
+    {
+     "type": "text",
+     "id": "lb",
+     "x": 40,
+     "y": 336,
+     "text": "切得更碎：中间一个算子超限，回退到 CPU",
+     "size": 26,
+     "weight": 700,
+     "anchor": "start"
+    },
+    {
+     "type": "arrow",
+     "id": "eB",
+     "points": [
+      [
+       60,
+       434
+      ],
+      [
+       1580,
+       434
+      ]
+     ],
+     "mode": "flow",
+     "head": false
+    },
+    {
+     "type": "box",
+     "id": "b0",
+     "x": 40,
+     "y": 389,
+     "w": 150,
+     "h": 90,
+     "label": "输入",
+     "kind": "neutral",
+     "size": 26,
+     "sub_size": 18
+    },
+    {
+     "type": "box",
+     "id": "b1",
+     "x": 215,
+     "y": 389,
+     "w": 150,
+     "h": 90,
+     "label": "量化",
+     "kind": "neutral",
+     "sub": "Quantize",
+     "size": 26,
+     "sub_size": 18
+    },
+    {
+     "type": "box",
+     "id": "b2",
+     "x": 390,
+     "y": 389,
+     "w": 150,
+     "h": 90,
+     "label": "Conv",
+     "kind": "neutral",
+     "size": 26,
+     "sub_size": 18
+    },
+    {
+     "type": "box",
+     "id": "b3",
+     "x": 565,
+     "y": 389,
+     "w": 150,
+     "h": 90,
+     "label": "超限算子",
+     "kind": "neutral",
+     "sub": "回退 CPU",
+     "size": 26,
+     "sub_size": 18
+    },
+    {
+     "type": "box",
+     "id": "b4",
+     "x": 740,
+     "y": 389,
+     "w": 150,
+     "h": 90,
+     "label": "Conv",
+     "kind": "neutral",
+     "size": 26,
+     "sub_size": 18
+    },
+    {
+     "type": "box",
+     "id": "b5",
+     "x": 915,
+     "y": 389,
+     "w": 150,
+     "h": 90,
+     "label": "fc7",
+     "kind": "neutral",
+     "size": 26,
+     "sub_size": 18
+    },
+    {
+     "type": "box",
+     "id": "b6",
+     "x": 1090,
+     "y": 389,
+     "w": 150,
+     "h": 90,
+     "label": "反量化",
+     "kind": "neutral",
+     "sub": "Dequantize",
+     "size": 26,
+     "sub_size": 18
+    },
+    {
+     "type": "box",
+     "id": "b7",
+     "x": 1265,
+     "y": 389,
+     "w": 150,
+     "h": 90,
+     "label": "Softmax",
+     "kind": "neutral",
+     "sub": "prob",
+     "size": 26,
+     "sub_size": 18
+    },
+    {
+     "type": "box",
+     "id": "b8",
+     "x": 1440,
+     "y": 389,
+     "w": 150,
+     "h": 90,
+     "label": "输出",
+     "kind": "neutral",
+     "size": 26,
+     "sub_size": 18
+    },
+    {
+     "type": "band",
+     "id": "bB1",
+     "x": 376,
+     "y": 374,
+     "w": 178,
+     "h": 120,
+     "label": "BPU 子图 1",
+     "label_at": [
+      392,
+      362
+     ]
+    },
+    {
+     "type": "band",
+     "id": "bB2",
+     "x": 726,
+     "y": 374,
+     "w": 353,
+     "h": 120,
+     "label": "BPU 子图 2",
+     "label_at": [
+      742,
+      362
+     ]
+    },
+    {
+     "type": "text",
+     "id": "swB",
+     "x": 1580,
+     "y": 336,
+     "text": "CPU ↔ BPU 切换 4 次",
+     "size": 24,
+     "weight": 700,
+     "anchor": "end",
+     "color": "blue"
+    },
+    {
+     "type": "token",
+     "id": "tA",
+     "x": 115,
+     "y": 248,
+     "label": "数据",
+     "w": 76,
+     "h": 36,
+     "size": 18,
+     "kind": "light",
+     "rest": "hide"
+    },
+    {
+     "type": "token",
+     "id": "tB",
+     "x": 115,
+     "y": 518,
+     "label": "数据",
+     "w": 76,
+     "h": 36,
+     "size": 18,
+     "kind": "light",
+     "rest": "hide"
+    },
+    {
+     "type": "box",
+     "id": "lg1",
+     "x": 1150,
+     "y": 552,
+     "w": 22,
+     "h": 22,
+     "label": "",
+     "kind": "bpu",
+     "on": true,
+     "shadow": false,
+     "r": 6
+    },
+    {
+     "type": "text",
+     "id": "lg1t",
+     "x": 1182,
+     "y": 571,
+     "text": "BPU 子图",
+     "size": 22,
+     "anchor": "start",
+     "color": "ink3"
+    },
+    {
+     "type": "box",
+     "id": "lg2",
+     "x": 1320,
+     "y": 552,
+     "w": 22,
+     "h": 22,
+     "label": "",
+     "kind": "cpu",
+     "on": true,
+     "shadow": false,
+     "r": 6
+    },
+    {
+     "type": "text",
+     "id": "lg2t",
+     "x": 1352,
+     "y": 571,
+     "text": "CPU 节点",
+     "size": 22,
+     "anchor": "start",
+     "color": "ink3"
+    }
+   ],
+   "steps": [
+    {
+     "at": 0,
+     "show": [
+      "la",
+      "eA",
+      "a0",
+      "a1",
+      "a2",
+      "a3",
+      "a4",
+      "a5",
+      "a6",
+      "a7",
+      "a8"
+     ],
+     "caption": "一个分类模型的计算图"
+    },
+    {
+     "at": 1400,
+     "state": {
+      "a0": "ghost",
+      "a1": "cpu",
+      "a2": "bpu",
+      "a3": "bpu",
+      "a4": "bpu",
+      "a5": "bpu",
+      "a6": "cpu",
+      "a7": "cpu",
+      "a8": "ghost"
+     },
+     "on": [
+      "a1",
+      "a2",
+      "a3",
+      "a4",
+      "a5",
+      "a6",
+      "a7"
+     ],
+     "show": [
+      "lg1",
+      "lg1t",
+      "lg2",
+      "lg2t"
+     ],
+     "caption": "工具链把它切成 BPU 子图和 CPU 节点"
+    },
+    {
+     "at": 2600,
+     "show": [
+      "bA"
+     ],
+     "caption": "卷积一直到 fc7 都在 BPU 上；Softmax(prob) 在 CPU 上"
+    },
+    {
+     "at": 4600,
+     "camera": [
+      20,
+      30,
+      560,
+      230
+     ],
+     "focus": [
+      "a0",
+      "a1",
+      "a2",
+      "eA",
+      "bA"
+     ],
+     "caption": "输入一端有 CPU 参与的量化"
+    },
+    {
+     "at": 6300,
+     "camera": [
+      1030,
+      30,
+      560,
+      230
+     ],
+     "focus": [
+      "a6",
+      "a7",
+      "a8",
+      "a5",
+      "eA",
+      "bA"
+     ],
+     "caption": "输出一端有反量化，最后的 Softmax 也在 CPU 上"
+    },
+    {
+     "at": 8300,
+     "camera": "home",
+     "focus": null,
+     "show": [
+      "lb",
+      "eB",
+      "b0",
+      "b1",
+      "b2",
+      "b3",
+      "b4",
+      "b5",
+      "b6",
+      "b7",
+      "b8"
+     ],
+     "caption": "如果中间有一个算子超出限制……"
+    },
+    {
+     "at": 9600,
+     "state": {
+      "b0": "ghost",
+      "b1": "cpu",
+      "b2": "bpu",
+      "b3": "cpu",
+      "b4": "bpu",
+      "b5": "bpu",
+      "b6": "cpu",
+      "b7": "cpu",
+      "b8": "ghost"
+     },
+     "on": [
+      "b1",
+      "b2",
+      "b3",
+      "b4",
+      "b5",
+      "b6",
+      "b7"
+     ],
+     "show": [
+      "bB1",
+      "bB2"
+     ],
+     "caption": "它会回退到 CPU，BPU 子图被切成两段"
+    },
+    {
+     "at": 11300,
+     "show": [
+      "swA",
+      "swB",
+      "tA",
+      "tB"
+     ],
+     "move": [
+      {
+       "id": "tA",
+       "path": [
+        [
+         115,
+         248
+        ],
+        [
+         377,
+         248,
+         700
+        ],
+        [
+         1077,
+         248,
+         700
+        ],
+        [
+         1515,
+         248
+        ]
+       ],
+       "speed": 0.45
+      },
+      {
+       "id": "tB",
+       "path": [
+        [
+         115,
+         518
+        ],
+        [
+         377,
+         518,
+         700
+        ],
+        [
+         552,
+         518,
+         700
+        ],
+        [
+         727,
+         518,
+         700
+        ],
+        [
+         1077,
+         518,
+         700
+        ],
+        [
+         1515,
+         518
+        ]
+       ],
+       "speed": 0.45
+      }
+     ],
+     "caption": "数据每过一次 CPU / BPU 边界就要切换一次：下面这条更慢"
+    },
+    {
+     "at": 17000,
+     "focus": null,
+     "caption": "CPU 节点越多、BPU 子图越碎，速度就越慢"
+    }
+   ],
+   "notes": "还要注意一点：一个模型，不一定全部在 BPU 上跑。工具链会把模型切成 BPU 子图和 CPU 节点，这叫\"混合异构模型\"。看上面这张图：从卷积一直到全连接层 fc7，都在 BPU 上，是一整块 BPU 子图；输入一端的量化、输出一端的反量化，还有最后的 Softmax，在 CPU 上。再看下面这条：如果中间有一个算子超出限制、回退到 CPU，BPU 子图就被切成了两段。数据每过一次 CPU 和 BPU 的边界，就要切换一次，所以下面这条明显更慢。模型检查工具会逐个告诉你，哪个算子放在 BPU、哪个放在 CPU；这个工具在电脑端运行，我们放到板块三再实际操作。"
+  },
+  {
+   "layout": "diagram",
+   "title": "四块板",
+   "eyebrow": "Four Boards",
+   "heading": "四块板的 ==BPU 一览==",
+   "height": 615,
+   "scene": [
+    {
+     "type": "photo",
+     "id": "p_x5",
+     "x": 97.0,
+     "y": 138,
+     "w": 206,
+     "h": 162,
+     "src": "assets/boards/rdk_x5.png"
+    },
+    {
+     "type": "text",
+     "id": "n_x5",
+     "x": 200,
+     "y": 350,
+     "text": "RDK X5",
+     "size": 32,
+     "weight": 700
+    },
+    {
+     "type": "text",
+     "id": "a_x5",
+     "x": 200,
+     "y": 388,
+     "text": "Bayes-e · 1 核",
+     "size": 24,
+     "color": "ink3"
+    },
+    {
+     "type": "text",
+     "id": "m_x5",
+     "x": 200,
+     "y": 418,
+     "text": "march bayes-e",
+     "size": 20,
+     "font": "mono",
+     "color": "ink3"
+    },
+    {
+     "type": "box",
+     "id": "c_x50",
+     "x": 180,
+     "y": 436,
+     "w": 40,
+     "h": 40,
+     "label": "",
+     "kind": "bpu",
+     "shadow": false,
+     "r": 10
+    },
+    {
+     "type": "text",
+     "id": "t_x5",
+     "x": 200,
+     "y": 530,
+     "text": "10 TOPS",
+     "size": 40,
+     "weight": 800,
+     "color": "accent"
+    },
+    {
+     "type": "text",
+     "id": "f_x5",
+     "x": 200,
+     "y": 592,
+     "text": "hb_mapper → .bin",
+     "size": 21,
+     "font": "mono",
+     "color": "accent",
+     "weight": 700
+    },
+    {
+     "type": "photo",
+     "id": "p_s100",
+     "x": 462.0,
+     "y": 108,
+     "w": 276,
+     "h": 192,
+     "src": "assets/boards/rdk_s100.png"
+    },
+    {
+     "type": "text",
+     "id": "n_s100",
+     "x": 600,
+     "y": 350,
+     "text": "RDK S100",
+     "size": 32,
+     "weight": 700
+    },
+    {
+     "type": "text",
+     "id": "a_s100",
+     "x": 600,
+     "y": 388,
+     "text": "Nash-e · 1 核",
+     "size": 24,
+     "color": "ink3"
+    },
+    {
+     "type": "text",
+     "id": "m_s100",
+     "x": 600,
+     "y": 418,
+     "text": "march nash-e",
+     "size": 20,
+     "font": "mono",
+     "color": "ink3"
+    },
+    {
+     "type": "box",
+     "id": "c_s1000",
+     "x": 580,
+     "y": 436,
+     "w": 40,
+     "h": 40,
+     "label": "",
+     "kind": "bpu",
+     "shadow": false,
+     "r": 10
+    },
+    {
+     "type": "text",
+     "id": "t_s100",
+     "x": 600,
+     "y": 530,
+     "text": "80 TOPS",
+     "size": 40,
+     "weight": 800,
+     "color": "accent"
+    },
+    {
+     "type": "text",
+     "id": "f_s100",
+     "x": 600,
+     "y": 592,
+     "text": "hb_compile → .hbm",
+     "size": 21,
+     "font": "mono",
+     "color": "blue",
+     "weight": 700
+    },
+    {
+     "type": "photo",
+     "id": "p_s100p",
+     "x": 862.0,
+     "y": 108,
+     "w": 276,
+     "h": 192,
+     "src": "assets/boards/rdk_s100p.png"
+    },
+    {
+     "type": "text",
+     "id": "n_s100p",
+     "x": 1000,
+     "y": 350,
+     "text": "RDK S100P",
+     "size": 32,
+     "weight": 700
+    },
+    {
+     "type": "text",
+     "id": "a_s100p",
+     "x": 1000,
+     "y": 388,
+     "text": "Nash-m · 1 核",
+     "size": 24,
+     "color": "ink3"
+    },
+    {
+     "type": "text",
+     "id": "m_s100p",
+     "x": 1000,
+     "y": 418,
+     "text": "march nash-m",
+     "size": 20,
+     "font": "mono",
+     "color": "ink3"
+    },
+    {
+     "type": "box",
+     "id": "c_s100p0",
+     "x": 980,
+     "y": 436,
+     "w": 40,
+     "h": 40,
+     "label": "",
+     "kind": "bpu",
+     "shadow": false,
+     "r": 10
+    },
+    {
+     "type": "text",
+     "id": "t_s100p",
+     "x": 1000,
+     "y": 530,
+     "text": "128 TOPS",
+     "size": 40,
+     "weight": 800,
+     "color": "accent"
+    },
+    {
+     "type": "text",
+     "id": "f_s100p",
+     "x": 1000,
+     "y": 592,
+     "text": "hb_compile → .hbm",
+     "size": 21,
+     "font": "mono",
+     "color": "blue",
+     "weight": 700
+    },
+    {
+     "type": "photo",
+     "id": "p_s600",
+     "x": 1242.0,
+     "y": 16,
+     "w": 316,
+     "h": 284,
+     "src": "assets/boards/rdk_s600.png"
+    },
+    {
+     "type": "text",
+     "id": "n_s600",
+     "x": 1400,
+     "y": 350,
+     "text": "RDK S600",
+     "size": 32,
+     "weight": 700
+    },
+    {
+     "type": "text",
+     "id": "a_s600",
+     "x": 1400,
+     "y": 388,
+     "text": "Nash-p · 4 核",
+     "size": 24,
+     "color": "ink3"
+    },
+    {
+     "type": "text",
+     "id": "m_s600",
+     "x": 1400,
+     "y": 418,
+     "text": "march nash-p",
+     "size": 20,
+     "font": "mono",
+     "color": "ink3"
+    },
+    {
+     "type": "box",
+     "id": "c_s6000",
+     "x": 1302,
+     "y": 436,
+     "w": 40,
+     "h": 40,
+     "label": "",
+     "kind": "bpu",
+     "shadow": false,
+     "r": 10
+    },
+    {
+     "type": "text",
+     "id": "cl_s6000",
+     "x": 1322,
+     "y": 496,
+     "text": "bpu0",
+     "size": 16,
+     "font": "mono",
+     "color": "ink3"
+    },
+    {
+     "type": "box",
+     "id": "c_s6001",
+     "x": 1354,
+     "y": 436,
+     "w": 40,
+     "h": 40,
+     "label": "",
+     "kind": "bpu",
+     "shadow": false,
+     "r": 10
+    },
+    {
+     "type": "text",
+     "id": "cl_s6001",
+     "x": 1374,
+     "y": 496,
+     "text": "bpu1",
+     "size": 16,
+     "font": "mono",
+     "color": "ink3"
+    },
+    {
+     "type": "box",
+     "id": "c_s6002",
+     "x": 1406,
+     "y": 436,
+     "w": 40,
+     "h": 40,
+     "label": "",
+     "kind": "bpu",
+     "shadow": false,
+     "r": 10
+    },
+    {
+     "type": "text",
+     "id": "cl_s6002",
+     "x": 1426,
+     "y": 496,
+     "text": "bpu2",
+     "size": 16,
+     "font": "mono",
+     "color": "ink3"
+    },
+    {
+     "type": "box",
+     "id": "c_s6003",
+     "x": 1458,
+     "y": 436,
+     "w": 40,
+     "h": 40,
+     "label": "",
+     "kind": "bpu",
+     "shadow": false,
+     "r": 10
+    },
+    {
+     "type": "text",
+     "id": "cl_s6003",
+     "x": 1478,
+     "y": 496,
+     "text": "bpu3",
+     "size": 16,
+     "font": "mono",
+     "color": "ink3"
+    },
+    {
+     "type": "text",
+     "id": "t_s600",
+     "x": 1400,
+     "y": 548,
+     "text": "最高 560 TOPS",
+     "size": 40,
+     "weight": 800,
+     "color": "accent"
+    },
+    {
+     "type": "text",
+     "id": "f_s600",
+     "x": 1400,
+     "y": 592,
+     "text": "hb_compile → .hbm",
+     "size": 21,
+     "font": "mono",
+     "color": "blue",
+     "weight": 700
+    }
+   ],
+   "steps": [
+    {
+     "at": 0,
+     "show": [
+      "p_x5",
+      "n_x5"
+     ],
+     "caption": "同样叫 BPU，四块板的架构和算力不一样"
+    },
+    {
+     "at": 1000,
+     "show": [
+      "p_s100",
+      "n_s100"
+     ]
+    },
+    {
+     "at": 2000,
+     "show": [
+      "p_s100p",
+      "n_s100p"
+     ]
+    },
+    {
+     "at": 3000,
+     "show": [
+      "p_s600",
+      "n_s600"
+     ]
+    },
+    {
+     "at": 4500,
+     "show": [
+      "a_x5",
+      "m_x5"
+     ],
+     "caption": "X5 是 Bayes-e；S 系列是 Nash-e / Nash-m / Nash-p，括号里的 march 写配置时要用"
+    },
+    {
+     "at": 5700,
+     "show": [
+      "c_x50"
+     ],
+     "caption": "每个方块代表一个 BPU 核"
+    },
+    {
+     "at": 7200,
+     "on": [
+      "c_x50"
+     ],
+     "show": [
+      "t_x5"
+     ],
+     "focus": [
+      "p_x5",
+      "n_x5",
+      "a_x5",
+      "m_x5",
+      "t_x5",
+      "c_x50",
+      "f_x5"
+     ],
+     "caption": "RDK X5：1 核，10 TOPS"
+    },
+    {
+     "at": 8400,
+     "show": [
+      "f_x5"
+     ]
+    },
+    {
+     "at": 10000,
+     "show": [
+      "a_s100",
+      "m_s100"
+     ],
+     "focus": [
+      "p_s100",
+      "n_s100",
+      "a_s100",
+      "m_s100",
+      "t_s100",
+      "c_s1000"
+     ],
+     "caption": "RDK S100：1 核，80 TOPS"
+    },
+    {
+     "at": 11200,
+     "show": [
+      "c_s1000",
+      "t_s100"
+     ],
+     "on": [
+      "c_s1000"
+     ]
+    },
+    {
+     "at": 12600,
+     "show": [
+      "a_s100p",
+      "m_s100p"
+     ],
+     "focus": [
+      "p_s100p",
+      "n_s100p",
+      "a_s100p",
+      "m_s100p",
+      "t_s100p",
+      "c_s100p0"
+     ],
+     "caption": "RDK S100P：1 核，128 TOPS"
+    },
+    {
+     "at": 13800,
+     "show": [
+      "c_s100p0",
+      "t_s100p"
+     ],
+     "on": [
+      "c_s100p0"
+     ]
+    },
+    {
+     "at": 15200,
+     "camera": [
+      1000,
+      0,
+      600,
+      615
+     ],
+     "show": [
+      "a_s600",
+      "m_s600"
+     ],
+     "focus": [
+      "p_s600",
+      "n_s600",
+      "a_s600",
+      "m_s600",
+      "c_s6000",
+      "cl_s6000",
+      "c_s6001",
+      "cl_s6001",
+      "c_s6002",
+      "cl_s6002",
+      "c_s6003",
+      "cl_s6003"
+     ],
+     "caption": "RDK S600 有 4 个 BPU 核：bpu0–bpu3"
+    },
+    {
+     "at": 16400,
+     "show": [
+      "c_s6000",
+      "cl_s6000",
+      "c_s6001",
+      "cl_s6001",
+      "c_s6002",
+      "cl_s6002",
+      "c_s6003",
+      "cl_s6003"
+     ]
+    },
+    {
+     "at": 17800,
+     "on": [
+      "c_s6000",
+      "c_s6001",
+      "c_s6002",
+      "c_s6003"
+     ],
+     "show": [
+      "t_s600"
+     ],
+     "focus": [
+      "p_s600",
+      "n_s600",
+      "a_s600",
+      "m_s600",
+      "t_s600",
+      "c_s6000",
+      "cl_s6000",
+      "c_s6001",
+      "cl_s6001",
+      "c_s6002",
+      "cl_s6002",
+      "c_s6003",
+      "cl_s6003"
+     ],
+     "caption": "4 个 BPU 核，合计最高 560 TOPS"
+    },
+    {
+     "at": 21000,
+     "camera": "home",
+     "focus": null,
+     "show": [
+      "f_s100",
+      "f_s100p",
+      "f_s600"
+     ],
+     "caption": "X5 用 hb_mapper 转出 .bin；S 系列用 hb_compile 转出 .hbm"
+    },
+    {
+     "at": 23300,
+     "caption": "记住自己板子的 march 和模型格式，后面每一课都会用到"
+    }
+   ],
+   "notes": "接下来，认一认四块板的 BPU。RDK X5 的架构叫 Bayes-e，单核，10 TOPS，用 hb_mapper 转换，板端模型是 .bin。S100 是 Nash-e，单核，80 TOPS；S100P 是 Nash-m，单核，128 TOPS；S600 是 Nash-p，有四个 BPU 核，最高 560 TOPS。这三块 S 系列板，都用 hb_compile 转换，板端模型是 .hbm，而且用的是同一个工具链镜像。至于工具链的版本号，以工具链文档为准。"
+  },
+  {
+   "layout": "diagram",
+   "title": "不能混用",
+   "eyebrow": "Model Format",
+   "heading": "模型格式==不能混用==",
+   "height": 620,
+   "scene": [
+    {
+     "type": "box",
+     "id": "bS100",
+     "x": 60,
+     "y": 92,
+     "w": 430,
+     "h": 150,
+     "label": "RDK S100",
+     "kind": "neutral",
+     "sub": "nash-e · 要 .hbm",
+     "icon": "chip",
+     "size": 30,
+     "sub_size": 21
+    },
+    {
+     "type": "box",
+     "id": "bS100P",
+     "x": 585,
+     "y": 92,
+     "w": 430,
+     "h": 150,
+     "label": "RDK S100P",
+     "kind": "neutral",
+     "sub": "nash-m · 要 nash-m 的 .hbm",
+     "icon": "chip",
+     "size": 30,
+     "sub_size": 21
+    },
+    {
+     "type": "box",
+     "id": "bX5",
+     "x": 1110,
+     "y": 92,
+     "w": 430,
+     "h": 150,
+     "label": "RDK X5",
+     "kind": "neutral",
+     "sub": "bayes-e · 要 .bin",
+     "icon": "chip",
+     "size": 30,
+     "sub_size": 21
+    },
+    {
+     "type": "token",
+     "id": "k1",
+     "x": 275,
+     "y": 18,
+     "label": "X5 的 .bin",
+     "w": 170,
+     "h": 42,
+     "size": 21,
+     "kind": "bpu"
+    },
+    {
+     "type": "token",
+     "id": "k2",
+     "x": 800,
+     "y": 18,
+     "label": "S100 的 .hbm",
+     "w": 190,
+     "h": 42,
+     "size": 21,
+     "kind": "cpu"
+    },
+    {
+     "type": "token",
+     "id": "k3",
+     "x": 1325,
+     "y": 18,
+     "label": ".hbm",
+     "w": 170,
+     "h": 42,
+     "size": 21,
+     "kind": "cpu",
+     "mono": true
+    },
+    {
+     "type": "text",
+     "id": "x1",
+     "x": 275,
+     "y": 284,
+     "text": "✗ X5 的 .bin 不能在 S 系列上跑",
+     "size": 23,
+     "weight": 700,
+     "color": "red"
+    },
+    {
+     "type": "text",
+     "id": "x2",
+     "x": 800,
+     "y": 284,
+     "text": "✗ S100P 也不能用 S100 的 .hbm",
+     "size": 23,
+     "weight": 700,
+     "color": "red"
+    },
+    {
+     "type": "text",
+     "id": "x3",
+     "x": 1325,
+     "y": 284,
+     "text": "✗ 禁止把 .hbm 改后缀冒充 .bin",
+     "size": 23,
+     "weight": 700,
+     "color": "red"
+    },
+    {
+     "type": "text",
+     "id": "inl",
+     "x": 60,
+     "y": 345,
+     "text": "输入也不一样（Model Zoo ResNet-18）",
+     "size": 26,
+     "weight": 700,
+     "anchor": "start"
+    },
+    {
+     "type": "box",
+     "id": "iX",
+     "x": 60,
+     "y": 375,
+     "w": 560,
+     "h": 150,
+     "label": "data",
+     "kind": "bpu",
+     "sub": "1×3×224×224 · 一个 packed NV12 张量",
+     "mono": true,
+     "size": 30,
+     "sub_size": 21
+    },
+    {
+     "type": "text",
+     "id": "iXt",
+     "x": 340,
+     "y": 560,
+     "text": "RDK X5：1 个输入",
+     "size": 22,
+     "color": "ink3"
+    },
+    {
+     "type": "box",
+     "id": "iY",
+     "x": 720,
+     "y": 375,
+     "w": 400,
+     "h": 150,
+     "label": "data_y",
+     "kind": "cpu",
+     "sub": "Y 平面 · (1, 224, 224, 1)",
+     "mono": true,
+     "size": 30,
+     "sub_size": 21
+    },
+    {
+     "type": "box",
+     "id": "iUV",
+     "x": 1140,
+     "y": 375,
+     "w": 400,
+     "h": 150,
+     "label": "data_uv",
+     "kind": "cpu",
+     "sub": "UV 平面 · (1, 112, 112, 2)",
+     "mono": true,
+     "size": 30,
+     "sub_size": 21
+    },
+    {
+     "type": "text",
+     "id": "iSt",
+     "x": 1130,
+     "y": 560,
+     "text": "S 系列：Y、UV 两个输入",
+     "size": 22,
+     "color": "ink3"
+    },
+    {
+     "type": "text",
+     "id": "qat",
+     "x": 800,
+     "y": 604,
+     "text": "例外：X5 走 QAT 产出 .hbm，本章不展开",
+     "size": 19,
+     "color": "ink4"
+    }
+   ],
+   "steps": [
+    {
+     "at": 0,
+     "show": [
+      "bS100",
+      "bS100P",
+      "bX5"
+     ],
+     "caption": "四块板的模型不能混用"
+    },
+    {
+     "at": 1200,
+     "show": [
+      "k1"
+     ],
+     "move": [
+      {
+       "id": "k1",
+       "path": [
+        [
+         275,
+         18
+        ],
+        [
+         275,
+         18,
+         300
+        ],
+        [
+         275,
+         92
+        ]
+       ],
+       "speed": 0.3
+      }
+     ],
+     "focus": [
+      "bS100",
+      "k1"
+     ],
+     "caption": "把 X5 的 .bin 拿到 S100 上……"
+    },
+    {
+     "at": 2500,
+     "state": {
+      "bS100": "bad"
+     },
+     "show": [
+      "x1"
+     ],
+     "focus": [
+      "bS100",
+      "k1",
+      "x1"
+     ],
+     "caption": "不能运行：X5 的 .bin 不能在 S 系列上跑"
+    },
+    {
+     "at": 4200,
+     "show": [
+      "k2"
+     ],
+     "move": [
+      {
+       "id": "k2",
+       "path": [
+        [
+         800,
+         18
+        ],
+        [
+         800,
+         18,
+         300
+        ],
+        [
+         800,
+         92
+        ]
+       ],
+       "speed": 0.3
+      }
+     ],
+     "focus": [
+      "bS100P",
+      "k2"
+     ],
+     "caption": "同是 S 系列，把 S100 的 .hbm 给 S100P……"
+    },
+    {
+     "at": 5500,
+     "state": {
+      "bS100P": "bad"
+     },
+     "show": [
+      "x2"
+     ],
+     "focus": [
+      "bS100P",
+      "k2",
+      "x2"
+     ],
+     "caption": "也不行：march 不同（nash-e ≠ nash-m）"
+    },
+    {
+     "at": 7200,
+     "show": [
+      "k3"
+     ],
+     "focus": [
+      "bX5",
+      "k3"
+     ],
+     "caption": "把 .hbm 改个后缀，冒充 .bin……"
+    },
+    {
+     "at": 8300,
+     "text": {
+      "k3": ".bin ?"
+     },
+     "state": {
+      "k3": "bad"
+     }
+    },
+    {
+     "at": 9000,
+     "move": [
+      {
+       "id": "k3",
+       "path": [
+        [
+         1325,
+         18
+        ],
+        [
+         1325,
+         92
+        ]
+       ],
+       "speed": 0.3
+      }
+     ],
+     "focus": [
+      "bX5",
+      "k3"
+     ]
+    },
+    {
+     "at": 9700,
+     "state": {
+      "bX5": "bad"
+     },
+     "show": [
+      "x3"
+     ],
+     "focus": [
+      "bX5",
+      "k3",
+      "x3"
+     ],
+     "caption": "明确禁止：改后缀不会改变模型本身"
+    },
+    {
+     "at": 11500,
+     "focus": null,
+     "show": [
+      "inl",
+      "iX",
+      "iXt"
+     ],
+     "camera": [
+      0,
+      300,
+      800,
+      330
+     ],
+     "caption": "X5 的模型输入：一个 packed NV12 张量 data，1×3×224×224"
+    },
+    {
+     "at": 14000,
+     "show": [
+      "iY",
+      "iUV",
+      "iSt"
+     ],
+     "camera": [
+      680,
+      300,
+      920,
+      330
+     ],
+     "caption": "S 系列：Y 和 UV 分开的两个张量 data_y、data_uv"
+    },
+    {
+     "at": 16500,
+     "camera": "home",
+     "show": [
+      "qat"
+     ],
+     "caption": "march 和格式一一对应；S 系列三块板用同一个工具链镜像，版本号以工具链文档为准"
+    }
+   ],
+   "notes": "这里有几条一定要记住。第一，四块板的模型不能混用：X5 的 .bin，不能在 S 系列上跑；S100P 也不能直接用 S100 的 .hbm。第二，千万别把 .hbm 改个后缀，冒充 .bin，这是明确禁止的。第三，输入形式也不一样：Model Zoo 的 ResNet-18 里，X5 的模型输入是一个 packed NV12 张量，叫 data，形状 1×3×224×224；S 系列是 Y 和 UV 分开的两个张量：data_y 是 1、224、224、1，data_uv 是 1、112、112、2。另外提一句例外：本课程的主线是 PTQ，X5 走 PTQ 产出 .bin；如果 X5 改走 QAT，产出的是 .hbm，那是另一条流程，本章不展开。"
+  },
+  {
+   "layout": "code",
+   "title": "认清板卡",
+   "eyebrow": "Board Check",
+   "heading": "先认清手上的板子",
+   "lead": "两条命令四块板通用，读的文件和 Model Zoo 自动识别板卡一致。",
+   "blocks": [
+    {
+     "label": "① BPU 有几个核",
+     "lines": [
+      "$ cat /sys/devices/system/bpu/core_num",
+      "$ ls /sys/devices/system/bpu/"
+     ],
+     "note": {
+      "k": "要点",
+      "p": "X5、S100、S100P 输出 1；S600 输出 4，能看到 bpu0..bpu3。"
+     }
+    },
+    {
+     "label": "② 板卡身份",
+     "lines": [
+      "$ cat /sys/class/boardinfo/soc_name \\",
+      "  /sys/class/socinfo/soc_name \\",
+      "  2>/dev/null | tr -d '\\0'"
+     ],
+     "note": {
+      "k": "要点",
+      "p": "X5 输出 X5U / X5H / X5M 之一；S 系列 → S100 / S100P / S600。--target auto 就靠它。"
+     }
+    }
+   ],
+   "notes": "那怎么确认自己手上是哪块板呢？两条命令。第一条，cat 一下 core_num，看 BPU 有几个核：X5、S100、S100P 都是 1，S600 是 4，还能看到 bpu0 到 bpu3 四个目录。第二条，读 soc_name：X5 会输出 X5U、X5H、X5M 三者之一，S 系列分别输出 S100、S100P、S600。这条命令读的文件和顺序，跟 Model Zoo 自动识别板卡的逻辑是一样的。所以跑 sample 的时候，target 设成 auto，它就能自己判断，平时不用手动指定。"
+  },
+  {
+   "layout": "section",
+   "title": "章节 02",
+   "num": "02",
+   "heading": "为什么要转换和量化",
+   "sub": "float32 → int8，PTQ 与 QAT"
+  },
+  {
+   "layout": "diagram",
+   "title": "量化",
+   "eyebrow": "Quantization",
+   "heading": "为什么要==转换 + 量化==",
+   "height": 540,
+   "scene": [
+    {
+     "type": "images",
+     "id": "qimg",
+     "x": 40,
+     "y": 70,
+     "n": 10,
+     "cols": 5,
+     "w": 64,
+     "h": 48,
+     "gap": 10
+    },
+    {
+     "type": "text",
+     "id": "qimt",
+     "x": 40,
+     "y": 210,
+     "text": "校准图片",
+     "size": 24,
+     "weight": 700,
+     "anchor": "start"
+    },
+    {
+     "type": "text",
+     "id": "qimt2",
+     "x": 40,
+     "y": 244,
+     "text": "X5 文档建议 20–100 张",
+     "size": 20,
+     "anchor": "start",
+     "color": "ink3"
+    },
+    {
+     "type": "text",
+     "id": "qimt3",
+     "x": 40,
+     "y": 274,
+     "text": "Model Zoo ResNet 用固定 200 张",
+     "size": 20,
+     "anchor": "start",
+     "color": "ink3"
+    },
+    {
+     "type": "arrow",
+     "id": "qa1",
+     "points": [
+      [
+       420,
+       140
+      ],
+      [
+       455,
+       140
+      ]
+     ]
+    },
+    {
+     "type": "text",
+     "id": "qht",
+     "x": 470,
+     "y": 40,
+     "text": "某一层的 float32 数值分布（示意）",
+     "size": 22,
+     "weight": 700,
+     "anchor": "start"
+    },
+    {
+     "type": "hist",
+     "id": "qh",
+     "x": 470,
+     "y": 70,
+     "w": 640,
+     "h": 200,
+     "values": [
+      6,
+      7,
+      8,
+      10,
+      13,
+      16,
+      20,
+      25,
+      31,
+      38,
+      45,
+      53,
+      61,
+      70,
+      78,
+      85,
+      92,
+      97,
+      101,
+      103,
+      103,
+      101,
+      97,
+      92,
+      85,
+      78,
+      70,
+      61,
+      53,
+      45,
+      38,
+      31,
+      25,
+      20,
+      16,
+      13,
+      10,
+      8,
+      7,
+      6
+     ],
+     "gap": 4
+    },
+    {
+     "type": "band",
+     "id": "qr",
+     "x": 456,
+     "y": 60,
+     "w": 668,
+     "h": 222,
+     "label": "校准统计出的数值范围",
+     "label_at": [
+      790.0,
+      322
+     ],
+     "anchor": "middle"
+    },
+    {
+     "type": "arrow",
+     "id": "qm1",
+     "points": [
+      [
+       456,
+       340
+      ],
+      [
+       456,
+       392
+      ]
+     ],
+     "color": "orange"
+    },
+    {
+     "type": "arrow",
+     "id": "qm2",
+     "points": [
+      [
+       1124,
+       340
+      ],
+      [
+       1124,
+       392
+      ]
+     ],
+     "color": "orange"
+    },
+    {
+     "type": "levels",
+     "id": "ql",
+     "x": 456,
+     "y": 400,
+     "w": 668,
+     "h": 46,
+     "n": 256
+    },
+    {
+     "type": "text",
+     "id": "qlt",
+     "x": 790.0,
+     "y": 484,
+     "text": "int8：256 个等级",
+     "size": 24,
+     "weight": 700,
+     "color": "accent"
+    },
+    {
+     "type": "text",
+     "id": "qlt2",
+     "x": 456,
+     "y": 484,
+     "text": "-128",
+     "size": 18,
+     "font": "mono",
+     "color": "ink3",
+     "anchor": "start"
+    },
+    {
+     "type": "text",
+     "id": "qlt3",
+     "x": 1124,
+     "y": 484,
+     "text": "127",
+     "size": 18,
+     "font": "mono",
+     "color": "ink3",
+     "anchor": "end"
+    },
+    {
+     "type": "text",
+     "id": "qbt",
+     "x": 1380,
+     "y": 70,
+     "text": "每个数",
+     "size": 24,
+     "weight": 700
+    },
+    {
+     "type": "bytes",
+     "id": "qf",
+     "x": 1255,
+     "y": 100,
+     "n": 4,
+     "cell": 50,
+     "gap": 10,
+     "label": "float32 · 4 字节",
+     "kind": "f32"
+    },
+    {
+     "type": "arrow",
+     "id": "qa2",
+     "points": [
+      [
+       1380,
+       196
+      ],
+      [
+       1380,
+       236
+      ]
+     ],
+     "color": "orange"
+    },
+    {
+     "type": "bytes",
+     "id": "qi",
+     "x": 1355,
+     "y": 250,
+     "n": 1,
+     "cell": 50,
+     "gap": 10,
+     "label": "int8 · 1 字节",
+     "kind": "i8"
+    },
+    {
+     "type": "text",
+     "id": "qacc",
+     "x": 1380,
+     "y": 420,
+     "text": "精度代价",
+     "size": 26,
+     "weight": 700
+    },
+    {
+     "type": "text",
+     "id": "qacc2",
+     "x": 1380,
+     "y": 456,
+     "text": "大部分典型模型 ≤ 1%",
+     "size": 21,
+     "color": "ink3"
+    }
+   ],
+   "steps": [
+    {
+     "at": 0,
+     "show": [
+      "qht",
+      "qh"
+     ],
+     "caption": "训练出来的模型是 float32：这是某一层数值分布的示意"
+    },
+    {
+     "at": 1800,
+     "show": [
+      "qimg",
+      "qimt",
+      "qimt2",
+      "qimt3",
+      "qa1"
+     ],
+     "focus": [
+      "qimg",
+      "qimt",
+      "qimt2",
+      "qimt3",
+      "qa1",
+      "qh",
+      "qht"
+     ],
+     "caption": "校准：拿一小批代表性图片跑一遍"
+    },
+    {
+     "at": 4000,
+     "show": [
+      "qr"
+     ],
+     "focus": [
+      "qr",
+      "qh",
+      "qht"
+     ],
+     "caption": "统计出这一层的数值范围"
+    },
+    {
+     "at": 5800,
+     "show": [
+      "qm1",
+      "qm2",
+      "ql",
+      "qlt",
+      "qlt2",
+      "qlt3"
+     ],
+     "focus": [
+      "qr",
+      "qh",
+      "qm1",
+      "qm2",
+      "ql",
+      "qlt",
+      "qlt2",
+      "qlt3"
+     ],
+     "caption": "再把这个范围映射到 int8 的 256 个等级上"
+    },
+    {
+     "at": 7600,
+     "on": [
+      "qh"
+     ],
+     "caption": "每个 float32 数都落到最近的一个等级：这就是量化"
+    },
+    {
+     "at": 9400,
+     "focus": [
+      "qbt",
+      "qf",
+      "qa2",
+      "qi"
+     ],
+     "show": [
+      "qbt",
+      "qf"
+     ],
+     "camera": [
+      1100,
+      20,
+      500,
+      500
+     ],
+     "caption": "每个数从 4 字节变成 1 字节"
+    },
+    {
+     "at": 10400,
+     "show": [
+      "qa2",
+      "qi"
+     ]
+    },
+    {
+     "at": 12200,
+     "show": [
+      "qacc",
+      "qacc2"
+     ],
+     "focus": [
+      "qacc",
+      "qacc2",
+      "qbt",
+      "qf",
+      "qa2",
+      "qi"
+     ],
+     "caption": "计算量大大减少；代价是精度：大部分典型模型的损失能控制在 1% 以内"
+    },
+    {
+     "at": 14600,
+     "camera": "home",
+     "focus": null,
+     "caption": "量化 = 用校准数据定范围，把 float32 映射到 int8"
+    }
+   ],
+   "notes": "好，第二个问题：为什么要转换和量化？训练出来的模型是 float32，每个数占 4 个字节；量化成 int8 之后，每个数只占 1 个字节，计算量大大减少。代价是，精度可能会下降。官方的说法是，大部分典型模型的精度损失，能控制在百分之一以内。那量化参数怎么定？靠校准：用一小批有代表性的图片，统计每一层的数值范围。X5 文档建议准备 20 到 100 张；Model Zoo 的 ResNet，用的是 COCO 里固定的 200 张图。"
+  },
+  {
+   "layout": "cards",
+   "title": "精度",
+   "eyebrow": "Accuracy",
+   "heading": "量化后精度怎么看",
+   "cols": 2,
+   "row": true,
+   "cards": [
+    {
+     "icon": "target",
+     "tone": "orange",
+     "title": "余弦相似度",
+     "text": "各输出节点建议 ≥ 0.999，最低不低于 0.99。"
+    },
+    {
+     "icon": "list-checks",
+     "tone": "blue",
+     "title": "ResNet-18 实例",
+     "text": "浮点 Top-1 59.35%；X5 板端 58.91%；S100 板端 58.79%。"
+    },
+    {
+     "icon": "zap",
+     "tone": "green",
+     "title": "PTQ 训练后量化",
+     "text": "本章主线，默认先走 PTQ。"
+    },
+    {
+     "icon": "graduation-cap",
+     "tone": "yellow",
+     "title": "QAT 量化感知训练",
+     "text": "要重新训练、门槛更高；PTQ 调优后仍不达标再考虑。"
+    }
+   ],
+   "notes": "量化完，精度怎么看？Model Zoo 建议，各输出节点的余弦相似度最好达到 0.999，最低也不要低于 0.99。看个实例：ResNet-18 浮点模型的 Top-1 准确率是 59.35%，X5 板端是 58.91%，S100 板端是 58.79%，掉得很少。量化有两条路线：PTQ，训练后量化，是本章主线，默认先走它；QAT，量化感知训练，要重新训练，门槛更高，只有明确需要，或者 PTQ 调优后还不达标，才去考虑。"
+  },
+  {
+   "layout": "diagram",
+   "title": "开发流程",
+   "eyebrow": "Workflow",
+   "heading": "官方开发流程：==五个阶段==",
+   "height": 646,
+   "scene": [
+    {
+     "type": "box",
+     "id": "st0",
+     "x": 30,
+     "y": 22,
+     "w": 284,
+     "h": 96,
+     "label": "浮点模型准备",
+     "kind": "neutral",
+     "sub": "PyTorch 等框架训练",
+     "size": 26,
+     "sub_size": 19
+    },
+    {
+     "type": "box",
+     "id": "st1",
+     "x": 344,
+     "y": 22,
+     "w": 284,
+     "h": 96,
+     "label": "模型验证",
+     "kind": "neutral",
+     "sub": "检查算子分配",
+     "size": 26,
+     "sub_size": 19
+    },
+    {
+     "type": "box",
+     "id": "st2",
+     "x": 658,
+     "y": 22,
+     "w": 284,
+     "h": 96,
+     "label": "模型转换",
+     "kind": "neutral",
+     "sub": "优化 + 量化 + 编译",
+     "size": 26,
+     "sub_size": 19
+    },
+    {
+     "type": "box",
+     "id": "st3",
+     "x": 972,
+     "y": 22,
+     "w": 284,
+     "h": 96,
+     "label": "性能评估",
+     "kind": "neutral",
+     "sub": "板端实测",
+     "size": 26,
+     "sub_size": 19
+    },
+    {
+     "type": "box",
+     "id": "st4",
+     "x": 1286,
+     "y": 22,
+     "w": 284,
+     "h": 96,
+     "label": "精度评估",
+     "kind": "neutral",
+     "sub": "对比浮点",
+     "size": 26,
+     "sub_size": 19
+    },
+    {
+     "type": "arrow",
+     "id": "sa0",
+     "points": [
+      [
+       316,
+       70
+      ],
+      [
+       340,
+       70
+      ]
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "sa1",
+     "points": [
+      [
+       630,
+       70
+      ],
+      [
+       654,
+       70
+      ]
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "sa2",
+     "points": [
+      [
+       944,
+       70
+      ],
+      [
+       968,
+       70
+      ]
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "sa3",
+     "points": [
+      [
+       1258,
+       70
+      ],
+      [
+       1282,
+       70
+      ]
+     ]
+    },
+    {
+     "type": "text",
+     "id": "stn",
+     "x": 1570,
+     "y": 150,
+     "text": "工具链不负责训练",
+     "size": 19,
+     "color": "ink3",
+     "anchor": "end"
+    },
+    {
+     "type": "arrow",
+     "id": "zl",
+     "points": [
+      [
+       658,
+       120
+      ],
+      [
+       40,
+       174
+      ]
+     ],
+     "head": false,
+     "color": "orange"
+    },
+    {
+     "type": "arrow",
+     "id": "zr",
+     "points": [
+      [
+       942,
+       120
+      ],
+      [
+       1245,
+       174
+      ]
+     ],
+     "head": false,
+     "color": "orange"
+    },
+    {
+     "type": "box",
+     "id": "dock",
+     "x": 30,
+     "y": 176,
+     "w": 1225,
+     "h": 459,
+     "label": "x86 电脑 · 官方 Docker",
+     "kind": "frame",
+     "sub": "转换都在这里完成",
+     "align": "tl",
+     "icon": "terminal",
+     "size": 28,
+     "sub_size": 20,
+     "sub_dx": 330,
+     "sub_dy": 0,
+     "shadow": false
+    },
+    {
+     "type": "box",
+     "id": "n1",
+     "x": 60,
+     "y": 266,
+     "w": 210,
+     "h": 126,
+     "label": ".pt / ONNX",
+     "kind": "neutral",
+     "sub": "float32 浮点模型",
+     "mono": true,
+     "size": 28
+    },
+    {
+     "type": "box",
+     "id": "n2",
+     "x": 300,
+     "y": 266,
+     "w": 210,
+     "h": 126,
+     "label": "校准",
+     "kind": "neutral",
+     "sub": "统计每层数值范围",
+     "icon": "target",
+     "size": 28
+    },
+    {
+     "type": "box",
+     "id": "n3",
+     "x": 540,
+     "y": 266,
+     "w": 210,
+     "h": 126,
+     "label": "量化",
+     "kind": "neutral",
+     "sub": "float32 → int8",
+     "icon": "zap",
+     "size": 28
+    },
+    {
+     "type": "box",
+     "id": "n4",
+     "x": 780,
+     "y": 266,
+     "w": 180,
+     "h": 126,
+     "label": "编译",
+     "kind": "neutral",
+     "sub": "按 march 生成",
+     "icon": "code",
+     "size": 28
+    },
+    {
+     "type": "arrow",
+     "id": "c12",
+     "points": [
+      [
+       272,
+       329
+      ],
+      [
+       296,
+       329
+      ]
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "c23",
+     "points": [
+      [
+       512,
+       329
+      ],
+      [
+       536,
+       329
+      ]
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "c34",
+     "points": [
+      [
+       752,
+       329
+      ],
+      [
+       776,
+       329
+      ]
+     ]
+    },
+    {
+     "type": "box",
+     "id": "o1",
+     "x": 1005,
+     "y": 226,
+     "w": 225,
+     "h": 108,
+     "label": ".bin",
+     "kind": "bpu",
+     "sub": "RDK X5 · bayes-e",
+     "mono": true,
+     "size": 30,
+     "sub_size": 19
+    },
+    {
+     "type": "box",
+     "id": "o2",
+     "x": 1005,
+     "y": 356,
+     "w": 225,
+     "h": 126,
+     "label": ".hbm",
+     "kind": "bpu",
+     "sub": "S100 / S100P / S600\nnash-e / nash-m / nash-p",
+     "mono": true,
+     "size": 30,
+     "sub_size": 18
+    },
+    {
+     "type": "arrow",
+     "id": "c4a",
+     "points": [
+      [
+       962,
+       311
+      ],
+      [
+       982,
+       311
+      ],
+      [
+       982,
+       280
+      ],
+      [
+       1001,
+       280
+      ]
+     ],
+     "color": "orange"
+    },
+    {
+     "type": "arrow",
+     "id": "c4b",
+     "points": [
+      [
+       962,
+       347
+      ],
+      [
+       982,
+       347
+      ],
+      [
+       982,
+       419
+      ],
+      [
+       1001,
+       419
+      ]
+     ],
+     "color": "orange"
+    },
+    {
+     "type": "images",
+     "id": "imgs",
+     "x": 70,
+     "y": 464,
+     "n": 10,
+     "cols": 5,
+     "w": 70,
+     "h": 46,
+     "gap": 10
+    },
+    {
+     "type": "text",
+     "id": "calt",
+     "x": 255,
+     "y": 608,
+     "text": "代表性图片 · X5 文档建议 20–100 张",
+     "size": 21,
+     "color": "ink3"
+    },
+    {
+     "type": "text",
+     "id": "qt",
+     "x": 760,
+     "y": 471,
+     "text": "每个数：4 字节 → 1 字节",
+     "size": 22,
+     "weight": 700,
+     "color": "accent"
+    },
+    {
+     "type": "bytes",
+     "id": "f32",
+     "x": 545,
+     "y": 509,
+     "n": 4,
+     "cell": 48,
+     "gap": 10,
+     "label": "float32",
+     "kind": "f32"
+    },
+    {
+     "type": "arrow",
+     "id": "qa",
+     "points": [
+      [
+       790,
+       531
+      ],
+      [
+       850,
+       531
+      ]
+     ],
+     "color": "orange"
+    },
+    {
+     "type": "bytes",
+     "id": "i8",
+     "x": 880,
+     "y": 509,
+     "n": 1,
+     "cell": 48,
+     "gap": 10,
+     "label": "int8",
+     "kind": "i8"
+    },
+    {
+     "type": "box",
+     "id": "board",
+     "x": 1295,
+     "y": 176,
+     "w": 275,
+     "h": 459,
+     "label": "RDK 板端",
+     "kind": "frame",
+     "sub": "只做推理",
+     "align": "tl",
+     "icon": "chip",
+     "size": 28,
+     "sub_size": 20,
+     "shadow": false
+    },
+    {
+     "type": "box",
+     "id": "r1",
+     "x": 1320,
+     "y": 284,
+     "w": 225,
+     "h": 135,
+     "label": "板端推理",
+     "kind": "bpu",
+     "sub": "hbm_runtime",
+     "icon": "rocket",
+     "size": 26,
+     "sub_size": 20
+    },
+    {
+     "type": "box",
+     "id": "r2",
+     "x": 1320,
+     "y": 446,
+     "w": 225,
+     "h": 135,
+     "label": "看信息 / 测性能",
+     "kind": "neutral",
+     "sub": "hrt_model_exec",
+     "icon": "terminal",
+     "size": 24,
+     "sub_size": 19
+    },
+    {
+     "type": "arrow",
+     "id": "co1",
+     "points": [
+      [
+       1232,
+       280
+      ],
+      [
+       1262,
+       280
+      ],
+      [
+       1262,
+       342
+      ],
+      [
+       1316,
+       342
+      ]
+     ],
+     "color": "orange"
+    },
+    {
+     "type": "arrow",
+     "id": "co2",
+     "points": [
+      [
+       1232,
+       428
+      ],
+      [
+       1262,
+       428
+      ],
+      [
+       1262,
+       360
+      ],
+      [
+       1316,
+       360
+      ]
+     ],
+     "color": "orange"
+    }
+   ],
+   "steps": [
+    {
+     "at": 0,
+     "show": [
+      "st0",
+      "sa0"
+     ],
+     "caption": "官方开发流程分五个阶段"
+    },
+    {
+     "at": 350,
+     "show": [
+      "st1",
+      "sa1"
+     ]
+    },
+    {
+     "at": 700,
+     "show": [
+      "st2",
+      "sa2"
+     ]
+    },
+    {
+     "at": 1050,
+     "show": [
+      "st3",
+      "sa3"
+     ]
+    },
+    {
+     "at": 1400,
+     "show": [
+      "st4",
+      "stn"
+     ]
+    },
+    {
+     "at": 2300,
+     "state": {
+      "st2": "bpu"
+     },
+     "on": [
+      "st2"
+     ],
+     "focus": [
+      "st2"
+     ],
+     "caption": "第三步“模型转换”包括优化、量化和编译：我们把它展开"
+    },
+    {
+     "at": 3300,
+     "show": [
+      "zl",
+      "zr"
+     ],
+     "focus": [
+      "st2",
+      "zl",
+      "zr"
+     ]
+    },
+    {
+     "at": 3600,
+     "show": [
+      "dock",
+      "n1"
+     ],
+     "caption": "起点：训练好的浮点模型，从 PyTorch 导出 ONNX（float32）"
+    },
+    {
+     "at": 5100,
+     "show": [
+      "c12",
+      "n2",
+      "imgs",
+      "calt"
+     ],
+     "camera": [
+      30,
+      221,
+      640,
+      423
+     ],
+     "focus": [
+      "n2",
+      "imgs",
+      "calt",
+      "n1",
+      "c12",
+      "st2",
+      "zl",
+      "zr"
+     ],
+     "caption": "校准：用一小批代表性图片统计每层数值范围"
+    },
+    {
+     "at": 7900,
+     "show": [
+      "c23",
+      "n3",
+      "qt",
+      "f32"
+     ],
+     "camera": [
+      420,
+      221,
+      640,
+      423
+     ],
+     "focus": [
+      "n3",
+      "qt",
+      "f32",
+      "c23",
+      "st2",
+      "zl",
+      "zr"
+     ],
+     "caption": "量化：float32 → int8"
+    },
+    {
+     "at": 9200,
+     "show": [
+      "qa",
+      "i8"
+     ],
+     "focus": [
+      "n3",
+      "qt",
+      "f32",
+      "qa",
+      "i8",
+      "st2",
+      "zl",
+      "zr"
+     ],
+     "caption": "每个数从 4 字节变成 1 字节，计算量大大减少"
+    },
+    {
+     "at": 11200,
+     "camera": "home",
+     "focus": null,
+     "show": [
+      "c34",
+      "n4"
+     ],
+     "caption": "编译：按目标板卡的 march 生成板端模型"
+    },
+    {
+     "at": 12600,
+     "show": [
+      "c4a",
+      "o1",
+      "c4b",
+      "o2"
+     ],
+     "focus": [
+      "n4",
+      "c4a",
+      "o1",
+      "c4b",
+      "o2",
+      "st2",
+      "zl",
+      "zr"
+     ],
+     "caption": "X5（bayes-e）得到 .bin；S 系列（nash-e / nash-m / nash-p）得到 .hbm"
+    },
+    {
+     "at": 14900,
+     "focus": [
+      "dock",
+      "n1",
+      "n2",
+      "n3",
+      "n4",
+      "o1",
+      "o2",
+      "c12",
+      "c23",
+      "c34",
+      "c4a",
+      "c4b",
+      "imgs",
+      "calt",
+      "qt",
+      "f32",
+      "qa",
+      "i8",
+      "st2",
+      "zl",
+      "zr"
+     ],
+     "caption": "以上全部在 x86 电脑的官方 Docker 里完成，不在板上做"
+    },
+    {
+     "at": 16600,
+     "show": [
+      "board",
+      "r1",
+      "r2",
+      "co1",
+      "co2"
+     ],
+     "focus": [
+      "board",
+      "r1",
+      "r2",
+      "co1",
+      "co2",
+      "st2",
+      "zl",
+      "zr"
+     ],
+     "caption": "板端只做推理：hbm_runtime 推理，hrt_model_exec 看信息、测性能"
+    },
+    {
+     "at": 19000,
+     "focus": null,
+     "caption": "转换在电脑上，推理在板上；转换后再做性能评估和精度评估"
+    }
+   ],
+   "notes": "把整件事串起来，官方把它分成五个阶段：浮点模型准备、模型验证、模型转换、性能评估、精度评估。其中\"模型转换\"又包括优化、量化和编译三步。注意，工具链本身不负责训练，训练还是用 PyTorch 这类框架来做。我们把\"模型转换\"这一步展开看。起点是训练好的浮点模型：从 PyTorch 导出 ONNX，里面都是 float32。第一步校准：拿一小批有代表性的图片跑一遍，统计每一层的数值范围，X5 文档建议准备 20 到 100 张。第二步量化：float32 变成 int8，每个数从 4 个字节变成 1 个字节，计算量大大减少。第三步编译：按目标板卡的架构，也就是 march 来编译。X5 是 bayes-e，得到 .bin；S 系列是 nash-e、nash-m、nash-p，得到 .hbm。注意，这些全部在 x86 电脑上的官方 Docker 里完成，不在板上做。转换好的模型拷到板子上，板子只负责推理：用 hbm_runtime 跑推理，用 hrt_model_exec 看模型信息、测性能。转换完，回到流程的最后两步：在板上做性能评估，再对比浮点模型做精度评估。"
+  },
+  {
+   "layout": "table",
+   "title": "两条工具线",
+   "eyebrow": "Toolchain",
+   "heading": "两条板卡线的工具",
+   "lead": "转换在 x86 电脑的官方 Docker 里做，不在板上做。",
+   "head": [
+    {
+     "html": "步骤",
+     "style": "width:250px"
+    },
+    "RDK X5",
+    "S 系列（S100 / S100P / S600）"
+   ],
+   "row_header": true,
+   "rows": [
+    [
+     "导出",
+     {
+      "html": "四块板一样：PyTorch 导出 ONNX。",
+      "colspan": 2
+     }
+    ],
+    [
+     "模型检查",
+     "<span class=\"cmd\">hb_mapper checker --march bayes-e</span>",
+     "<span class=\"cmd\">hb_compile -m &lt;model&gt; --march nash-*</span>"
+    ],
+    [
+     "量化编译",
+     "<span class=\"cmd\">hb_mapper makertbin</span> → .bin",
+     "<span class=\"cmd\">hb_config_generator</span> + <span class=\"cmd\">hb_compile -c</span> → .hbm"
+    ],
+    [
+     "板端推理",
+     {
+      "html": "四块板统一用 Python 的 hbm_runtime，或 C/C++ 接口。",
+      "colspan": 2
+     }
+    ]
+   ],
+   "notes": "落到具体工具，分两条板卡线。导出这一步都一样，从 PyTorch 导出 ONNX。模型检查：X5 用 hb_mapper checker，S 系列用 hb_compile 加上 march 参数。量化编译：X5 用 hb_mapper makertbin 生成 .bin；S 系列先用 hb_config_generator 生成配置文件，再用 hb_compile 生成 .hbm。这些转换都在 x86 电脑上的官方 Docker 里完成，不在板子上做。到了板端推理，四块板都可以用 Python 的 hbm_runtime，本课程也统一按 hbm_runtime 来讲。"
+  },
+  {
+   "layout": "cards",
+   "title": "Model Zoo",
+   "eyebrow": "Model Zoo",
+   "heading": "Model Zoo 帮你省掉什么",
+   "lead": "以 `samples/vision/resnet/` 为例：`model/`、`conversion/`、`runtime/` 三个目录。",
+   "cols": 3,
+   "cards": [
+    {
+     "icon": "grid",
+     "tone": "orange",
+     "title": "转换好的模型",
+     "text": "大多数 Sample 提供 .bin / .hbm 下载，拿来就能跑。"
+    },
+    {
+     "icon": "code",
+     "tone": "blue",
+     "title": "板端推理代码",
+     "text": "前处理、推理、后处理代码都已写好。"
+    },
+    {
+     "icon": "book-open",
+     "tone": "green",
+     "title": "转换配方",
+     "text": "conversion/ 目录可以照着转自己的模型。"
+    }
+   ],
+   "notes": "那 Model Zoo 在哪一环帮你呢？主要省掉三件事：第一，大多数 Sample 都提供转换好的 .bin 和 .hbm，下载就能跑；第二，附带板端的前处理、推理、后处理代码；第三，conversion 目录里有转换配方，可以照着去转你自己的模型。以 ResNet 为例，目录里就是 model、conversion、runtime 三个文件夹。这三件事，正好对应本章后面的三个板块。"
+  },
+  {
+   "layout": "diagram",
+   "title": "算子分配",
+   "eyebrow": "Operators",
+   "heading": "算子去 BPU 还是 CPU",
+   "height": 600,
+   "scene": [
+    {
+     "type": "band",
+     "id": "oA",
+     "x": 226,
+     "y": 86,
+     "w": 1008,
+     "h": 128,
+     "label": "BPU 子图",
+     "label_at": [
+      242,
+      74
+     ]
+    },
+    {
+     "type": "band",
+     "id": "oB1",
+     "x": 226,
+     "y": 86,
+     "w": 388,
+     "h": 128,
+     "label": "BPU 子图 1",
+     "label_at": [
+      242,
+      74
+     ]
+    },
+    {
+     "type": "band",
+     "id": "oB2",
+     "x": 846,
+     "y": 86,
+     "w": 388,
+     "h": 128,
+     "label": "BPU 子图 2",
+     "label_at": [
+      862,
+      74
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "oeL",
+     "points": [
+      [
+       60,
+       150
+      ],
+      [
+       640,
+       150
+      ]
+     ],
+     "mode": "flow",
+     "head": false
+    },
+    {
+     "type": "arrow",
+     "id": "oeM",
+     "points": [
+      [
+       640,
+       150
+      ],
+      [
+       850,
+       150
+      ]
+     ],
+     "mode": "flow",
+     "head": false
+    },
+    {
+     "type": "arrow",
+     "id": "oeR",
+     "points": [
+      [
+       850,
+       150
+      ],
+      [
+       1262,
+       150
+      ]
+     ],
+     "mode": "flow",
+     "head": false
+    },
+    {
+     "type": "box",
+     "id": "o0",
+     "x": 40,
+     "y": 105,
+     "w": 160,
+     "h": 90,
+     "label": "量化",
+     "kind": "neutral",
+     "sub": "CPU",
+     "size": 26,
+     "sub_size": 18
+    },
+    {
+     "type": "box",
+     "id": "o1",
+     "x": 250,
+     "y": 105,
+     "w": 160,
+     "h": 90,
+     "label": "Conv",
+     "kind": "neutral",
+     "size": 26
+    },
+    {
+     "type": "box",
+     "id": "o2",
+     "x": 440,
+     "y": 105,
+     "w": 160,
+     "h": 90,
+     "label": "Conv",
+     "kind": "neutral",
+     "size": 26
+    },
+    {
+     "type": "box",
+     "id": "o4",
+     "x": 870,
+     "y": 105,
+     "w": 160,
+     "h": 90,
+     "label": "Conv",
+     "kind": "neutral",
+     "size": 26
+    },
+    {
+     "type": "box",
+     "id": "o5",
+     "x": 1050,
+     "y": 105,
+     "w": 160,
+     "h": 90,
+     "label": "Conv",
+     "kind": "neutral",
+     "size": 26
+    },
+    {
+     "type": "box",
+     "id": "o6",
+     "x": 1260,
+     "y": 105,
+     "w": 160,
+     "h": 90,
+     "label": "反量化",
+     "kind": "neutral",
+     "sub": "CPU",
+     "size": 26,
+     "sub_size": 18
+    },
+    {
+     "type": "token",
+     "id": "oX",
+     "x": 725,
+     "y": 150,
+     "label": "算子 X",
+     "w": 170,
+     "h": 90,
+     "size": 26,
+     "kind": "bpu"
+    },
+    {
+     "type": "text",
+     "id": "olim",
+     "x": 725,
+     "y": 44,
+     "text": "shape（C×H×W）超过 8192",
+     "size": 22,
+     "weight": 700,
+     "color": "red"
+    },
+    {
+     "type": "arrow",
+     "id": "odn",
+     "points": [
+      [
+       600,
+       168
+      ],
+      [
+       618,
+       168
+      ],
+      [
+       618,
+       345
+      ],
+      [
+       636,
+       345
+      ]
+     ],
+     "color": "blue"
+    },
+    {
+     "type": "arrow",
+     "id": "oup",
+     "points": [
+      [
+       814,
+       345
+      ],
+      [
+       832,
+       345
+      ],
+      [
+       832,
+       168
+      ],
+      [
+       866,
+       168
+      ]
+     ],
+     "color": "blue"
+    },
+    {
+     "type": "band",
+     "id": "ocpu",
+     "x": 628,
+     "y": 292,
+     "w": 194,
+     "h": 106,
+     "label": "C×H×W > 8192 → 回退到 CPU",
+     "label_at": [
+      725,
+      424
+     ],
+     "anchor": "middle",
+     "color": "blue"
+    },
+    {
+     "type": "text",
+     "id": "osw",
+     "x": 1560,
+     "y": 40,
+     "text": "CPU ↔ BPU 切换 2 次",
+     "size": 24,
+     "weight": 700,
+     "anchor": "end",
+     "color": "blue"
+    },
+    {
+     "type": "box",
+     "id": "oun",
+     "x": 40,
+     "y": 478,
+     "w": 250,
+     "h": 104,
+     "label": "不支持的算子",
+     "kind": "bad",
+     "size": 26
+    },
+    {
+     "type": "arrow",
+     "id": "oua",
+     "points": [
+      [
+       292,
+       530
+      ],
+      [
+       342,
+       530
+      ]
+     ],
+     "color": "orange"
+    },
+    {
+     "type": "box",
+     "id": "oer",
+     "x": 350,
+     "y": 478,
+     "w": 900,
+     "h": 104,
+     "label": "HorizonRT not support these cpu operators",
+     "kind": "bad",
+     "sub": "检查工具直接报错 → 查算子支持约束列表，或用自定义算子",
+     "mono": true,
+     "size": 24,
+     "sub_size": 19
+    }
+   ],
+   "steps": [
+    {
+     "at": 0,
+     "show": [
+      "oeL",
+      "oeM",
+      "oeR",
+      "o0",
+      "o1",
+      "o2",
+      "oX",
+      "o4",
+      "o5",
+      "o6"
+     ],
+     "caption": "一个模型：两端是 CPU 的量化、反量化，中间都是 BPU 算子"
+    },
+    {
+     "at": 1200,
+     "state": {
+      "o0": "cpu",
+      "o6": "cpu",
+      "o1": "bpu",
+      "o2": "bpu",
+      "o4": "bpu",
+      "o5": "bpu"
+     },
+     "on": [
+      "o0",
+      "o6",
+      "o1",
+      "o2",
+      "o4",
+      "o5"
+     ],
+     "show": [
+      "oA",
+      "osw"
+     ],
+     "caption": "理想情况：中间是一整块 BPU 子图，CPU ↔ BPU 只切换 2 次"
+    },
+    {
+     "at": 3400,
+     "show": [
+      "olim"
+     ],
+     "focus": [
+      "oX",
+      "olim",
+      "oA"
+     ],
+     "camera": [
+      420,
+      0,
+      640,
+      430
+     ],
+     "caption": "但算子 X 的 shape（C×H×W）超过了 8192……"
+    },
+    {
+     "at": 5600,
+     "move": [
+      {
+       "id": "oX",
+       "path": [
+        [
+         725,
+         150
+        ],
+        [
+         725,
+         345
+        ]
+       ],
+       "speed": 0.22
+      }
+     ],
+     "state": {
+      "oX": "cpu"
+     },
+     "hide": [
+      "oeM",
+      "oA",
+      "olim"
+     ],
+     "show": [
+      "ocpu",
+      "oB1",
+      "oB2"
+     ],
+     "focus": [
+      "oX",
+      "ocpu",
+      "oB1",
+      "oB2"
+     ],
+     "caption": "它会回退到 CPU 上执行"
+    },
+    {
+     "at": 7600,
+     "camera": "home",
+     "show": [
+      "odn",
+      "oup"
+     ],
+     "focus": null,
+     "text": {
+      "osw": "CPU ↔ BPU 切换 4 次"
+     },
+     "caption": "BPU 子图被切成两段，CPU ↔ BPU 切换从 2 次变成 4 次：越碎越慢"
+    },
+    {
+     "at": 10400,
+     "show": [
+      "oun",
+      "oua",
+      "oer"
+     ],
+     "focus": [
+      "oun",
+      "oua",
+      "oer"
+     ],
+     "caption": "如果算子根本不支持，检查工具会直接报错"
+    },
+    {
+     "at": 13000,
+     "focus": null,
+     "caption": "能不能上板，和上板后快不快，是两回事"
+    }
+   ],
+   "notes": "再说一个新手常踩的坑：算子分配。检查工具遇到不支持的算子，会直接报错，这时可以查算子支持约束列表，或者用自定义算子来解决。还有一种情况：超出限制的算子会回退到 CPU，比如 shape，也就是 C 乘 H 乘 W，超过 8192，就会回退到 CPU，把 BPU 子图切成两段，CPU 和 BPU 之间的切换次数也跟着变多。另外，即使模型以 BPU 为主，输入输出两端通常也有 CPU 参与的量化和反量化。就像前面动图里看到的，CPU 节点越多、BPU 子图切得越碎，速度就越慢。能不能上板，和上板之后快不快，是两回事。"
+  },
+  {
+   "layout": "section",
+   "title": "章节 03",
+   "num": "03",
+   "heading": "上板看 BPU 干活",
+   "sub": "下载模型 · 看信息 · 测性能"
+  },
+  {
+   "layout": "code",
+   "title": "下载模型",
+   "eyebrow": "Demo · Model",
+   "heading": "下载模型并查看信息",
+   "lead": "在仓库根目录执行；换板时把 x5 改成 s100 / s100p / s600。",
+   "blocks": [
+    {
+     "label": "① 下载 ResNet-18",
+     "lines": [
+      "$ git clone https://github.com/D-Robotics/rdk_model_zoo.git",
+      "$ cd rdk_model_zoo",
+      {
+       "text": "$ bash samples/vision/resnet/model/download.sh x5 18",
+       "hl": true
+      }
+     ],
+     "note": {
+      "k": "要点",
+      "p": "X5 得到 resnet18_<wbr>bayese_<wbr>224x224_<wbr>nv12.bin；S 系列得到对应的 .hbm（nashe / nashm / nashp）。"
+     }
+    },
+    {
+     "label": "② 查看模型信息",
+     "lines": [
+      "$ hrt_model_exec model_info \\",
+      "  --model_file <模型文件>"
+     ],
+     "note": {
+      "k": "要点",
+      "p": "四块板都已预装 hrt_model_exec，不用另外安装。"
+     }
+    }
+   ],
+   "notes": "好，第三个问题，我们上板，看看 BPU 在干活。先把 Model Zoo 克隆下来，进入仓库根目录，用 download 脚本下载 ResNet-18。X5 就填 x5，换板的时候改成 s100、s100p 或者 s600。X5 会得到一个 .bin 文件，S 系列得到各自对应的 .hbm 文件。然后用 hrt_model_exec model_info 看一下模型信息，输入输出、NV12 输入这些都能在这里看到。这个工具四块板都已经预装好了，不用另外安装。"
+  },
+  {
+   "layout": "code",
+   "title": "实测性能",
+   "eyebrow": "Demo · Perf",
+   "heading": "实测 BPU 推理性能",
+   "lead": "四块板语法一致；另开一个终端看 BPU 使用率。",
+   "blocks": [
+    {
+     "label": "③ 纯推理性能",
+     "lines": [
+      "$ hrt_model_exec perf \\",
+      "  --model_file <模型文件> \\",
+      "  --frame_count=200"
+     ],
+     "note": {
+      "k": "要点",
+      "p": "--thread_num=&lt;N&gt; 是并发测试线程数，不是核数：X5 1–8，S 系列 1–32。多核模型要用 --core_id 指定与 core_num 相同数量的核。"
+     }
+    },
+    {
+     "label": "④ BPU 使用率",
+     "lines": [
+      "$ hrut_somstatus",
+      "$ hrut_somstatus | grep -A4 -i \"bpu status\"",
+      "$ hrut_somstatus | grep -A6 -i \"bpu status\""
+     ],
+     "note": {
+      "k": "要点",
+      "p": "第一行 X5；第二行 S100 / S100P；第三行 S600（分别列出 bpu0..bpu3）。"
+     }
+    }
+   ],
+   "notes": "接着测 BPU 的纯推理性能。还是 hrt_model_exec，子命令换成 perf，跑 200 帧。四块板的语法完全一样。想测并发下的极限吞吐，可以加 thread_num 参数，它是同时提交任务的测试线程数，不是 BPU 核数：X5 可以设 1 到 8，S 系列可以设 1 到 32。一次推理用几个核，是转换时 core_num 定下来的；如果是 core_num 大于 1 的多核模型，还要用 core_id 列出同样数量的核，core_id 从 1 开始编号，1 就是 bpu0。跑的同时，另开一个终端，执行 hrut_somstatus，看 BPU 使用率。X5 直接看 bpu status 那一段；S 系列输出比较长，用 grep 过滤一下就行，S600 会分别列出 bpu0 到 bpu3 四个核的使用率。"
+  },
+  {
+   "layout": "diagram",
+   "title": "实测参考",
+   "eyebrow": "Demo · Result",
+   "heading": "ResNet-18 ==实测参考==",
+   "height": 560,
+   "scene": [
+    {
+     "type": "text",
+     "id": "pft",
+     "x": 40,
+     "y": 40,
+     "text": "ResNet-18 平均单帧延时（Model Zoo README 参考）",
+     "size": 24,
+     "weight": 700,
+     "anchor": "start"
+    },
+    {
+     "type": "meter",
+     "id": "pl0",
+     "x": 230,
+     "y": 90,
+     "w": 540,
+     "h": 44,
+     "value": 1.0,
+     "label": "RDK X5",
+     "vlabel": "2.740 ms",
+     "kind": "bpu",
+     "size": 24
+    },
+    {
+     "type": "meter",
+     "id": "pl1",
+     "x": 230,
+     "y": 172,
+     "w": 540,
+     "h": 44,
+     "value": 0.2302919708029197,
+     "label": "RDK S100",
+     "vlabel": "0.631 ms",
+     "kind": "cpu",
+     "size": 24
+    },
+    {
+     "type": "meter",
+     "id": "pl2",
+     "x": 230,
+     "y": 254,
+     "w": 540,
+     "h": 44,
+     "value": 0.1948905109489051,
+     "label": "RDK S100P",
+     "vlabel": "0.534 ms",
+     "kind": "cpu",
+     "size": 24
+    },
+    {
+     "type": "meter",
+     "id": "pl3",
+     "x": 230,
+     "y": 336,
+     "w": 540,
+     "h": 44,
+     "value": 0.1437956204379562,
+     "label": "RDK S600",
+     "vlabel": "0.394 ms",
+     "kind": "cpu",
+     "size": 24
+    },
+    {
+     "type": "text",
+     "id": "pfn",
+     "x": 40,
+     "y": 452,
+     "text": "条越短越快 · CPU 调频 performance 模式下测得",
+     "size": 20,
+     "color": "ink3",
+     "anchor": "start"
+    },
+    {
+     "type": "text",
+     "id": "pfr",
+     "x": 935,
+     "y": 66,
+     "text": "实测 S600 · ResNet-18",
+     "size": 26,
+     "weight": 700,
+     "anchor": "start"
+    },
+    {
+     "type": "meter",
+     "id": "pt0",
+     "x": 1075,
+     "y": 140,
+     "w": 330,
+     "h": 40,
+     "value": 0.2004475703324808,
+     "label": "1 线程",
+     "vlabel": "2508 FPS",
+     "kind": "bpu",
+     "size": 22
+    },
+    {
+     "type": "text",
+     "id": "pm0",
+     "x": 1057,
+     "y": 212,
+     "text": "0.387 ms",
+     "size": 22,
+     "font": "mono",
+     "weight": 700,
+     "color": "ink2",
+     "anchor": "end"
+    },
+    {
+     "type": "meter",
+     "id": "pt1",
+     "x": 1075,
+     "y": 252,
+     "w": 330,
+     "h": 40,
+     "value": 0.5946291560102301,
+     "label": "4 线程",
+     "vlabel": "7440 FPS",
+     "kind": "bpu",
+     "size": 22
+    },
+    {
+     "type": "text",
+     "id": "pm1",
+     "x": 1057,
+     "y": 324,
+     "text": "0.522 ms",
+     "size": 22,
+     "font": "mono",
+     "weight": 700,
+     "color": "ink2",
+     "anchor": "end"
+    },
+    {
+     "type": "meter",
+     "id": "pt2",
+     "x": 1075,
+     "y": 364,
+     "w": 330,
+     "h": 40,
+     "value": 1.0,
+     "label": "12 线程",
+     "vlabel": "12512 FPS",
+     "kind": "bpu",
+     "size": 22
+    },
+    {
+     "type": "text",
+     "id": "pm2",
+     "x": 1057,
+     "y": 436,
+     "text": "0.927 ms",
+     "size": 22,
+     "font": "mono",
+     "weight": 700,
+     "color": "ink2",
+     "anchor": "end"
+    }
+   ],
+   "steps": [
+    {
+     "at": 0,
+     "show": [
+      "pft",
+      "pl0",
+      "pl1",
+      "pl2",
+      "pl3"
+     ],
+     "caption": "对照 Model Zoo README 的参考数据：重点看 Average latency 和 Frame rate"
+    },
+    {
+     "at": 900,
+     "on": [
+      "pl0"
+     ]
+    },
+    {
+     "at": 1500,
+     "on": [
+      "pl1"
+     ]
+    },
+    {
+     "at": 2100,
+     "on": [
+      "pl2"
+     ]
+    },
+    {
+     "at": 2700,
+     "on": [
+      "pl3"
+     ]
+    },
+    {
+     "at": 4400,
+     "show": [
+      "pfn"
+     ],
+     "caption": "X5 2.740 ms，S600 0.394 ms；测出来偏差大，先检查 CPU 是不是 performance 模式"
+    },
+    {
+     "at": 6800,
+     "show": [
+      "pfr",
+      "pt0",
+      "pt1",
+      "pt2"
+     ],
+     "camera": [
+      880,
+      0,
+      720,
+      560
+     ],
+     "focus": [
+      "pfr",
+      "pt0",
+      "pm0",
+      "pt1",
+      "pm1",
+      "pt2",
+      "pm2"
+     ],
+     "caption": "再看 S600 实测：ResNet-18 用不同线程数跑 perf"
+    },
+    {
+     "at": 7800,
+     "on": [
+      "pt0"
+     ],
+     "show": [
+      "pm0"
+     ],
+     "caption": "1 线程：0.387 ms，2508 FPS"
+    },
+    {
+     "at": 9400,
+     "on": [
+      "pt1"
+     ],
+     "show": [
+      "pm1"
+     ],
+     "caption": "4 线程：0.522 ms，7440 FPS"
+    },
+    {
+     "at": 11000,
+     "on": [
+      "pt2"
+     ],
+     "show": [
+      "pm2"
+     ],
+     "caption": "12 线程：0.927 ms，12512 FPS"
+    },
+    {
+     "at": 13200,
+     "camera": "home",
+     "focus": null,
+     "caption": "线程越多，吞吐越高；单次延迟略有上升"
+    }
+   ],
+   "notes": "perf 跑完，重点看两个数：Average latency，也就是平均单帧延时；还有 Frame rate，帧率。对照 Model Zoo README 里的参考数据：ResNet-18 在 X5 上是 2.740 毫秒，S100 是 0.631 毫秒，S100P 是 0.534 毫秒，S600 是 0.394 毫秒。这些数据是在 CPU 调频 performance 模式下测的。如果你测出来偏差比较大，可以先检查一下这一点。再看一组我们在 RDK S600 上用 ResNet-18 的实测，改变 perf 的线程数：1 个线程，单次延迟 0.387 毫秒，2508 帧每秒；4 个线程，0.522 毫秒，7440 帧每秒；12 个线程，0.927 毫秒，12512 帧每秒。线程越多，吞吐越高，单次延迟略有上升。"
+  },
+  {
+   "layout": "section",
+   "title": "章节 04",
+   "num": "04",
+   "heading": "新手规则与下一课",
+   "sub": "五条规则 · 2-02 预告"
+  },
+  {
+   "layout": "bullets",
+   "title": "五条规则",
+   "eyebrow": "Rules",
+   "heading": "新手必记==五条规则==",
+   "lead": "每次动手转换前，先对照这五条。",
+   "variant": "numbered",
+   "items": [
+    "march 和格式一一对应，不跨平台复用模型、Runtime、wheel 包",
+    "默认先走 PTQ，不达标再考虑 QAT",
+    "工具链用官方 Docker，在 x86 电脑上转换",
+    "先跑 checker 看算子分配，再准备校准数据和 YAML",
+    "每次转换后都测性能和精度；板端用系统自带的 hbm_runtime"
+   ],
+   "notes": "最后，送大家五条新手必记的规则。一，march 和格式一一对应，不能跨平台复用模型、Runtime 或者 wheel 包。二，默认先走 PTQ，不达标再考虑 QAT。三，工具链用官方 Docker，在 x86 电脑上转换，板端只负责推理。四，先跑 checker 看算子分配，再准备校准数据和 YAML 配置。五，每次转换后，都要测性能和精度，不能只看\"转换成功\"；板端用系统自带的 hbm_runtime，不要去装 PyPI 上的同名包。"
+  },
+  {
+   "layout": "closing",
+   "title": "下一课",
+   "eyebrow": "Up Next · Lesson 2-02",
+   "heading": "下一课：==打开 Model Zoo==",
+   "lead": "BPU 只跑量化、编译后的模型；X5 用 .bin，S 系列用 .hbm；Model Zoo 已经准备好模型和推理代码。",
+   "cards": [
+    {
+     "icon": "grid",
+     "tone": "orange",
+     "k": "一套代码四块板",
+     "d": "看 main 分支如何同时支持四块板。"
+    },
+    {
+     "icon": "rocket",
+     "tone": "green",
+     "k": "跑通第一个 Sample",
+     "d": "用 Model Zoo 的 Python 程序跑同一个模型。"
+    },
+    {
+     "icon": "eye",
+     "tone": "yellow",
+     "k": "真正看到结果",
+     "d": "ResNet-18 输出 white wolf。"
+    }
+   ],
+   "full_logo": true,
+   "notes": "一句话回顾：BPU 只跑量化、编译之后的模型，X5 用 .bin，S 系列用 .hbm，而 Model Zoo 已经把转换好的模型和推理代码准备好了。下一课，我们正式打开 Model Zoo，看看一套代码怎么同时支持四块板，并且跑通第一个 Sample，亲眼看到 ResNet-18 输出 white wolf。我们下节课见。"
+  }
+ ]
+}
