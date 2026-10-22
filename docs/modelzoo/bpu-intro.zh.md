@@ -8,7 +8,7 @@
 >
 > 学习方式：概念讲解 + 板端只读命令实操。本课不需要电脑端工具链，板子能 SSH 登录、能联网即可
 >
-> 配套视频：<!-- TODO: B 站视频发布后补充链接 -->**待发布**（B 站链接发布后补充）
+> 配套视频：[B 站观看「认识 BPU」](https://www.bilibili.com/video/BV1Xnnx6jECC/)
 >
 > 配套课件：[查看中文 HTML 课件源码](https://github.com/D-Robotics/rdk-course-demos/blob/develop/02_modelzoo/01_bpu_intro/lesson-2-01.zh.html) · [English slide source](https://github.com/D-Robotics/rdk-course-demos/blob/develop/02_modelzoo/01_bpu_intro/lesson-2-01.html)
 
