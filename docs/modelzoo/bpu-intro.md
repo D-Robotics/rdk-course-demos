@@ -8,7 +8,7 @@
 >
 > Learning format: concept explanation + read-only commands on the board. No PC toolchain is needed for this lesson; you only need a board you can reach over SSH, with network access
 >
-> Video: <!-- TODO: add the Bilibili link after the video is published -->**Coming soon** (Bilibili link to be added after publishing)
+> Video: [Watch on Bilibili (in Chinese)](https://www.bilibili.com/video/BV1Xnnx6jECC/)
 >
 > Slides: [Open English HTML slides on GitHub](https://github.com/D-Robotics/rdk-course-demos/blob/develop/02_modelzoo/01_bpu_intro/lesson-2-01.html) · [中文课件源码](https://github.com/D-Robotics/rdk-course-demos/blob/develop/02_modelzoo/01_bpu_intro/lesson-2-01.zh.html)
 
