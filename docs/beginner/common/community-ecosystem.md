@@ -20,7 +20,7 @@ This lesson follows the shortest path through these four tasks: find the manual,
 After completing this lesson, you will be able to:
 
 1. Find the correct RDK X Series or RDK S Series manual and, using RDK X5 as an example, locate the video codec APIs;
-2. Identify official repositories in D-Robotics GitHub and RDK Model Zoo, select the branch for your board, and find the target README before taking action;
+2. Identify official repositories in D-Robotics GitHub and RDK Model Zoo, stay on Model Zoo `main` for RDK X5, S100, S100P, and S600, and find the target README before taking action;
 3. Find the official TogetheROS.Bot (TROS) manual and source-code entry points, and understand their different roles;
 4. Find the forum and its new-topic entry point, then prepare a problem description that other developers can reproduce.
 
@@ -43,7 +43,7 @@ Before opening the individual sites, establish the following eight concepts. At 
 
 You do not need to connect an RDK board for this lesson. You only need a computer with Internet access and a browser.
 
-It is useful to confirm your board model in advance, such as RDK X3, RDK X5, RDK S100, or RDK S600. The board series affects which manual, Model Zoo branch, and example code you should use.
+It is useful to confirm your board model in advance, such as RDK X3, RDK X5, RDK S100, RDK S100P, or RDK S600. The board series decides which manual you open. In Model Zoo, it decides which model and runtime option you use, not which branch.
 
 The bilingual handbooks, original page content, and supporting demos for this course are stored in the `rdk-course-demos` repository and published through GitHub Pages:
 
@@ -59,7 +59,7 @@ Choose an entry point according to the problem you need to solve:
 |---|---|---|
 | Board interfaces, system installation, configuration, or common issues | RDK Resource Center and the manual for your board | Quick Start, System Configuration, Basic Application Development, FAQs |
 | Open-source projects and implementation details | D-Robotics GitHub | Repositories, README files, source code, Issues |
-| BPU model deployment examples | RDK Model Zoo | Board branches, model directories, README files |
+| BPU model deployment examples | RDK Model Zoo | The `main` branch, per-board models, and sample READMEs |
 | ROS 2 / TROS robotics development | TROS manual and GitHub | Usage paths, packages, source code, Issues |
 | A development workspace for RDK devices | RDK Studio | Device-development entry point; covered in the RDK Studio tutorial |
 | Existing solutions and application scenarios | NodeHub | Additional application-case entry point |
@@ -119,33 +119,37 @@ Task 1 is complete when you can:
 When you enter a repository, confirm three things first:
 
 1. The repository name and purpose match your task;
-2. The selected branch supports your board;
+2. For repositories other than Model Zoo, the selected branch supports your board. Model Zoo uses `main` for the four current boards; see section 6.2;
 3. The README explains the dependencies, directory structure, and intended workflow.
 
 ### 6.2 What Model Zoo Is For
 
 [RDK Model Zoo](https://github.com/D-Robotics/rdk_model_zoo) is D-Robotics' collection of BPU model examples and tools for model deployment and intelligent application development.
 
-Model Zoo maintains hardware-specific branches. Select the branch for your board before reading or using an example:
+Since Model Zoo v2.0.0, RDK X5, S100, S100P, and S600 share one source tree. Use the default `main` branch for all four boards. `develop` is the development line, not a per-board branch. The old per-board branches `rdk_x5` and `rdk_s` remain only as history. RDK X3 material is archived on `rdk_x3` and is no longer an adaptation target.
 
-| Target hardware | Branch | Example entry point |
-|---|---|---|
-| RDK X5 | `rdk_x5` | `samples/vision/<sample>/README.md` |
-| RDK X5 legacy examples | `rdk_x5_legacy` | README in the target example directory |
-| RDK X3 | `rdk_x3` | `demos/<task>/<demo>/README.md` |
-| RDK S Series | `rdk_s` | `samples/<domain>/<sample>/README.md` |
+Models are still per board. X5 artifacts use `.bin`. S100, S100P, and S600 artifacts use `.hbm`. Every maintained sample lives under `samples/<domain>/<sample>/`, and the sample picks the board at run time. A Python entry uses the `--target` or `--platform` option its README documents. When that README offers `--target auto`, the value detects the board from the hardware; an explicit value selects that board's model. A native C++ entry uses the arguments its own README documents.
+
+| What to choose | Where |
+|---|---|
+| Branch for RDK X5, S100, S100P, and S600 | `main` |
+| X5 model | `.bin`, model target `x5` |
+| S100 / S100P / S600 model | `.hbm`, model targets `s100`, `s100p`, and `s600` |
+| Sample guide | `samples/<domain>/<sample>/README.md` |
+| Historical per-board lines | `rdk_x5` and `rdk_s`, kept only as history |
+| RDK X3 | Archived on `rdk_x3`; not an adaptation target |
 
 For this lesson, remember only three steps:
 
-1. Open the official repository;
-2. Select the branch for your board;
-3. Enter the target example directory and read its README first.
+1. Open the official repository and stay on `main`;
+2. Enter the target example directory and read its README first;
+3. Note which runtime option and model file that README uses for your board.
 
-Do not copy commands from another hardware branch. Directory structures, system requirements, and inference interfaces can differ. The README in the target directory is the direct guide for that example.
+Do not copy a command or a model file from another board. The directory layout is shared, but the model artifact and the runtime option are not. System requirements and toolchain versions follow the sample README and the toolchain docs.
 
 ### 6.3 Completion Check
 
-Task 2 is complete when you can select the branch for your board in Model Zoo and locate a README in a target example directory. You do not need to download code or run a model in this lesson.
+Task 2 is complete when you can stay on Model Zoo `main`, open one sample README, and explain how that sample selects your board. You do not need to download code or run a model in this lesson.
 
 ## 7. Task 3: Find the TROS Manual and Source Code
 
@@ -215,7 +219,7 @@ This is easier to diagnose than a title such as “Encoding does not work, pleas
 You have built a basic map of the RDK community and ecosystem when you can complete these four tasks:
 
 - [ ] Open the correct user manual for a board series and find one specific topic;
-- [ ] Select the correct Model Zoo branch and find the README for a target example;
+- [ ] Stay on Model Zoo `main`, find one sample README, and note how it selects the board;
 - [ ] Find both the TROS user manual and a source-code entry point;
 - [ ] Find the forum's new-topic entry point and list the seven items required for an effective problem report.
 
@@ -225,9 +229,9 @@ You have built a basic map of the RDK community and ecosystem when you can compl
 
 Return to the Resource Center and confirm whether you need the RDK X Series or RDK S Series manual. Then verify the selected product on the page. Do not apply steps for another series or board directly to your device.
 
-### Q2: Why should I not copy commands directly from the default Model Zoo page?
+### Q2: Why should I not copy a Model Zoo command from another board?
 
-Model Zoo uses hardware-specific branches, and directory structures and interfaces can differ. Select the branch for your board first, then read the README in the target directory.
+All four current boards use `main`, but each board has its own model file. Read the sample README and use the board option it documents. Do not reuse an X5 `.bin` command on an S-series board, or an S-series `.hbm` command on X5. Toolchain versions follow the toolchain docs.
 
 ### Q3: Should I read the TROS manual or GitHub first?
 
@@ -256,7 +260,7 @@ The next lesson is **RDK Product Overview**, which introduces the positioning of
 ## 13. Further Practice
 
 1. Open the user manual for your board from the Resource Center and find a topic related to your current task;
-2. Open Model Zoo, select the branch for your board, and record one example directory and its README location;
+2. Open Model Zoo on `main` and record one example directory, its README, and the runtime option it uses for your board;
 3. Open the TROS manual, then follow a source link to one `hobot_*` package;
 4. Use the appendix template to draft the title and details for a hypothetical problem report.
 

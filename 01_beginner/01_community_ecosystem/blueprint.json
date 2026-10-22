@@ -12,7 +12,7 @@
       "title": "RDK Community & [gradient]Ecosystem[/gradient]",
       "lead": "Build a clear RDK resource map and know where to look first when a development need arises.",
       "tags": ["Official docs", "GitHub", "Model Zoo", "TROS", "Feedback"],
-      "hero_nodes": ["Find docs by board", "Find source by task", "Choose the right branch", "Report with context"],
+      "hero_nodes": ["Find docs by board", "Find source by task", "Pick the board on main", "Report with context"],
       "hero_center": {
         "strong": "RDK",
         "sub": "Community resource map"
@@ -38,7 +38,7 @@
       "title": "Four Shortest Paths",
       "cards": [
         {"tint": "tint-1", "icon": "film", "title": "Manuals & APIs", "body": "Open the correct manual and find the X5 video codec APIs."},
-        {"tint": "tint-2", "icon": "grid", "title": "Source & Models", "body": "Identify official repos, choose a board branch, and read the README first."},
+        {"tint": "tint-2", "icon": "grid", "title": "Source & Models", "body": "Identify official repos, stay on Model Zoo main, and read the README first."},
         {"tint": "tint-4", "icon": "robot", "title": "TROS Resources", "body": "Find the TROS manual and source entry points and understand their roles."},
         {"tint": "tint-6", "icon": "list-check", "title": "Useful Feedback", "body": "Find the new-topic entry and organize a reproducible problem report."}
       ]
@@ -51,7 +51,7 @@
       "cards": [
         {"tint": "tint-1", "icon": "layers", "title": "Resource Center", "body": "Board manuals, system setup, basic applications, and FAQs."},
         {"tint": "tint-2", "icon": "github", "title": "GitHub", "body": "Official repositories, source, README files, and Issues."},
-        {"tint": "tint-3", "icon": "grid", "title": "Model Zoo", "body": "BPU model examples, board branches, and deployment guides."},
+        {"tint": "tint-3", "icon": "grid", "title": "Model Zoo", "body": "BPU examples on main, per-board models, and sample READMEs."},
         {"tint": "tint-4", "icon": "robot", "title": "TROS", "body": "Robotics manuals, package source code, and Issues."},
         {"tint": "tint-5", "icon": "globe", "title": "Studio / NodeHub", "body": "A device-development entry and an application-case entry."},
         {"tint": "tint-6", "icon": "message", "title": "Forum", "body": "Technical discussions, problem reports, and shared experience."}
@@ -107,7 +107,7 @@
       "lead": "Use GitHub for official open-source projects, implementation details, and issue history.",
       "cards": [
         {"tint": "tint-1", "icon": "target", "title": "Right Repository", "body": "Confirm that the repository name and purpose match your task."},
-        {"tint": "tint-2", "icon": "code", "title": "Right Branch", "body": "Make sure the branch matches your board and platform."},
+        {"tint": "tint-2", "icon": "code", "title": "Right Branch", "body": "Match the branch to your board in other repos. Model Zoo uses main."},
         {"tint": "tint-4", "icon": "book-open", "title": "Read the README", "body": "Review dependencies, directory structure, and usage before acting."}
       ]
     },
@@ -115,13 +115,13 @@
       "pattern": "split-timeline",
       "data_title": "Model Zoo",
       "kicker": "Model Zoo",
-      "title": "Model Zoo: Pick the Board Branch",
-      "lead": "This lesson shows only the shortest lookup path. It does not download code or run a model.",
+      "title": "Model Zoo: Stay on main",
+      "lead": "Since v2.0.0, four boards share main. This lesson does not download code or run a model.",
       "steps": [
-        {"badge": "RDK X5", "body": "Choose rdk_x5; use rdk_x5_legacy only for historical examples."},
-        {"badge": "RDK X3", "body": "Choose rdk_x3, then open the target task directory."},
-        {"badge": "RDK S", "body": "Choose rdk_s, then find the example by domain."},
-        {"badge": "README", "body": "Read the target directory README before deciding the next step."}
+        {"badge": "main", "body": "Use main for RDK X5, S100, S100P, and S600. rdk_x5 and rdk_s are history only."},
+        {"badge": "Models", "body": "Models are per board: X5 uses .bin, and the S series uses .hbm."},
+        {"badge": "Runtime", "body": "Samples pick the board with --target or --platform. --target auto detects the board when the README offers it."},
+        {"badge": "README", "body": "Read the sample README first. Toolchain versions follow the toolchain docs."}
       ]
     },
     {
@@ -182,7 +182,7 @@
       "lead": "Together, these four tasks form your first RDK resource map.",
       "items": [
         "Open the correct board manual and locate one specific topic",
-        "Choose the correct Model Zoo branch and find the target README",
+        "Stay on Model Zoo main, find a sample README, and see how it selects the board",
         "Find both the TROS manual and source-code entry points",
         "Find the forum post entry and list all seven fields of a useful report"
       ]

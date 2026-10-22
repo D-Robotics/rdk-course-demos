@@ -12,7 +12,7 @@
       "title": "RDK 社区与 [gradient]生态入门[/gradient]",
       "lead": "建立一张清晰的 RDK 资源地图，遇到开发需求时，知道应该先去哪里找答案。",
       "tags": ["官方手册", "GitHub", "Model Zoo", "TROS", "问题反馈"],
-      "hero_nodes": ["按板卡找手册", "按任务找源码", "按平台选分支", "带完整信息反馈"],
+      "hero_nodes": ["按板卡找手册", "按任务找源码", "在 main 上选板卡", "带完整信息反馈"],
       "hero_center": {
         "strong": "RDK",
         "sub": "社区与生态资源地图"
@@ -38,7 +38,7 @@
       "title": "完成后掌握四条最短路径",
       "cards": [
         {"tint": "tint-1", "icon": "film", "title": "手册与 API", "body": "按板卡进入正确手册，找到 X5 视频编解码 API。"},
-        {"tint": "tint-2", "icon": "grid", "title": "源码与模型", "body": "识别官方仓库、选择板卡分支并先读 README。"},
+        {"tint": "tint-2", "icon": "grid", "title": "源码与模型", "body": "识别官方仓库，Model Zoo 留在 main，并先读 README。"},
         {"tint": "tint-4", "icon": "robot", "title": "TROS 资料", "body": "找到 TROS 手册与源码，并理解两者分工。"},
         {"tint": "tint-6", "icon": "list-check", "title": "有效反馈", "body": "找到发帖入口，整理可复现的问题描述。"}
       ]
@@ -51,7 +51,7 @@
       "cards": [
         {"tint": "tint-1", "icon": "layers", "title": "资料中心", "body": "板卡手册、系统配置、基础应用与 FAQ。"},
         {"tint": "tint-2", "icon": "github", "title": "GitHub", "body": "官方仓库、源码、README 与 Issues。"},
-        {"tint": "tint-3", "icon": "grid", "title": "Model Zoo", "body": "BPU 模型示例、板卡分支与部署说明。"},
+        {"tint": "tint-3", "icon": "grid", "title": "Model Zoo", "body": "main 上的 BPU 示例、按板卡区分的模型与 README。"},
         {"tint": "tint-4", "icon": "robot", "title": "TROS", "body": "机器人应用手册、功能包源码与 Issues。"},
         {"tint": "tint-5", "icon": "globe", "title": "Studio / NodeHub", "body": "设备开发入口与应用案例补充入口。"},
         {"tint": "tint-6", "icon": "message", "title": "论坛", "body": "技术讨论、问题反馈与经验分享。"}
@@ -107,7 +107,7 @@
       "lead": "GitHub 用来查看官方开源项目、实现细节与问题记录。",
       "cards": [
         {"tint": "tint-1", "icon": "target", "title": "仓库是否匹配", "body": "先看仓库名称与用途是否对应当前任务。"},
-        {"tint": "tint-2", "icon": "code", "title": "分支是否匹配", "body": "确认当前分支适合自己的板卡与平台。"},
+        {"tint": "tint-2", "icon": "code", "title": "分支是否匹配", "body": "其他仓库再核对分支是否适合板卡。Model Zoo 用 main。"},
         {"tint": "tint-4", "icon": "book-open", "title": "README 怎么说", "body": "操作前先读依赖、目录结构和使用方法。"}
       ]
     },
@@ -115,13 +115,13 @@
       "pattern": "split-timeline",
       "data_title": "Model Zoo",
       "kicker": "Model Zoo",
-      "title": "Model Zoo：先选对分支",
-      "lead": "本课只展示最短查找路径，不下载代码，也不运行模型。",
+      "title": "Model Zoo：留在 main",
+      "lead": "自 v2.0.0 起，四块板卡共用 main。本课不下载代码，也不运行模型。",
       "steps": [
-        {"badge": "RDK X5", "body": "选择 rdk_x5；历史示例按需查看 rdk_x5_legacy。"},
-        {"badge": "RDK X3", "body": "选择 rdk_x3，再进入目标任务目录。"},
-        {"badge": "RDK S", "body": "选择 rdk_s，再按领域找到目标示例。"},
-        {"badge": "README", "body": "进入目标目录后，先读 README，再决定下一步。"}
+        {"badge": "main", "body": "RDK X5、S100、S100P、S600 都用 main。rdk_x5 与 rdk_s 只作历史。"},
+        {"badge": "模型", "body": "模型按板卡区分：X5 用 .bin，S 系列用 .hbm。"},
+        {"badge": "运行时", "body": "示例用 --target 或 --platform 选板。README 提供 --target auto 时，该值会识别板卡。"},
+        {"badge": "README", "body": "先读示例 README。工具链版本以工具链文档为准。"}
       ]
     },
     {
@@ -182,7 +182,7 @@
       "lead": "这四项共同组成你的第一张 RDK 资源地图。",
       "items": [
         "按板卡系列进入正确手册，并找到一个具体主题",
-        "在 Model Zoo 选择正确分支，并找到目标目录 README",
+        "留在 Model Zoo 的 main，找到示例 README，并看清它如何选择板卡",
         "分别找到 TROS 用户手册和源码入口",
         "找到论坛发帖入口，并列出有效问题所需的七项信息"
       ]
