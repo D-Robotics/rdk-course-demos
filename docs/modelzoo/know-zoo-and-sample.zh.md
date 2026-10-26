@@ -103,7 +103,7 @@ Sample 代码只有一份。用 `--target` 告诉程序在哪块板上跑：
 2. `python3 …/main.py --list-models --target <目标>` 列出清单里的制品引用；
 3. `--dry-run` 只解析选择，不加载模型、不触发板端 SDK。
 
-示例（ResNet）：ResNet-18 在四块板上均有 Python 制品；C++ 只覆盖 S 系列，X5 无 C++ 运行时。YOLOv8 Detect 在 Model Zoo 官网上，X5、S100、S100P、S600 四块板都有；不是每个模型都覆盖四块板，动手前先在 [Model Zoo 官网](https://d-robotics.github.io/rdk_model_zoo/)的卡片标签或硬件平台筛选里确认平台与模型，以官网为准。
+示例（ResNet）：ResNet-18 在四块板上均有 Python 制品；C++ 只覆盖 S 系列，X5 无 C++ 运行时。YOLOv8 Detect 在 Model Zoo 在线模型目录上，X5、S100、S100P、S600 四块板都有；不是每个模型都覆盖四块板，动手前先在 [Model Zoo 在线模型目录](https://d-robotics.github.io/rdk_model_zoo/)的卡片标签或硬件平台筛选里确认平台与模型，以在线模型目录为准。
 
 ### 4.2 六个目录
 
