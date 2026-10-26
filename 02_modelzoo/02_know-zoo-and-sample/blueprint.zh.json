@@ -580,7 +580,7 @@
    "title": "支持矩阵",
    "eyebrow": "Support Matrix",
    "heading": "支持矩阵==怎么读==",
-   "lead": "找到自己板子那一列：— 表示没有发布。来源：ResNet 行来自 Sample README；YOLOv8 Detect 行来自 Model Zoo 网站支持表。",
+   "lead": "找到自己板子那一列：— 表示没有发布。来源：ResNet 行来自 Sample README；YOLOv8 Detect 行来自 Model Zoo 官网。",
    "head": [
     {
      "html": "Sample",
@@ -615,7 +615,7 @@
      "✓"
     ]
    ],
-   "notes": "支持矩阵怎么读。以 ResNet 为例，ResNet-18 在四块板上都有发布制品；C++ 只覆盖 S 系列，X5 没有 C++ 运行时。再看 YOLOv8 Detect，Model Zoo 网站的支持表里，X5、S100、S100P、S600 四块板都有它。不过不是每个模型都覆盖四块板，所以动手之前，先在支持表里确认你的板子和模型。"
+   "notes": "支持矩阵怎么读。以 ResNet 为例，ResNet-18 在四块板上都有发布制品；C++ 只覆盖 S 系列，X5 没有 C++ 运行时。再看 YOLOv8 Detect，Model Zoo 官网上，X5、S100、S100P、S600 四块板都有它。不过不是每个模型都覆盖四块板，所以动手之前，先在 Model Zoo 官网的卡片标签或硬件平台筛选里确认你的板子和模型。"
   },
   {
    "layout": "table",
