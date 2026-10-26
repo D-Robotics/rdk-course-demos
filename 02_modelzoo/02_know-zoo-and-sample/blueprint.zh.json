@@ -1,0 +1,1763 @@
+{
+ "meta": {
+  "title": "【RDK 小课堂】第 2 章 Model Zoo · 第 2 课｜认识 RDK Model Zoo",
+  "lang": "zh-CN",
+  "mode": "deck",
+  "tag": "RDK 小课堂 2-02",
+  "footer": "认识 RDK Model Zoo",
+  "theme": {}
+ },
+ "slides": [
+  {
+   "layout": "series-cover",
+   "chapter": 2,
+   "chapter_name": "Model Zoo",
+   "lesson": 2,
+   "title": "认识 RDK Model Zoo",
+   "highlight": "Model Zoo",
+   "subtitle": "一套代码，四块板",
+   "visual": "assets/white_wolf.jpg",
+   "theme": "light",
+   "notes": "这是第二章 Model Zoo 的第二课：认识 RDK Model Zoo。上一课结尾我们说过：下一课，我们正式打开 Model Zoo，跑通第一个 Sample。这一课，我们就把这件事做完——看 main 分支如何用一套代码同时支持四块板；跑通第一个 Sample，亲眼看到 ResNet-18 输出 white wolf。"
+  },
+  {
+   "layout": "cards",
+   "title": "本课问题",
+   "eyebrow": "Why This Lesson",
+   "heading": "本课回答==三个问题==",
+   "lead": "上节课：BPU 只跑量化、编译后的模型。这节课：拿到模型之后，怎么在板子上跑起来？",
+   "cols": 3,
+   "cards": [
+    {
+     "num": "01",
+     "title": "一套代码四块板",
+     "text": "main 分支怎么同时支持 X5、S100、S100P、S600？"
+    },
+    {
+     "num": "02",
+     "title": "一个 Sample 有什么",
+     "text": "目录、入口和接口在哪里？"
+    },
+    {
+     "num": "03",
+     "title": "怎么跑通并读懂",
+     "text": "在 X5 和 S100 上跑 ResNet-18，看 Top-5。"
+    }
+   ],
+   "notes": "上一课我们知道，BPU 只跑量化、编译之后的模型，X5 用 .bin，S 系列用 .hbm。拿到模型以后，怎么在板子上跑起来？这一课回答三个问题：第一，一套代码怎么支持四块板；第二，一个 Sample 里有什么，入口在哪里；第三，怎么在 X5 和 S100 上把 ResNet-18 跑通，并读懂结果。"
+  },
+  {
+   "layout": "links",
+   "title": "配套资源",
+   "eyebrow": "Resources",
+   "heading": "课程资料与入口",
+   "items": [
+    {
+     "k": "RDK Model Zoo（main）",
+     "d": "本课主角：Sample、制品清单、共用工具",
+     "url": "https://github.com/D-Robotics/rdk_model_zoo"
+    },
+    {
+     "k": "ResNet Sample README",
+     "d": "支持矩阵、快速体验、预期结果",
+     "url": "samples/vision/resnet/README_cn.md"
+    },
+    {
+     "k": "ResNet 模型制品说明",
+     "d": "制品清单、下载脚本、输入协议",
+     "url": "samples/vision/resnet/model/README_cn.md"
+    },
+    {
+     "k": "ResNet Python 运行说明",
+     "d": "main.py 的参数、结果与集成示例",
+     "url": "samples/vision/resnet/runtime/python/README_cn.md"
+    },
+    {
+     "k": "发布制品清单与板卡别名",
+     "d": "models.yaml（x5 / s）、platforms.json",
+     "url": "docs/release/"
+    },
+    {
+     "k": "RDK 文档资源中心",
+     "d": "各板卡手册与算法工具链文档",
+     "url": "https://developer.d-robotics.cc/rdk_doc_center/"
+    }
+   ],
+   "notes": "开始之前，先把资料准备好。本课的主角是 GitHub 上的 RDK Model Zoo，我们用 main 分支，以及这次课固定的那个提交。ResNet 的 README 和 Python 运行说明，就在 samples 目录下。需要查概念，就去文档资源中心。上板时，板子能登录，并能访问 D-Robotics 的制品下载站，用来取制品；仓库在板上直接 git clone 到临时目录下的课程文件夹里，进入仓库后即可运行。如果板子网络访问不了 GitHub，也可以在电脑上 clone 后用 scp 拷过去。"
+  },
+  {
+   "layout": "section",
+   "title": "章节 01",
+   "num": "01",
+   "heading": "一套代码，四块板",
+   "sub": "Model Zoo 是什么，怎么选板",
+   "notes": "第一部分：一套代码，四块板。"
+  },
+  {
+   "layout": "cards",
+   "title": "Model Zoo",
+   "eyebrow": "What Is It",
+   "heading": "Model Zoo ==是什么==",
+   "lead": "地瓜机器人维护的 BPU 模型示例集合。当前交付线是 main 分支（仓库 VERSION 2.0.0）。",
+   "cols": 4,
+   "cards": [
+    {
+     "icon": "grid",
+     "tone": "orange",
+     "title": "转换好的模型",
+     "text": "已编译的 .bin / .hbm，下载即用。"
+    },
+    {
+     "icon": "code",
+     "tone": "blue",
+     "title": "板端推理代码",
+     "text": "Python 入口，前后处理已写好。"
+    },
+    {
+     "icon": "book-open",
+     "tone": "green",
+     "title": "转换与评估",
+     "text": "conversion/ 转换，evaluator/ 评估。"
+    },
+    {
+     "icon": "github",
+     "tone": "yellow",
+     "title": "一条主线",
+     "text": "main 统一维护；rdk_x5、rdk_s 保留为历史分支。"
+    }
+   ],
+   "notes": "先说 Model Zoo 是什么。它是我们维护的 BPU 模型示例集合。每个 Sample 里，有转换好的模型、板端推理代码，还有转换配方和精度评估。过去不同板卡各有分支，现在 main 分支统一维护，当前版本是 2.0.0；历史上按板卡分的 X5 分支和 S 系列分支仍然保留。"
+  },
+  {
+   "layout": "table",
+   "title": "仓库地图",
+   "eyebrow": "Repo Map",
+   "heading": "仓库里==四个位置==",
+   "lead": "后面的每一步，都会用到这四个位置。",
+   "head": [
+    {
+     "html": "目录",
+     "style": "width:330px"
+    },
+    "放什么"
+   ],
+   "row_header": true,
+   "rows": [
+    [
+     "<span class=\"cmd\">samples/</span>",
+     "全部 Sample，按领域分：vision、speech、llm、robotics、vla"
+    ],
+    [
+     "<span class=\"cmd\">utils/</span>",
+     "共用工具：读图、读标签、Runtime 封装"
+    ],
+    [
+     "<span class=\"cmd\">docs/release/</span>",
+     "制品清单 models.yaml（x5 / s）和 platforms.json"
+    ],
+    [
+     "<span class=\"cmd\">datasets/</span>",
+     "评估用的数据和类别名，如 imagenet_classes.names"
+    ]
+   ],
+   "notes": "再看仓库怎么摆。samples 放全部 Sample，按领域分成 vision、speech、llm、robotics 和 vla。utils 放共用的工具，比如读图、读标签、封装 Runtime。docs 的 release 目录放制品清单，X5 一份，S 系列一份，还有 platforms 这个对照文件，记录板卡身份怎么对应到目标。datasets 放评估用的数据和类别名。"
+  },
+  {
+   "layout": "diagram",
+   "title": "选板流程",
+   "eyebrow": "Select Target",
+   "heading": "一套代码，==四块板==",
+   "height": 560,
+   "scene": [
+    {
+     "type": "box",
+     "id": "code",
+     "x": 40,
+     "y": 190,
+     "w": 250,
+     "h": 180,
+     "label": "一份代码",
+     "kind": "cpu",
+     "sub": "resnet Sample",
+     "size": 32,
+     "sub_size": 22
+    },
+    {
+     "type": "box",
+     "id": "tgt",
+     "x": 350,
+     "y": 190,
+     "w": 290,
+     "h": 180,
+     "label": "--target",
+     "kind": "cpu",
+     "sub": "auto 自动识别板卡",
+     "size": 32,
+     "sub_size": 22,
+     "mono": true
+    },
+    {
+     "type": "box",
+     "id": "reg",
+     "x": 700,
+     "y": 190,
+     "w": 290,
+     "h": 180,
+     "label": "platforms.json",
+     "kind": "neutral",
+     "sub": "板卡身份 → 目标",
+     "size": 26,
+     "sub_size": 22,
+     "mono": true
+    },
+    {
+     "type": "arrow",
+     "id": "a1",
+     "points": [
+      [
+       292,
+       280
+      ],
+      [
+       348,
+       280
+      ]
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "a2",
+     "points": [
+      [
+       642,
+       280
+      ],
+      [
+       698,
+       280
+      ]
+     ]
+    },
+    {
+     "type": "box",
+     "id": "t0",
+     "x": 1060,
+     "y": 20,
+     "w": 500,
+     "h": 100,
+     "label": "x5 · Bayes-e",
+     "kind": "bpu",
+     "sub": "resnet18_bayese_224x224_nv12.bin",
+     "size": 30,
+     "sub_size": 21
+    },
+    {
+     "type": "arrow",
+     "id": "f0",
+     "points": [
+      [
+       992,
+       280
+      ],
+      [
+       1024,
+       280
+      ],
+      [
+       1024,
+       70
+      ],
+      [
+       1058,
+       70
+      ]
+     ]
+    },
+    {
+     "type": "box",
+     "id": "t1",
+     "x": 1060,
+     "y": 150,
+     "w": 500,
+     "h": 100,
+     "label": "s100 · Nash-e",
+     "kind": "bpu",
+     "sub": "s100/resnet18_nashe_224x224_nv12.hbm",
+     "size": 30,
+     "sub_size": 21
+    },
+    {
+     "type": "arrow",
+     "id": "f1",
+     "points": [
+      [
+       992,
+       280
+      ],
+      [
+       1024,
+       280
+      ],
+      [
+       1024,
+       200
+      ],
+      [
+       1058,
+       200
+      ]
+     ]
+    },
+    {
+     "type": "box",
+     "id": "t2",
+     "x": 1060,
+     "y": 280,
+     "w": 500,
+     "h": 100,
+     "label": "s100p · Nash-m",
+     "kind": "bpu",
+     "sub": "s100p/resnet18_nashm_224x224_nv12.hbm",
+     "size": 30,
+     "sub_size": 21
+    },
+    {
+     "type": "arrow",
+     "id": "f2",
+     "points": [
+      [
+       992,
+       280
+      ],
+      [
+       1024,
+       280
+      ],
+      [
+       1024,
+       330
+      ],
+      [
+       1058,
+       330
+      ]
+     ]
+    },
+    {
+     "type": "box",
+     "id": "t3",
+     "x": 1060,
+     "y": 410,
+     "w": 500,
+     "h": 100,
+     "label": "s600 · Nash-p",
+     "kind": "bpu",
+     "sub": "s600/resnet18_nashp_224x224_nv12.hbm",
+     "size": 30,
+     "sub_size": 21
+    },
+    {
+     "type": "arrow",
+     "id": "f3",
+     "points": [
+      [
+       992,
+       280
+      ],
+      [
+       1024,
+       280
+      ],
+      [
+       1024,
+       460
+      ],
+      [
+       1058,
+       460
+      ]
+     ]
+    },
+    {
+     "type": "text",
+     "id": "foot",
+     "x": 520,
+     "y": 470,
+     "text": "代码不变，变的只有 target 和制品",
+     "size": 30,
+     "weight": 700,
+     "anchor": "middle",
+     "color": "orange"
+    }
+   ],
+   "steps": [
+    {
+     "at": 0,
+     "show": [
+      "code"
+     ],
+     "caption": "一份 Sample 代码，要跑在四块板上"
+    },
+    {
+     "at": 1200,
+     "show": [
+      "a1",
+      "tgt"
+     ],
+     "focus": [
+      "code",
+      "a1",
+      "tgt"
+     ],
+     "caption": "用 --target 指定板卡；写 auto，让程序自己认"
+    },
+    {
+     "at": 3400,
+     "show": [
+      "a2",
+      "reg"
+     ],
+     "focus": [
+      "tgt",
+      "a2",
+      "reg"
+     ],
+     "caption": "auto：读取板卡身份，对照 platforms.json 认出目标"
+    },
+    {
+     "at": 5600,
+     "show": [
+      "f0",
+      "t0"
+     ],
+     "focus": [
+      "reg",
+      "f0",
+      "t0"
+     ],
+     "on": [
+      "t0"
+     ],
+     "caption": "x5：X5 的 .bin 制品"
+    },
+    {
+     "at": 7000,
+     "show": [
+      "f1",
+      "t1"
+     ],
+     "focus": [
+      "reg",
+      "f1",
+      "t1"
+     ],
+     "on": [
+      "t1"
+     ],
+     "caption": "s100：S100 的 .hbm 制品"
+    },
+    {
+     "at": 8400,
+     "show": [
+      "f2",
+      "t2"
+     ],
+     "focus": [
+      "reg",
+      "f2",
+      "t2"
+     ],
+     "on": [
+      "t2"
+     ],
+     "caption": "s100p：S100P 的 .hbm 制品"
+    },
+    {
+     "at": 9800,
+     "show": [
+      "f3",
+      "t3"
+     ],
+     "focus": [
+      "reg",
+      "f3",
+      "t3"
+     ],
+     "on": [
+      "t3"
+     ],
+     "caption": "s600：S600 的 .hbm 制品"
+    },
+    {
+     "at": 11400,
+     "focus": null,
+     "show": [
+      "foot"
+     ],
+     "caption": "代码不变，变的只有 target 和制品"
+    }
+   ],
+   "notes": "重点来了：一套代码，怎么跑四块板。Sample 代码只有一份。你用 target 参数告诉它在哪块板上跑，可以写 x5、s100、s100p、s600，也可以写 auto。写 auto 时，程序读取板卡身份，对照 platforms 这个文件，认出目标。目标定了，制品也就定了：X5 用 bayese 的 .bin，S100 用 nashe 的 .hbm，S100P 用 nashm，S600 用 nashp。代码不变，变的只有 target 和制品。"
+  },
+  {
+   "layout": "table",
+   "title": "制品命名",
+   "eyebrow": "Artifacts",
+   "heading": "制品==按板卡==命名",
+   "lead": "文件名里的 bayese / nashe / nashm / nashp 就是 march，不能互换。",
+   "head": [
+    {
+     "html": "target",
+     "style": "width:200px"
+    },
+    {
+     "html": "march",
+     "style": "width:200px"
+    },
+    "ResNet-18 制品（model/ 下）"
+   ],
+   "row_header": true,
+   "rows": [
+    [
+     "x5",
+     "bayes-e",
+     "<span class=\"cmd\">resnet18_bayese_224x224_nv12.bin</span>"
+    ],
+    [
+     "s100",
+     "nash-e",
+     "<span class=\"cmd\">s100/resnet18_nashe_224x224_nv12.hbm</span>"
+    ],
+    [
+     "s100p",
+     "nash-m",
+     "<span class=\"cmd\">s100p/resnet18_nashm_224x224_nv12.hbm</span>"
+    ],
+    [
+     "s600",
+     "nash-p",
+     "<span class=\"cmd\">s600/resnet18_nashp_224x224_nv12.hbm</span>"
+    ]
+   ],
+   "notes": "制品的命名很有规律。文件名里的 bayese、nashe、nashm、nashp，对应各自工具链的 march。X5 是 bayes-e，扩展名 .bin；S100 是 nash-e，S100P 是 nash-m，S600 是 nash-p，扩展名都是 .hbm，放在各自的子目录里。每块板用自己的制品，S100P 不能用 S100 的文件。另外，model 目录本身不放二进制，制品要用下载脚本去取。"
+  },
+  {
+   "layout": "section",
+   "title": "章节 02",
+   "num": "02",
+   "heading": "走进 Sample",
+   "sub": "支持矩阵、目录、入口和接口",
+   "notes": "第二部分：走进 Sample。"
+  },
+  {
+   "layout": "cards",
+   "title": "找 Sample",
+   "eyebrow": "Find a Sample",
+   "heading": "先判断==能不能用==",
+   "lead": "三步都不需要板卡，在电脑上就能做。",
+   "cols": 3,
+   "cards": [
+    {
+     "num": "01",
+     "title": "看支持矩阵",
+     "text": "README 的 support-matrix：target × 变体 × 语言。"
+    },
+    {
+     "num": "02",
+     "title": "列发布清单",
+     "text": "`--list-models` 列出清单里的制品引用。"
+    },
+    {
+     "num": "03",
+     "title": "预演选择",
+     "text": "`--dry-run` 只解析选择，不加载模型。"
+    }
+   ],
+   "notes": "先学会判断，某个 Sample 在你的板子上能不能用。第一步，看 README 里的支持矩阵，写明哪些 target 提供哪些变体。第二步，运行 main.py 加 list-models，不需要板卡，就能列出清单里的制品。第三步，加 dry-run 参数，只检查你的选择，不加载模型，也用不到板端 SDK。target 写 auto，会列出所有发布过的引用。这三步，在电脑上就能做。"
+  },
+  {
+   "layout": "table",
+   "title": "支持矩阵",
+   "eyebrow": "Support Matrix",
+   "heading": "支持矩阵==怎么读==",
+   "lead": "找到自己板子那一列：— 表示没有发布。来源：ResNet 行来自 Sample README；YOLOv8 Detect 行来自 Model Zoo 网站支持表。",
+   "head": [
+    {
+     "html": "Sample",
+     "style": "width:260px"
+    },
+    "X5",
+    "S100",
+    "S100P",
+    "S600"
+   ],
+   "row_header": true,
+   "rows": [
+    [
+     "ResNet-18 · Python",
+     "✓",
+     "✓",
+     "✓",
+     "✓"
+    ],
+    [
+     "ResNet-18 · C++",
+     "—",
+     "✓",
+     "✓",
+     "✓"
+    ],
+    [
+     "YOLOv8 Detect",
+     "✓",
+     "✓",
+     "✓",
+     "✓"
+    ]
+   ],
+   "notes": "支持矩阵怎么读。以 ResNet 为例，ResNet-18 在四块板上都有发布制品；C++ 只覆盖 S 系列，X5 没有 C++ 运行时。再看 YOLOv8 Detect，Model Zoo 网站的支持表里，X5、S100、S100P、S600 四块板都有它。不过不是每个模型都覆盖四块板，所以动手之前，先在支持表里确认你的板子和模型。"
+  },
+  {
+   "layout": "table",
+   "title": "目录骨架",
+   "eyebrow": "Directory",
+   "heading": "Sample 的==六个目录==",
+   "lead": "以 `samples/vision/resnet/` 为例。",
+   "head": [
+    {
+     "html": "目录",
+     "style": "width:210px"
+    },
+    "管什么",
+    {
+     "html": "目录",
+     "style": "width:210px"
+    },
+    "管什么"
+   ],
+   "row_header": true,
+   "rows": [
+    [
+     "<span class=\"cmd\">model/</span>",
+     "制品获取，不放二进制",
+     "<span class=\"cmd\">conversion/</span>",
+     "导出与量化配方"
+    ],
+    [
+     "<span class=\"cmd\">runtime/</span>",
+     "板上运行的代码",
+     "<span class=\"cmd\">evaluator/</span>",
+     "数据集上算精度"
+    ],
+    [
+     "<span class=\"cmd\">test_data/</span>",
+     "能直接跑的输入",
+     "<span class=\"cmd\">tests/</span>",
+     "行为与数值回归"
+    ]
+   ],
+   "notes": "打开一个 Sample，比如 samples 下的 vision、resnet，有六个目录。model 管模型制品的获取；conversion 放导出和量化的配方，下一课会用到；runtime 放板上运行的代码；evaluator 在数据集上算精度；test_data 是能直接运行的示例输入；tests 是回归测试。每个 Sample 的 README 也用固定的小节，学会一个，其他的就好找了。"
+  },
+  {
+   "layout": "diagram",
+   "title": "统一接口",
+   "eyebrow": "Runtime",
+   "heading": "入口、参数、==模型类==",
+   "height": 560,
+   "scene": [
+    {
+     "type": "box",
+     "id": "m",
+     "x": 40,
+     "y": 20,
+     "w": 440,
+     "h": 130,
+     "label": "main.py",
+     "kind": "cpu",
+     "sub": "入口：参数 → 模型 → predict",
+     "size": 34,
+     "sub_size": 22,
+     "mono": true
+    },
+    {
+     "type": "box",
+     "id": "c",
+     "x": 580,
+     "y": 20,
+     "w": 440,
+     "h": 130,
+     "label": "cli.py",
+     "kind": "cpu",
+     "sub": "参数 · 制品选择 · 清单 · 预演",
+     "size": 34,
+     "sub_size": 22,
+     "mono": true
+    },
+    {
+     "type": "box",
+     "id": "k",
+     "x": 1120,
+     "y": 20,
+     "w": 440,
+     "h": 130,
+     "label": "classify.py",
+     "kind": "cpu",
+     "sub": "ResNetClassifier 模型类",
+     "size": 34,
+     "sub_size": 22,
+     "mono": true
+    },
+    {
+     "type": "arrow",
+     "id": "am",
+     "points": [
+      [
+       482,
+       85
+      ],
+      [
+       578,
+       85
+      ]
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "ac",
+     "points": [
+      [
+       1022,
+       85
+      ],
+      [
+       1118,
+       85
+      ]
+     ]
+    },
+    {
+     "type": "band",
+     "id": "pred",
+     "x": 70,
+     "y": 235,
+     "w": 1190,
+     "h": 190,
+     "label": "predict()",
+     "label_at": [
+      665,
+      222
+     ],
+     "anchor": "middle"
+    },
+    {
+     "type": "box",
+     "id": "p1",
+     "x": 100,
+     "y": 265,
+     "w": 300,
+     "h": 130,
+     "label": "preprocess",
+     "kind": "cpu",
+     "sub": "缩放 · 裁剪 · 转 NV12",
+     "size": 30,
+     "sub_size": 22,
+     "mono": true
+    },
+    {
+     "type": "box",
+     "id": "p2",
+     "x": 520,
+     "y": 265,
+     "w": 300,
+     "h": 130,
+     "label": "infer",
+     "kind": "bpu",
+     "sub": "BPU 执行模型",
+     "size": 30,
+     "sub_size": 22,
+     "mono": true
+    },
+    {
+     "type": "box",
+     "id": "p3",
+     "x": 940,
+     "y": 265,
+     "w": 300,
+     "h": 130,
+     "label": "postprocess",
+     "kind": "cpu",
+     "sub": "softmax · Top-K",
+     "size": 30,
+     "sub_size": 22,
+     "mono": true
+    },
+    {
+     "type": "box",
+     "id": "res",
+     "x": 1340,
+     "y": 265,
+     "w": 220,
+     "h": 130,
+     "label": "结果",
+     "kind": "neutral",
+     "sub": "Top-K 分类",
+     "size": 30,
+     "sub_size": 22
+    },
+    {
+     "type": "arrow",
+     "id": "b1",
+     "points": [
+      [
+       402,
+       330
+      ],
+      [
+       518,
+       330
+      ]
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "b2",
+     "points": [
+      [
+       822,
+       330
+      ],
+      [
+       938,
+       330
+      ]
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "b3",
+     "points": [
+      [
+       1242,
+       330
+      ],
+      [
+       1338,
+       330
+      ]
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "track",
+     "points": [
+      [
+       100,
+       455
+      ],
+      [
+       1500,
+       455
+      ]
+     ],
+     "mode": "flow",
+     "head": true
+    },
+    {
+     "type": "token",
+     "id": "tk",
+     "x": 160,
+     "y": 455,
+     "label": "图像",
+     "w": 130,
+     "h": 44,
+     "size": 22,
+     "kind": "light"
+    },
+    {
+     "type": "box",
+     "id": "ut",
+     "x": 40,
+     "y": 492,
+     "w": 1520,
+     "h": 56,
+     "label": "utils/py_utils：共享的读图、读标签、Runtime 封装",
+     "kind": "ghost",
+     "size": 24
+    }
+   ],
+   "steps": [
+    {
+     "at": 0,
+     "show": [
+      "m"
+     ],
+     "caption": "main.py 是入口，很薄"
+    },
+    {
+     "at": 1600,
+     "show": [
+      "am",
+      "c"
+     ],
+     "focus": [
+      "m",
+      "am",
+      "c"
+     ],
+     "caption": "cli.py 管参数、制品选择、列清单和预演"
+    },
+    {
+     "at": 3600,
+     "show": [
+      "ac",
+      "k"
+     ],
+     "focus": [
+      "c",
+      "ac",
+      "k"
+     ],
+     "caption": "classify.py 里是模型类 ResNetClassifier"
+    },
+    {
+     "at": 5600,
+     "focus": null,
+     "show": [
+      "pred",
+      "p1",
+      "p2",
+      "p3",
+      "b1",
+      "b2",
+      "res",
+      "b3"
+     ],
+     "caption": "predict() 依次调用三个阶段"
+    },
+    {
+     "at": 7200,
+     "show": [
+      "track",
+      "tk"
+     ],
+     "focus": [
+      "p1",
+      "track",
+      "tk"
+     ],
+     "on": [
+      "p1"
+     ],
+     "move": [
+      {
+       "id": "tk",
+       "path": [
+        [
+         160,
+         455
+        ],
+        [
+         250,
+         455
+        ]
+       ]
+      }
+     ],
+     "caption": "preprocess：CPU 缩放、裁剪、转 NV12"
+    },
+    {
+     "at": 8000,
+     "text": {
+      "tk": "NV12"
+     }
+    },
+    {
+     "at": 9000,
+     "focus": [
+      "p2",
+      "track",
+      "tk"
+     ],
+     "on": [
+      "p2"
+     ],
+     "move": [
+      {
+       "id": "tk",
+       "path": [
+        [
+         250,
+         455
+        ],
+        [
+         670,
+         455
+        ]
+       ]
+      }
+     ],
+     "caption": "infer：交给 BPU 执行模型"
+    },
+    {
+     "at": 10800,
+     "text": {
+      "tk": "输出"
+     },
+     "focus": [
+      "p3",
+      "track",
+      "tk"
+     ],
+     "on": [
+      "p3"
+     ],
+     "move": [
+      {
+       "id": "tk",
+       "path": [
+        [
+         670,
+         455
+        ],
+        [
+         1090,
+         455
+        ]
+       ]
+      }
+     ],
+     "caption": "postprocess：softmax，取 Top-K"
+    },
+    {
+     "at": 12600,
+     "text": {
+      "tk": "Top-5"
+     },
+     "focus": [
+      "res",
+      "track",
+      "tk"
+     ],
+     "move": [
+      {
+       "id": "tk",
+       "path": [
+        [
+         1090,
+         455
+        ],
+        [
+         1450,
+         455
+        ]
+       ]
+      }
+     ],
+     "caption": "得到分类结果"
+    },
+    {
+     "at": 14200,
+     "focus": null,
+     "show": [
+      "ut"
+     ],
+     "caption": "换成检测、分割的 Sample，接口名字不变"
+    }
+   ],
+   "notes": "再看 runtime 里的 Python。main.py 是入口，很薄：取参数、构造模型、调用 predict、打印结果。参数、制品选择、列清单和预演，都在 cli.py。真正的推理在 classify.py 的 ResNetClassifier：predict 依次调用 preprocess、infer、postprocess。前后处理在 CPU，infer 交给 BPU。换成检测或分割的 Sample，接口名字不变。"
+  },
+  {
+   "layout": "cards",
+   "title": "制品选择",
+   "eyebrow": "Artifact Selection",
+   "heading": "制品==怎么选对==",
+   "lead": "三个概念，决定了到底跑哪个文件。",
+   "cols": 3,
+   "cards": [
+    {
+     "icon": "list-checks",
+     "tone": "orange",
+     "title": "manifest 清单",
+     "text": "docs/release 里每个制品一行，地址和格式以它为准。"
+    },
+    {
+     "icon": "puzzle",
+     "tone": "blue",
+     "title": "asset-id 与路径",
+     "text": "asset-id 是清单里的名字，model-path 是本地文件，须配对。"
+    },
+    {
+     "icon": "target",
+     "tone": "green",
+     "title": "运行前校验",
+     "text": "target 与检测到的硬件不一致，直接报错。"
+    }
+   ],
+   "notes": "怎么保证跑的是对的文件？三个概念。第一，manifest，也就是 docs 下 release 里的清单，每个制品一行，下载地址和格式以它为准。第二，asset-id 和 model-path：asset-id 是清单里的完整名字，model-path 是本地文件，两者必须配对，因为只看文件名，分不出输入协议。第三，运行前校验：请求的 target 和检测到的硬件不一致，程序直接报错，不会硬跑。"
+  },
+  {
+   "layout": "compare",
+   "title": "输入协议",
+   "eyebrow": "Input Protocol",
+   "heading": "两种==输入协议==",
+   "left": {
+    "badge": "RDK X5",
+    "title": "packed NV12",
+    "good": false,
+    "items": [
+     "一个输入张量",
+     "一维 uint8 缓冲",
+     "224×224：75,264 字节",
+     "制品格式 .bin"
+    ]
+   },
+   "right": {
+    "badge": "S100 · S100P · S600",
+    "title": "split NV12",
+    "good": false,
+    "items": [
+     "Y 和 UV 两个输入",
+     "Y：(1,224,224,1)",
+     "UV：(1,112,112,2)",
+     "制品格式 .hbm"
+    ]
+   },
+   "notes": "同一份代码能跑四块板，还因为前处理会按输入协议准备数据。X5 的模型只有一个输入，是 packed NV12，一维的 uint8 缓冲，224 乘 224 的图像是 75,264 字节。S 系列的模型有两个输入，Y 和 UV 分开：Y 是 1、224、224、1，UV 是 1、112、112、2。你不用自己拼；输入张量用 model_info 核对，输入协议用 dry-run 参数看。"
+  },
+  {
+   "layout": "section",
+   "title": "章节 03",
+   "num": "03",
+   "heading": "上板跑通",
+   "sub": "X5 做一遍，S100 做一遍",
+   "notes": "第三部分：上板跑通。"
+  },
+  {
+   "layout": "code",
+   "title": "X5 准备",
+   "eyebrow": "Demo · X5",
+   "heading": "X5：认板卡，下载模型",
+   "lead": "板上 git clone https://github.com/D-Robotics/rdk_model_zoo.git（/tmp/course_2-02/）。",
+   "blocks": [
+    {
+     "label": "① 认清板卡",
+     "lines": [
+      "$ cat /sys/class/boardinfo/soc_name \\",
+      "  /sys/class/socinfo/soc_name \\",
+      "  2>/dev/null | tr -d '\\0'"
+     ],
+     "note": {
+      "k": "要点",
+      "p": "输出：X5U（实测）"
+     }
+    },
+    {
+     "label": "② 下载 ResNet-18",
+     "lines": [
+      {
+       "text": "$ bash samples/vision/resnet/model/download.sh x5 18",
+       "hl": true
+      },
+      {
+       "text": "→ resnet18_bayese…nv12.bin · 11.08 MB",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "要点",
+      "p": "得到 resnet18_<wbr>bayese_<wbr>224x224_<wbr>nv12.bin"
+     }
+    }
+   ],
+   "notes": "先在 X5 上做。在板上把仓库 git clone 到临时目录下的课程文件夹里，进入仓库根目录；然后认清板卡，读 soc_name，实测输出是 X5U；再用 download.sh 下载 ResNet-18，得到约 11.08 MB 的 .bin。命令都在仓库根目录执行。读身份时，命令末尾那段把错误信息丢弃的写法要保留，因为 X5 没有 boardinfo，S100 没有 socinfo。"
+  },
+  {
+   "layout": "code",
+   "title": "X5 运行",
+   "eyebrow": "Demo · X5",
+   "heading": "X5：看信息，跑 Sample",
+   "lead": "model_info 看输入张量；协议用 --dry-run；再跑 main.py。",
+   "blocks": [
+    {
+     "label": "③ 模型信息",
+     "lines": [
+      "$ hrt_model_exec model_info \\",
+      "  --model_file <模型文件>",
+      {
+       "text": "input data · NV12 · (1,3,224,224)",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "要点",
+      "p": "输入协议：packed_nv12（`--dry-run` 显示）"
+     }
+    },
+    {
+     "label": "④ 运行 main.py",
+     "lines": [
+      {
+       "text": "$ python3 samples/vision/resnet/runtime/python/main.py \\",
+       "hl": true
+      },
+      "  --target x5 --variant 18",
+      {
+       "text": "Rank1 white wolf · 0.998090",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "要点",
+      "p": "默认用随仓 white_wolf.JPEG 和 ImageNet 标签。"
+     }
+    }
+   ],
+   "notes": "第三步，用 model_info 看输入张量：X5 是单个 NV12 输入 data；输入协议待会儿用 dry-run 参数看，是 packed_nv12。第四步，运行 main.py，target 写 x5，variant 写 18，其余用默认：随仓的 white wolf 图片和 ImageNet 标签。终端打印 Top-5，第一名 white wolf，分数 0.998090。"
+  },
+  {
+   "layout": "code",
+   "title": "S100 准备",
+   "eyebrow": "Demo · S100",
+   "heading": "S100：认板卡，下载模型",
+   "lead": "命令结构不变，只换 target 和下载参数。",
+   "blocks": [
+    {
+     "label": "① 认清板卡",
+     "lines": [
+      "$ cat /sys/class/boardinfo/soc_name \\",
+      "  /sys/class/socinfo/soc_name \\",
+      "  2>/dev/null | tr -d '\\0'"
+     ],
+     "note": {
+      "k": "要点",
+      "p": "输出：S100（实测）"
+     }
+    },
+    {
+     "label": "② 下载 ResNet-18",
+     "lines": [
+      {
+       "text": "$ bash samples/vision/resnet/model/download.sh s100 18",
+       "hl": true
+      },
+      {
+       "text": "→ s100/resnet18_nashe…nv12.hbm · 12.19 MB",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "要点",
+      "p": "得到 s100/resnet18_<wbr>nashe_<wbr>224x224_<wbr>nv12.hbm"
+     }
+    }
+   ],
+   "notes": "S100 上，同样是这两步。读 soc_name，输出是 S100；download.sh 参数换成 s100，得到约 12.19 MB 的 .hbm。命令结构没有变。"
+  },
+  {
+   "layout": "code",
+   "title": "S100 运行",
+   "eyebrow": "Demo · S100",
+   "heading": "S100：看信息，跑 Sample",
+   "lead": "同样的 model_info、--dry-run 与 main.py。",
+   "blocks": [
+    {
+     "label": "③ 模型信息",
+     "lines": [
+      "$ hrt_model_exec model_info \\",
+      "  --model_file <模型文件>",
+      {
+       "text": "input data_y + data_uv · U8",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "要点",
+      "p": "输入协议：split_nv12（`--dry-run` 显示）"
+     }
+    },
+    {
+     "label": "④ 运行 main.py",
+     "lines": [
+      {
+       "text": "$ python3 samples/vision/resnet/runtime/python/main.py \\",
+       "hl": true
+      },
+      "  --target s100 --variant 18",
+      {
+       "text": "Rank1 white wolf · 0.998109",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "要点",
+      "p": "只把 target 换成 s100。"
+     }
+    }
+   ],
+   "notes": "再看 model_info：S100 是两个输入，data_y 和 data_uv；输入协议待会儿用 dry-run 参数看，是 split_nv12。运行 main.py，只把 target 换成 s100，variant 仍是 18，第一名同样是 white wolf，分数 0.998109。"
+  },
+  {
+   "layout": "table",
+   "title": "读结果",
+   "eyebrow": "Read Results",
+   "heading": "怎么==读结果==",
+   "lead": "实测（X5U / S100）：顺序与 README 一致。X5 Top-1 0.998090；S100 Top-1 0.998109。",
+   "head": [
+    {
+     "html": "名次",
+     "style": "width:160px"
+    },
+    "类别",
+    "X5 分数",
+    "S100 分数"
+   ],
+   "row_header": true,
+   "rows": [
+    [
+     "1",
+     "white wolf（270）",
+     {
+      "html": "0.998090",
+      "cls": "hc"
+     },
+     {
+      "html": "0.998109",
+      "cls": "hc"
+     }
+    ],
+    [
+     "2",
+     "timber wolf",
+     "0.000592",
+     "0.000565"
+    ],
+    [
+     "3",
+     "ice bear",
+     "0.000189",
+     "0.000185"
+    ],
+    [
+     "4",
+     "Arctic fox",
+     "0.000126",
+     "0.000137"
+    ],
+    [
+     "5",
+     "Samoyed",
+     "0.000080",
+     "0.000087"
+    ]
+   ],
+   "notes": "看结果。每一行三项：class 是 ImageNet 一千类里的编号，label 是名字，score 是 softmax 之后的分数。实测顺序与 README 一致：white wolf、timber wolf、ice bear、Arctic fox、Samoyed。X5 第一名分数 0.998090，S100 第一名分数 0.998109，编号都是 270。精度方面，README 参考值里，ResNet-18 在 ImageNetV2 上的 Top-1，X5 是 58.91%，S100 是 58.79%，浮点模型是 59.35%。"
+  },
+  {
+   "layout": "diagram",
+   "title": "跑 Sample 四步",
+   "eyebrow": "Four Steps",
+   "heading": "跑一个 Sample，==四步==",
+   "height": 560,
+   "scene": [
+    {
+     "type": "box",
+     "id": "s0",
+     "x": 40,
+     "y": 120,
+     "w": 330,
+     "h": 200,
+     "label": "① 下载制品",
+     "kind": "neutral",
+     "sub": "download.sh <target> 18",
+     "size": 34,
+     "sub_size": 21
+    },
+    {
+     "type": "text",
+     "id": "u0",
+     "x": 205,
+     "y": 372,
+     "text": "model/ 里得到制品",
+     "size": 24,
+     "anchor": "middle",
+     "color": "ink2"
+    },
+    {
+     "type": "box",
+     "id": "s1",
+     "x": 450,
+     "y": 120,
+     "w": 330,
+     "h": 200,
+     "label": "② 看模型信息",
+     "kind": "neutral",
+     "sub": "hrt_model_exec model_info",
+     "size": 34,
+     "sub_size": 21
+    },
+    {
+     "type": "text",
+     "id": "u1",
+     "x": 615,
+     "y": 372,
+     "text": "确认输入、输出",
+     "size": 24,
+     "anchor": "middle",
+     "color": "ink2"
+    },
+    {
+     "type": "arrow",
+     "id": "a1",
+     "points": [
+      [
+       372,
+       220
+      ],
+      [
+       446,
+       220
+      ]
+     ]
+    },
+    {
+     "type": "box",
+     "id": "s2",
+     "x": 860,
+     "y": 120,
+     "w": 330,
+     "h": 200,
+     "label": "③ 运行 Sample",
+     "kind": "neutral",
+     "sub": "main.py --target <板卡>",
+     "size": 34,
+     "sub_size": 21
+    },
+    {
+     "type": "text",
+     "id": "u2",
+     "x": 1025,
+     "y": 372,
+     "text": "默认用 white_wolf.JPEG",
+     "size": 24,
+     "anchor": "middle",
+     "color": "ink2"
+    },
+    {
+     "type": "arrow",
+     "id": "a2",
+     "points": [
+      [
+       782,
+       220
+      ],
+      [
+       856,
+       220
+      ]
+     ]
+    },
+    {
+     "type": "box",
+     "id": "s3",
+     "x": 1270,
+     "y": 120,
+     "w": 330,
+     "h": 200,
+     "label": "④ 读结果",
+     "kind": "neutral",
+     "sub": "Top-5 · class · score",
+     "size": 34,
+     "sub_size": 21
+    },
+    {
+     "type": "text",
+     "id": "u3",
+     "x": 1435,
+     "y": 372,
+     "text": "对照 README 参考值",
+     "size": 24,
+     "anchor": "middle",
+     "color": "ink2"
+    },
+    {
+     "type": "arrow",
+     "id": "a3",
+     "points": [
+      [
+       1192,
+       220
+      ],
+      [
+       1266,
+       220
+      ]
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "track",
+     "points": [
+      [
+       100,
+       450
+      ],
+      [
+       1500,
+       450
+      ]
+     ],
+     "mode": "flow",
+     "head": true
+    },
+    {
+     "type": "token",
+     "id": "tk",
+     "x": 205,
+     "y": 450,
+     "label": "制品",
+     "w": 120,
+     "h": 44,
+     "size": 22,
+     "kind": "light"
+    },
+    {
+     "type": "text",
+     "id": "swap",
+     "x": 800,
+     "y": 530,
+     "text": "换板：只改 target 和制品，四步不变",
+     "size": 30,
+     "weight": 700,
+     "anchor": "middle",
+     "color": "orange"
+    }
+   ],
+   "steps": [
+    {
+     "at": 0,
+     "show": [
+      "s0",
+      "u0"
+     ],
+     "on": [
+      "s0"
+     ],
+     "caption": "第一步：下载制品"
+    },
+    {
+     "at": 2000,
+     "show": [
+      "a1",
+      "s1",
+      "u1",
+      "track",
+      "tk"
+     ],
+     "focus": [
+      "s1",
+      "u1",
+      "a1",
+      "track",
+      "tk"
+     ],
+     "on": [
+      "s1"
+     ],
+     "move": [
+      {
+       "id": "tk",
+       "path": [
+        [
+         205,
+         450
+        ],
+        [
+         615,
+         450
+        ]
+       ]
+      }
+     ],
+     "caption": "第二步：model_info 看输入输出"
+    },
+    {
+     "at": 4200,
+     "show": [
+      "a2",
+      "s2",
+      "u2"
+     ],
+     "focus": [
+      "s2",
+      "u2",
+      "a2",
+      "track",
+      "tk"
+     ],
+     "on": [
+      "s2"
+     ],
+     "move": [
+      {
+       "id": "tk",
+       "path": [
+        [
+         615,
+         450
+        ],
+        [
+         1025,
+         450
+        ]
+       ]
+      }
+     ],
+     "text": {
+      "tk": "图片"
+     },
+     "caption": "第三步：运行 main.py"
+    },
+    {
+     "at": 6400,
+     "show": [
+      "a3",
+      "s3",
+      "u3"
+     ],
+     "focus": [
+      "s3",
+      "u3",
+      "a3",
+      "track",
+      "tk"
+     ],
+     "on": [
+      "s3"
+     ],
+     "move": [
+      {
+       "id": "tk",
+       "path": [
+        [
+         1025,
+         450
+        ],
+        [
+         1435,
+         450
+        ]
+       ]
+      }
+     ],
+     "text": {
+      "tk": "Top-5"
+     },
+     "caption": "第四步：读 Top-5 结果"
+    },
+    {
+     "at": 8600,
+     "focus": null,
+     "show": [
+      "swap"
+     ],
+     "caption": "换板：只改 target 和制品，四步不变"
+    }
+   ],
+   "notes": "把今天的操作压成四步。第一，下载制品，参数是 target 和变体。第二，用 model_info 看输入输出。第三，运行 main.py，target 指定板卡。第四，读结果，Top-5 里 white wolf 排第一，和 README 的参考结果对照。换一块板，只改 target 和制品，四步不变。"
+  },
+  {
+   "layout": "section",
+   "title": "章节 04",
+   "num": "04",
+   "heading": "换板与避坑",
+   "sub": "换一块板要改什么",
+   "notes": "第四部分：换板与避坑。"
+  },
+  {
+   "layout": "cards",
+   "title": "换板",
+   "eyebrow": "Switch Board",
+   "heading": "换板只改==三处==",
+   "lead": "测试图片、标签文件和其他参数都不用动。",
+   "cols": 3,
+   "cards": [
+    {
+     "num": "01",
+     "title": "target",
+     "text": "x5 换成 s100 / s100p / s600，或写 auto。"
+    },
+    {
+     "num": "02",
+     "title": "下载参数",
+     "text": "download.sh 的第一个参数同步改。"
+    },
+    {
+     "num": "03",
+     "title": "制品路径",
+     "text": "S 系列制品在 s100/、s100p/、s600/ 子目录里。"
+    }
+   ],
+   "notes": "换一块板，只改三处。第一，target，从 x5 换成 s100、s100p 或 s600，或者写 auto。第二，download.sh 的第一个参数，同步改。第三，S 系列的制品在 s100、s100p、s600 子目录里，路径跟着变。测试图片、标签文件和其他参数，都不用动。"
+  },
+  {
+   "layout": "bullets",
+   "variant": "split",
+   "title": "常见坑",
+   "eyebrow": "Pitfalls",
+   "heading": "常见==五个坑==",
+   "lead": "跑不起来时，先查这五项。",
+   "items": [
+    {
+     "mark": "x",
+     "text": "S100P 不能用 S100 制品"
+    },
+    {
+     "mark": "x",
+     "text": "target 与硬件不符会报错"
+    },
+    {
+     "mark": "info",
+     "text": "老镜像可能缺 PyYAML/Pillow"
+    },
+    {
+     "mark": "info",
+     "text": "推理不自动下载，先下载制品"
+    },
+    {
+     "mark": "note",
+     "text": "C++ 默认 zebra，看白狼加参数"
+    }
+   ],
+   "notes": "最后说五个常见的坑。第一，S100P 不能用 S100 的制品，两者的 march 不同。第二，target 和检测到的硬件不一致，程序直接报错。第三，老镜像或精简镜像可能缺 PyYAML、Pillow，用 pip 装上即可；两块板上都已经具备，没有缺依赖。第四，推理不会自动下载模型，要先运行 download.sh。第五，S 系列的 C++ run.sh 默认用 zebra 图，看白狼必须加 test-img 参数。"
+  },
+  {
+   "layout": "closing",
+   "title": "下一课",
+   "eyebrow": "Up Next · Lesson 2-03",
+   "heading": "下一课：==对照 Sample 量化==",
+   "lead": "下一课（2-03）：对照 Sample 量化——以 ResNet 为例，从 ONNX、校准数据到 `.bin` / `.hbm`，把 PTQ 完整走一遍，再把产物放回 Sample，用今天学的方法上板验证。",
+   "cards": [
+    {
+     "icon": "grid",
+     "tone": "orange",
+     "k": "一套代码四块板",
+     "d": "target 选板，制品对应 march。"
+    },
+    {
+     "icon": "book-open",
+     "tone": "blue",
+     "k": "Sample 六个目录",
+     "d": "入口 main.py、cli.py、模型类。"
+    },
+    {
+     "icon": "rocket",
+     "tone": "green",
+     "k": "跑通 ResNet-18",
+     "d": "在 X5 和 S100 上看到 Top-5。"
+    }
+   ],
+   "full_logo": true,
+   "notes": "回顾一下：main 分支用 target 选板，一套代码对应四块板的制品；一个 Sample 分六个目录，入口是 main.py、cli.py 和模型类；我们在 X5 和 S100 上跑通了 ResNet-18。下一课（第二章第三课）：对照 Sample 量化——以 ResNet 为例，从 ONNX、校准数据到 .bin / .hbm，把 PTQ 完整走一遍，再把产物放回 Sample，用今天学的方法上板验证。"
+  }
+ ]
+}
