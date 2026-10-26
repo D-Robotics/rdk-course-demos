@@ -60,22 +60,22 @@
     {
      "k": "ResNet Sample README",
      "d": "支持矩阵、快速体验、预期结果",
-     "url": "samples/vision/resnet/README_cn.md"
+     "url": "https://github.com/D-Robotics/rdk_model_zoo/blob/main/samples/vision/resnet/README_cn.md"
     },
     {
      "k": "ResNet 模型制品说明",
      "d": "制品清单、下载脚本、输入协议",
-     "url": "samples/vision/resnet/model/README_cn.md"
+     "url": "https://github.com/D-Robotics/rdk_model_zoo/blob/main/samples/vision/resnet/model/README_cn.md"
     },
     {
      "k": "ResNet Python 运行说明",
      "d": "main.py 的参数、结果与集成示例",
-     "url": "samples/vision/resnet/runtime/python/README_cn.md"
+     "url": "https://github.com/D-Robotics/rdk_model_zoo/blob/main/samples/vision/resnet/runtime/python/README_cn.md"
     },
     {
      "k": "发布制品清单与板卡别名",
      "d": "models.yaml（x5 / s）、platforms.json",
-     "url": "docs/release/"
+     "url": "https://github.com/D-Robotics/rdk_model_zoo/tree/main/docs/release"
     },
     {
      "k": "RDK 文档资源中心",
