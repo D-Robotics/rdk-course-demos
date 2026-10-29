@@ -1,0 +1,4377 @@
+{
+ "meta": {
+  "title": "【RDK 小课堂】第 2 章 Model Zoo · 第 3 课｜ResNet 量化实操",
+  "lang": "zh-CN",
+  "mode": "deck",
+  "tag": "RDK 小课堂 2-03",
+  "footer": "ResNet 量化实操",
+  "theme": {}
+ },
+ "slides": [
+  {
+   "layout": "series-cover",
+   "chapter": 2,
+   "chapter_name": "Model Zoo",
+   "lesson": 3,
+   "title": "ResNet 量化实操",
+   "highlight": "量化",
+   "subtitle": "跟着做一遍：从打开 OE 到上板验证",
+   "visual": "assets/cover_wolf_vis.png",
+   "theme": "light",
+   "notes": "这是第二章 Model Zoo 的第三课：ResNet 量化实操。上一课我们在板上跑通了 Sample，用的是转好的模型。这一课，我们跟着做一遍，把 ResNet-18 自己量化出来。从打开 OE 开始，配环境，写 YAML，编译，直到看到完整日志。最后把产物放回 Sample，上板验证。"
+  },
+  {
+   "layout": "cards",
+   "title": "本课路线",
+   "eyebrow": "Roadmap",
+   "heading": "本课按==操作顺序==走",
+   "lead": "跟着做一遍：先打开 OE，再配环境，然后编译，最后看产物并上板验证。",
+   "cols": 2,
+   "cards": [
+    {
+     "num": "01",
+     "title": "打开 OE",
+     "text": "OE 是什么，怎么从镜像进到容器里。"
+    },
+    {
+     "num": "02",
+     "title": "配环境",
+     "text": "对照 conversion 目录，准备目录、YAML 和校准数据。"
+    },
+    {
+     "num": "03",
+     "title": "编译",
+     "text": "X5 与 S100 各做一遍，完整日志。"
+    },
+    {
+     "num": "04",
+     "title": "产物与验证",
+     "text": "看产物和相似度，上板验证，再做评估。"
+    }
+   ],
+   "notes": "这一课按操作顺序，分四步。第一步，打开 OE：它是什么，怎么从镜像进到容器里。第二步，配环境：对照 conversion 目录，准备工作目录、YAML 和校准数据。第三步，编译：X5 和 S100 各做一遍，完整日志都给你看。第四步，看产物和相似度，再上板验证、做评估。开始之前，先用几分钟，把 PTQ 的理论过一遍。"
+  },
+  {
+   "layout": "links",
+   "title": "配套资源",
+   "eyebrow": "Resources",
+   "heading": "课程资料与入口",
+   "items": [
+    {
+     "k": "RDK Model Zoo（main）",
+     "d": "本课主角：Sample 与共用工具",
+     "url": "https://github.com/D-Robotics/rdk_model_zoo"
+    },
+    {
+     "k": "ResNet 转换配方",
+     "d": "conversion 目录：导出、校准、yaml",
+     "url": "https://github.com/D-Robotics/rdk_model_zoo/blob/main/samples/vision/resnet/conversion/README_cn.md"
+    },
+    {
+     "k": "S 系列：模型量化与编译",
+     "d": "hb_compile 流程与相似度",
+     "url": "https://developer.d-robotics.cc/oe_s_doc/guide/ptq/ptq_usage/quantize_compile"
+    },
+    {
+     "k": "X5：PTQ 转换步骤",
+     "d": "hb_mapper checker 与 makertbin",
+     "url": "https://developer.d-robotics.cc/oe_x5_doc/cn/oe_mapper/source/ptq/ptq_usage/ptq_usage.html"
+    }
+   ],
+   "notes": "先把资料准备好。主角还是 Model Zoo 仓库。ResNet 的 conversion 目录，就是这节课的转换配方。S 系列和 X5 各有一份工具链文档，讲量化与编译，也讲相似度怎么读。地址都在屏幕上，版本以文档为准。"
+  },
+  {
+   "layout": "section",
+   "title": "章节 01",
+   "num": "01",
+   "heading": "理论速览",
+   "sub": "先把 PTQ 的理论过一遍",
+   "notes": "第一部分：先把理论过一遍。"
+  },
+  {
+   "layout": "diagram",
+   "title": "PTQ 五阶段",
+   "eyebrow": "PTQ Pipeline",
+   "heading": "PTQ 的==五个阶段==",
+   "height": 560,
+   "scene": [
+    {
+     "type": "band",
+     "id": "pc",
+     "x": 5,
+     "y": 70,
+     "w": 1270,
+     "h": 330,
+     "label": "在电脑上",
+     "label_at": [
+      640,
+      56
+     ],
+     "anchor": "middle"
+    },
+    {
+     "type": "box",
+     "id": "s0",
+     "x": 25,
+     "y": 130,
+     "w": 270,
+     "h": 170,
+     "label": "1 浮点模型",
+     "kind": "neutral",
+     "sub": "fetch · export",
+     "size": 32,
+     "sub_size": 22
+    },
+    {
+     "type": "text",
+     "id": "u0",
+     "x": 160,
+     "y": 345,
+     "text": "得到 model.onnx",
+     "size": 21,
+     "anchor": "middle",
+     "color": "ink2"
+    },
+    {
+     "type": "box",
+     "id": "s1",
+     "x": 345,
+     "y": 130,
+     "w": 270,
+     "h": 170,
+     "label": "2 验证",
+     "kind": "neutral",
+     "sub": "PyTorch 对比",
+     "size": 32,
+     "sub_size": 22
+    },
+    {
+     "type": "text",
+     "id": "u1",
+     "x": 480,
+     "y": 345,
+     "text": "再检查算子",
+     "size": 21,
+     "anchor": "middle",
+     "color": "ink2"
+    },
+    {
+     "type": "arrow",
+     "id": "a1",
+     "points": [
+      [
+       297,
+       215
+      ],
+      [
+       342,
+       215
+      ]
+     ]
+    },
+    {
+     "type": "box",
+     "id": "s2",
+     "x": 665,
+     "y": 130,
+     "w": 270,
+     "h": 170,
+     "label": "3 校准数据",
+     "kind": "neutral",
+     "sub": "calibrate",
+     "size": 32,
+     "sub_size": 22
+    },
+    {
+     "type": "text",
+     "id": "u2",
+     "x": 800,
+     "y": 345,
+     "text": "200 张 · 短边 235 裁 224",
+     "size": 21,
+     "anchor": "middle",
+     "color": "ink2"
+    },
+    {
+     "type": "arrow",
+     "id": "a2",
+     "points": [
+      [
+       617,
+       215
+      ],
+      [
+       662,
+       215
+      ]
+     ]
+    },
+    {
+     "type": "box",
+     "id": "s3",
+     "x": 985,
+     "y": 130,
+     "w": 270,
+     "h": 170,
+     "label": "4 量化编译",
+     "kind": "neutral",
+     "sub": "两套工具链",
+     "size": 32,
+     "sub_size": 22
+    },
+    {
+     "type": "text",
+     "id": "u3",
+     "x": 1120,
+     "y": 345,
+     "text": ".bin（X5）· .hbm（S100）",
+     "size": 21,
+     "anchor": "middle",
+     "color": "ink2"
+    },
+    {
+     "type": "arrow",
+     "id": "a3",
+     "points": [
+      [
+       937,
+       215
+      ],
+      [
+       982,
+       215
+      ]
+     ]
+    },
+    {
+     "type": "box",
+     "id": "s4",
+     "x": 1305,
+     "y": 130,
+     "w": 270,
+     "h": 170,
+     "label": "5 评估",
+     "kind": "neutral",
+     "sub": "evaluator",
+     "size": 32,
+     "sub_size": 22
+    },
+    {
+     "type": "text",
+     "id": "u4",
+     "x": 1440,
+     "y": 345,
+     "text": "演示一下 · 说明怎么测",
+     "size": 21,
+     "anchor": "middle",
+     "color": "ink2"
+    },
+    {
+     "type": "arrow",
+     "id": "a4",
+     "points": [
+      [
+       1257,
+       215
+      ],
+      [
+       1302,
+       215
+      ]
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "track",
+     "points": [
+      [
+       60,
+       470
+      ],
+      [
+       1540,
+       470
+      ]
+     ],
+     "mode": "flow",
+     "head": true
+    },
+    {
+     "type": "token",
+     "id": "tk",
+     "x": 160,
+     "y": 470,
+     "label": "PyTorch",
+     "w": 150,
+     "h": 44,
+     "size": 22,
+     "kind": "light"
+    },
+    {
+     "type": "text",
+     "id": "foot",
+     "x": 800,
+     "y": 530,
+     "text": "先有可靠的浮点模型，再谈量化",
+     "size": 28,
+     "weight": 700,
+     "anchor": "middle",
+     "color": "accent"
+    }
+   ],
+   "steps": [
+    {
+     "at": 0,
+     "show": [
+      "pc",
+      "s0",
+      "u0",
+      "track",
+      "tk"
+     ],
+     "on": [
+      "s0"
+     ],
+     "caption": "第一阶段：浮点模型，导出成 ONNX"
+    },
+    {
+     "at": 2200,
+     "show": [
+      "a1",
+      "s1",
+      "u1"
+     ],
+     "focus": [
+      "s1",
+      "u1",
+      "a1",
+      "track",
+      "tk"
+     ],
+     "on": [
+      "s1"
+     ],
+     "move": [
+      {
+       "id": "tk",
+       "path": [
+        [
+         160,
+         470
+        ],
+        [
+         480,
+         470
+        ]
+       ]
+      }
+     ],
+     "text": {
+      "tk": "ONNX"
+     },
+     "caption": "第二阶段：验证，和 PyTorch 对比"
+    },
+    {
+     "at": 4400,
+     "show": [
+      "a2",
+      "s2",
+      "u2"
+     ],
+     "focus": [
+      "s2",
+      "u2",
+      "a2",
+      "track",
+      "tk"
+     ],
+     "on": [
+      "s2"
+     ],
+     "move": [
+      {
+       "id": "tk",
+       "path": [
+        [
+         480,
+         470
+        ],
+        [
+         800,
+         470
+        ]
+       ]
+      }
+     ],
+     "text": {
+      "tk": "校准图"
+     },
+     "caption": "第三阶段：准备校准数据"
+    },
+    {
+     "at": 6600,
+     "show": [
+      "a3",
+      "s3",
+      "u3"
+     ],
+     "focus": [
+      "s3",
+      "u3",
+      "a3",
+      "track",
+      "tk"
+     ],
+     "on": [
+      "s3"
+     ],
+     "move": [
+      {
+       "id": "tk",
+       "path": [
+        [
+         800,
+         470
+        ],
+        [
+         1120,
+         470
+        ]
+       ]
+      }
+     ],
+     "text": {
+      "tk": "产物"
+     },
+     "caption": "第四阶段：量化编译，X5 与 S100 各转一次"
+    },
+    {
+     "at": 8800,
+     "show": [
+      "a4",
+      "s4",
+      "u4"
+     ],
+     "focus": [
+      "s4",
+      "u4",
+      "a4",
+      "track",
+      "tk"
+     ],
+     "on": [
+      "s4"
+     ],
+     "move": [
+      {
+       "id": "tk",
+       "path": [
+        [
+         1120,
+         470
+        ],
+        [
+         1440,
+         470
+        ]
+       ]
+      }
+     ],
+     "text": {
+      "tk": "Top-5"
+     },
+     "caption": "第五阶段：评估精度，演示一下并说明怎么测"
+    },
+    {
+     "at": 11000,
+     "focus": null,
+     "show": [
+      "foot"
+     ],
+     "caption": "PTQ 五阶段：从浮点模型到板上验证"
+    }
+   ],
+   "notes": "PTQ，也就是训练后量化，分五个阶段。第一，浮点模型：取权重，导出成 ONNX。第二，验证：和 PyTorch 对比，再检查算子。第三，校准数据：准备一批有代表性的输入。第四，量化编译：校准、量化、编译，两套工具链各做一次。第五，评估：在数据集上比精度。这一课，我们动手做第四阶段，再回头验证和评估。"
+  },
+  {
+   "layout": "diagram",
+   "title": "输入编进模型",
+   "eyebrow": "Input Pipeline",
+   "heading": "预处理==编进模型==（示意）",
+   "height": 560,
+   "scene": [
+    {
+     "type": "box",
+     "id": "cam",
+     "x": 20,
+     "y": 190,
+     "w": 260,
+     "h": 140,
+     "label": "NV12 输入",
+     "kind": "cpu",
+     "sub": "板上 CPU 准备",
+     "size": 30,
+     "sub_size": 22
+    },
+    {
+     "type": "arrow",
+     "id": "b0",
+     "points": [
+      [
+       282,
+       260
+      ],
+      [
+       348,
+       260
+      ]
+     ]
+    },
+    {
+     "type": "band",
+     "id": "inm",
+     "x": 330,
+     "y": 125,
+     "w": 950,
+     "h": 290,
+     "label": "模型内部（示意）",
+     "label_at": [
+      805,
+      105
+     ],
+     "anchor": "middle"
+    },
+    {
+     "type": "box",
+     "id": "m1",
+     "x": 360,
+     "y": 190,
+     "w": 270,
+     "h": 140,
+     "label": "NV12 → RGB",
+     "kind": "bpu",
+     "sub": "颜色转换",
+     "size": 28,
+     "sub_size": 22
+    },
+    {
+     "type": "box",
+     "id": "m2",
+     "x": 690,
+     "y": 190,
+     "w": 270,
+     "h": 140,
+     "label": "减均值 · 乘 scale",
+     "kind": "bpu",
+     "sub": "归一化",
+     "size": 26,
+     "sub_size": 22
+    },
+    {
+     "type": "box",
+     "id": "m3",
+     "x": 1020,
+     "y": 190,
+     "w": 230,
+     "h": 140,
+     "label": "INT8 网络",
+     "kind": "bpu",
+     "sub": "ResNet-18",
+     "size": 28,
+     "sub_size": 22
+    },
+    {
+     "type": "arrow",
+     "id": "b1",
+     "points": [
+      [
+       632,
+       260
+      ],
+      [
+       688,
+       260
+      ]
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "b2",
+     "points": [
+      [
+       962,
+       260
+      ],
+      [
+       1018,
+       260
+      ]
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "b3",
+     "points": [
+      [
+       1282,
+       260
+      ],
+      [
+       1338,
+       260
+      ]
+     ]
+    },
+    {
+     "type": "box",
+     "id": "out",
+     "x": 1340,
+     "y": 190,
+     "w": 240,
+     "h": 140,
+     "label": "logits",
+     "kind": "cpu",
+     "sub": "CPU 后处理 Top-K",
+     "size": 30,
+     "sub_size": 22
+    },
+    {
+     "type": "text",
+     "id": "y1",
+     "x": 800,
+     "y": 470,
+     "text": "yaml：input_type_rt: nv12  ·  input_type_train: rgb",
+     "size": 24,
+     "font": "mono",
+     "color": "ink2"
+    },
+    {
+     "type": "text",
+     "id": "y2",
+     "x": 800,
+     "y": 515,
+     "text": "mean = mean × 255  ·  scale = 1 ÷ (255 × std)",
+     "size": 24,
+     "font": "mono",
+     "color": "ink2"
+    }
+   ],
+   "steps": [
+    {
+     "at": 0,
+     "show": [
+      "cam"
+     ],
+     "caption": "板上给模型的输入是 NV12"
+    },
+    {
+     "at": 1800,
+     "show": [
+      "inm",
+      "b0",
+      "m1"
+     ],
+     "focus": [
+      "cam",
+      "b0",
+      "m1",
+      "inm"
+     ],
+     "on": [
+      "m1"
+     ],
+     "caption": "颜色转换：NV12 转成训练用的 RGB"
+    },
+    {
+     "at": 3800,
+     "show": [
+      "b1",
+      "m2"
+     ],
+     "focus": [
+      "m1",
+      "b1",
+      "m2",
+      "inm"
+     ],
+     "on": [
+      "m2"
+     ],
+     "caption": "归一化：减均值、乘 scale"
+    },
+    {
+     "at": 5800,
+     "focus": null,
+     "show": [
+      "y1"
+     ],
+     "caption": "这些都在转换时编进模型：yaml 里写好输入类型"
+    },
+    {
+     "at": 7800,
+     "show": [
+      "y2"
+     ],
+     "caption": "yaml 里的 mean 和 scale，就是干这个的"
+    },
+    {
+     "at": 9800,
+     "show": [
+      "b2",
+      "m3",
+      "b3",
+      "out"
+     ],
+     "focus": [
+      "m2",
+      "b2",
+      "m3",
+      "b3",
+      "out"
+     ],
+     "on": [
+      "m3"
+     ],
+     "caption": "第二件：优化、量化、编译成 INT8 模型"
+    }
+   ],
+   "notes": "转换要解决两件事。第一件，输入怎么处理。板上给模型的是 NV12，训练时模型吃的是 RGB。颜色转换，还有减均值、乘缩放系数，都不在板上做。而是转换时编进模型，yaml 里的 mean 和 scale 就是干这个的。第二件，把模型优化、量化、编译成 BPU 能跑的 INT8 模型。"
+  },
+  {
+   "layout": "diagram",
+   "title": "两套工具链",
+   "eyebrow": "Toolchains",
+   "heading": "一个 ONNX，==两套工具链==",
+   "height": 560,
+   "scene": [
+    {
+     "type": "box",
+     "id": "onnx",
+     "x": 20,
+     "y": 180,
+     "w": 210,
+     "h": 130,
+     "label": "model.onnx",
+     "kind": "neutral",
+     "size": 26,
+     "mono": true
+    },
+    {
+     "type": "box",
+     "id": "i1",
+     "x": 300,
+     "y": 60,
+     "w": 420,
+     "h": 130,
+     "label": "X5 OE 镜像",
+     "kind": "neutral",
+     "sub": "local/rdk-x5-oe:v1.2.8-server",
+     "size": 30,
+     "sub_size": 19
+    },
+    {
+     "type": "box",
+     "id": "t1",
+     "x": 770,
+     "y": 60,
+     "w": 400,
+     "h": 130,
+     "label": "hb_mapper",
+     "kind": "neutral",
+     "sub": "checker + makertbin",
+     "size": 30,
+     "sub_size": 22,
+     "mono": true
+    },
+    {
+     "type": "box",
+     "id": "r1",
+     "x": 1230,
+     "y": 60,
+     "w": 350,
+     "h": 130,
+     "label": ".bin",
+     "kind": "bpu",
+     "sub": "bayes-e · packed NV12",
+     "size": 34,
+     "sub_size": 21
+    },
+    {
+     "type": "box",
+     "id": "i2",
+     "x": 300,
+     "y": 300,
+     "w": 420,
+     "h": 130,
+     "label": "S 系列 OE 镜像",
+     "kind": "neutral",
+     "sub": "ai_toolchain_ubuntu_22…:v3.7.0",
+     "size": 30,
+     "sub_size": 19
+    },
+    {
+     "type": "box",
+     "id": "t2",
+     "x": 770,
+     "y": 300,
+     "w": 400,
+     "h": 130,
+     "label": "hb_compile",
+     "kind": "neutral",
+     "sub": "一条命令",
+     "size": 30,
+     "sub_size": 22,
+     "mono": true
+    },
+    {
+     "type": "box",
+     "id": "r2",
+     "x": 1230,
+     "y": 300,
+     "w": 350,
+     "h": 130,
+     "label": ".hbm",
+     "kind": "bpu",
+     "sub": "nash-e · split NV12",
+     "size": 34,
+     "sub_size": 21
+    },
+    {
+     "type": "arrow",
+     "id": "f1",
+     "points": [
+      [
+       232,
+       245
+      ],
+      [
+       265,
+       245
+      ],
+      [
+       265,
+       125
+      ],
+      [
+       298,
+       125
+      ]
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "f2",
+     "points": [
+      [
+       232,
+       245
+      ],
+      [
+       265,
+       245
+      ],
+      [
+       265,
+       365
+      ],
+      [
+       298,
+       365
+      ]
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "c1",
+     "points": [
+      [
+       722,
+       125
+      ],
+      [
+       768,
+       125
+      ]
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "c2",
+     "points": [
+      [
+       1172,
+       125
+      ],
+      [
+       1228,
+       125
+      ]
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "d1",
+     "points": [
+      [
+       722,
+       365
+      ],
+      [
+       768,
+       365
+      ]
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "d2",
+     "points": [
+      [
+       1172,
+       365
+      ],
+      [
+       1228,
+       365
+      ]
+     ]
+    },
+    {
+     "type": "text",
+     "id": "lb1",
+     "x": 300,
+     "y": 225,
+     "text": "X5（Bayes-e）",
+     "size": 24,
+     "anchor": "start",
+     "color": "ink2"
+    },
+    {
+     "type": "text",
+     "id": "lb2",
+     "x": 300,
+     "y": 465,
+     "text": "S100（Nash-e）",
+     "size": 24,
+     "anchor": "start",
+     "color": "ink2"
+    },
+    {
+     "type": "text",
+     "id": "foot",
+     "x": 800,
+     "y": 525,
+     "text": "S100P（nash-m）· S600（nash-p）：同一个工具、同一份 yaml，本课只在文字里提",
+     "size": 24,
+     "anchor": "middle",
+     "color": "ink3"
+    }
+   ],
+   "steps": [
+    {
+     "at": 0,
+     "show": [
+      "onnx"
+     ],
+     "caption": "同一个 ONNX，要转给两套工具链"
+    },
+    {
+     "at": 1600,
+     "show": [
+      "f1",
+      "i1",
+      "lb1"
+     ],
+     "focus": [
+      "onnx",
+      "f1",
+      "i1",
+      "lb1"
+     ],
+     "caption": "X5：进 X5 的 OE 镜像"
+    },
+    {
+     "at": 3200,
+     "show": [
+      "c1",
+      "t1"
+     ],
+     "focus": [
+      "i1",
+      "c1",
+      "t1"
+     ],
+     "on": [
+      "t1"
+     ],
+     "caption": "hb_mapper：先 checker，再 makertbin"
+    },
+    {
+     "at": 4800,
+     "show": [
+      "c2",
+      "r1"
+     ],
+     "focus": [
+      "t1",
+      "c2",
+      "r1"
+     ],
+     "on": [
+      "r1"
+     ],
+     "caption": "产出 .bin，给 X5 用"
+    },
+    {
+     "at": 6800,
+     "show": [
+      "f2",
+      "i2",
+      "lb2"
+     ],
+     "focus": [
+      "onnx",
+      "f2",
+      "i2",
+      "lb2"
+     ],
+     "caption": "S100：进 S 系列的 OE 镜像"
+    },
+    {
+     "at": 8400,
+     "show": [
+      "d1",
+      "t2"
+     ],
+     "focus": [
+      "i2",
+      "d1",
+      "t2"
+     ],
+     "on": [
+      "t2"
+     ],
+     "caption": "hb_compile：一条命令"
+    },
+    {
+     "at": 10000,
+     "show": [
+      "d2",
+      "r2"
+     ],
+     "focus": [
+      "t2",
+      "d2",
+      "r2"
+     ],
+     "on": [
+      "r2"
+     ],
+     "caption": "产出 .hbm，给 S100 用"
+    },
+    {
+     "at": 12000,
+     "focus": null,
+     "show": [
+      "foot"
+     ],
+     "caption": "同一个 ONNX，两套工具链，两种产物"
+    }
+   ],
+   "notes": "两套工具链，都装在 Docker 镜像里。X5 用 hb_mapper：先 checker 检查，再 makertbin 转换。产出 bin 文件，march 是 bayes-e，输入是一个 packed NV12。S 系列用 hb_compile，一条命令，产出 hbm 文件。S100 的 march 是 nash-e，输入是 Y 和 UV 分开的 split NV12。S100P 和 S600 同一个工具，同一份 yaml，本课不转。"
+  },
+  {
+   "layout": "section",
+   "title": "章节 02",
+   "num": "02",
+   "heading": "打开 OE",
+   "sub": "镜像、docker run、版本确认",
+   "notes": "第二部分：打开 OE。"
+  },
+  {
+   "layout": "diagram",
+   "title": "OE 是什么",
+   "eyebrow": "What Is OE",
+   "heading": "OE 是一个==Docker 镜像==",
+   "height": 560,
+   "scene": [
+    {
+     "type": "box",
+     "id": "oe",
+     "x": 20,
+     "y": 190,
+     "w": 290,
+     "h": 150,
+     "label": "OE",
+     "kind": "neutral",
+     "sub": "D-Robotics 算法工具链",
+     "size": 40,
+     "sub_size": 20
+    },
+    {
+     "type": "box",
+     "id": "i1",
+     "x": 400,
+     "y": 60,
+     "w": 380,
+     "h": 120,
+     "label": "X5 镜像",
+     "kind": "neutral",
+     "sub": "CPU / GPU · v1.2.8",
+     "size": 30,
+     "sub_size": 20
+    },
+    {
+     "type": "box",
+     "id": "i2",
+     "x": 400,
+     "y": 220,
+     "w": 380,
+     "h": 120,
+     "label": "S 系列镜像",
+     "kind": "neutral",
+     "sub": "CPU / GPU · v3.7.0",
+     "size": 30,
+     "sub_size": 20
+    },
+    {
+     "type": "arrow",
+     "id": "o1",
+     "points": [
+      [
+       312,
+       240
+      ],
+      [
+       355,
+       240
+      ],
+      [
+       355,
+       120
+      ],
+      [
+       398,
+       120
+      ]
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "o2",
+     "points": [
+      [
+       312,
+       290
+      ],
+      [
+       355,
+       290
+      ],
+      [
+       355,
+       280
+      ],
+      [
+       398,
+       280
+      ]
+     ]
+    },
+    {
+     "type": "text",
+     "id": "tl",
+     "x": 590,
+     "y": 385,
+     "text": "镜像里已装好：hb_mapper · hb_compile · 依赖库",
+     "size": 22,
+     "anchor": "middle",
+     "color": "ink2"
+    },
+    {
+     "type": "box",
+     "id": "ct",
+     "x": 960,
+     "y": 100,
+     "w": 360,
+     "h": 170,
+     "label": "容器",
+     "kind": "bpu",
+     "sub": "docker run 启动",
+     "size": 36,
+     "sub_size": 24
+    },
+    {
+     "type": "arrow",
+     "id": "r1",
+     "points": [
+      [
+       782,
+       120
+      ],
+      [
+       870,
+       120
+      ],
+      [
+       870,
+       160
+      ],
+      [
+       958,
+       160
+      ]
+     ],
+     "label": "docker run",
+     "size": 22
+    },
+    {
+     "type": "arrow",
+     "id": "r2",
+     "points": [
+      [
+       782,
+       280
+      ],
+      [
+       870,
+       280
+      ],
+      [
+       870,
+       220
+      ],
+      [
+       958,
+       220
+      ]
+     ]
+    },
+    {
+     "type": "box",
+     "id": "wd",
+     "x": 960,
+     "y": 340,
+     "w": 360,
+     "h": 120,
+     "label": "工作目录",
+     "kind": "cpu",
+     "sub": "宿主机与容器同一路径",
+     "size": 30,
+     "sub_size": 20
+    },
+    {
+     "type": "arrow",
+     "id": "mt",
+     "points": [
+      [
+       1140,
+       340
+      ],
+      [
+       1140,
+       272
+      ]
+     ],
+     "label": "-v 挂载",
+     "size": 22,
+     "label_at": [
+      1215,
+      306
+     ]
+    },
+    {
+     "type": "token",
+     "id": "pk",
+     "x": 1140,
+     "y": 395,
+     "label": "产物",
+     "w": 120,
+     "h": 44,
+     "size": 22,
+     "kind": "light"
+    },
+    {
+     "type": "text",
+     "id": "rg",
+     "x": 590,
+     "y": 470,
+     "text": "S 系列镜像在 registry：拉取前先 docker login（自己的账号）",
+     "size": 22,
+     "anchor": "middle",
+     "color": "accent",
+     "weight": 700
+    }
+   ],
+   "steps": [
+    {
+     "at": 0,
+     "show": [
+      "oe"
+     ],
+     "on": [
+      "oe"
+     ],
+     "caption": "OE：D-Robotics 提供的算法工具链"
+    },
+    {
+     "at": 2000,
+     "show": [
+      "o1",
+      "o2",
+      "i1",
+      "i2"
+     ],
+     "focus": [
+      "oe",
+      "o1",
+      "o2",
+      "i1",
+      "i2"
+     ],
+     "caption": "不是要安装的软件，而是 Docker 镜像"
+    },
+    {
+     "at": 4000,
+     "show": [
+      "tl"
+     ],
+     "caption": "镜像里装好了转换用的全部工具"
+    },
+    {
+     "at": 6000,
+     "focus": [
+      "i1",
+      "i2"
+     ],
+     "on": [
+      "i1",
+      "i2"
+     ],
+     "caption": "每个系列都有 CPU 与 GPU 镜像，版本不同"
+    },
+    {
+     "at": 8000,
+     "focus": [
+      "i1",
+      "i2"
+     ],
+     "on": [
+      "i1",
+      "i2"
+     ],
+     "caption": "PTQ 用 CPU 镜像就够；有 GPU 可选加速"
+    },
+    {
+     "at": 10000,
+     "show": [
+      "r1",
+      "r2",
+      "ct"
+     ],
+     "focus": [
+      "i1",
+      "i2",
+      "r1",
+      "r2",
+      "ct"
+     ],
+     "on": [
+      "ct"
+     ],
+     "caption": "docker run 启动容器，进去执行命令"
+    },
+    {
+     "at": 12000,
+     "show": [
+      "wd",
+      "mt"
+     ],
+     "focus": [
+      "ct",
+      "mt",
+      "wd"
+     ],
+     "on": [
+      "wd"
+     ],
+     "caption": "工作目录挂进容器，路径与宿主机一致"
+    },
+    {
+     "at": 14000,
+     "show": [
+      "pk"
+     ],
+     "focus": [
+      "wd",
+      "pk"
+     ],
+     "caption": "产物写回工作目录，容器退出后还在"
+    },
+    {
+     "at": 16000,
+     "focus": null,
+     "show": [
+      "rg"
+     ],
+     "caption": "S 系列镜像在 registry，拉取前先 docker login"
+    }
+   ],
+   "notes": "OE，是 D-Robotics 提供的算法工具链。它不是一个要安装的软件，而是一个 Docker 镜像。镜像里，已经装好了转换用的全部工具。X5 和 S 系列，各有对应版本的镜像；同一系列还分 CPU 镜像和 GPU 镜像。单纯做 PTQ，用 CPU 镜像就能完成；有可用的 GPU 时，用 GPU 镜像可以加速。用的时候，用 docker run 启动容器，进到里面执行命令。我们的工作目录，挂载到容器里，路径和宿主机一样。编译出来的产物，直接写回这个目录，容器退出后还在。S 系列的镜像在 registry 上，拉取前要先用自己的账号 docker login。"
+  },
+  {
+   "layout": "code",
+   "title": "X5 的 OE",
+   "eyebrow": "Open OE · X5",
+   "heading": "X5：==打开 OE==",
+   "blocks": [
+    {
+     "label": "① 确认镜像在本地",
+     "lines": [
+      "$ docker image inspect local/rdk-x5-oe:v1.2.8-server",
+      {
+       "text": "→ sha256:4c01b83f…",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "要点",
+      "p": "镜像编号是它的唯一标识"
+     }
+    },
+    {
+     "label": "② 进容器看版本",
+     "lines": [
+      {
+       "text": "$ docker run --rm --entrypoint '' <X5 镜像> \\",
+       "hl": true
+      },
+      "  bash -c 'hb_mapper --version'",
+      {
+       "text": "→ hb_mapper 1.24.3",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "要点",
+      "p": "版本号要和后面的日志对得上"
+     }
+    },
+    {
+     "label": "③ 底层工具版本",
+     "lines": [
+      "  … bash -c 'pip list | grep -E \"hbdk|horizon\"'",
+      {
+       "text": "→ hbdk 3.49.15 · horizon-nn 1.1.0",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "要点",
+      "p": "参数含义下一页逐项讲"
+     }
+    }
+   ],
+   "notes": "先看 X5 的 OE。第一条命令，docker image inspect，确认镜像在本地。它是 local 开头的 v1.2.8 server 镜像。输出的第一段，是镜像的唯一编号，后面是创建时间。第二条命令，用 docker run 进容器，执行 hb_mapper 加 version。容器里打印出：hb_mapper 1.24.3。再用 pip list 筛一下：hbdk 3.49.15，horizon-nn 1.1.0。有了这些版本号，后面日志里的版本才能对得上。命令里的 rm、entrypoint 和 bash -c，下一页逐项讲。",
+   "lead": "实测 · 本课所用 X5 镜像：local/rdk-x5-oe:v1.2.8-server（路径、用户名已隐藏）。",
+   "dense": true
+  },
+  {
+   "layout": "code",
+   "title": "S100 的 OE",
+   "eyebrow": "Open OE · S100",
+   "heading": "S100：==打开 OE==",
+   "blocks": [
+    {
+     "label": "① 镜像（来自 registry）",
+     "lines": [
+      "$ docker image inspect \\",
+      "  registry.d-robotics.cc/deliver/ai_toolchain_ubuntu_22_s100_s600_gpu:v3.7.0"
+     ],
+     "note": {
+      "k": "要点",
+      "p": "本课演示 GPU 镜像；另有 …_cpu:v3.7.0；拉取要 docker login"
+     },
+     "wide": true
+    },
+    {
+     "label": "② hb_compile 没有 --version",
+     "lines": [
+      {
+       "text": "$ hb_compile --version",
+       "hl": true
+      },
+      {
+       "text": "→ Error: no such option: --version",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "要点",
+      "p": "真实输出：不是环境坏了"
+     }
+    },
+    {
+     "label": "③ 版本看 pip list",
+     "lines": [
+      "  pip list | grep -E \"horizon|hbdk|hmct\"",
+      {
+       "text": "→ horizon_tc_ui 3.5.3 · hbdk4 4.7.5 · hmct-gpu 2.6.5",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "要点",
+      "p": "编译日志开头会再打印一遍"
+     }
+    }
+   ],
+   "notes": "再看 S100 的镜像。它来自 registry 点 d-robotics 点 cc，名字里有 s100，版本 v3.7.0。本课演示用的是 GPU 镜像；同版本还有 CPU 镜像，做 PTQ 用 CPU 镜像就够。同样，先 docker image inspect，再进容器。这里有个坑：hb_compile 不支持 version 选项。命令返回 no such option，这是真实输出，不是我们把环境弄坏了。所以，版本要靠 pip list 来看。horizon_tc_ui 3.5.3，hbdk4 4.7.5，hmct-gpu 2.6.5。后面编译日志的开头，也会把这几个版本再打印一遍。",
+   "dense": true
+  },
+  {
+   "layout": "code",
+   "title": "docker run 参数",
+   "eyebrow": "docker run",
+   "heading": "docker run：==逐项看==",
+   "blocks": [
+    {
+     "label": "① 本课用的写法",
+     "lines": [
+      {
+       "text": "$ docker run --rm --entrypoint '' \\",
+       "hl": true
+      },
+      "  --user 1000:1000 --shm-size 15g \\",
+      "  -v $WORK:$WORK -w $WORK/x5 <镜像> \\",
+      "  bash -c '<命令>'"
+     ],
+     "note": {
+      "k": "要点",
+      "p": "有显卡时可加 --gpus all（可选加速）"
+     }
+    },
+    {
+     "label": "② 各参数的作用",
+     "lines": [
+      {
+       "text": "--rm 退出即删 · --user 产物归当前用户",
+       "out": true
+      },
+      {
+       "text": "--entrypoint '' 清掉默认入口 · --shm-size 共享内存",
+       "out": true
+      },
+      {
+       "text": "-v / -w  挂载并进入工作目录",
+       "out": true
+      },
+      {
+       "text": "--gpus all 有 NVIDIA 显卡时可选，不是 S 系列必需",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "要点",
+      "p": "路径在容器内外一致；亦可用 CPU 镜像"
+     }
+    },
+    {
+     "label": "③ 想交互式进入",
+     "lines": [
+      {
+       "text": "$ docker run -i -t … <镜像> bash",
+       "hl": true
+      },
+      {
+       "text": "i 保持输入 · t 分配终端",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "要点",
+      "p": "本课用一次性命令，日志更好保存"
+     }
+    }
+   ],
+   "notes": "把 docker run 的参数，逐项过一遍。rm：容器退出就删掉，不留垃圾。entrypoint 后面跟空串：清掉镜像的默认入口，不加会怎样，下一页就看到。user 1000 冒号 1000：用普通用户身份运行，产物就不会变成 root 的。shm-size 15g：给容器留足共享内存。v 参数：把工作目录挂进去，宿主机和容器里是同一个路径。w 参数：容器启动后，就在这个目录里。有 NVIDIA 显卡时，可以加 gpus all，把显卡交给容器做加速；这不是 S 系列必需的参数。同版本还有 CPU 镜像，做 PTQ 用 CPU 镜像就够，不必加 gpus all。最后的 bash -c，后面引号里，就是要执行的命令。想交互式进去敲命令？把 bash -c 和后面的命令，换成 bash，再加 i 和 t 两个参数。i 保持输入，t 分配终端，这样就像登录一台机器。这次录制用一次性命令，效果一样，日志也更好保存。",
+   "dense": true
+  },
+  {
+   "layout": "code",
+   "title": "报错 126",
+   "eyebrow": "Error 126",
+   "heading": "常见报错：==126==",
+   "blocks": [
+    {
+     "label": "① 不加 --entrypoint",
+     "lines": [
+      "$ docker run --rm <X5 镜像> bash -c 'hb_mapper checker …'",
+      {
+       "text": "/usr/bin/bash: cannot execute binary file",
+       "out": true
+      },
+      {
+       "text": "EXIT_CODE=126",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "要点",
+      "p": "默认入口把 bash 当成了参数"
+     }
+    },
+    {
+     "label": "② 加上 --entrypoint 空串",
+     "lines": [
+      {
+       "text": "$ docker run --rm --entrypoint '' <X5 镜像> …",
+       "hl": true
+      },
+      {
+       "text": "→ hb_mapper 开始打印版本 · EXIT_CODE=0",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "要点",
+      "p": "实测第一次尝试就踩到"
+     }
+    }
+   ],
+   "notes": "再看一个常见的错误。这是我们第一次尝试：命令里，没有加 entrypoint。结果，bash 报 cannot execute binary file，退出码 126。原因是镜像自带一个默认入口，我们的 bash 被当成参数交给了它。解决办法：加上 entrypoint 空串。再运行，就正常了：hb_mapper 开始打印版本，退出码 0。"
+  },
+  {
+   "layout": "section",
+   "title": "章节 03",
+   "num": "03",
+   "heading": "配环境",
+   "sub": "对照 conversion 目录，准备目录、YAML 和校准数据",
+   "notes": "第三部分：配环境。"
+  },
+  {
+   "layout": "code",
+   "title": "conversion 目录",
+   "eyebrow": "Conversion Dir",
+   "heading": "Model Zoo 仓库的==conversion 目录==",
+   "blocks": [
+    {
+     "label": "① 仓库版本",
+     "lines": [
+      "$ git rev-parse --short HEAD",
+      {
+       "text": "→ 7a97c17",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "要点",
+      "p": "内容均来自这个提交"
+     }
+    },
+    {
+     "label": "② samples/vision/resnet/",
+     "lines": [
+      "conversion/  evaluator/  model/  runtime/",
+      "test_data/  tests/  README.md  README_cn.md"
+     ],
+     "note": {
+      "k": "要点",
+      "p": "转换要用的，都在 conversion 里"
+     }
+    },
+    {
+     "label": "③ conversion/",
+     "lines": [
+      {
+       "text": "README_cn.md  README.md  export.py",
+       "hl": true
+      },
+      {
+       "text": "ptq_x5.yaml  ptq_s.yaml",
+       "hl": true
+      }
+     ],
+     "note": {
+      "k": "要点",
+      "p": "这些文件就是本课转换所用的 Sample"
+     }
+    }
+   ],
+   "notes": "配环境的第一步，打开 Model Zoo 仓库的 conversion 目录。先看仓库的版本：提交号 7a97c17。samples vision resnet 下面，有 conversion、evaluator、model、runtime，还有测试数据和测试。转换要用的，都在 conversion 里。里面五个文件：中文和英文两份 README，export.py，ptq_x5.yaml，ptq_s.yaml。中文 README 一共九节，从源模型一直讲到产物。目录结构、工具链、导出、校准、编译、转换后验证，这节课都会走一遍。这些文件，就是我们这节课转换所用的 Sample。",
+   "lead": "README_cn 共九节：源模型 · 目录结构 · 工具链与目标 · 导出 · 校准 · 编译 · 转换后验证 · 产物 · 补充准备。",
+   "dense": true
+  },
+  {
+   "layout": "code",
+   "title": "export.py",
+   "eyebrow": "export.py",
+   "heading": "==export.py==：十行入口",
+   "blocks": [
+    {
+     "label": "① 全部内容（节选）",
+     "lines": [
+      "from utils.tools.classification.workflow import main",
+      "if __name__ == \"__main__\":",
+      {
+       "text": "    main(default_family=\"resnet\", default_command=\"export\")",
+       "hl": true
+      }
+     ],
+     "note": {
+      "k": "要点",
+      "p": "没有自己的逻辑，引用共享 workflow"
+     }
+    },
+    {
+     "label": "② README 写明它会做什么",
+     "lines": [
+      {
+       "text": "校验权重哈希 · 严格加载 · 简化计算图",
+       "out": true
+      },
+      {
+       "text": "两张真实图片：logits、Top-5 与 PyTorch 对比",
+       "out": true
+      },
+      {
+       "text": "误差记入 export.json",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "要点",
+      "p": "检查点 → ONNX 已封装好"
+     }
+    }
+   ],
+   "notes": "先看 export.py，一共十行。它自己没有逻辑，只是引用共享的 workflow。最后一行：默认的命令是 export，也就是导出 ONNX。README 写明，它会校验权重的哈希，严格加载，再简化计算图。还会用两张真实图片，把 logits 和 Top-5 同 PyTorch 对比。对比的误差，记录在 export.json 里。也就是说，从检查点到 ONNX，这一步已经封装好了。"
+  },
+  {
+   "layout": "code",
+   "title": "ptq_x5.yaml",
+   "eyebrow": "ptq_x5.yaml",
+   "heading": "==ptq_x5.yaml==：X5 模板",
+   "blocks": [
+    {
+     "label": "① 文件头注释",
+     "lines": [
+      {
+       "text": "# 发布制品所用的编译参数",
+       "out": true
+      },
+      {
+       "text": "# 占位符：@WORK@ 工作目录 · @SIZE@ 输入尺寸",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "要点",
+      "p": "只有两个占位符"
+     }
+    },
+    {
+     "label": "② 占位符出现的位置",
+     "lines": [
+      {
+       "text": "onnx_model: @WORK@/export/model.onnx",
+       "hl": true
+      },
+      {
+       "text": "working_dir: @WORK@/x5/build",
+       "hl": true
+      },
+      {
+       "text": "input_shape: 1x3x@SIZE@x@SIZE@",
+       "hl": true
+      },
+      {
+       "text": "cal_data_dir: @WORK@/x5/calibration/data",
+       "hl": true
+      }
+     ],
+     "note": {
+      "k": "要点",
+      "p": "共 5 行含 @（含注释）"
+     }
+    },
+    {
+     "label": "③ 归一化",
+     "lines": [
+      "mean_value: 123.675 116.28 103.53",
+      "scale_value: 0.0171247538317 …"
+     ],
+     "note": {
+      "k": "要点",
+      "p": "均值 × 255；scale = 1 ÷ (255 × std)"
+     }
+    }
+   ],
+   "notes": "再看 ptq_x5.yaml，X5 的编译配置。开头的注释说得很清楚：这是发布制品所用的编译参数。只有 @WORK@ 和 @SIZE@ 两个占位符，需要我们替换。work 是工作目录，出现在模型路径、工作目录和校准数据目录里。size 是输入尺寸，出现在 input_shape 里。归一化已经编进模型：均值乘 255，缩放是 1 除以 255 乘标准差。其余字段，下一部分逐段讲。",
+   "lead": "Model Zoo 仓库 conversion 目录里的 X5 模板（31 行）。",
+   "dense": true
+  },
+  {
+   "layout": "table",
+   "title": "ptq_s.yaml",
+   "eyebrow": "ptq_s.yaml",
+   "heading": "==ptq_s.yaml== 与 X5 模板的差别",
+   "lead": "共用于 S100 / S100P / S600；占位符：@TARGET@ · @MARCH@ · @WORK@ · @SIZE@（46 行，对比 X5 的 31 行）。",
+   "head": [
+    {
+     "html": "字段",
+     "style": "width:300px"
+    },
+    "ptq_x5.yaml",
+    "ptq_s.yaml"
+   ],
+   "row_header": true,
+   "rows": [
+    [
+     "march",
+     "bayes-e（固定）",
+     {
+      "html": "@MARCH@：nash-e / m / p",
+      "cls": "hc"
+     }
+    ],
+    [
+     "默认值字段",
+     "—",
+     "debug_mode · output_nodes · remove_node_name …"
+    ],
+    [
+     "输入 / 量化",
+     "—",
+     "std_value · separate_batch · quant_config"
+    ],
+    [
+     "optimize_level",
+     "O3",
+     "O2"
+    ],
+    [
+     "input_source",
+     "data: pyramid",
+     "不写；改为 jobs / cache 一组"
+    ]
+   ],
+   "notes": "接着是 ptq_s.yaml，S 系列的配置。S100、S100P 和 S600，共用这一份。注释里列出四个占位符：@TARGET@、@MARCH@、@WORK@ 和 @SIZE@。target 是目标名，march 是 nash-e、nash-m 或 nash-p。用 diff 比较两份模板，差别一眼就能看到。第一，march 不同：X5 固定 bayes-e，S 系列由占位符决定。第二，S 系列多了一批默认值字段，比如 debug_mode、output_nodes。第三，S 系列多了 std_value、separate_batch，还有 quant_config。第四，优化级别：X5 是 O3，S 系列是 O2。第五，X5 有 input_source，S 系列没有，改成 jobs 和 cache 这一组。"
+  },
+  {
+   "layout": "code",
+   "title": "工作目录与导出",
+   "eyebrow": "Workdir & Export",
+   "heading": "工作目录与==导出 ONNX==",
+   "blocks": [
+    {
+     "label": "① 建工作目录（仓库外）",
+     "lines": [
+      "$ mkdir -p $WORK/x5 $WORK/s100"
+     ],
+     "note": {
+      "k": "要点",
+      "p": "中间文件不要写进 Sample"
+     }
+    },
+    {
+     "label": "② 取权重",
+     "lines": [
+      "$ python3 utils/tools/classification/workflow.py \\",
+      "  fetch --model resnet18 --output $WORK/weights"
+     ],
+     "note": {
+      "k": "要点",
+      "p": "model.safetensors 约 46.8 MB · 30.8 秒"
+     }
+    },
+    {
+     "label": "③ 导出",
+     "lines": [
+      "$ python3 samples/vision/resnet/conversion/export.py \\",
+      "  --model resnet18 --source-dir $WORK/weights \\",
+      "  --opset 11 --simplify",
+      {
+       "text": "→ model.onnx · sha256 280ee0b5…",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "要点",
+      "p": "与第一次导出的哈希相同"
+     }
+    }
+   ],
+   "notes": "动手。先建工作目录，放在仓库外面。x5 和 s100，各一个子目录。第二步，fetch：下载固定版本的权重，用了 30.8 秒。得到 model.safetensors，约 4680 万字节。第三步，export：加 opset 11，加 simplify。输出 model.onnx 和 export.json。再算一下 sha256：开头是 280ee0b5。和我们第一次导出的哈希完全相同，说明导出可以复现。",
+   "lead": "实测 · $WORK 是仓库外的工作目录（路径已隐藏）。",
+   "dense": true
+  },
+  {
+   "layout": "diagram",
+   "title": "校准数据",
+   "eyebrow": "Calibration Data",
+   "heading": "校准数据：==两种格式==",
+   "height": 560,
+   "scene": [
+    {
+     "type": "images",
+     "id": "imgs",
+     "x": 20,
+     "y": 100,
+     "n": 12,
+     "cols": 4,
+     "w": 70,
+     "h": 52,
+     "gap": 12
+    },
+    {
+     "type": "text",
+     "id": "imt",
+     "x": 178,
+     "y": 320,
+     "text": "200 张图（固定子集 · 示意）",
+     "size": 24,
+     "anchor": "middle",
+     "color": "ink2"
+    },
+    {
+     "type": "arrow",
+     "id": "d0",
+     "points": [
+      [
+       345,
+       190
+      ],
+      [
+       418,
+       190
+      ]
+     ]
+    },
+    {
+     "type": "box",
+     "id": "pre",
+     "x": 420,
+     "y": 100,
+     "w": 390,
+     "h": 180,
+     "label": "预处理",
+     "kind": "cpu",
+     "sub": "短边缩放 235 → 中心裁剪 224",
+     "size": 34,
+     "sub_size": 22
+    },
+    {
+     "type": "arrow",
+     "id": "o1",
+     "points": [
+      [
+       812,
+       190
+      ],
+      [
+       890,
+       190
+      ],
+      [
+       890,
+       120
+      ],
+      [
+       968,
+       120
+      ]
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "o2",
+     "points": [
+      [
+       812,
+       190
+      ],
+      [
+       890,
+       190
+      ],
+      [
+       890,
+       395
+      ],
+      [
+       968,
+       395
+      ]
+     ]
+    },
+    {
+     "type": "box",
+     "id": "x5d",
+     "x": 970,
+     "y": 40,
+     "w": 610,
+     "h": 160,
+     "label": "X5 · .rgb",
+     "kind": "neutral",
+     "sub": "原始 [0,255] RGB · float32",
+     "size": 34,
+     "sub_size": 22
+    },
+    {
+     "type": "text",
+     "id": "x5t",
+     "x": 970,
+     "y": 235,
+     "text": "602,112 字节 / 张 · 加载器再转 NV12",
+     "size": 22,
+     "anchor": "start",
+     "color": "ink2"
+    },
+    {
+     "type": "box",
+     "id": "s1d",
+     "x": 970,
+     "y": 315,
+     "w": 610,
+     "h": 160,
+     "label": "S100 · .npy",
+     "kind": "neutral",
+     "sub": "已按 ONNX 输入归一化 · float32",
+     "size": 34,
+     "sub_size": 22
+    },
+    {
+     "type": "text",
+     "id": "s1t",
+     "x": 970,
+     "y": 510,
+     "text": "602,240 字节 / 张（含 128 字节文件头）",
+     "size": 22,
+     "anchor": "start",
+     "color": "ink2"
+    }
+   ],
+   "steps": [
+    {
+     "at": 0,
+     "show": [
+      "imgs",
+      "imt"
+     ],
+     "caption": "校准数据：固定的 200 张图"
+    },
+    {
+     "at": 2200,
+     "show": [
+      "d0",
+      "pre"
+     ],
+     "focus": [
+      "imgs",
+      "d0",
+      "pre"
+     ],
+     "on": [
+      "pre"
+     ],
+     "caption": "先做预处理：短边缩放到 235，中心裁剪 224"
+    },
+    {
+     "at": 4600,
+     "show": [
+      "o1",
+      "x5d",
+      "x5t"
+     ],
+     "focus": [
+      "pre",
+      "o1",
+      "x5d",
+      "x5t"
+     ],
+     "on": [
+      "x5d"
+     ],
+     "caption": "X5：存原始 RGB，由加载器转成 NV12"
+    },
+    {
+     "at": 7000,
+     "show": [
+      "o2",
+      "s1d",
+      "s1t"
+     ],
+     "focus": [
+      "pre",
+      "o2",
+      "s1d",
+      "s1t"
+     ],
+     "on": [
+      "s1d"
+     ],
+     "caption": "S100：存已经归一化的 npy"
+    },
+    {
+     "at": 9400,
+     "focus": null,
+     "caption": "两个目标，两种格式：别用错"
+    }
+   ],
+   "notes": "再看校准数据。工具需要一批有代表性的输入。Sample 的配方是固定的 200 张图。短边先缩放到 235，再中心裁剪成 224。注意，两个目标写出的数据不一样。X5 存的是原始 0 到 255 的 RGB，由加载器再转成 NV12。每张 602,112 字节。S100 存的是已经按 ONNX 输入归一化好的 npy 文件。它每张多 128 字节的文件头。"
+  },
+  {
+   "layout": "cards",
+   "title": "校准要点",
+   "eyebrow": "Calibration Tips",
+   "heading": "校准==对齐部署==",
+   "lead": "本课校准图：Hugging Face 上 COCO 数据集的一个分片，固定抽 200 张；未与发布制品所用的校准图核对。",
+   "cols": 3,
+   "cards": [
+    {
+     "icon": "target",
+     "tone": "orange",
+     "title": "几何一致",
+     "text": "缩放、裁剪方式与运行时相同。"
+    },
+    {
+     "icon": "grid",
+     "tone": "blue",
+     "title": "颜色格式一致",
+     "text": "X5 先存 RGB，再由加载器转 NV12。"
+    },
+    {
+     "icon": "puzzle",
+     "tone": "green",
+     "title": "归一化位置一致",
+     "text": "X5 在模型内做；S100 的数据已归一化。"
+    }
+   ],
+   "notes": "校准数据有三个要点，都是和部署对齐。几何要一致：缩放和裁剪方式，与运行时相同。颜色格式要一致：X5 先是 RGB，再转 NV12。归一化的位置要一致。X5 的校准数据没有归一化，由模型内部做；S100 的已经归一化。对不上，量化参数就不准。另外，本课的校准图来自 Hugging Face 上 COCO 的一个分片。没有和发布制品的校准图核对。"
+  },
+  {
+   "layout": "code",
+   "title": "生成校准数据",
+   "eyebrow": "Calibration Data",
+   "heading": "生成==校准数据==",
+   "blocks": [
+    {
+     "label": "① X5：.rgb",
+     "lines": [
+      "$ python3 utils/tools/classification/workflow.py \\",
+      "  calibrate --model resnet18 --platform x5 …",
+      {
+       "text": "→ 200 个 .rgb · 602,112 字节 / 个 · 目录 115M",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "要点",
+      "p": "原始 RGB，float32"
+     }
+    },
+    {
+     "label": "② S100：.npy",
+     "lines": [
+      "$ … calibrate --model resnet18 --platform s100 …",
+      {
+       "text": "→ 200 个 .npy · 602,240 字节 / 个 · 目录 116M",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "要点",
+      "p": "多 128 字节文件头"
+     }
+    }
+   ],
+   "notes": "校准数据，用 workflow 的 calibrate 子命令生成。platform 写 x5，写的就是 X5 要的格式。输出 200 个 rgb 文件，每个 602,112 字节。platform 写 s100，写的是 npy 格式。同样 200 个文件，每个 602,240 字节，多出 128 字节的头。整个目录，X5 是 115M，S100 是 116M。",
+   "lead": "实测 · 其余参数（清单、图片目录、输出目录）略去。"
+  },
+  {
+   "layout": "code",
+   "title": "替换占位符",
+   "eyebrow": "Placeholders",
+   "heading": "把占位符==换成真实值==",
+   "blocks": [
+    {
+     "label": "① 找出占位符",
+     "lines": [
+      "$ grep -n '@' ptq_x5.yaml",
+      {
+       "text": "→ 第 3、6、8、15、22 行，共 5 行",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "要点",
+      "p": "第 3 行是注释"
+     }
+    },
+    {
+     "label": "② sed 替换",
+     "lines": [
+      {
+       "text": "$ sed -e \"s#@WORK@#$WORK#g\" -e \"s#@SIZE@#224#g\" ptq_x5.yaml \\",
+       "hl": true
+      },
+      "  > $WORK/x5/config.yaml",
+      {
+       "text": "S100 另换 @TARGET@ → s100，@MARCH@ → nash-e",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "要点",
+      "p": "注释里的占位符也会被换"
+     }
+    },
+    {
+     "label": "③ diff 前后",
+     "lines": [
+      "< input_shape: 1x3x@SIZE@x@SIZE@",
+      {
+       "text": "> input_shape: 1x3x224x224",
+       "hl": true
+      },
+      {
+       "text": "替换后，两份 config.yaml 里 @ 都是 0 个",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "要点",
+      "p": "路径与尺寸以外，一律不改"
+     }
+    }
+   ],
+   "notes": "接着，把占位符换成真实的值。先用 grep，找出 ptq_x5.yaml 里所有的 at 符号，一共五行。再用 sed 替换：work 换成工作目录，size 换成 224。diff 对比前后：路径变成真实路径，input_shape 变成 1x3x224x224。注意，第三行的注释也被换了，不影响使用。S100 多两个占位符：target 换成 s100，march 换成 nash-e。替换完，两个配置里的 at 符号都是零个。最后用 find 看整个工作目录：export、s100、weights、x5 四个分支。",
+   "lead": "$WORK 是工作目录，实测里是仓库外的一个路径（已隐藏）。",
+   "dense": true
+  },
+  {
+   "layout": "table",
+   "title": "模板与实际配置",
+   "eyebrow": "Template vs Used",
+   "heading": "模板 ==对照== 实际用的配置",
+   "lead": "只补了路径和尺寸；其余编译参数就是 Sample 固定的。",
+   "head": [
+    {
+     "html": "字段（X5）",
+     "style": "width:260px"
+    },
+    "Sample 模板",
+    "实际使用"
+   ],
+   "row_header": true,
+   "rows": [
+    [
+     "onnx_model",
+     "@WORK@/export/model.onnx",
+     {
+      "html": "/work/resnet-18/export/model.onnx",
+      "cls": "hc"
+     }
+    ],
+    [
+     "input_shape",
+     "1x3x@SIZE@x@SIZE@",
+     {
+      "html": "1x3x224x224",
+      "cls": "hc"
+     }
+    ],
+    [
+     "cal_data_dir",
+     "@WORK@/x5/calibration/data",
+     {
+      "html": "/work/resnet-18/x5/calibration/data",
+      "cls": "hc"
+     }
+    ],
+    [
+     "march · optimize_level",
+     "bayes-e · O3",
+     "bayes-e · O3（未改）"
+    ]
+   ],
+   "notes": "回头对比一下：Sample 里的模板，和我们实际用的配置。路径：模板是占位符，我们换成了真实的绝对路径。尺寸：size 换成 224。march、校准方法、优化级别、输入类型，一律不改。也就是说，编译参数就是 Sample 固定的，我们只补了路径和尺寸。所以这几个文件，就是我们这节课用的 Sample。"
+  },
+  {
+   "layout": "section",
+   "title": "章节 04",
+   "num": "04",
+   "heading": "YAML 与编译",
+   "sub": "逐段讲 YAML，再跑 checker、makertbin 和 hb_compile",
+   "notes": "第四部分：YAML 与编译。"
+  },
+  {
+   "layout": "code",
+   "title": "X5 YAML（上）",
+   "eyebrow": "X5 YAML · 1/2",
+   "heading": "X5 YAML：==模型与输入==",
+   "blocks": [
+    {
+     "label": "① model_parameters",
+     "lines": [
+      {
+       "text": "onnx_model: /work/resnet-18/export/model.onnx",
+       "hl": true
+      },
+      {
+       "text": "march: bayes-e",
+       "hl": true
+      },
+      "output_model_file_prefix: resnet_x5"
+     ],
+     "note": {
+      "k": "要点",
+      "p": "march 对应 X5 的 BPU"
+     }
+    },
+    {
+     "label": "② input_parameters",
+     "lines": [
+      "input_name: data  ·  input_layout_train: NCHW",
+      {
+       "text": "input_type_rt: nv12",
+       "hl": true
+      },
+      {
+       "text": "input_type_train: rgb",
+       "hl": true
+      },
+      "input_shape: 1x3x224x224"
+     ],
+     "note": {
+      "k": "要点",
+      "p": "颜色转换由工具编进模型"
+     }
+    },
+    {
+     "label": "③ 归一化",
+     "lines": [
+      "mean_value: 123.675 116.28 103.53",
+      "scale_value: 0.0171247538317 …",
+      "input_space_and_range: bt601_video"
+     ],
+     "note": {
+      "k": "要点",
+      "p": "均值 × 255；scale = 1 ÷ (255 × std)"
+     }
+    }
+   ],
+   "notes": "现在，把 X5 的 YAML 逐段讲一遍。第一段，model_parameters：模型本身。onnx_model 是导出的 model.onnx；march 是 bayes-e，对应 X5 的 BPU。working_dir 是产物输出目录；output_model_file_prefix 决定文件名前缀，这里是 resnet_x5。第二段，input_parameters：输入怎么处理。input_name 是 data，和 ONNX 的输入名一致。input_type_rt 是 nv12：板上给模型的是 NV12。input_type_train 是 rgb：训练时模型吃 RGB，转换由工具编进模型。input_shape 是 1x3x224x224，布局是 NCHW。norm_type 用 data_mean_and_scale：先减均值，再乘缩放。mean_value 是 ImageNet 均值乘 255；scale_value 是 1 除以 255 乘标准差。input_space_and_range 是 bt601_video，对应 NV12 的有限范围。",
+   "dense": true
+  },
+  {
+   "layout": "code",
+   "title": "X5 YAML（下）",
+   "eyebrow": "X5 YAML · 2/2",
+   "heading": "X5 YAML：==校准与编译==",
+   "blocks": [
+    {
+     "label": "④ calibration_parameters",
+     "lines": [
+      "cal_data_dir: /work/resnet-18/x5/calibration/data",
+      "cal_data_type: float32",
+      {
+       "text": "calibration_type: default",
+       "hl": true
+      },
+      "preprocess_on: false"
+     ],
+     "note": {
+      "k": "要点",
+      "p": "default = 自动搜索"
+     }
+    },
+    {
+     "label": "⑤ compiler_parameters",
+     "lines": [
+      {
+       "text": "optimize_level: O3",
+       "hl": true
+      },
+      "compile_mode: latency",
+      "core_num: 1",
+      "input_source:",
+      "  data: pyramid"
+     ],
+     "note": {
+      "k": "要点",
+      "p": "pyramid：输入来自板上的 NV12 通路"
+     }
+    }
+   ],
+   "notes": "第三段，calibration_parameters：校准。cal_data_dir，指向我们准备好的 200 个文件。cal_data_type 是 float32，和 rgb 文件对应。calibration_type 写 default，表示自动搜索，后面有动画讲。preprocess_on 是 false：数据已经准备好，不用工具再处理图片。第四段，compiler_parameters：编译。optimize_level 是 O3，数字越大，优化越多。compile_mode 是 latency，追求低延迟。core_num 是 1，只用一个核。input_source 里，data 设为 pyramid：输入来自板上的 NV12 图像通路。四段合起来，就是一份完整的转换配置。"
+  },
+  {
+   "layout": "diagram",
+   "title": "校准方法",
+   "eyebrow": "Calibration Search",
+   "heading": "default 是==自动搜索==",
+   "height": 560,
+   "scene": [
+    {
+     "type": "box",
+     "id": "c0",
+     "x": 20,
+     "y": 30,
+     "w": 520,
+     "h": 80,
+     "label": "calibration_type: max · kl",
+     "kind": "neutral",
+     "size": 24,
+     "mono": true,
+     "shadow": false
+    },
+    {
+     "type": "box",
+     "id": "c1",
+     "x": 20,
+     "y": 130,
+     "w": 520,
+     "h": 80,
+     "label": "max_percentile: 0.99995 · 1.0",
+     "kind": "neutral",
+     "size": 24,
+     "mono": true,
+     "shadow": false
+    },
+    {
+     "type": "box",
+     "id": "c2",
+     "x": 20,
+     "y": 230,
+     "w": 520,
+     "h": 80,
+     "label": "per_channel: True · False",
+     "kind": "neutral",
+     "size": 24,
+     "mono": true,
+     "shadow": false
+    },
+    {
+     "type": "box",
+     "id": "c3",
+     "x": 20,
+     "y": 330,
+     "w": 520,
+     "h": 80,
+     "label": "asymmetric: True · False",
+     "kind": "neutral",
+     "size": 24,
+     "mono": true,
+     "shadow": false
+    },
+    {
+     "type": "text",
+     "id": "ct",
+     "x": 280,
+     "y": 440,
+     "text": "候选组合",
+     "size": 24,
+     "anchor": "middle",
+     "color": "ink2"
+    },
+    {
+     "type": "text",
+     "id": "dflt",
+     "x": 800,
+     "y": 490,
+     "text": "calibration_type: default",
+     "size": 26,
+     "font": "mono",
+     "anchor": "middle",
+     "color": "accent",
+     "weight": 700
+    },
+    {
+     "type": "arrow",
+     "id": "s0",
+     "points": [
+      [
+       542,
+       200
+      ],
+      [
+       640,
+       200
+      ]
+     ]
+    },
+    {
+     "type": "box",
+     "id": "srch",
+     "x": 642,
+     "y": 110,
+     "w": 320,
+     "h": 180,
+     "label": "自动搜索",
+     "kind": "neutral",
+     "sub": "相似度 0.995",
+     "on": true,
+     "size": 34,
+     "sub_size": 24
+    },
+    {
+     "type": "arrow",
+     "id": "s1",
+     "points": [
+      [
+       964,
+       200
+      ],
+      [
+       1030,
+       200
+      ],
+      [
+       1030,
+       120
+      ],
+      [
+       1096,
+       120
+      ]
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "s2",
+     "points": [
+      [
+       964,
+       200
+      ],
+      [
+       1030,
+       200
+      ],
+      [
+       1030,
+       340
+      ],
+      [
+       1096,
+       340
+      ]
+     ]
+    },
+    {
+     "type": "box",
+     "id": "rx",
+     "x": 1098,
+     "y": 50,
+     "w": 480,
+     "h": 140,
+     "label": "X5 选中",
+     "kind": "neutral",
+     "sub": "max-percentile · 0.99995",
+     "on": true,
+     "size": 32,
+     "sub_size": 22
+    },
+    {
+     "type": "box",
+     "id": "rs",
+     "x": 1098,
+     "y": 270,
+     "w": 480,
+     "h": 140,
+     "label": "S100 选中",
+     "kind": "neutral",
+     "sub": "kl · num_bin 1024",
+     "on": true,
+     "size": 32,
+     "sub_size": 22
+    },
+    {
+     "type": "text",
+     "id": "foot",
+     "x": 800,
+     "y": 535,
+     "text": "同样的写法，两套工具链选的方法可以不同",
+     "size": 26,
+     "anchor": "middle",
+     "color": "accent",
+     "weight": 700
+    }
+   ],
+   "steps": [
+    {
+     "at": 0,
+     "show": [
+      "dflt"
+     ],
+     "on": [
+      "dflt"
+     ],
+     "caption": "calibration_type 写 default"
+    },
+    {
+     "at": 1200,
+     "show": [
+      "srch"
+     ],
+     "focus": [
+      "dflt",
+      "srch"
+     ],
+     "on": [
+      "srch"
+     ],
+     "caption": "不是不校准，而是自动搜索"
+    },
+    {
+     "at": 2400,
+     "show": [
+      "ct"
+     ],
+     "caption": "工具在一组候选里试"
+    },
+    {
+     "at": 3600,
+     "focus": [
+      "srch"
+     ],
+     "on": [
+      "srch"
+     ],
+     "caption": "目标：相似度 0.995"
+    },
+    {
+     "at": 4800,
+     "show": [
+      "s0",
+      "c0"
+     ],
+     "focus": [
+      "c0",
+      "s0",
+      "srch"
+     ],
+     "caption": "候选一：max 或 kl 两种方法"
+    },
+    {
+     "at": 6000,
+     "show": [
+      "c1"
+     ],
+     "focus": [
+      "c1",
+      "s0",
+      "srch"
+     ],
+     "caption": "候选二：百分位取 0.99995 或 1.0"
+    },
+    {
+     "at": 7200,
+     "show": [
+      "c2"
+     ],
+     "focus": [
+      "c2",
+      "s0",
+      "srch"
+     ],
+     "caption": "候选三：per_channel 试开关"
+    },
+    {
+     "at": 8400,
+     "show": [
+      "c3"
+     ],
+     "focus": [
+      "c3",
+      "s0",
+      "srch"
+     ],
+     "caption": "候选三：asymmetric 也试开关"
+    },
+    {
+     "at": 9600,
+     "show": [
+      "s1",
+      "rx"
+     ],
+     "focus": [
+      "srch",
+      "s1",
+      "rx"
+     ],
+     "on": [
+      "rx"
+     ],
+     "caption": "X5 选中 max-percentile，百分位 0.99995"
+    },
+    {
+     "at": 11000,
+     "show": [
+      "s2",
+      "rs"
+     ],
+     "focus": [
+      "srch",
+      "s2",
+      "rs"
+     ],
+     "on": [
+      "rs"
+     ],
+     "caption": "S100 选中 kl，num_bin 1024"
+    },
+    {
+     "at": 12400,
+     "focus": null,
+     "show": [
+      "foot"
+     ],
+     "caption": "同样的写法，选的方法可以不同"
+    }
+   ],
+   "notes": "yaml 里的 calibration_type 写 default。这不是什么都不做，而是自动搜索。工具在一组候选里试。目标相似度 0.995。候选一，max 或 kl 两种方法。候选二，百分位取 0.99995 或 1.0。候选三，per_channel 与 asymmetric 各试开关。结果不一样：X5 选了 max-percentile，百分位 0.99995。S100 选了 kl，num_bin 是 1024。同样的写法，选的方法可以不同。细节留给下一课。"
+  },
+  {
+   "layout": "table",
+   "title": "S100 YAML 差别",
+   "eyebrow": "S100 YAML",
+   "heading": "S100 的 YAML：==和 X5 差在哪==",
+   "lead": "实际使用的 S100 配置，与 X5 配置逐项对照。",
+   "head": [
+    {
+     "html": "字段",
+     "style": "width:330px"
+    },
+    "X5",
+    "S100"
+   ],
+   "row_header": true,
+   "rows": [
+    [
+     "march · 前缀",
+     "bayes-e · resnet_x5",
+     {
+      "html": "nash-e · resnet_s100",
+      "cls": "hc"
+     }
+    ],
+    [
+     "默认值字段 · jobs",
+     "无",
+     "debug_mode · output_nodes … 留空 · 16"
+    ],
+    [
+     "校准里的其余字段",
+     "preprocess_on: false",
+     "std_value '' · separate_batch false · quant_config {}"
+    ],
+    [
+     "optimize_level · input_source",
+     "O3 · data: pyramid",
+     "O2 · 不写"
+    ]
+   ],
+   "notes": "再看 S100 的 YAML，和 X5 的差别。march 是 nash-e，前缀是 resnet_s100。多了一些留空的字段：debug_mode、output_nodes、remove_node_name 等，用默认值就行。输入部分，多了 std_value 和 separate_batch，也取默认。校准部分没有 preprocess_on，换成 quant_config，留空。编译的优化级别是 O2，没有 input_source。多出 jobs，值是 16，控制并行度。S 系列的日志，会对几个字段给出弃用警告，稍后在日志里能看到。"
+  },
+  {
+   "layout": "code",
+   "title": "X5 checker",
+   "eyebrow": "Convert · checker",
+   "heading": "X5：==hb_mapper checker==",
+   "blocks": [
+    {
+     "label": "① 命令",
+     "lines": [
+      {
+       "text": "$ docker run --rm --entrypoint '' --user 1000:1000 --shm-size 15g \\",
+       "hl": true
+      },
+      "  -v $WORK:$WORK -w $WORK/x5 <X5 镜像> bash -c \\",
+      "  'hb_mapper checker --model-type onnx --march bayes-e \\",
+      "   --model $WORK/export/model.onnx --input-shape data 1x3x224x224'"
+     ],
+     "note": {
+      "k": "要点",
+      "p": "实测 5.7 秒"
+     },
+     "wide": true
+    },
+    {
+     "label": "② 日志看什么",
+     "lines": [
+      {
+       "text": "版本 → 输入 ONNX 信息 → 优化 → 校准 → 量化 → 编译",
+       "out": true
+      },
+      {
+       "text": "checker 只用 1 个样本、固定阈值；FPS 241.75 / 4136.5 µs 只是估算",
+       "out": true
+      },
+      {
+       "text": "节点表：卷积都在 BPU（int8），最后一个 Reshape 在 CPU",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "要点",
+      "p": "相似度一列是 --，checker 不算相似度"
+     }
+    }
+   ],
+   "notes": "配置就绪，开始编译。先跑 X5 的 checker。还是 docker run 进容器，后半段才是真正的命令：hb_mapper checker。model-type 写 onnx，march 写 bayes-e，再给模型路径和输入尺寸。回车之后，日志开始滚动。开头先打印版本：hbdk 3.49.15，horizon_nn 1.1.0，hb_mapper 1.24.3。然后是输入的 ONNX 信息：opset 11，输入 data，输出 logits。接着依次是：优化模型、校准、量化、编译，每一步都有开始和结束。checker 的校准只用 1 个样本，固定阈值，目的只是检查，所以不看相似度。编译这一步，会估一个性能：FPS 241.75，延迟 4136.5 微秒，只是估算。最后是节点表：每一层卷积都在 BPU 上，用 int8 计算。只有最后一个 reshape，落在 CPU 上。相似度一列是横线，checker 不算相似度。没有报错，退出码是 0，检查通过。",
+   "dense": true
+  },
+  {
+   "layout": "code",
+   "title": "X5 makertbin",
+   "eyebrow": "Convert · makertbin",
+   "heading": "X5：==hb_mapper makertbin==",
+   "blocks": [
+    {
+     "label": "① 命令",
+     "lines": [
+      {
+       "text": "$ docker run … <X5 镜像> bash -c \\",
+       "hl": true
+      },
+      "  'hb_mapper makertbin --config config.yaml --model-type onnx'"
+     ],
+     "note": {
+      "k": "要点",
+      "p": "校准 + 量化 + 编译"
+     }
+    },
+    {
+     "label": "② 日志分段",
+     "lines": [
+      {
+       "text": "版本 → 读校准数据（200 个，batch 8）→ 校准 → 量化 → 编译",
+       "out": true
+      },
+      {
+       "text": "选中 max-percentile，percentile=0.99995",
+       "out": true
+      },
+      {
+       "text": "编译估算 FPS 428.67 · 延迟 2332.8 µs（估算）",
+       "out": true
+      },
+      {
+       "text": "logits 余弦相似度 0.999941",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "要点",
+      "p": "等待的进度条会加速播放"
+     }
+    },
+    {
+     "label": "③ 结果",
+     "lines": [
+      {
+       "text": "Convert to runtime bin file successfully!",
+       "out": true
+      },
+      {
+       "text": "总共 32.8 秒 · 退出码 0 · resnet_x5.bin",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "要点",
+      "p": "耗时为实测"
+     }
+    }
+   ],
+   "notes": "checker 通过，接着 makertbin，真正的转换。命令前半段没变，后半段换成 hb_mapper makertbin，参数是 config.yaml。开头是版本，和 yaml 的检查。有一条警告：校准目录后缀和 cal_data_type 不一致，以参数为准，不用管。然后读校准数据：第一张图的名字和 md5，都会打印出来。接着，Horizon NN Model Convert，也就是前面讲的几个阶段。这一次，校准用 200 个样本，batch 是 8。校准配置和我们讲过的一样：max 和 kl，百分位，相似度 0.995。校准要几十秒，屏幕上是进度条，等待的部分我们加速播放。最后选中 max-percentile，百分位 0.99995。再是量化，然后编译：这一次，编译器估算的 FPS 是 428.67。接着是节点表和输出相似度：logits 的余弦相似度是 0.999941。最后，是模型信息的汇总，包括 march、输入类型、均值和缩放。最后一行：Convert to runtime bin file successfully，总共 32.8 秒，退出码 0。",
+   "dense": true
+  },
+  {
+   "layout": "code",
+   "title": "S100 这一步走 CPU",
+   "eyebrow": "PTQ · CPU",
+   "heading": "S100：==这一步走 CPU==",
+   "blocks": [
+    {
+     "label": "① 命令（加了 --gpus all）",
+     "lines": [
+      {
+       "text": "$ docker run --rm --entrypoint '' --gpus all … <S 系列镜像> \\",
+       "hl": true
+      },
+      "  bash -c 'hb_compile --config config.yaml'"
+     ],
+     "note": {
+      "k": "要点",
+      "p": "没有设置 CUDA_VISIBLE_DEVICES"
+     }
+    },
+    {
+     "label": "② 日志",
+     "lines": [
+      {
+       "text": "校准开始后，onnxruntime 报错：HzCalibration",
+       "out": true
+      },
+      {
+       "text": "ERROR-OCCUR-DURING hmct.api.build_model",
+       "out": true
+      },
+      {
+       "text": "退出码 255 · 没有产出 hbm",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "要点",
+      "p": "这台机器这一步没用上 GPU"
+     }
+    },
+    {
+     "label": "③ 强制 CPU 也能跑通",
+     "lines": [
+      {
+       "text": "-e CUDA_VISIBLE_DEVICES=-1",
+       "hl": true
+      },
+      {
+       "text": "强制走 CPU，完整跑通 · 说明 PTQ 不依赖 GPU",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "要点",
+      "p": "下一页再跑一遍；亦可用同版本 CPU 镜像"
+     }
+    }
+   ],
+   "notes": "再看 S100。先看一次没有强制走 CPU 时的日志。命令是 docker run 加 gpus all，里面是 hb_compile，参数是 config.yaml。前面的日志都正常：hbdk 4.7.5，hmct 2.6.5，hb_compile 3.5.3。校准数据 200 张，march 是 nash-e。到了校准这一步，onnxruntime 报错了，日志里是 ERROR。错误发生在 build_model 的时候，退出码 255，没有产出 hbm。这台机器这一步没用上 GPU。设环境变量 CUDA_VISIBLE_DEVICES 等于负一，强制走 CPU，也能完整跑通。这正好说明：PTQ 并不依赖 GPU。",
+   "dense": true
+  },
+  {
+   "layout": "code",
+   "title": "S100 hb_compile",
+   "eyebrow": "Convert · hb_compile",
+   "heading": "S100：==hb_compile 完整日志==",
+   "blocks": [
+    {
+     "label": "① 命令",
+     "lines": [
+      {
+       "text": "$ docker run --rm --entrypoint '' --gpus all \\",
+       "hl": true
+      },
+      {
+       "text": "  -e CUDA_VISIBLE_DEVICES=-1 … <S 系列镜像> \\",
+       "hl": true
+      },
+      "  bash -c 'hb_compile --config config.yaml'"
+     ],
+     "note": {
+      "k": "要点",
+      "p": "实测 217.5 秒"
+     }
+    },
+    {
+     "label": "② 日志分段",
+     "lines": [
+      {
+       "text": "版本 · yaml 校验 · 弃用警告 → 校准数据 200 张 → nash-e · opset 11 → 19",
+       "out": true
+      },
+      {
+       "text": "CUDA failure / EP Error：试 GPU 未成功后自动回退 CPU，14 次，不影响结果",
+       "out": true
+      },
+      {
+       "text": "选中 kl · num_bin 1024 → 量化 → 逐节点相似度表",
+       "out": true
+      },
+      {
+       "text": "compile model（约 170 秒，加速播放）→ Successfully compile the hbm model",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "要点",
+      "p": "估算 FPS 2430.87 · 延迟 411.4 µs"
+     }
+    },
+    {
+     "label": "③ 结果",
+     "lines": [
+      {
+       "text": "logits 相似度：Calibrated 0.999913 · Quantized 0.999856",
+       "out": true
+      },
+      {
+       "text": "输入 data_y + data_uv · 输出 logits · 退出码 0",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "要点",
+      "p": "resnet_s100.hbm"
+     }
+    }
+   ],
+   "notes": "设好 CUDA_VISIBLE_DEVICES 等于负一，再跑一遍。命令只多了这一个参数，其余和刚才一样。开头是版本，和 yaml 校验。警告有几条：norm_type 和 cal_data_type 已弃用，按 Sample 原样用就行。然后读校准数据：200 张，第一张的 md5 也会打印出来。接着是 Horizon NN Model Convert，march 是 nash-e。输入的 ONNX 是 opset 11，工具会把它转成 opset 19。再看校准配置：max 和 kl 两种方法，百分位 0.99995 和 1.0，目标相似度 0.995。校准开始。屏幕上出现大量 CUDA failure 和 EP Error。这是容器内试 GPU 未成功后，自动回退到 CPU 的提示，共 14 次。它们不影响结果，校准会继续往下走。校准完成，选中了 kl，num_bin 是 1024。接着量化，导出模型，再检查参数。然后是逐节点的相似度表：每一层校准后的余弦相似度，都在 0.98 以上。最后一张表是 logits：校准后 0.999913，量化后 0.999856。再进入 compile model，这一步最慢，实测约 170 秒，我们加速播放。出现 Successfully compile the hbm model，编译成功。编译器估算的 FPS 是 2430.87，也只是估算。最后打印模型信息：march 是 nash-e，还有各个部分的内存占用。输入有两个，data_y 和 data_uv，这就是 split NV12。输出是 logits。最后一行：hb_compile completes running，总共 217.5 秒，退出码 0。",
+   "dense": true
+  },
+  {
+   "layout": "section",
+   "title": "章节 05",
+   "num": "05",
+   "heading": "产物与验证",
+   "sub": "看产物，读相似度，回到 Sample 上板",
+   "notes": "第五部分：产物与验证。"
+  },
+  {
+   "layout": "code",
+   "title": "产物与 quant_info",
+   "eyebrow": "Artifacts",
+   "heading": "看==产物==与 quant_info",
+   "blocks": [
+    {
+     "label": "① X5 · build/",
+     "lines": [
+      {
+       "text": "resnet_x5.bin  11,081,570 字节  sha256 7f8fa575…",
+       "hl": true
+      },
+      "original / optimized / calibrated / quantized .onnx",
+      "resnet_x5_quant_info.json · main_graph_subgraph_0.html / .json"
+     ],
+     "note": {
+      "k": "要点",
+      "p": "每一步一份 onnx"
+     }
+    },
+    {
+     "label": "② S100 · build/",
+     "lines": [
+      {
+       "text": "resnet_s100.hbm  12,193,304 字节  sha256 a506767b…",
+       "hl": true
+      },
+      "resnet_s100_quantized_model.bc · advice / node_info .csv",
+      "resnet_s100_quant_info.json · hb_compile.log"
+     ],
+     "note": {
+      "k": "要点",
+      "p": "编译报告 html / json"
+     }
+    },
+    {
+     "label": "③ quant_info /fc/Gemm（共 50 条）",
+     "lines": [
+      "X5   thresholds 3.865509   cosine_similarity 0.999941",
+      "S100 thresholds 2.823619   cosine_similarity 0.999913"
+     ],
+     "note": {
+      "k": "要点",
+      "p": "两边口径不同，不比大小"
+     }
+    }
+   ],
+   "notes": "编译完，看产物。X5 的 build 目录里，resnet_x5.bin 是最终产物，11,081,570 字节。旁边几份 onnx，对应流程里的每一步：original、optimized、calibrated、quantized。quant_info.json 记录每个节点的量化信息，html 和 json 是编译报告。用 sha256 记下产物的指纹，bin 的开头是 7f8fa575。S100 的 build 目录里，resnet_s100.hbm，12,193,304 字节。还有 advice 和 node_info 两份 csv，一份 bc 文件，以及 hb_compile.log。hbm 的 sha256，开头是 a506767b。再打开 quant_info：每个节点一条，一共 50 条。看 fc 节点：thresholds 是 3.865509，cosine_similarity 是 0.999941。这个相似度，和日志里 logits 那一行一致。S100 同样：thresholds 是 2.823619，相似度 0.999913。两边的口径不同，不比大小。",
+   "dense": true
+  },
+  {
+   "layout": "diagram",
+   "title": "读相似度",
+   "eyebrow": "Cosine Similarity",
+   "heading": "相似度==怎么读==",
+   "height": 560,
+   "scene": [
+    {
+     "type": "text",
+     "id": "r1",
+     "x": 20,
+     "y": 40,
+     "text": "S100 · hb_compile 日志",
+     "size": 24,
+     "anchor": "start",
+     "color": "ink2"
+    },
+    {
+     "type": "box",
+     "id": "fl",
+     "x": 20,
+     "y": 70,
+     "w": 250,
+     "h": 110,
+     "label": "浮点模型",
+     "kind": "neutral",
+     "size": 30
+    },
+    {
+     "type": "box",
+     "id": "ca",
+     "x": 690,
+     "y": 70,
+     "w": 250,
+     "h": 110,
+     "label": "校准后模型",
+     "kind": "neutral",
+     "size": 30
+    },
+    {
+     "type": "box",
+     "id": "qt",
+     "x": 1330,
+     "y": 70,
+     "w": 250,
+     "h": 110,
+     "label": "量化模型",
+     "kind": "bpu",
+     "sub": "定点",
+     "size": 30,
+     "sub_size": 22
+    },
+    {
+     "type": "arrow",
+     "id": "c_a",
+     "points": [
+      [
+       272,
+       125
+      ],
+      [
+       688,
+       125
+      ]
+     ],
+     "label": "Calibrated 0.999913",
+     "size": 24,
+     "label_at": [
+      480,
+      102
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "c_q",
+     "points": [
+      [
+       145,
+       182
+      ],
+      [
+       145,
+       235
+      ],
+      [
+       1455,
+       235
+      ],
+      [
+       1455,
+       184
+      ]
+     ],
+     "label": "Quantized 0.999856",
+     "size": 24,
+     "label_at": [
+      800,
+      218
+     ]
+    },
+    {
+     "type": "text",
+     "id": "r2",
+     "x": 20,
+     "y": 300,
+     "text": "X5 · makertbin 日志",
+     "size": 24,
+     "anchor": "start",
+     "color": "ink2"
+    },
+    {
+     "type": "box",
+     "id": "fx",
+     "x": 20,
+     "y": 330,
+     "w": 250,
+     "h": 110,
+     "label": "浮点模型",
+     "kind": "neutral",
+     "size": 30
+    },
+    {
+     "type": "box",
+     "id": "qx",
+     "x": 1330,
+     "y": 330,
+     "w": 250,
+     "h": 110,
+     "label": "量化模型",
+     "kind": "bpu",
+     "sub": "定点",
+     "size": 30,
+     "sub_size": 22
+    },
+    {
+     "type": "arrow",
+     "id": "x_q",
+     "points": [
+      [
+       272,
+       385
+      ],
+      [
+       1328,
+       385
+      ]
+     ],
+     "label": "Cosine Similarity 0.999941",
+     "size": 24,
+     "label_at": [
+      800,
+      362
+     ]
+    },
+    {
+     "type": "text",
+     "id": "cmp",
+     "x": 800,
+     "y": 470,
+     "text": "两边口径不同，不要比谁更好",
+     "size": 26,
+     "anchor": "middle",
+     "color": "accent",
+     "weight": 700
+    },
+    {
+     "type": "text",
+     "id": "thr",
+     "x": 800,
+     "y": 520,
+     "text": "输出节点相似度低于 0.8，通常有明显精度损失 · 它只是参考，最终看任务精度",
+     "size": 24,
+     "anchor": "middle",
+     "color": "accent",
+     "weight": 700
+    }
+   ],
+   "steps": [
+    {
+     "at": 0,
+     "show": [
+      "r1",
+      "fl",
+      "ca",
+      "qt"
+     ],
+     "caption": "S100：浮点、校准后、量化后三个模型"
+    },
+    {
+     "at": 2000,
+     "show": [
+      "c_a"
+     ],
+     "focus": [
+      "fl",
+      "ca",
+      "c_a"
+     ],
+     "on": [
+      "ca"
+     ],
+     "caption": "Calibrated：浮点 对比 校准后，0.999913"
+    },
+    {
+     "at": 4200,
+     "show": [
+      "c_q"
+     ],
+     "focus": [
+      "fl",
+      "qt",
+      "c_q"
+     ],
+     "on": [
+      "qt"
+     ],
+     "caption": "Quantized：浮点 对比 量化定点，0.999856"
+    },
+    {
+     "at": 6600,
+     "show": [
+      "r2",
+      "fx",
+      "qx"
+     ],
+     "focus": [
+      "fx",
+      "qx",
+      "r2"
+     ],
+     "on": [
+      "qx"
+     ],
+     "caption": "X5：只有一列，浮点 对比 量化模型"
+    },
+    {
+     "at": 8400,
+     "show": [
+      "x_q"
+     ],
+     "focus": [
+      "fx",
+      "qx",
+      "x_q"
+     ],
+     "caption": "Cosine Similarity：0.999941"
+    },
+    {
+     "at": 10400,
+     "focus": null,
+     "show": [
+      "cmp"
+     ],
+     "caption": "两边口径不同，不要比谁更好"
+    },
+    {
+     "at": 12000,
+     "show": [
+      "thr"
+     ],
+     "caption": "低于 0.8 通常有明显精度损失；只作参考，最终看任务精度"
+    }
+   ],
+   "notes": "转换完先看相似度。S100 的日志有两列。Calibrated 是浮点模型和校准后模型的余弦，0.999913。Quantized 是浮点模型和量化后定点模型的余弦，0.999856。X5 只有一列。它是浮点和量化模型的余弦，0.999941。两边口径不同，不要比谁更好。输出节点相似度低于 0.8，通常有明显精度损失。它只是参考，最终要看任务精度。"
+  },
+  {
+   "layout": "table",
+   "title": "相似度实测",
+   "eyebrow": "Similarity",
+   "heading": "几个节点的==相似度==",
+   "lead": "实测 · 转换日志；两边口径不同，分开读，不比大小。",
+   "head": [
+    {
+     "html": "位置",
+     "style": "width:300px"
+    },
+    "X5 · Cosine",
+    "S100 · Calibrated / Quantized"
+   ],
+   "row_header": true,
+   "rows": [
+    [
+     "输出 logits",
+     "0.999941",
+     "0.999913 / 0.999856"
+    ],
+    [
+     "GlobalAveragePool",
+     "0.997738",
+     "0.997083 / 0.995166"
+    ],
+    [
+     "最低的节点",
+     "0.996568",
+     "— / 0.973402"
+    ]
+   ],
+   "notes": "再看节点。输出 logits，X5 是 0.999941，S100 的 Quantized 是 0.999856。GlobalAveragePool，X5 是 0.997738，S100 的 Quantized 是 0.995166。节点最低的，X5 是 0.996568。S100 的 Quantized 最低 0.973402，在最后一个残差块里。都远高于 0.8。"
+  },
+  {
+   "layout": "diagram",
+   "title": "上板验证",
+   "eyebrow": "Verify on Board",
+   "heading": "回到 Sample：==六步验证==",
+   "height": 560,
+   "scene": [
+    {
+     "type": "box",
+     "id": "v0",
+     "x": 20,
+     "y": 70,
+     "w": 230,
+     "h": 150,
+     "label": "① 重命名",
+     "kind": "neutral",
+     "sub": "只改文件名",
+     "size": 28,
+     "sub_size": 22
+    },
+    {
+     "type": "box",
+     "id": "v1",
+     "x": 286,
+     "y": 70,
+     "w": 230,
+     "h": 150,
+     "label": "② scp 上板",
+     "kind": "neutral",
+     "sub": "板上临时目录",
+     "size": 28,
+     "sub_size": 22
+    },
+    {
+     "type": "arrow",
+     "id": "w1",
+     "points": [
+      [
+       252,
+       145
+      ],
+      [
+       283,
+       145
+      ]
+     ]
+    },
+    {
+     "type": "box",
+     "id": "v2",
+     "x": 552,
+     "y": 70,
+     "w": 230,
+     "h": 150,
+     "label": "③ sha256",
+     "kind": "neutral",
+     "sub": "两块板都 OK",
+     "size": 28,
+     "sub_size": 22
+    },
+    {
+     "type": "arrow",
+     "id": "w2",
+     "points": [
+      [
+       518,
+       145
+      ],
+      [
+       549,
+       145
+      ]
+     ]
+    },
+    {
+     "type": "box",
+     "id": "v3",
+     "x": 818,
+     "y": 70,
+     "w": 230,
+     "h": 150,
+     "label": "④ model_info",
+     "kind": "neutral",
+     "sub": "看输入输出",
+     "size": 28,
+     "sub_size": 22
+    },
+    {
+     "type": "arrow",
+     "id": "w3",
+     "points": [
+      [
+       784,
+       145
+      ],
+      [
+       815,
+       145
+      ]
+     ]
+    },
+    {
+     "type": "box",
+     "id": "v4",
+     "x": 1084,
+     "y": 70,
+     "w": 230,
+     "h": 150,
+     "label": "⑤ main.py",
+     "kind": "neutral",
+     "sub": "读 Top-5",
+     "size": 28,
+     "sub_size": 22
+    },
+    {
+     "type": "arrow",
+     "id": "w4",
+     "points": [
+      [
+       1050,
+       145
+      ],
+      [
+       1081,
+       145
+      ]
+     ]
+    },
+    {
+     "type": "box",
+     "id": "v5",
+     "x": 1350,
+     "y": 70,
+     "w": 230,
+     "h": 150,
+     "label": "⑥ 对比",
+     "kind": "neutral",
+     "sub": "和发布制品",
+     "size": 28,
+     "sub_size": 22
+    },
+    {
+     "type": "arrow",
+     "id": "w5",
+     "points": [
+      [
+       1316,
+       145
+      ],
+      [
+       1347,
+       145
+      ]
+     ]
+    },
+    {
+     "type": "text",
+     "id": "n1",
+     "x": 800,
+     "y": 300,
+     "text": "resnet_x5.bin  →  resnet18_bayese_224x224_nv12.bin",
+     "size": 26,
+     "font": "mono",
+     "color": "ink2"
+    },
+    {
+     "type": "text",
+     "id": "n2",
+     "x": 800,
+     "y": 345,
+     "text": "resnet_s100.hbm  →  resnet18_nashe_224x224_nv12.hbm",
+     "size": 26,
+     "font": "mono",
+     "color": "ink2"
+    },
+    {
+     "type": "text",
+     "id": "n3",
+     "x": 800,
+     "y": 430,
+     "text": "model_info 里的模型名不变：自制 resnet_x5，发布制品 resnet18_224_x5",
+     "size": 26,
+     "anchor": "middle",
+     "color": "accent",
+     "weight": 700
+    }
+   ],
+   "steps": [
+    {
+     "at": 0,
+     "show": [
+      "v0"
+     ],
+     "on": [
+      "v0"
+     ],
+     "caption": "第一步：重命名成发布名称"
+    },
+    {
+     "at": 1600,
+     "show": [
+      "n1",
+      "n2"
+     ],
+     "focus": [
+      "v0",
+      "n1",
+      "n2"
+     ],
+     "caption": "只改文件名，两块板各一个"
+    },
+    {
+     "at": 3600,
+     "focus": null,
+     "show": [
+      "n3"
+     ],
+     "caption": "模型里记录的名字不变：自制 resnet_x5，发布制品 resnet18_224_x5"
+    },
+    {
+     "at": 5200,
+     "show": [
+      "w1",
+      "v1"
+     ],
+     "focus": [
+      "v1",
+      "w1"
+     ],
+     "on": [
+      "v1"
+     ],
+     "caption": "第二步：scp 到板上的临时目录"
+    },
+    {
+     "at": 6800,
+     "show": [
+      "w2",
+      "v2"
+     ],
+     "focus": [
+      "v2",
+      "w2"
+     ],
+     "on": [
+      "v2"
+     ],
+     "caption": "第三步：核对 sha256"
+    },
+    {
+     "at": 8400,
+     "show": [
+      "w3",
+      "v3"
+     ],
+     "focus": [
+      "v3",
+      "w3"
+     ],
+     "on": [
+      "v3"
+     ],
+     "caption": "第四步：model_info 看输入输出"
+    },
+    {
+     "at": 10000,
+     "show": [
+      "w4",
+      "v4"
+     ],
+     "focus": [
+      "v4",
+      "w4"
+     ],
+     "on": [
+      "v4"
+     ],
+     "caption": "第五步：main.py 读 Top-5"
+    },
+    {
+     "at": 11600,
+     "show": [
+      "w5",
+      "v5"
+     ],
+     "focus": [
+      "v5",
+      "w5"
+     ],
+     "on": [
+      "v5"
+     ],
+     "caption": "第六步：和发布制品对比"
+    }
+   ],
+   "notes": "产物回到 Sample，上板验证，一共六步。第一步，重命名成发布名称，只改文件名。模型里记录的名字不变：自制的模型名前缀是 resnet_x5，发布制品是 resnet18_224_x5。这个前缀是转换时自己指定的，所以和发布制品不同，不影响使用。第二步，用 scp 拷到板上的临时目录。第三步，核对 sha256，两块板都是 OK。第四步，model_info 看输入输出。第五步，main.py 读 Top-5。第六步，和发布制品对比。"
+  },
+  {
+   "layout": "code",
+   "title": "X5 验证",
+   "eyebrow": "Verify · X5",
+   "heading": "X5：自制产物==上板==",
+   "blocks": [
+    {
+     "label": "① 模型信息",
+     "lines": [
+      "$ hrt_model_exec model_info \\",
+      "  --model_file <自制产物>",
+      {
+       "text": "→ resnet_x5 · data · NV12 · (1,3,224,224)",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "要点",
+      "p": "--dry-run 显示输入协议：packed_nv12"
+     }
+    },
+    {
+     "label": "② 运行 main.py",
+     "lines": [
+      {
+       "text": "$ python3 samples/vision/resnet/runtime/python/main.py \\",
+       "hl": true
+      },
+      "  --target x5 --asset-id <ID> --model-path <自制 .bin>",
+      {
+       "text": "Rank 1: class=270, label=white wolf, …, score=0.997102",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "要点",
+      "p": "--test-img 与 --label-file 略去"
+     }
+    }
+   ],
+   "notes": "先看 X5。model_info：模型名 resnet_x5，输入 data，NV12，1、3、224、224，来源是 pyramid。模型名是自制的，前缀和发布制品的 resnet18_224_x5 不同。dry-run 显示 packed_nv12，输入结构和发布制品相同。运行 main.py，target 写 x5，换成自制的 bin。第一名 white wolf，分数 0.997102。",
+   "lead": "model_info 看输入；再用自制的 .bin 跑 main.py（--asset-id 沿用发布制品的 ID）。"
+  },
+  {
+   "layout": "code",
+   "title": "S100 验证",
+   "eyebrow": "Verify · S100",
+   "heading": "S100：自制产物==上板==",
+   "blocks": [
+    {
+     "label": "① 模型信息",
+     "lines": [
+      "$ hrt_model_exec model_info \\",
+      "  --model_file <自制产物>",
+      {
+       "text": "→ resnet_s100 · data_y + data_uv · U8",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "要点",
+      "p": "--dry-run 显示输入协议：split_nv12"
+     }
+    },
+    {
+     "label": "② 运行 main.py",
+     "lines": [
+      {
+       "text": "$ python3 samples/vision/resnet/runtime/python/main.py \\",
+       "hl": true
+      },
+      "  --target s100 --asset-id <ID> --model-path <自制 .hbm>",
+      {
+       "text": "Rank 1: class=270, label=white wolf, …, score=0.998149",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "要点",
+      "p": "只把 target 换成 s100"
+     }
+    }
+   ],
+   "notes": "再看 S100。model_info 里是两个输入：data_y 和 data_uv。Y 是 1、224、224、1，UV 是 1、112、112、2。dry-run 显示 split_nv12。运行 main.py，只把 target 换成 s100，换成自制的 hbm。第一名同样是 white wolf，分数 0.998149。模型名同样是自制的 resnet_s100，发布制品是 resnet18_224_s100。",
+   "lead": "同样的两步，只换 target、asset-id 和产物。"
+  },
+  {
+   "layout": "table",
+   "title": "对比发布制品",
+   "eyebrow": "Compare",
+   "heading": "自制 ==对比== 发布制品",
+   "lead": "实测 · X5U / S100，Top-1 分数；看 Top-1 和分数量级，不要求五个类别完全一致。",
+   "head": [
+    {
+     "html": "图 · 板",
+     "style": "width:260px"
+    },
+    "自制",
+    "发布制品",
+    "说明"
+   ],
+   "row_header": true,
+   "rows": [
+    [
+     "白狼 · X5",
+     {
+      "html": "0.997102",
+      "cls": "hc"
+     },
+     "0.998090",
+     "Top-5 类别与顺序全同"
+    ],
+    [
+     "白狼 · S100",
+     {
+      "html": "0.998149",
+      "cls": "hc"
+     },
+     "0.998109",
+     "前两名一致；第 3–5 名略有不同"
+    ],
+    [
+     "斑马 · X5",
+     {
+      "html": "0.999962",
+      "cls": "hc"
+     },
+     "0.999974",
+     "Top-1 都是 zebra"
+    ],
+    [
+     "斑马 · S100",
+     {
+      "html": "0.999976",
+      "cls": "hc"
+     },
+     "0.999971",
+     "Top-1 都是 zebra"
+    ]
+   ],
+   "notes": "和发布制品对一对。Top-1 都是 white wolf，斑马图也一样。X5 上，自制与发布制品的 Top-5 类别和顺序完全一致。S100 上，前两名与发布制品一致。第三到第五名分数都在万分之一量级，顺序和个别类别略有不同。白狼的 Top-1 分数，X5 自制 0.997102，发布制品 0.998090。S100 自制 0.998149，发布制品 0.998109。所以看 Top-1 和分数量级，不要求五个类别完全一致。"
+  },
+  {
+   "layout": "table",
+   "title": "板测速度",
+   "eyebrow": "Speed",
+   "heading": "板测==速度==",
+   "lead": "实测 · perf，200 帧，单线程；两块板各自实测，不做跨板比较。",
+   "head": [
+    {
+     "html": "板",
+     "style": "width:200px"
+    },
+    "自制 · 三次延迟 (ms)",
+    "自制 · FPS",
+    "发布制品"
+   ],
+   "row_header": true,
+   "rows": [
+    [
+     "X5U",
+     "3.108 · 3.066 · 3.118",
+     "320.4 · 325.0 · 319.6",
+     "3.112 ms · 320.1"
+    ],
+    [
+     "S100",
+     "0.638 · 0.630 · 0.630",
+     "1524 · 1543 · 1542",
+     "0.641 ms · 1514"
+    ]
+   ],
+   "notes": "再看速度，用 perf，200 帧，单线程。X5 上自制跑了三次，3.066 到 3.118 毫秒，发布制品是 3.112 毫秒。S100 上自制 0.630 到 0.638 毫秒，发布制品 0.641 毫秒。折合 X5 每秒约 320 帧，S100 每秒一千五百多帧。自制和发布制品相差不到百分之二。两块板各自实测，不做跨板比较。日志里编译器给的帧率只是估算。"
+  },
+  {
+   "layout": "diagram",
+   "title": "评估怎么测",
+   "eyebrow": "Evaluation Pipeline",
+   "heading": "评估==怎么测==",
+   "height": 560,
+   "scene": [
+    {
+     "type": "box",
+     "id": "e0",
+     "x": 25,
+     "y": 40,
+     "w": 270,
+     "h": 160,
+     "label": "1 数据",
+     "kind": "neutral",
+     "sub": "ImageNetV2",
+     "size": 32,
+     "sub_size": 22
+    },
+    {
+     "type": "text",
+     "id": "f0",
+     "x": 160,
+     "y": 232,
+     "text": "1 万张 · 1000 类",
+     "size": 22,
+     "anchor": "middle",
+     "color": "ink2"
+    },
+    {
+     "type": "box",
+     "id": "e1",
+     "x": 345,
+     "y": 40,
+     "w": 270,
+     "h": 160,
+     "label": "2 预处理",
+     "kind": "neutral",
+     "sub": "缩放 · 裁剪 224",
+     "size": 32,
+     "sub_size": 22
+    },
+    {
+     "type": "text",
+     "id": "f1",
+     "x": 480,
+     "y": 232,
+     "text": "两条路径同一规则",
+     "size": 22,
+     "anchor": "middle",
+     "color": "ink2"
+    },
+    {
+     "type": "arrow",
+     "id": "ea1",
+     "points": [
+      [
+       297,
+       120
+      ],
+      [
+       342,
+       120
+      ]
+     ]
+    },
+    {
+     "type": "box",
+     "id": "e2",
+     "x": 665,
+     "y": 40,
+     "w": 270,
+     "h": 160,
+     "label": "3 模型",
+     "kind": "neutral",
+     "sub": "FP32 或量化产物",
+     "size": 32,
+     "sub_size": 22
+    },
+    {
+     "type": "text",
+     "id": "f2",
+     "x": 800,
+     "y": 232,
+     "text": "输出 1000 个分数",
+     "size": 22,
+     "anchor": "middle",
+     "color": "ink2"
+    },
+    {
+     "type": "arrow",
+     "id": "ea2",
+     "points": [
+      [
+       617,
+       120
+      ],
+      [
+       662,
+       120
+      ]
+     ]
+    },
+    {
+     "type": "box",
+     "id": "e3",
+     "x": 985,
+     "y": 40,
+     "w": 270,
+     "h": 160,
+     "label": "4 取 Top-K",
+     "kind": "neutral",
+     "sub": "分数排序",
+     "size": 32,
+     "sub_size": 22
+    },
+    {
+     "type": "text",
+     "id": "f3",
+     "x": 1120,
+     "y": 232,
+     "text": "取前 5 名",
+     "size": 22,
+     "anchor": "middle",
+     "color": "ink2"
+    },
+    {
+     "type": "arrow",
+     "id": "ea3",
+     "points": [
+      [
+       937,
+       120
+      ],
+      [
+       982,
+       120
+      ]
+     ]
+    },
+    {
+     "type": "box",
+     "id": "e4",
+     "x": 1305,
+     "y": 40,
+     "w": 270,
+     "h": 160,
+     "label": "5 统计",
+     "kind": "neutral",
+     "sub": "Top-1 / Top-5",
+     "size": 32,
+     "sub_size": 22
+    },
+    {
+     "type": "text",
+     "id": "f4",
+     "x": 1440,
+     "y": 232,
+     "text": "正确张数 ÷ 总张数",
+     "size": 22,
+     "anchor": "middle",
+     "color": "ink2"
+    },
+    {
+     "type": "arrow",
+     "id": "ea4",
+     "points": [
+      [
+       1257,
+       120
+      ],
+      [
+       1302,
+       120
+      ]
+     ]
+    },
+    {
+     "type": "text",
+     "id": "nt",
+     "x": 160,
+     "y": 268,
+     "text": "不是 ILSVRC2012 val",
+     "size": 24,
+     "weight": 700,
+     "anchor": "middle",
+     "color": "red"
+    },
+    {
+     "type": "text",
+     "id": "def",
+     "x": 800,
+     "y": 322,
+     "text": "Top-1：第 1 名 = 标签　·　Top-5：标签在前 5 名里",
+     "size": 27,
+     "weight": 700,
+     "anchor": "middle",
+     "color": "blue"
+    },
+    {
+     "type": "box",
+     "id": "fp",
+     "x": 230,
+     "y": 380,
+     "w": 520,
+     "h": 110,
+     "label": "evaluate.py",
+     "kind": "cpu",
+     "sub": "电脑 · 浮点 ONNX",
+     "size": 30,
+     "sub_size": 22
+    },
+    {
+     "type": "box",
+     "id": "bd",
+     "x": 850,
+     "y": 380,
+     "w": 520,
+     "h": 110,
+     "label": "evaluate_board.py",
+     "kind": "bpu",
+     "sub": "板上 · .bin / .hbm",
+     "size": 30,
+     "sub_size": 22
+    }
+   ],
+   "steps": [
+    {
+     "at": 0,
+     "show": [
+      "e0",
+      "f0"
+     ],
+     "on": [
+      "e0"
+     ],
+     "caption": "数据：ImageNetV2 MatchedFrequency"
+    },
+    {
+     "at": 2000,
+     "show": [
+      "nt"
+     ],
+     "caption": "不是 ILSVRC2012 val，数字不能互相比"
+    },
+    {
+     "at": 4000,
+     "show": [
+      "ea1",
+      "e1",
+      "f1"
+     ],
+     "focus": [
+      "e1",
+      "f1",
+      "ea1"
+     ],
+     "on": [
+      "e1"
+     ],
+     "caption": "预处理：缩放、裁剪到 224"
+    },
+    {
+     "at": 6000,
+     "show": [
+      "ea2",
+      "e2",
+      "f2"
+     ],
+     "focus": [
+      "e2",
+      "f2",
+      "ea2"
+     ],
+     "on": [
+      "e2"
+     ],
+     "caption": "模型：输出 1000 个分数"
+    },
+    {
+     "at": 8000,
+     "show": [
+      "ea3",
+      "e3",
+      "f3"
+     ],
+     "focus": [
+      "e3",
+      "f3",
+      "ea3"
+     ],
+     "on": [
+      "e3"
+     ],
+     "caption": "Top-K：分数排序取前 5"
+    },
+    {
+     "at": 10000,
+     "show": [
+      "def"
+     ],
+     "focus": [
+      "e3",
+      "def"
+     ],
+     "caption": "Top-1：第 1 名是标签；Top-5：标签在前 5 名里"
+    },
+    {
+     "at": 12000,
+     "show": [
+      "ea4",
+      "e4",
+      "f4"
+     ],
+     "focus": [
+      "e4",
+      "f4",
+      "ea4"
+     ],
+     "on": [
+      "e4"
+     ],
+     "caption": "统计：Top-1 与 Top-5"
+    },
+    {
+     "at": 14000,
+     "focus": null,
+     "show": [
+      "fp"
+     ],
+     "on": [
+      "fp"
+     ],
+     "caption": "电脑上用 evaluate.py 评估浮点 ONNX"
+    },
+    {
+     "at": 16000,
+     "show": [
+      "bd"
+     ],
+     "on": [
+      "bd"
+     ],
+     "caption": "板上用 evaluate_board.py 评估 bin 或 hbm"
+    }
+   ],
+   "notes": "第五阶段，评估。评估就是在数据集上比精度，流水线五步：数据、预处理、模型、取前几名、统计。数据用 ImageNetV2 的 MatchedFrequency，一万张图，一千个类。注意，它不是 ILSVRC 2012 验证集，所以数字不能和那边互相比。预处理是缩放、裁剪到 224，两条路径同一规则。模型给出一千个分数，排序取前五名。第一名等于标签，算 Top-1 正确；标签在前五名里，算 Top-5 正确。统计就是正确张数占总张数的比例。电脑上用 evaluate.py 评估浮点 ONNX。板上用 evaluate_board.py 评估 bin 或 hbm。"
+  },
+  {
+   "layout": "code",
+   "title": "FP32 评估演示",
+   "eyebrow": "Evaluate · FP32",
+   "heading": "FP32 评估：==演示子集==",
+   "lead": "实测 · 200 张演示子集，不代表完整数据集；1834 张：Top-1 60.74% · Top-5 81.52%。其余参数略去。",
+   "blocks": [
+    {
+     "label": "① 电脑上评估（evaluate.py）",
+     "lines": [
+      {
+       "text": "$ python samples/vision/resnet/evaluator/evaluate.py \\",
+       "hl": true
+      },
+      "  --model resnet18 --manifest <清单> --expected-images 200 \\",
+      "  --export-dir <导出> --images-root <数据> --output <新目录>"
+     ],
+     "note": {
+      "k": "要点",
+      "p": "张数与清单不符报错；输出目录须是新的"
+     }
+    },
+    {
+     "label": "② 看结果（evaluation.json）",
+     "lines": [
+      "$ jq -c '.metrics, .correct' evaluation.json",
+      {
+       "text": "{\"top1\":0.625,\"top5\":0.835}",
+       "out": true
+      },
+      {
+       "text": "{\"top1\":125,\"top5\":167}",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "演示子集",
+      "p": "Top-1 62.5% · Top-5 83.5%；只覆盖 124 类"
+     }
+    }
+   ],
+   "notes": "先在电脑上演示一次浮点评估。评估清单是演示用的子集，不是完整数据集。这里只用 200 张，Top-1 是 62.5%，Top-5 是 83.5%。演示清单一共 1834 张。全跑一遍是 60.74% 和 81.52%。这些图只覆盖一部分类别。数字只演示怎么测，不代表完整数据集的精度。也不和 README 里的数字比较。命令有两道保护：张数和清单不符会报错，输出目录必须是新的。"
+  },
+  {
+   "layout": "code",
+   "title": "板端评估命令",
+   "eyebrow": "Evaluate · Board",
+   "heading": "板端评估：==真实运行==",
+   "dense": true,
+   "blocks": [
+    {
+     "label": "① X5 · .bin（板上运行）",
+     "lines": [
+      {
+       "text": "$ python3 .../evaluator/evaluate_board.py --target x5 --variant resnet18 \\",
+       "hl": true
+      },
+      "  --model own/resnet18_bayese_224x224_nv12.bin --model-sha256 7f8fa575…c3374a \\",
+      "  --campaign campaign.json --manifest manifest.json --data-root data --output x5_demo200",
+      {
+       "text": "{\"target\": \"x5\", \"count\": 200, \"top1\": 0.63, \"top5\": 0.84}",
+       "out": true
+      }
+     ],
+     "wide": true
+    },
+    {
+     "label": "② S100 · .hbm（换 target、模型、校验值、输出目录，其余同 X5）",
+     "lines": [
+      {
+       "text": "$ python3 .../evaluate_board.py --target s100 --model own/resnet18_nashe_…nv12.hbm …",
+       "hl": true
+      },
+      {
+       "text": "{\"target\": \"s100\", \"count\": 200, \"top1\": 0.635, \"top5\": 0.845}",
+       "out": true
+      }
+     ],
+     "wide": true
+    },
+    {
+     "label": "③ 三方对照：Top-1 / Top-5 / 逐张 Top-1 与 FP32 相同（200 张演示子集；只说明流程跑通）",
+     "lines": [
+      "FP32 (ONNX)      62.5%   83.5%   —",
+      {
+       "text": "X5   .bin        63.0%   84.0%   177 / 200",
+       "hl": true
+      },
+      {
+       "text": "S100 .hbm        63.5%   84.5%   182 / 200",
+       "hl": true
+      }
+     ],
+     "wide": true
+    }
+   ],
+   "notes": "板上评估用 evaluate_board.py，下面是 X5 和 S100 上的实际运行记录。先看 X5，model 参数是自制的 bin。model-sha256 保证评估的就是这个文件。campaign 提供预处理规则和张数，manifest 是图片清单。输出是一行 JSON：200 张，Top-1 是 63.0%，Top-5 是 84.0%。S100 把 target、模型文件、校验值和输出目录换掉，其余相同。它的结果是 Top-1 63.5%，Top-5 84.5%。把三个结果放在一起：浮点是 62.5% 和 83.5%。X5 是 63.0% 和 84.0%，S100 是 63.5% 和 84.5%。板端比浮点多对一到两张，在噪声范围内，不能说量化提升了精度。逐张看，Top-1 类别和浮点相同的，X5 有 177 张，S100 有 182 张。这是 200 张演示子集，不和 README 的数字比。这一页只说明一件事：流程跑通了。建议你课后动手：用同一份清单，分别跑浮点和板端，再对比两边的结果。"
+  },
+  {
+   "layout": "bullets",
+   "variant": "split",
+   "title": "五条规则",
+   "eyebrow": "Rules",
+   "heading": "转换==五条规则==",
+   "lead": "跑不通、对不上时，先查这五项。",
+   "items": [
+    {
+     "mark": "num",
+     "text": "镜像要加 --entrypoint ''"
+    },
+    {
+     "mark": "num",
+     "text": "PTQ 纯 CPU 即可；GPU 只是可选加速；日志 CUDA 提示可忽略"
+    },
+    {
+     "mark": "num",
+     "text": "校准预处理要与部署一致"
+    },
+    {
+     "mark": "num",
+     "text": "换板型要重新转（S100P 用 nash-m）"
+    },
+    {
+     "mark": "num",
+     "text": "验证看 Top-1 与分数量级"
+    }
+   ],
+   "notes": "最后说五条规则。第一，镜像要加 entrypoint 空串，否则报 126。第二，PTQ 纯 CPU 就能完成，GPU 只是可选加速；日志里的 CUDA 提示可忽略。第三，校准预处理要和部署一致。第四，产物按板型编译，换板型要重新转。S100P 要用 nash-m 另转一份。第五，验证看 Top-1 和分数量级。"
+  },
+  {
+   "layout": "bullets",
+   "variant": "numbered",
+   "title": "本课小结",
+   "eyebrow": "Summary",
+   "heading": "本课小结",
+   "items": [
+    "打开 OE：docker run 进容器，pip list 确认版本",
+    "配环境：conversion 目录 → 工作目录 → 导出 ONNX → 校准数据 → YAML 占位符",
+    "编译：X5 checker → makertbin；S100 hb_compile",
+    "看日志、产物与相似度，再放回 Sample 上板验证",
+    "200 张演示子集的数字只说明流程跑通；两块板 Top-1 都是 white wolf"
+   ],
+   "notes": "回顾这一课的操作。第一，打开 OE：docker run 进容器，用 pip list 确认版本。第二，配环境：对照 conversion 目录，建工作目录，导出 ONNX，准备校准数据，替换 YAML 占位符。第三，编译：X5 先 checker 再 makertbin，S100 一条 hb_compile。第四，看日志、产物和相似度，再放回 Sample 上板验证。这一课的数字来自 200 张演示子集，只说明流程跑通。产物在 X5 和 S100 上，Top-1 都是 white wolf。"
+  },
+  {
+   "layout": "closing",
+   "title": "下一课",
+   "eyebrow": "Up Next · Lesson 2-04",
+   "heading": "下一课：==YOLO 量化==",
+   "lead": "以 YOLO 为例：检测模型的输出头和分类不同，后处理放在哪；再讲校准方法、逐层 / 逐通道、int8 / int16 混合精度和精度排查。",
+   "cards": [
+    {
+     "icon": "grid",
+     "tone": "orange",
+     "k": "输出头不同",
+     "d": "检测与分类的输出结构"
+    },
+    {
+     "icon": "book-open",
+     "tone": "blue",
+     "k": "校准与精度",
+     "d": "逐层 / 逐通道、混合精度"
+    },
+    {
+     "icon": "rocket",
+     "tone": "green",
+     "k": "精度排查",
+     "d": "相似度低时怎么查"
+    }
+   ],
+   "full_logo": true,
+   "notes": "下一课，第二章第四课：以 YOLO 为例讲量化。检测模型的输出头和分类完全不同，后处理放在哪。再把校准方法、逐层和逐通道、int8 与 int16 混合精度，还有精度排查，一次讲完。"
+  }
+ ]
+}

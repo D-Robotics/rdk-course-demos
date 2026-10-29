@@ -83,6 +83,7 @@ plugins:
             Course overview: 课程介绍
             Meet the BPU: 认识 BPU
             Meet RDK Model Zoo: 认识 RDK Model Zoo
+            ResNet Quantization Hands-on: ResNet 量化实操
             03 · TROS: 03 · TROS
             04 · System & drivers: 04 · 系统与驱动
             05 · LLMs & embodied AI: 05 · 大模型与具身智能
@@ -171,6 +172,7 @@ nav:
       - Course overview: modelzoo/index.md
       - Meet the BPU: modelzoo/bpu-intro.md
       - Meet RDK Model Zoo: modelzoo/know-zoo-and-sample.md
+      - ResNet Quantization Hands-on: modelzoo/quantize-resnet.md
   - 03 · TROS:
       - Course overview: tros/index.md
   - 04 · System & drivers:
