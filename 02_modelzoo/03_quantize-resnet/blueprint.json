@@ -1,0 +1,4378 @@
+{
+ "meta": {
+  "title": "[RDK Classroom] Chapter 2 Model Zoo · Lesson 3 | ResNet Quantization Hands-on",
+  "lang": "en",
+  "mode": "deck",
+  "tag": "RDK Classroom 2-03",
+  "footer": "ResNet Quantization Hands-on",
+  "theme": {},
+  "logo_full": "d-robotics-logo-full-en.png"
+ },
+ "slides": [
+  {
+   "layout": "series-cover",
+   "chapter": 2,
+   "chapter_name": "Model Zoo",
+   "lesson": 3,
+   "title": "ResNet Quantization Hands-on",
+   "highlight": "Quantization",
+   "subtitle": "From opening the OE to on-board verification",
+   "visual": "assets/cover_wolf_vis.png",
+   "theme": "light",
+   "notes": "This is Lesson 3 of Chapter 2, Model Zoo: ResNet Quantization Hands-on. In the last lesson, we got a Sample running on the board, using a model that was already converted. In this lesson, we follow along and quantize ResNet-18 ourselves. We start by opening the OE, then set up the environment, write the YAML, compile, and read the complete logs. At the end, we put the artifacts back into the Sample and verify them on the board."
+  },
+  {
+   "layout": "cards",
+   "title": "Lesson Roadmap",
+   "eyebrow": "Roadmap",
+   "heading": "This lesson follows the ==order of operations==",
+   "lead": "Open the OE, set up the environment, compile, then check artifacts and verify on the board.",
+   "cols": 2,
+   "cards": [
+    {
+     "num": "01",
+     "title": "Open the OE",
+     "text": "What the OE is; from image to container."
+    },
+    {
+     "num": "02",
+     "title": "Set up the environment",
+     "text": "Working directory, YAML, calibration data."
+    },
+    {
+     "num": "03",
+     "title": "Compile",
+     "text": "X5 and S100, with complete logs."
+    },
+    {
+     "num": "04",
+     "title": "Artifacts and verification",
+     "text": "Similarity, board check, evaluation."
+    }
+   ],
+   "notes": "This lesson follows the order of the actual operations, in four steps. Step one, open the OE: what it is, and how to get from the image into the container. Step two, set up the environment: following the conversion directory, prepare the working directory, the YAML, and the calibration data. Step three, compile: we do the X5 and the S100 once each, and show you the complete logs. Step four, look at the artifacts and the similarity, then verify on the board and run an evaluation. Before we begin, let's spend a few minutes on the PTQ theory."
+  },
+  {
+   "layout": "links",
+   "title": "Resources",
+   "eyebrow": "Resources",
+   "heading": "Course Materials and Entry Points",
+   "items": [
+    {
+     "k": "RDK Model Zoo (main)",
+     "d": "The star of this lesson: the Sample and shared tools",
+     "url": "https://github.com/D-Robotics/rdk_model_zoo"
+    },
+    {
+     "k": "ResNet conversion recipe",
+     "d": "conversion directory: export, calibration, yaml",
+     "url": "https://github.com/D-Robotics/rdk_model_zoo/blob/main/samples/vision/resnet/conversion/README_cn.md"
+    },
+    {
+     "k": "S series: model quantization and compilation",
+     "d": "The hb_compile flow and similarity",
+     "url": "https://developer.d-robotics.cc/oe_s_doc/guide/ptq/ptq_usage/quantize_compile"
+    },
+    {
+     "k": "X5: PTQ conversion steps",
+     "d": "hb_mapper checker and makertbin",
+     "url": "https://developer.d-robotics.cc/oe_x5_doc/cn/oe_mapper/source/ptq/ptq_usage/ptq_usage.html"
+    }
+   ],
+   "notes": "First, let's get the materials ready. The star is still the Model Zoo repository. The ResNet conversion directory is this lesson's conversion recipe. The S series and the X5 each have a toolchain document, covering quantization and compilation, and explaining how to read the similarity. The addresses are on screen, and the versions are whatever the documentation says."
+  },
+  {
+   "layout": "section",
+   "title": "Chapter 01",
+   "num": "01",
+   "heading": "Theory Overview",
+   "sub": "Let us go through the PTQ theory first",
+   "notes": "Part one: let's go through the theory first."
+  },
+  {
+   "layout": "diagram",
+   "title": "Five PTQ Stages",
+   "eyebrow": "PTQ Pipeline",
+   "heading": "The ==five stages== of PTQ",
+   "height": 560,
+   "scene": [
+    {
+     "type": "band",
+     "id": "pc",
+     "x": 5,
+     "y": 70,
+     "w": 1270,
+     "h": 330,
+     "label": "On the computer",
+     "label_at": [
+      640,
+      56
+     ],
+     "anchor": "middle"
+    },
+    {
+     "type": "box",
+     "id": "s0",
+     "x": 25,
+     "y": 130,
+     "w": 270,
+     "h": 170,
+     "label": "1 Float model",
+     "kind": "neutral",
+     "sub": "fetch · export",
+     "size": 32,
+     "sub_size": 22
+    },
+    {
+     "type": "text",
+     "id": "u0",
+     "x": 160,
+     "y": 345,
+     "text": "Get model.onnx",
+     "size": 21,
+     "anchor": "middle",
+     "color": "ink2"
+    },
+    {
+     "type": "box",
+     "id": "s1",
+     "x": 345,
+     "y": 130,
+     "w": 270,
+     "h": 170,
+     "label": "2 Validation",
+     "kind": "neutral",
+     "sub": "vs. PyTorch",
+     "size": 32,
+     "sub_size": 22
+    },
+    {
+     "type": "text",
+     "id": "u1",
+     "x": 480,
+     "y": 345,
+     "text": "Then check the operators",
+     "size": 21,
+     "anchor": "middle",
+     "color": "ink2"
+    },
+    {
+     "type": "arrow",
+     "id": "a1",
+     "points": [
+      [
+       297,
+       215
+      ],
+      [
+       342,
+       215
+      ]
+     ]
+    },
+    {
+     "type": "box",
+     "id": "s2",
+     "x": 665,
+     "y": 130,
+     "w": 270,
+     "h": 170,
+     "label": "3 Calibration",
+     "kind": "neutral",
+     "sub": "calibrate",
+     "size": 32,
+     "sub_size": 22
+    },
+    {
+     "type": "text",
+     "id": "u2",
+     "x": 800,
+     "y": 345,
+     "text": "200 images · 235 → crop 224",
+     "size": 21,
+     "anchor": "middle",
+     "color": "ink2"
+    },
+    {
+     "type": "arrow",
+     "id": "a2",
+     "points": [
+      [
+       617,
+       215
+      ],
+      [
+       662,
+       215
+      ]
+     ]
+    },
+    {
+     "type": "box",
+     "id": "s3",
+     "x": 985,
+     "y": 130,
+     "w": 270,
+     "h": 170,
+     "label": "4 Quantize",
+     "kind": "neutral",
+     "sub": "and compile",
+     "size": 32,
+     "sub_size": 22
+    },
+    {
+     "type": "text",
+     "id": "u3",
+     "x": 1120,
+     "y": 345,
+     "text": ".bin (X5) · .hbm (S100)",
+     "size": 21,
+     "anchor": "middle",
+     "color": "ink2"
+    },
+    {
+     "type": "arrow",
+     "id": "a3",
+     "points": [
+      [
+       937,
+       215
+      ],
+      [
+       982,
+       215
+      ]
+     ]
+    },
+    {
+     "type": "box",
+     "id": "s4",
+     "x": 1305,
+     "y": 130,
+     "w": 270,
+     "h": 170,
+     "label": "5 Evaluation",
+     "kind": "neutral",
+     "sub": "evaluator",
+     "size": 32,
+     "sub_size": 22
+    },
+    {
+     "type": "text",
+     "id": "u4",
+     "x": 1440,
+     "y": 345,
+     "text": "Demo · how to measure",
+     "size": 21,
+     "anchor": "middle",
+     "color": "ink2"
+    },
+    {
+     "type": "arrow",
+     "id": "a4",
+     "points": [
+      [
+       1257,
+       215
+      ],
+      [
+       1302,
+       215
+      ]
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "track",
+     "points": [
+      [
+       60,
+       470
+      ],
+      [
+       1540,
+       470
+      ]
+     ],
+     "mode": "flow",
+     "head": true
+    },
+    {
+     "type": "token",
+     "id": "tk",
+     "x": 160,
+     "y": 470,
+     "label": "PyTorch",
+     "w": 150,
+     "h": 44,
+     "size": 22,
+     "kind": "light"
+    },
+    {
+     "type": "text",
+     "id": "foot",
+     "x": 800,
+     "y": 530,
+     "text": "A reliable float model comes first, then quantization",
+     "size": 28,
+     "weight": 700,
+     "anchor": "middle",
+     "color": "accent"
+    }
+   ],
+   "steps": [
+    {
+     "at": 0,
+     "show": [
+      "pc",
+      "s0",
+      "u0",
+      "track",
+      "tk"
+     ],
+     "on": [
+      "s0"
+     ],
+     "caption": "Stage 1: the float model, exported to ONNX"
+    },
+    {
+     "at": 2200,
+     "show": [
+      "a1",
+      "s1",
+      "u1"
+     ],
+     "focus": [
+      "s1",
+      "u1",
+      "a1",
+      "track",
+      "tk"
+     ],
+     "on": [
+      "s1"
+     ],
+     "move": [
+      {
+       "id": "tk",
+       "path": [
+        [
+         160,
+         470
+        ],
+        [
+         480,
+         470
+        ]
+       ]
+      }
+     ],
+     "text": {
+      "tk": "ONNX"
+     },
+     "caption": "Stage 2: validation, compared with PyTorch"
+    },
+    {
+     "at": 4400,
+     "show": [
+      "a2",
+      "s2",
+      "u2"
+     ],
+     "focus": [
+      "s2",
+      "u2",
+      "a2",
+      "track",
+      "tk"
+     ],
+     "on": [
+      "s2"
+     ],
+     "move": [
+      {
+       "id": "tk",
+       "path": [
+        [
+         480,
+         470
+        ],
+        [
+         800,
+         470
+        ]
+       ]
+      }
+     ],
+     "text": {
+      "tk": "Calib images"
+     },
+     "caption": "Stage 3: prepare the calibration data"
+    },
+    {
+     "at": 6600,
+     "show": [
+      "a3",
+      "s3",
+      "u3"
+     ],
+     "focus": [
+      "s3",
+      "u3",
+      "a3",
+      "track",
+      "tk"
+     ],
+     "on": [
+      "s3"
+     ],
+     "move": [
+      {
+       "id": "tk",
+       "path": [
+        [
+         800,
+         470
+        ],
+        [
+         1120,
+         470
+        ]
+       ]
+      }
+     ],
+     "text": {
+      "tk": "Artifacts"
+     },
+     "caption": "Stage 4: quantize and compile, once each for X5 and S100"
+    },
+    {
+     "at": 8800,
+     "show": [
+      "a4",
+      "s4",
+      "u4"
+     ],
+     "focus": [
+      "s4",
+      "u4",
+      "a4",
+      "track",
+      "tk"
+     ],
+     "on": [
+      "s4"
+     ],
+     "move": [
+      {
+       "id": "tk",
+       "path": [
+        [
+         1120,
+         470
+        ],
+        [
+         1440,
+         470
+        ]
+       ]
+      }
+     ],
+     "text": {
+      "tk": "Top-5"
+     },
+     "caption": "Stage 5: evaluate accuracy, a demo of how to measure"
+    },
+    {
+     "at": 11000,
+     "focus": null,
+     "show": [
+      "foot"
+     ],
+     "caption": "Five PTQ stages: from the float model to on-board verification"
+    }
+   ],
+   "notes": "PTQ, post-training quantization, has five stages. One, the float model: take the weights and export them to ONNX. Two, validation: compare against PyTorch, then check the operators. Three, calibration data: prepare a batch of representative inputs. Four, quantize and compile: calibrate, quantize, and compile, once for each of the two toolchains. Five, evaluation: compare accuracy on a dataset. In this lesson, we do stage four by hand, then come back to validation and evaluation."
+  },
+  {
+   "layout": "diagram",
+   "title": "Input Compiled In",
+   "eyebrow": "Input Pipeline",
+   "heading": "Preprocessing is ==compiled into the model==",
+   "height": 560,
+   "scene": [
+    {
+     "type": "box",
+     "id": "cam",
+     "x": 20,
+     "y": 190,
+     "w": 260,
+     "h": 140,
+     "label": "NV12 input",
+     "kind": "cpu",
+     "sub": "from the board CPU",
+     "size": 30,
+     "sub_size": 22
+    },
+    {
+     "type": "arrow",
+     "id": "b0",
+     "points": [
+      [
+       282,
+       260
+      ],
+      [
+       348,
+       260
+      ]
+     ]
+    },
+    {
+     "type": "band",
+     "id": "inm",
+     "x": 330,
+     "y": 125,
+     "w": 950,
+     "h": 290,
+     "label": "Inside the model (schematic)",
+     "label_at": [
+      805,
+      105
+     ],
+     "anchor": "middle"
+    },
+    {
+     "type": "box",
+     "id": "m1",
+     "x": 360,
+     "y": 190,
+     "w": 270,
+     "h": 140,
+     "label": "NV12 → RGB",
+     "kind": "bpu",
+     "sub": "color conversion",
+     "size": 28,
+     "sub_size": 22
+    },
+    {
+     "type": "box",
+     "id": "m2",
+     "x": 690,
+     "y": 190,
+     "w": 270,
+     "h": 140,
+     "label": "mean · × scale",
+     "kind": "bpu",
+     "sub": "normalization",
+     "size": 26,
+     "sub_size": 22
+    },
+    {
+     "type": "box",
+     "id": "m3",
+     "x": 1020,
+     "y": 190,
+     "w": 230,
+     "h": 140,
+     "label": "INT8 network",
+     "kind": "bpu",
+     "sub": "ResNet-18",
+     "size": 28,
+     "sub_size": 22
+    },
+    {
+     "type": "arrow",
+     "id": "b1",
+     "points": [
+      [
+       632,
+       260
+      ],
+      [
+       688,
+       260
+      ]
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "b2",
+     "points": [
+      [
+       962,
+       260
+      ],
+      [
+       1018,
+       260
+      ]
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "b3",
+     "points": [
+      [
+       1282,
+       260
+      ],
+      [
+       1338,
+       260
+      ]
+     ]
+    },
+    {
+     "type": "box",
+     "id": "out",
+     "x": 1340,
+     "y": 190,
+     "w": 240,
+     "h": 140,
+     "label": "logits",
+     "kind": "cpu",
+     "sub": "CPU Top-K",
+     "size": 30,
+     "sub_size": 22
+    },
+    {
+     "type": "text",
+     "id": "y1",
+     "x": 800,
+     "y": 470,
+     "text": "yaml: input_type_rt: nv12  ·  input_type_train: rgb",
+     "size": 24,
+     "font": "mono",
+     "color": "ink2"
+    },
+    {
+     "type": "text",
+     "id": "y2",
+     "x": 800,
+     "y": 515,
+     "text": "mean = mean × 255  ·  scale = 1 ÷ (255 × std)",
+     "size": 24,
+     "font": "mono",
+     "color": "ink2"
+    }
+   ],
+   "steps": [
+    {
+     "at": 0,
+     "show": [
+      "cam"
+     ],
+     "caption": "What the board feeds the model is NV12"
+    },
+    {
+     "at": 1800,
+     "show": [
+      "inm",
+      "b0",
+      "m1"
+     ],
+     "focus": [
+      "cam",
+      "b0",
+      "m1",
+      "inm"
+     ],
+     "on": [
+      "m1"
+     ],
+     "caption": "Color conversion: NV12 to the RGB used in training"
+    },
+    {
+     "at": 3800,
+     "show": [
+      "b1",
+      "m2"
+     ],
+     "focus": [
+      "m1",
+      "b1",
+      "m2",
+      "inm"
+     ],
+     "on": [
+      "m2"
+     ],
+     "caption": "Normalization: subtract the mean, multiply by scale"
+    },
+    {
+     "at": 5800,
+     "focus": null,
+     "show": [
+      "y1"
+     ],
+     "caption": "All of this is compiled into the model at conversion; the input type is set in the yaml"
+    },
+    {
+     "at": 7800,
+     "show": [
+      "y2"
+     ],
+     "caption": "The mean and scale in the yaml are exactly for this"
+    },
+    {
+     "at": 9800,
+     "show": [
+      "b2",
+      "m3",
+      "b3",
+      "out"
+     ],
+     "focus": [
+      "m2",
+      "b2",
+      "m3",
+      "b3",
+      "out"
+     ],
+     "on": [
+      "m3"
+     ],
+     "caption": "The second job: optimize, quantize, and compile into an INT8 model"
+    }
+   ],
+   "notes": "Conversion has to solve two things. First, how the input is handled. The board feeds the model NV12, while during training the model took RGB. Color conversion, subtracting the mean, and multiplying by a scale factor are not done on the board. Instead, they are compiled into the model at conversion time, which is exactly what mean and scale in the yaml are for. Second, optimize, quantize, and compile the model into an INT8 model that the BPU can run."
+  },
+  {
+   "layout": "diagram",
+   "title": "Two Toolchains",
+   "eyebrow": "Toolchains",
+   "heading": "One ONNX, ==two toolchains==",
+   "height": 560,
+   "scene": [
+    {
+     "type": "box",
+     "id": "onnx",
+     "x": 20,
+     "y": 180,
+     "w": 210,
+     "h": 130,
+     "label": "model.onnx",
+     "kind": "neutral",
+     "size": 26,
+     "mono": true
+    },
+    {
+     "type": "box",
+     "id": "i1",
+     "x": 300,
+     "y": 60,
+     "w": 420,
+     "h": 130,
+     "label": "X5 OE image",
+     "kind": "neutral",
+     "sub": "local/rdk-x5-oe:v1.2.8-server",
+     "size": 30,
+     "sub_size": 19
+    },
+    {
+     "type": "box",
+     "id": "t1",
+     "x": 770,
+     "y": 60,
+     "w": 400,
+     "h": 130,
+     "label": "hb_mapper",
+     "kind": "neutral",
+     "sub": "checker + makertbin",
+     "size": 30,
+     "sub_size": 22,
+     "mono": true
+    },
+    {
+     "type": "box",
+     "id": "r1",
+     "x": 1230,
+     "y": 60,
+     "w": 350,
+     "h": 130,
+     "label": ".bin",
+     "kind": "bpu",
+     "sub": "bayes-e · packed NV12",
+     "size": 34,
+     "sub_size": 21
+    },
+    {
+     "type": "box",
+     "id": "i2",
+     "x": 300,
+     "y": 300,
+     "w": 420,
+     "h": 130,
+     "label": "S series OE image",
+     "kind": "neutral",
+     "sub": "ai_toolchain_ubuntu_22…:v3.7.0",
+     "size": 30,
+     "sub_size": 19
+    },
+    {
+     "type": "box",
+     "id": "t2",
+     "x": 770,
+     "y": 300,
+     "w": 400,
+     "h": 130,
+     "label": "hb_compile",
+     "kind": "neutral",
+     "sub": "one command",
+     "size": 30,
+     "sub_size": 22,
+     "mono": true
+    },
+    {
+     "type": "box",
+     "id": "r2",
+     "x": 1230,
+     "y": 300,
+     "w": 350,
+     "h": 130,
+     "label": ".hbm",
+     "kind": "bpu",
+     "sub": "nash-e · split NV12",
+     "size": 34,
+     "sub_size": 21
+    },
+    {
+     "type": "arrow",
+     "id": "f1",
+     "points": [
+      [
+       232,
+       245
+      ],
+      [
+       265,
+       245
+      ],
+      [
+       265,
+       125
+      ],
+      [
+       298,
+       125
+      ]
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "f2",
+     "points": [
+      [
+       232,
+       245
+      ],
+      [
+       265,
+       245
+      ],
+      [
+       265,
+       365
+      ],
+      [
+       298,
+       365
+      ]
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "c1",
+     "points": [
+      [
+       722,
+       125
+      ],
+      [
+       768,
+       125
+      ]
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "c2",
+     "points": [
+      [
+       1172,
+       125
+      ],
+      [
+       1228,
+       125
+      ]
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "d1",
+     "points": [
+      [
+       722,
+       365
+      ],
+      [
+       768,
+       365
+      ]
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "d2",
+     "points": [
+      [
+       1172,
+       365
+      ],
+      [
+       1228,
+       365
+      ]
+     ]
+    },
+    {
+     "type": "text",
+     "id": "lb1",
+     "x": 300,
+     "y": 225,
+     "text": "X5 (Bayes-e)",
+     "size": 24,
+     "anchor": "start",
+     "color": "ink2"
+    },
+    {
+     "type": "text",
+     "id": "lb2",
+     "x": 300,
+     "y": 465,
+     "text": "S100 (Nash-e)",
+     "size": 24,
+     "anchor": "start",
+     "color": "ink2"
+    },
+    {
+     "type": "text",
+     "id": "foot",
+     "x": 800,
+     "y": 525,
+     "text": "S100P (nash-m) · S600 (nash-p): same tool, same yaml; only mentioned in text in this lesson",
+     "size": 24,
+     "anchor": "middle",
+     "color": "ink3"
+    }
+   ],
+   "steps": [
+    {
+     "at": 0,
+     "show": [
+      "onnx"
+     ],
+     "caption": "The same ONNX has to go to two toolchains"
+    },
+    {
+     "at": 1600,
+     "show": [
+      "f1",
+      "i1",
+      "lb1"
+     ],
+     "focus": [
+      "onnx",
+      "f1",
+      "i1",
+      "lb1"
+     ],
+     "caption": "X5: enter the X5 OE image"
+    },
+    {
+     "at": 3200,
+     "show": [
+      "c1",
+      "t1"
+     ],
+     "focus": [
+      "i1",
+      "c1",
+      "t1"
+     ],
+     "on": [
+      "t1"
+     ],
+     "caption": "hb_mapper: checker first, then makertbin"
+    },
+    {
+     "at": 4800,
+     "show": [
+      "c2",
+      "r1"
+     ],
+     "focus": [
+      "t1",
+      "c2",
+      "r1"
+     ],
+     "on": [
+      "r1"
+     ],
+     "caption": "Produces a .bin for the X5"
+    },
+    {
+     "at": 6800,
+     "show": [
+      "f2",
+      "i2",
+      "lb2"
+     ],
+     "focus": [
+      "onnx",
+      "f2",
+      "i2",
+      "lb2"
+     ],
+     "caption": "S100: enter the S series OE image"
+    },
+    {
+     "at": 8400,
+     "show": [
+      "d1",
+      "t2"
+     ],
+     "focus": [
+      "i2",
+      "d1",
+      "t2"
+     ],
+     "on": [
+      "t2"
+     ],
+     "caption": "hb_compile: one command"
+    },
+    {
+     "at": 10000,
+     "show": [
+      "d2",
+      "r2"
+     ],
+     "focus": [
+      "t2",
+      "d2",
+      "r2"
+     ],
+     "on": [
+      "r2"
+     ],
+     "caption": "Produces an .hbm for the S100"
+    },
+    {
+     "at": 12000,
+     "focus": null,
+     "show": [
+      "foot"
+     ],
+     "caption": "One ONNX, two toolchains, two kinds of artifact"
+    }
+   ],
+   "notes": "Both toolchains are installed in Docker images. The X5 uses hb_mapper: first checker to check the model, then makertbin to convert it. It produces a bin file; the march is bayes-e, and the input is a single packed NV12. The S series uses hb_compile, one command, and it produces an hbm file. The S100's march is nash-e, and the input is a split NV12, with Y and UV kept separate. The S100P and the S600 use the same tool and the same yaml, and we won't convert them in this lesson."
+  },
+  {
+   "layout": "section",
+   "title": "Chapter 02",
+   "num": "02",
+   "heading": "Opening the OE",
+   "sub": "Image, docker run, version check",
+   "notes": "Part two: opening the OE."
+  },
+  {
+   "layout": "diagram",
+   "title": "What the OE Is",
+   "eyebrow": "What Is OE",
+   "heading": "The OE is a ==Docker image==",
+   "height": 560,
+   "scene": [
+    {
+     "type": "box",
+     "id": "oe",
+     "x": 20,
+     "y": 190,
+     "w": 290,
+     "h": 150,
+     "label": "OE",
+     "kind": "neutral",
+     "sub": "D-Robotics algorithm toolchain",
+     "size": 40,
+     "sub_size": 20
+    },
+    {
+     "type": "box",
+     "id": "i1",
+     "x": 400,
+     "y": 60,
+     "w": 380,
+     "h": 120,
+     "label": "X5 image",
+     "kind": "neutral",
+     "sub": "CPU / GPU · v1.2.8",
+     "size": 30,
+     "sub_size": 20
+    },
+    {
+     "type": "box",
+     "id": "i2",
+     "x": 400,
+     "y": 220,
+     "w": 380,
+     "h": 120,
+     "label": "S series image",
+     "kind": "neutral",
+     "sub": "CPU / GPU · v3.7.0",
+     "size": 30,
+     "sub_size": 20
+    },
+    {
+     "type": "arrow",
+     "id": "o1",
+     "points": [
+      [
+       312,
+       240
+      ],
+      [
+       355,
+       240
+      ],
+      [
+       355,
+       120
+      ],
+      [
+       398,
+       120
+      ]
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "o2",
+     "points": [
+      [
+       312,
+       290
+      ],
+      [
+       355,
+       290
+      ],
+      [
+       355,
+       280
+      ],
+      [
+       398,
+       280
+      ]
+     ]
+    },
+    {
+     "type": "text",
+     "id": "tl",
+     "x": 590,
+     "y": 385,
+     "text": "Installed in the image: hb_mapper · hb_compile · dependencies",
+     "size": 22,
+     "anchor": "middle",
+     "color": "ink2"
+    },
+    {
+     "type": "box",
+     "id": "ct",
+     "x": 960,
+     "y": 100,
+     "w": 360,
+     "h": 170,
+     "label": "Container",
+     "kind": "bpu",
+     "sub": "started by docker run",
+     "size": 36,
+     "sub_size": 24
+    },
+    {
+     "type": "arrow",
+     "id": "r1",
+     "points": [
+      [
+       782,
+       120
+      ],
+      [
+       870,
+       120
+      ],
+      [
+       870,
+       160
+      ],
+      [
+       958,
+       160
+      ]
+     ],
+     "label": "docker run",
+     "size": 22
+    },
+    {
+     "type": "arrow",
+     "id": "r2",
+     "points": [
+      [
+       782,
+       280
+      ],
+      [
+       870,
+       280
+      ],
+      [
+       870,
+       220
+      ],
+      [
+       958,
+       220
+      ]
+     ]
+    },
+    {
+     "type": "box",
+     "id": "wd",
+     "x": 960,
+     "y": 340,
+     "w": 360,
+     "h": 120,
+     "label": "Working directory",
+     "kind": "cpu",
+     "sub": "same path on host and container",
+     "size": 30,
+     "sub_size": 20
+    },
+    {
+     "type": "arrow",
+     "id": "mt",
+     "points": [
+      [
+       1140,
+       340
+      ],
+      [
+       1140,
+       272
+      ]
+     ],
+     "label": "-v mount",
+     "size": 22,
+     "label_at": [
+      1215,
+      306
+     ]
+    },
+    {
+     "type": "token",
+     "id": "pk",
+     "x": 1140,
+     "y": 395,
+     "label": "Artifacts",
+     "w": 120,
+     "h": 44,
+     "size": 22,
+     "kind": "light"
+    },
+    {
+     "type": "text",
+     "id": "rg",
+     "x": 590,
+     "y": 470,
+     "text": "S series images are on a registry: docker login first (your own account)",
+     "size": 22,
+     "anchor": "middle",
+     "color": "accent",
+     "weight": 700
+    }
+   ],
+   "steps": [
+    {
+     "at": 0,
+     "show": [
+      "oe"
+     ],
+     "on": [
+      "oe"
+     ],
+     "caption": "OE: the algorithm toolchain provided by D-Robotics"
+    },
+    {
+     "at": 2000,
+     "show": [
+      "o1",
+      "o2",
+      "i1",
+      "i2"
+     ],
+     "focus": [
+      "oe",
+      "o1",
+      "o2",
+      "i1",
+      "i2"
+     ],
+     "caption": "Not software you install, but a Docker image"
+    },
+    {
+     "at": 4000,
+     "show": [
+      "tl"
+     ],
+     "caption": "The image has every tool needed for conversion"
+    },
+    {
+     "at": 6000,
+     "focus": [
+      "i1",
+      "i2"
+     ],
+     "on": [
+      "i1",
+      "i2"
+     ],
+     "caption": "Each series has CPU and GPU images, with different versions"
+    },
+    {
+     "at": 8000,
+     "focus": [
+      "i1",
+      "i2"
+     ],
+     "on": [
+      "i1",
+      "i2"
+     ],
+     "caption": "For PTQ the CPU image is enough; a GPU is an optional speed-up"
+    },
+    {
+     "at": 10000,
+     "show": [
+      "r1",
+      "r2",
+      "ct"
+     ],
+     "focus": [
+      "i1",
+      "i2",
+      "r1",
+      "r2",
+      "ct"
+     ],
+     "on": [
+      "ct"
+     ],
+     "caption": "docker run starts a container; run commands inside"
+    },
+    {
+     "at": 12000,
+     "show": [
+      "wd",
+      "mt"
+     ],
+     "focus": [
+      "ct",
+      "mt",
+      "wd"
+     ],
+     "on": [
+      "wd"
+     ],
+     "caption": "The working directory is mounted in, with the same path as on the host"
+    },
+    {
+     "at": 14000,
+     "show": [
+      "pk"
+     ],
+     "focus": [
+      "wd",
+      "pk"
+     ],
+     "caption": "Artifacts are written back to the working directory and stay after the container exits"
+    },
+    {
+     "at": 16000,
+     "focus": null,
+     "show": [
+      "rg"
+     ],
+     "caption": "S series images are on a registry; docker login before pulling"
+    }
+   ],
+   "notes": "The OE is the algorithm toolchain provided by D-Robotics. It is not a piece of software you install, but a Docker image. The image already has all the tools needed for conversion. The X5 and the S series each have their own image versions; within a series there are also CPU images and GPU images. For PTQ alone, the CPU image is enough; when a usable GPU is available, the GPU image can speed things up. To use it, you start a container with docker run and run your commands inside. Our working directory is mounted into the container, with the same path as on the host. The artifacts we compile are written straight back to this directory, and they are still there after the container exits. The S series images are on a registry, and before pulling them you first have to docker login with your own account."
+  },
+  {
+   "layout": "code",
+   "title": "The X5 OE",
+   "eyebrow": "Open OE · X5",
+   "heading": "X5: ==opening the OE==",
+   "blocks": [
+    {
+     "label": "① Confirm the image is local",
+     "lines": [
+      "$ docker image inspect local/rdk-x5-oe:v1.2.8-server",
+      {
+       "text": "→ sha256:4c01b83f…",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "The image ID uniquely identifies it"
+     }
+    },
+    {
+     "label": "② Enter the container, check the version",
+     "lines": [
+      {
+       "text": "$ docker run --rm --entrypoint '' <X5 image> \\",
+       "hl": true
+      },
+      "  bash -c 'hb_mapper --version'",
+      {
+       "text": "→ hb_mapper 1.24.3",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "The version must match the later logs"
+     }
+    },
+    {
+     "label": "③ Underlying tool versions",
+     "lines": [
+      "  … bash -c 'pip list | grep -E \"hbdk|horizon\"'",
+      {
+       "text": "→ hbdk 3.49.15 · horizon-nn 1.1.0",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "The parameters are explained one by one on the next page"
+     }
+    }
+   ],
+   "notes": "Let's start with the OE for the X5. The first command, docker image inspect, confirms the image is available locally. It is a v1.2.8 server image, with a name that starts with local. The first part of the output is the image's unique ID, followed by the creation time. The second command uses docker run to enter the container and runs hb_mapper with the version option. The container prints: hb_mapper 1.24.3. Then we filter pip list: hbdk 3.49.15, horizon-nn 1.1.0. With these version numbers, the versions in the later logs can be matched up. The rm, entrypoint, and bash -c in the command are explained one by one on the next page.",
+   "lead": "Real run · the X5 image used in this lesson: local/rdk-x5-oe:v1.2.8-server (paths and user names hidden).",
+   "dense": true
+  },
+  {
+   "layout": "code",
+   "title": "The S100 OE",
+   "eyebrow": "Open OE · S100",
+   "heading": "S100: ==opening the OE==",
+   "blocks": [
+    {
+     "label": "① Image (from a registry)",
+     "lines": [
+      "$ docker image inspect \\",
+      "  registry.d-robotics.cc/deliver/ai_toolchain_ubuntu_22_s100_s600_gpu:v3.7.0"
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "This lesson demos the GPU image; there is also …_cpu:v3.7.0; pulling needs docker login"
+     },
+     "wide": true
+    },
+    {
+     "label": "② hb_compile has no --version",
+     "lines": [
+      {
+       "text": "$ hb_compile --version",
+       "hl": true
+      },
+      {
+       "text": "→ Error: no such option: --version",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "Real output: the environment is not broken"
+     }
+    },
+    {
+     "label": "③ Read versions with pip list",
+     "lines": [
+      "  pip list | grep -E \"horizon|hbdk|hmct\"",
+      {
+       "text": "→ horizon_tc_ui 3.5.3 · hbdk4 4.7.5 · hmct-gpu 2.6.5",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "The compile log prints them again at the start"
+     }
+    }
+   ],
+   "notes": "Now the image for the S100. It comes from the D-Robotics registry, with s100 in its name, version v3.7.0. This lesson's demo uses the GPU image; the same version also has a CPU image, and for PTQ the CPU image is enough. As before, first docker image inspect, then enter the container. Here's a pitfall: hb_compile does not support a version option. The command returns no such option; this is the real output, not us breaking the environment. So the version has to be read with pip list. horizon_tc_ui 3.5.3, hbdk4 4.7.5, hmct-gpu 2.6.5. The start of the compile log later prints these versions again.",
+   "dense": true
+  },
+  {
+   "layout": "code",
+   "title": "docker run Options",
+   "eyebrow": "docker run",
+   "heading": "docker run: ==one by one==",
+   "blocks": [
+    {
+     "label": "① The form used in this lesson",
+     "lines": [
+      {
+       "text": "$ docker run --rm --entrypoint '' \\",
+       "hl": true
+      },
+      "  --user 1000:1000 --shm-size 15g \\",
+      "  -v $WORK:$WORK -w $WORK/x5 <image> \\",
+      "  bash -c '<command>'"
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "With a graphics card you can add --gpus all (optional speed-up)"
+     }
+    },
+    {
+     "label": "② What each option does",
+     "lines": [
+      {
+       "text": "--rm delete on exit · --user your own files",
+       "out": true
+      },
+      {
+       "text": "--entrypoint '' no default entry · --shm-size shared mem",
+       "out": true
+      },
+      {
+       "text": "-v / -w  mount and enter the working directory",
+       "out": true
+      },
+      {
+       "text": "--gpus all: optional with NVIDIA GPU; not needed for S series",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "Same path inside and outside the container; a CPU image also works"
+     }
+    },
+    {
+     "label": "③ Going in interactively",
+     "lines": [
+      {
+       "text": "$ docker run -i -t … <image> bash",
+       "hl": true
+      },
+      {
+       "text": "i keeps input open · t allocates a terminal",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "This lesson uses one-shot commands; logs are easier to save"
+     }
+    }
+   ],
+   "notes": "Let's go through the docker run parameters one by one. rm: the container is deleted when it exits, leaving no clutter. entrypoint followed by an empty string: clears the image's default entrypoint; what happens without it, you'll see on the next page. user 1000 colon 1000: run as a normal user, so the artifacts don't end up owned by root. shm-size 15g: leave the container enough shared memory. The v parameter mounts the working directory, so the host and the container see the same path. The w parameter: after the container starts, you are already in that directory. With an NVIDIA graphics card, you can add gpus all to hand the card to the container for acceleration; this is not a required parameter for the S series. The same version also has a CPU image; for PTQ the CPU image is enough, and there's no need to add gpus all. Finally, bash -c: what's in the quotes after it is the command to run. Want to go in interactively and type commands? Replace bash -c and the command after it with bash, and add the i and t parameters. i keeps the input open, and t allocates a terminal, so it feels like logging into a machine. This recording uses one-shot commands; the effect is the same, and the logs are easier to save.",
+   "dense": true
+  },
+  {
+   "layout": "code",
+   "title": "Error 126",
+   "eyebrow": "Error 126",
+   "heading": "A common error: ==126==",
+   "blocks": [
+    {
+     "label": "① Without --entrypoint",
+     "lines": [
+      "$ docker run --rm <X5 image> bash -c 'hb_mapper checker …'",
+      {
+       "text": "/usr/bin/bash: cannot execute binary file",
+       "out": true
+      },
+      {
+       "text": "EXIT_CODE=126",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "The default entrypoint takes bash as an argument"
+     }
+    },
+    {
+     "label": "② With --entrypoint set to an empty string",
+     "lines": [
+      {
+       "text": "$ docker run --rm --entrypoint '' <X5 image> …",
+       "hl": true
+      },
+      {
+       "text": "→ hb_mapper starts printing its version · EXIT_CODE=0",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "Hit on our very first attempt"
+     }
+    }
+   ],
+   "notes": "Now, a common mistake. This was our first attempt: the command had no entrypoint. The result: bash reports cannot execute binary file, exit code 126. The reason is that the image has a default entrypoint of its own, and our bash was handed to it as an argument. The fix: add entrypoint with an empty string. Run it again and it works: hb_mapper starts printing its version, exit code 0."
+  },
+  {
+   "layout": "section",
+   "title": "Chapter 03",
+   "num": "03",
+   "heading": "Setting Up the Environment",
+   "sub": "Following the conversion directory: working directory, YAML and calibration data",
+   "notes": "Part three: setting up the environment."
+  },
+  {
+   "layout": "code",
+   "title": "conversion Directory",
+   "eyebrow": "Conversion Dir",
+   "heading": "The repo's ==conversion directory==",
+   "blocks": [
+    {
+     "label": "① Repository version",
+     "lines": [
+      "$ git rev-parse --short HEAD",
+      {
+       "text": "→ 7a97c17",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "Everything here comes from this commit"
+     }
+    },
+    {
+     "label": "② samples/vision/resnet/",
+     "lines": [
+      "conversion/  evaluator/  model/  runtime/",
+      "test_data/  tests/  README.md  README_cn.md"
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "Everything conversion needs is in conversion"
+     }
+    },
+    {
+     "label": "③ conversion/",
+     "lines": [
+      {
+       "text": "README_cn.md  README.md  export.py",
+       "hl": true
+      },
+      {
+       "text": "ptq_x5.yaml  ptq_s.yaml",
+       "hl": true
+      }
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "These files are the Sample we use for conversion in this lesson"
+     }
+    }
+   ],
+   "notes": "The first step of setting up is to open the conversion directory of the Model Zoo repository. First, the repository version: commit 7a97c17. Under samples, vision, resnet, there are conversion, evaluator, model, and runtime, plus test data and tests. Everything conversion needs is in the conversion directory. It has five files: a Chinese and an English README, export.py, ptq_x5.yaml, and ptq_s.yaml. The Chinese README has nine sections in all, going from the source model all the way to the artifacts. Directory layout, toolchain, export, calibration, compilation, and validation after conversion: this lesson walks through every one of them. These files are the Sample we use for conversion in this lesson.",
+   "lead": "README_cn has nine sections: model · export · calibration · compile · validation …",
+   "dense": true
+  },
+  {
+   "layout": "code",
+   "title": "export.py",
+   "eyebrow": "export.py",
+   "heading": "==export.py==: a ten-line entry point",
+   "blocks": [
+    {
+     "label": "① Everything (excerpt)",
+     "lines": [
+      "from utils.tools.classification.workflow import main",
+      "if __name__ == \"__main__\":",
+      {
+       "text": "    main(default_family=\"resnet\", default_command=\"export\")",
+       "hl": true
+      }
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "No logic of its own; it references the shared workflow"
+     }
+    },
+    {
+     "label": "② What the README says it does",
+     "lines": [
+      {
+       "text": "Checks the weights hash · strict load · simplifies the graph",
+       "out": true
+      },
+      {
+       "text": "Two real images: logits and Top-5 compared with PyTorch",
+       "out": true
+      },
+      {
+       "text": "Error is recorded in export.json",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "Checkpoint → ONNX is already packaged"
+     }
+    }
+   ],
+   "notes": "First, export.py, ten lines in all. It has no logic of its own; it just references the shared workflow. The last line: the default command is export, which exports ONNX. The README says it checks the weights' hash, loads them strictly, and then simplifies the graph. It also compares logits and Top-5 against PyTorch, using two real images. The comparison error is recorded in export.json. In other words, from the checkpoint to ONNX, this step is already packaged."
+  },
+  {
+   "layout": "code",
+   "title": "ptq_x5.yaml",
+   "eyebrow": "ptq_x5.yaml",
+   "heading": "==ptq_x5.yaml==: the X5 template",
+   "blocks": [
+    {
+     "label": "① File header comment",
+     "lines": [
+      {
+       "text": "# Compile parameters used for the release artifacts",
+       "out": true
+      },
+      {
+       "text": "# Placeholders: @WORK@ working directory · @SIZE@ input size",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "Only two placeholders"
+     }
+    },
+    {
+     "label": "② Where the placeholders appear",
+     "lines": [
+      {
+       "text": "onnx_model: @WORK@/export/model.onnx",
+       "hl": true
+      },
+      {
+       "text": "working_dir: @WORK@/x5/build",
+       "hl": true
+      },
+      {
+       "text": "input_shape: 1x3x@SIZE@x@SIZE@",
+       "hl": true
+      },
+      {
+       "text": "cal_data_dir: @WORK@/x5/calibration/data",
+       "hl": true
+      }
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "5 lines contain @ (comments included)"
+     }
+    },
+    {
+     "label": "③ Normalization",
+     "lines": [
+      "mean_value: 123.675 116.28 103.53",
+      "scale_value: 0.0171247538317 …"
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "mean × 255; scale = 1 ÷ (255 × std)"
+     }
+    }
+   ],
+   "notes": "Next, ptq_x5.yaml, the compile configuration for the X5. The comment at the top says it clearly: these are the compile parameters used for the release artifacts. Only two placeholders, @WORK@ and @SIZE@, need to be replaced by us. work is the working directory; it appears in the model path, the working directory, and the calibration data directory. size is the input size; it appears in input_shape. Normalization is already compiled into the model: the mean times 255, and the scale is 1 divided by 255 times the standard deviation. The other fields are explained section by section in the next part.",
+   "lead": "The X5 template in the Model Zoo repository's conversion directory (31 lines).",
+   "dense": true
+  },
+  {
+   "layout": "table",
+   "title": "ptq_s.yaml",
+   "eyebrow": "ptq_s.yaml",
+   "heading": "==ptq_s.yaml== vs. the X5 template",
+   "lead": "Shared by S100 / S100P / S600 · @TARGET@ @MARCH@ @WORK@ @SIZE@ · 46 lines (X5: 31).",
+   "head": [
+    {
+     "html": "Field",
+     "style": "width:300px"
+    },
+    "ptq_x5.yaml",
+    "ptq_s.yaml"
+   ],
+   "row_header": true,
+   "rows": [
+    [
+     "march",
+     "bayes-e (fixed)",
+     {
+      "html": "@MARCH@: nash-e / m / p",
+      "cls": "hc"
+     }
+    ],
+    [
+     "Default fields",
+     "—",
+     "debug_mode · output_nodes · remove_node_name …"
+    ],
+    [
+     "Input / quant.",
+     "—",
+     "std_value · separate_batch · quant_config"
+    ],
+    [
+     "optimize_level",
+     "O3",
+     "O2"
+    ],
+    [
+     "input_source",
+     "data: pyramid",
+     "Absent; uses a jobs / cache group instead"
+    ]
+   ],
+   "notes": "Next is ptq_s.yaml, the configuration for the S series. The S100, S100P, and S600 all share this one file. The comment lists four placeholders: @TARGET@, @MARCH@, @WORK@, and @SIZE@. target is the target name; march is nash-e, nash-m, or nash-p. Compare the two templates with diff, and the differences are visible at a glance. First, the march differs: the X5 fixes bayes-e, while for the S series it is decided by a placeholder. Second, the S series has a batch of extra default-value fields, such as debug_mode and output_nodes. Third, the S series adds std_value and separate_batch, and also quant_config. Fourth, the optimization level: O3 on the X5, O2 on the S series. Fifth, the X5 has input_source, and the S series doesn't; it uses the jobs and cache group instead."
+  },
+  {
+   "layout": "code",
+   "title": "Working Dir & Export",
+   "eyebrow": "Workdir & Export",
+   "heading": "Working directory and ==exporting ONNX==",
+   "blocks": [
+    {
+     "label": "① Create the working directory (outside the repo)",
+     "lines": [
+      "$ mkdir -p $WORK/x5 $WORK/s100"
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "Keep intermediate files out of the Sample"
+     }
+    },
+    {
+     "label": "② Fetch the weights",
+     "lines": [
+      "$ python3 utils/tools/classification/workflow.py \\",
+      "  fetch --model resnet18 --output $WORK/weights"
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "model.safetensors about 46.8 MB · 30.8 s"
+     }
+    },
+    {
+     "label": "③ Export",
+     "lines": [
+      "$ python3 samples/vision/resnet/conversion/export.py \\",
+      "  --model resnet18 --source-dir $WORK/weights \\",
+      "  --opset 11 --simplify",
+      {
+       "text": "→ model.onnx · sha256 280ee0b5…",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "Same hash as our first export"
+     }
+    }
+   ],
+   "notes": "Now, hands-on. First create the working directory, outside the repository. One subdirectory each for x5 and s100. Step two, fetch: download the pinned-version weights, which took 30.8 seconds. We get model.safetensors, about 46.8 million bytes. Step three, export: with opset 11, and with simplify. The output is model.onnx and export.json. Now compute the sha256: it starts with 280ee0b5. It is exactly the same as the hash from our first export, which shows the export is reproducible.",
+   "lead": "Real run · $WORK is the working directory outside the repo (path hidden).",
+   "dense": true
+  },
+  {
+   "layout": "diagram",
+   "title": "Calibration Data",
+   "eyebrow": "Calibration Data",
+   "heading": "Calibration data: ==two formats==",
+   "height": 560,
+   "scene": [
+    {
+     "type": "images",
+     "id": "imgs",
+     "x": 20,
+     "y": 100,
+     "n": 12,
+     "cols": 4,
+     "w": 70,
+     "h": 52,
+     "gap": 12
+    },
+    {
+     "type": "text",
+     "id": "imt",
+     "x": 178,
+     "y": 320,
+     "text": "200 images (fixed)",
+     "size": 24,
+     "anchor": "middle",
+     "color": "ink2"
+    },
+    {
+     "type": "arrow",
+     "id": "d0",
+     "points": [
+      [
+       345,
+       190
+      ],
+      [
+       418,
+       190
+      ]
+     ]
+    },
+    {
+     "type": "box",
+     "id": "pre",
+     "x": 420,
+     "y": 100,
+     "w": 390,
+     "h": 180,
+     "label": "Preprocessing",
+     "kind": "cpu",
+     "sub": "short side 235 → crop 224",
+     "size": 34,
+     "sub_size": 22
+    },
+    {
+     "type": "arrow",
+     "id": "o1",
+     "points": [
+      [
+       812,
+       190
+      ],
+      [
+       890,
+       190
+      ],
+      [
+       890,
+       120
+      ],
+      [
+       968,
+       120
+      ]
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "o2",
+     "points": [
+      [
+       812,
+       190
+      ],
+      [
+       890,
+       190
+      ],
+      [
+       890,
+       395
+      ],
+      [
+       968,
+       395
+      ]
+     ]
+    },
+    {
+     "type": "box",
+     "id": "x5d",
+     "x": 970,
+     "y": 40,
+     "w": 610,
+     "h": 160,
+     "label": "X5 · .rgb",
+     "kind": "neutral",
+     "sub": "raw [0,255] RGB · float32",
+     "size": 34,
+     "sub_size": 22
+    },
+    {
+     "type": "text",
+     "id": "x5t",
+     "x": 970,
+     "y": 235,
+     "text": "602,112 bytes each · the loader then converts to NV12",
+     "size": 22,
+     "anchor": "start",
+     "color": "ink2"
+    },
+    {
+     "type": "box",
+     "id": "s1d",
+     "x": 970,
+     "y": 315,
+     "w": 610,
+     "h": 160,
+     "label": "S100 · .npy",
+     "kind": "neutral",
+     "sub": "normalized to the ONNX input · float32",
+     "size": 34,
+     "sub_size": 22
+    },
+    {
+     "type": "text",
+     "id": "s1t",
+     "x": 970,
+     "y": 510,
+     "text": "602,240 bytes each (incl. 128-byte file header)",
+     "size": 22,
+     "anchor": "start",
+     "color": "ink2"
+    }
+   ],
+   "steps": [
+    {
+     "at": 0,
+     "show": [
+      "imgs",
+      "imt"
+     ],
+     "caption": "Calibration data: a fixed set of 200 images"
+    },
+    {
+     "at": 2200,
+     "show": [
+      "d0",
+      "pre"
+     ],
+     "focus": [
+      "imgs",
+      "d0",
+      "pre"
+     ],
+     "on": [
+      "pre"
+     ],
+     "caption": "Preprocess first: short side to 235, center crop 224"
+    },
+    {
+     "at": 4600,
+     "show": [
+      "o1",
+      "x5d",
+      "x5t"
+     ],
+     "focus": [
+      "pre",
+      "o1",
+      "x5d",
+      "x5t"
+     ],
+     "on": [
+      "x5d"
+     ],
+     "caption": "X5: stores raw RGB; the loader converts it to NV12"
+    },
+    {
+     "at": 7000,
+     "show": [
+      "o2",
+      "s1d",
+      "s1t"
+     ],
+     "focus": [
+      "pre",
+      "o2",
+      "s1d",
+      "s1t"
+     ],
+     "on": [
+      "s1d"
+     ],
+     "caption": "S100: stores npy that is already normalized"
+    },
+    {
+     "at": 9400,
+     "focus": null,
+     "caption": "Two targets, two formats: do not mix them up"
+    }
+   ],
+   "notes": "Now the calibration data. The tool needs a batch of representative inputs. The Sample's recipe is fixed: 200 images. The short side is first resized to 235, then center-cropped to 224. Note that the two targets write out different data. The X5 stores the raw 0-to-255 RGB, which the loader then converts to NV12. Each one is 602,112 bytes. The S100 stores npy files that are already normalized to the ONNX input. Each one has an extra 128 bytes of file header."
+  },
+  {
+   "layout": "cards",
+   "title": "Calibration Essentials",
+   "eyebrow": "Calibration Tips",
+   "heading": "Calibration ==matches deployment==",
+   "lead": "This lesson's calibration images: one shard of the COCO dataset on Hugging Face, 200 fixed picks; not checked against the release artifacts' calibration images.",
+   "cols": 3,
+   "cards": [
+    {
+     "icon": "target",
+     "tone": "orange",
+     "title": "Same geometry",
+     "text": "Resize and crop the same way as at runtime."
+    },
+    {
+     "icon": "grid",
+     "tone": "blue",
+     "title": "Same color format",
+     "text": "X5 stores RGB first; the loader converts to NV12."
+    },
+    {
+     "icon": "puzzle",
+     "tone": "green",
+     "title": "Same place for normalization",
+     "text": "X5 normalizes inside the model; S100's data is already normalized."
+    }
+   ],
+   "notes": "The calibration data has three key points, all about matching the deployment. The geometry must match: resize and crop the same way as at runtime. The color format must match: for the X5, RGB first, then NV12. The place where normalization happens must match too. The X5's calibration data is not normalized, because the model does it internally; the S100's is already normalized. If they don't match, the quantization parameters won't be accurate. In addition, this lesson's calibration images come from one shard of COCO on Hugging Face. They were not checked against the calibration images of the release artifacts."
+  },
+  {
+   "layout": "code",
+   "title": "Generate Calibration Data",
+   "eyebrow": "Calibration Data",
+   "heading": "Generating ==calibration data==",
+   "blocks": [
+    {
+     "label": "① X5: .rgb",
+     "lines": [
+      "$ python3 utils/tools/classification/workflow.py \\",
+      "  calibrate --model resnet18 --platform x5 …",
+      {
+       "text": "→ 200 .rgb files · 602,112 bytes each · directory 115M",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "Raw RGB, float32"
+     }
+    },
+    {
+     "label": "② S100: .npy",
+     "lines": [
+      "$ … calibrate --model resnet18 --platform s100 …",
+      {
+       "text": "→ 200 .npy files · 602,240 bytes each · directory 116M",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "128 extra bytes of file header"
+     }
+    }
+   ],
+   "notes": "The calibration data is generated with the calibrate subcommand of the workflow. With platform set to x5, it writes the format the X5 needs. The output is 200 rgb files, each 602,112 bytes. With platform set to s100, it writes npy format. Again 200 files, each 602,240 bytes, with an extra 128-byte header. For the whole directory, the X5 is 115M, and the S100 is 116M.",
+   "lead": "Real run · other arguments (manifest, image directory, output directory) omitted."
+  },
+  {
+   "layout": "code",
+   "title": "Replace Placeholders",
+   "eyebrow": "Placeholders",
+   "heading": "Replace the placeholders ==with real values==",
+   "blocks": [
+    {
+     "label": "① Find the placeholders",
+     "lines": [
+      "$ grep -n '@' ptq_x5.yaml",
+      {
+       "text": "→ lines 3, 6, 8, 15, 22 · 5 lines in all",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "Line 3 is a comment"
+     }
+    },
+    {
+     "label": "② Replace with sed",
+     "lines": [
+      {
+       "text": "$ sed -e \"s#@WORK@#$WORK#g\" -e \"s#@SIZE@#224#g\" ptq_x5.yaml \\",
+       "hl": true
+      },
+      "  > $WORK/x5/config.yaml",
+      {
+       "text": "S100 also replaces @TARGET@ → s100, @MARCH@ → nash-e",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "Placeholders in comments get replaced too"
+     }
+    },
+    {
+     "label": "③ diff before and after",
+     "lines": [
+      "< input_shape: 1x3x@SIZE@x@SIZE@",
+      {
+       "text": "> input_shape: 1x3x224x224",
+       "hl": true
+      },
+      {
+       "text": "After replacement, both config.yaml files have 0 @ signs",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "Nothing is changed except paths and size"
+     }
+    }
+   ],
+   "notes": "Next, replace the placeholders with real values. First use grep to find every at sign in ptq_x5.yaml: five lines in all. Then use sed to replace them: work becomes the working directory, and size becomes 224. Diff the before and after: the paths become real paths, and input_shape becomes 1x3x224x224. Note that the comment on the third line was replaced too, which doesn't affect use. The S100 has two more placeholders: target becomes s100, and march becomes nash-e. After the replacement, the number of at signs in both configurations is zero. Finally, use find on the whole working directory: four branches, export, s100, weights, and x5.",
+   "lead": "$WORK is the working directory: in the real run, a path outside the repo (hidden).",
+   "dense": true
+  },
+  {
+   "layout": "table",
+   "title": "Template vs. Actual",
+   "eyebrow": "Template vs Used",
+   "heading": "Template ==vs.== the configuration actually used",
+   "lead": "Only paths and size were filled in; the other compile parameters are exactly what the Sample fixes.",
+   "head": [
+    {
+     "html": "Field (X5)",
+     "style": "width:260px"
+    },
+    "Sample template",
+    "Actually used"
+   ],
+   "row_header": true,
+   "rows": [
+    [
+     "onnx_model",
+     "@WORK@/export/model.onnx",
+     {
+      "html": "/work/resnet-18/export/model.onnx",
+      "cls": "hc"
+     }
+    ],
+    [
+     "input_shape",
+     "1x3x@SIZE@x@SIZE@",
+     {
+      "html": "1x3x224x224",
+      "cls": "hc"
+     }
+    ],
+    [
+     "cal_data_dir",
+     "@WORK@/x5/calibration/data",
+     {
+      "html": "/work/resnet-18/x5/calibration/data",
+      "cls": "hc"
+     }
+    ],
+    [
+     "march · optimize_level",
+     "bayes-e · O3",
+     "bayes-e · O3 (unchanged)"
+    ]
+   ],
+   "notes": "Let's compare once more: the template in the Sample, and the configuration we actually used. Paths: the template has placeholders, and we replaced them with real absolute paths. Size: size became 224. The march, the calibration method, the optimization level, and the input type are all left unchanged. In other words, the compile parameters are exactly what the Sample fixes; we only filled in the paths and the size. So these files are the Sample we use in this lesson."
+  },
+  {
+   "layout": "section",
+   "title": "Chapter 04",
+   "num": "04",
+   "heading": "YAML and Compilation",
+   "sub": "The YAML section by section, then checker, makertbin and hb_compile",
+   "notes": "Part four: YAML and compilation."
+  },
+  {
+   "layout": "code",
+   "title": "X5 YAML (1/2)",
+   "eyebrow": "X5 YAML · 1/2",
+   "heading": "X5 YAML: ==model and input==",
+   "blocks": [
+    {
+     "label": "① model_parameters",
+     "lines": [
+      {
+       "text": "onnx_model: /work/resnet-18/export/model.onnx",
+       "hl": true
+      },
+      {
+       "text": "march: bayes-e",
+       "hl": true
+      },
+      "output_model_file_prefix: resnet_x5"
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "march corresponds to the X5's BPU"
+     }
+    },
+    {
+     "label": "② input_parameters",
+     "lines": [
+      "input_name: data  ·  input_layout_train: NCHW",
+      {
+       "text": "input_type_rt: nv12",
+       "hl": true
+      },
+      {
+       "text": "input_type_train: rgb",
+       "hl": true
+      },
+      "input_shape: 1x3x224x224"
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "The tool compiles the color conversion into the model"
+     }
+    },
+    {
+     "label": "③ Normalization",
+     "lines": [
+      "mean_value: 123.675 116.28 103.53",
+      "scale_value: 0.0171247538317 …",
+      "input_space_and_range: bt601_video"
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "mean × 255; scale = 1 ÷ (255 × std)"
+     }
+    }
+   ],
+   "notes": "Now let's go through the X5's YAML section by section. First section, model_parameters: the model itself. onnx_model is the exported model.onnx; march is bayes-e, which corresponds to the X5's BPU. working_dir is the artifact output directory; output_model_file_prefix decides the file name prefix, here resnet_x5. Second section, input_parameters: how the input is handled. input_name is data, matching the ONNX input name. input_type_rt is nv12: what the board feeds the model is NV12. input_type_train is rgb: during training the model took RGB, and the tool compiles the conversion into the model. input_shape is 1x3x224x224, and the layout is NCHW. norm_type uses data_mean_and_scale: subtract the mean first, then multiply by the scale. mean_value is the ImageNet mean times 255; scale_value is 1 divided by 255 times the standard deviation. input_space_and_range is bt601_video, which corresponds to the limited range of NV12.",
+   "dense": true
+  },
+  {
+   "layout": "code",
+   "title": "X5 YAML (2/2)",
+   "eyebrow": "X5 YAML · 2/2",
+   "heading": "X5 YAML: ==calibration and compile==",
+   "blocks": [
+    {
+     "label": "④ calibration_parameters",
+     "lines": [
+      "cal_data_dir: /work/resnet-18/x5/calibration/data",
+      "cal_data_type: float32",
+      {
+       "text": "calibration_type: default",
+       "hl": true
+      },
+      "preprocess_on: false"
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "default = automatic search"
+     }
+    },
+    {
+     "label": "⑤ compiler_parameters",
+     "lines": [
+      {
+       "text": "optimize_level: O3",
+       "hl": true
+      },
+      "compile_mode: latency",
+      "core_num: 1",
+      "input_source:",
+      "  data: pyramid"
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "pyramid: the input comes from the board's NV12 path"
+     }
+    }
+   ],
+   "notes": "Third section, calibration_parameters: calibration. cal_data_dir points to the 200 files we prepared. cal_data_type is float32, matching the rgb files. calibration_type is set to default, which means automatic search; an animation later explains it. preprocess_on is false: the data is already prepared, so the tool doesn't need to process the images. Fourth section, compiler_parameters: compilation. optimize_level is O3; the larger the number, the more optimization. compile_mode is latency, aiming for low latency. core_num is 1, so it uses only one core. In input_source, data is set to pyramid: the input comes from the board's NV12 image path. Put the four sections together, and you have a complete conversion configuration."
+  },
+  {
+   "layout": "diagram",
+   "title": "Calibration Methods",
+   "eyebrow": "Calibration Search",
+   "heading": "default means ==automatic search==",
+   "height": 560,
+   "scene": [
+    {
+     "type": "box",
+     "id": "c0",
+     "x": 20,
+     "y": 30,
+     "w": 520,
+     "h": 80,
+     "label": "calibration_type: max · kl",
+     "kind": "neutral",
+     "size": 24,
+     "mono": true,
+     "shadow": false
+    },
+    {
+     "type": "box",
+     "id": "c1",
+     "x": 20,
+     "y": 130,
+     "w": 520,
+     "h": 80,
+     "label": "max_percentile: 0.99995 · 1.0",
+     "kind": "neutral",
+     "size": 24,
+     "mono": true,
+     "shadow": false
+    },
+    {
+     "type": "box",
+     "id": "c2",
+     "x": 20,
+     "y": 230,
+     "w": 520,
+     "h": 80,
+     "label": "per_channel: True · False",
+     "kind": "neutral",
+     "size": 24,
+     "mono": true,
+     "shadow": false
+    },
+    {
+     "type": "box",
+     "id": "c3",
+     "x": 20,
+     "y": 330,
+     "w": 520,
+     "h": 80,
+     "label": "asymmetric: True · False",
+     "kind": "neutral",
+     "size": 24,
+     "mono": true,
+     "shadow": false
+    },
+    {
+     "type": "text",
+     "id": "ct",
+     "x": 280,
+     "y": 440,
+     "text": "Candidate combinations",
+     "size": 24,
+     "anchor": "middle",
+     "color": "ink2"
+    },
+    {
+     "type": "text",
+     "id": "dflt",
+     "x": 800,
+     "y": 490,
+     "text": "calibration_type: default",
+     "size": 26,
+     "font": "mono",
+     "anchor": "middle",
+     "color": "accent",
+     "weight": 700
+    },
+    {
+     "type": "arrow",
+     "id": "s0",
+     "points": [
+      [
+       542,
+       200
+      ],
+      [
+       640,
+       200
+      ]
+     ]
+    },
+    {
+     "type": "box",
+     "id": "srch",
+     "x": 642,
+     "y": 110,
+     "w": 320,
+     "h": 180,
+     "label": "Automatic search",
+     "kind": "neutral",
+     "sub": "similarity 0.995",
+     "on": true,
+     "size": 34,
+     "sub_size": 24
+    },
+    {
+     "type": "arrow",
+     "id": "s1",
+     "points": [
+      [
+       964,
+       200
+      ],
+      [
+       1030,
+       200
+      ],
+      [
+       1030,
+       120
+      ],
+      [
+       1096,
+       120
+      ]
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "s2",
+     "points": [
+      [
+       964,
+       200
+      ],
+      [
+       1030,
+       200
+      ],
+      [
+       1030,
+       340
+      ],
+      [
+       1096,
+       340
+      ]
+     ]
+    },
+    {
+     "type": "box",
+     "id": "rx",
+     "x": 1098,
+     "y": 50,
+     "w": 480,
+     "h": 140,
+     "label": "X5 chose",
+     "kind": "neutral",
+     "sub": "max-percentile · 0.99995",
+     "on": true,
+     "size": 32,
+     "sub_size": 22
+    },
+    {
+     "type": "box",
+     "id": "rs",
+     "x": 1098,
+     "y": 270,
+     "w": 480,
+     "h": 140,
+     "label": "S100 chose",
+     "kind": "neutral",
+     "sub": "kl · num_bin 1024",
+     "on": true,
+     "size": 32,
+     "sub_size": 22
+    },
+    {
+     "type": "text",
+     "id": "foot",
+     "x": 800,
+     "y": 535,
+     "text": "Same setting, but the two toolchains can choose different methods",
+     "size": 26,
+     "anchor": "middle",
+     "color": "accent",
+     "weight": 700
+    }
+   ],
+   "steps": [
+    {
+     "at": 0,
+     "show": [
+      "dflt"
+     ],
+     "on": [
+      "dflt"
+     ],
+     "caption": "calibration_type is written as default"
+    },
+    {
+     "at": 1200,
+     "show": [
+      "srch"
+     ],
+     "focus": [
+      "dflt",
+      "srch"
+     ],
+     "on": [
+      "srch"
+     ],
+     "caption": "Not skipping calibration, but an automatic search"
+    },
+    {
+     "at": 2400,
+     "show": [
+      "ct"
+     ],
+     "caption": "The tool tries a set of candidates"
+    },
+    {
+     "at": 3600,
+     "focus": [
+      "srch"
+     ],
+     "on": [
+      "srch"
+     ],
+     "caption": "Target: similarity 0.995"
+    },
+    {
+     "at": 4800,
+     "show": [
+      "s0",
+      "c0"
+     ],
+     "focus": [
+      "c0",
+      "s0",
+      "srch"
+     ],
+     "caption": "Candidate 1: two methods, max or kl"
+    },
+    {
+     "at": 6000,
+     "show": [
+      "c1"
+     ],
+     "focus": [
+      "c1",
+      "s0",
+      "srch"
+     ],
+     "caption": "Candidate 2: percentile 0.99995 or 1.0"
+    },
+    {
+     "at": 7200,
+     "show": [
+      "c2"
+     ],
+     "focus": [
+      "c2",
+      "s0",
+      "srch"
+     ],
+     "caption": "Candidate 3: per_channel tried on and off"
+    },
+    {
+     "at": 8400,
+     "show": [
+      "c3"
+     ],
+     "focus": [
+      "c3",
+      "s0",
+      "srch"
+     ],
+     "caption": "Candidate 3: asymmetric also tried on and off"
+    },
+    {
+     "at": 9600,
+     "show": [
+      "s1",
+      "rx"
+     ],
+     "focus": [
+      "srch",
+      "s1",
+      "rx"
+     ],
+     "on": [
+      "rx"
+     ],
+     "caption": "X5 chose max-percentile, percentile 0.99995"
+    },
+    {
+     "at": 11000,
+     "show": [
+      "s2",
+      "rs"
+     ],
+     "focus": [
+      "srch",
+      "s2",
+      "rs"
+     ],
+     "on": [
+      "rs"
+     ],
+     "caption": "S100 chose kl, num_bin 1024"
+    },
+    {
+     "at": 12400,
+     "focus": null,
+     "show": [
+      "foot"
+     ],
+     "caption": "Same setting, but the chosen method can differ"
+    }
+   ],
+   "notes": "In the yaml, calibration_type is written as default. This isn't doing nothing; it is an automatic search. The tool tries a set of candidates. The target similarity is 0.995. Candidate one: two methods, max or kl. Candidate two: the percentile, 0.99995 or 1.0. Candidate three: per_channel and asymmetric, each tried on and off. The results differ: the X5 chose max-percentile, with percentile 0.99995. The S100 chose kl, with num_bin 1024. With the same setting, the chosen method can be different. The details are left for the next lesson."
+  },
+  {
+   "layout": "table",
+   "title": "S100 YAML Differences",
+   "eyebrow": "S100 YAML",
+   "heading": "The S100's YAML: ==how it differs from the X5's==",
+   "lead": "The S100 configuration actually used, compared item by item with the X5 configuration.",
+   "head": [
+    {
+     "html": "Field",
+     "style": "width:330px"
+    },
+    "X5",
+    "S100"
+   ],
+   "row_header": true,
+   "rows": [
+    [
+     "march · prefix",
+     "bayes-e · resnet_x5",
+     {
+      "html": "nash-e · resnet_s100",
+      "cls": "hc"
+     }
+    ],
+    [
+     "Default-value fields · jobs",
+     "None",
+     "debug_mode · output_nodes … left blank · 16"
+    ],
+    [
+     "Other calibration fields",
+     "preprocess_on: false",
+     "std_value '' · separate_batch false · quant_config {}"
+    ],
+    [
+     "optimize_level · input_source",
+     "O3 · data: pyramid",
+     "O2 · absent"
+    ]
+   ],
+   "notes": "Now the S100's YAML, and how it differs from the X5's. march is nash-e, and the prefix is resnet_s100. There are some extra fields left blank: debug_mode, output_nodes, remove_node_name, and so on; the defaults are fine. In the input section there are an extra std_value and separate_batch, also left at their defaults. The calibration section has no preprocess_on; it has quant_config instead, left blank. The compile optimization level is O2, and there is no input_source. There is an extra jobs, with the value 16, which controls the parallelism. The S series log gives deprecation warnings for a few fields, and we'll see them in the log shortly."
+  },
+  {
+   "layout": "code",
+   "title": "X5 checker",
+   "eyebrow": "Convert · checker",
+   "heading": "X5: ==hb_mapper checker==",
+   "blocks": [
+    {
+     "label": "① Command",
+     "lines": [
+      {
+       "text": "$ docker run --rm --entrypoint '' --user 1000:1000 --shm-size 15g \\",
+       "hl": true
+      },
+      "  -v $WORK:$WORK -w $WORK/x5 <X5 image> bash -c \\",
+      "  'hb_mapper checker --model-type onnx --march bayes-e \\",
+      "   --model $WORK/export/model.onnx --input-shape data 1x3x224x224'"
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "Measured 5.7 s"
+     },
+     "wide": true
+    },
+    {
+     "label": "② What to look for in the log",
+     "lines": [
+      {
+       "text": "Versions → input ONNX → optimize → calibrate → quantize → compile",
+       "out": true
+      },
+      {
+       "text": "checker: 1 sample, fixed thresholds; FPS 241.75 is only an estimate",
+       "out": true
+      },
+      {
+       "text": "Node table: convolutions all on BPU (int8); last Reshape on CPU",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "The similarity column is --; checker does not compute similarity"
+     }
+    }
+   ],
+   "notes": "The configuration is ready, so let's compile. First, the X5's checker. It is still docker run into the container; the second half is the real command: hb_mapper checker. model-type is onnx, march is bayes-e, and then the model path and the input size. After Enter, the log starts to scroll. It first prints the versions: hbdk 3.49.15, horizon_nn 1.1.0, hb_mapper 1.24.3. Then the input ONNX information: opset 11, input data, output logits. Next, in order: optimize the model, calibrate, quantize, compile, each with a start and an end. The checker's calibration uses only one sample and fixed thresholds; its purpose is only to check, so we don't look at the similarity. The compile step estimates the performance: FPS 241.75, latency 4136.5 microseconds, only an estimate. Finally the node table: every convolution layer is on the BPU, computing in int8. Only the last reshape lands on the CPU. The similarity column is just dashes; the checker doesn't compute similarity. There is no error, the exit code is 0, and the check passes.",
+   "dense": true
+  },
+  {
+   "layout": "code",
+   "title": "X5 makertbin",
+   "eyebrow": "Convert · makertbin",
+   "heading": "X5: ==hb_mapper makertbin==",
+   "blocks": [
+    {
+     "label": "① Command",
+     "lines": [
+      {
+       "text": "$ docker run … <X5 image> bash -c \\",
+       "hl": true
+      },
+      "  'hb_mapper makertbin --config config.yaml --model-type onnx'"
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "Calibrate + quantize + compile"
+     }
+    },
+    {
+     "label": "② Log sections",
+     "lines": [
+      {
+       "text": "Versions → read data (200, batch 8) → calibrate → quantize → compile",
+       "out": true
+      },
+      {
+       "text": "Selected max-percentile, percentile=0.99995",
+       "out": true
+      },
+      {
+       "text": "Compile estimate: FPS 428.67 · latency 2332.8 µs (estimate)",
+       "out": true
+      },
+      {
+       "text": "logits cosine similarity 0.999941",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "The waiting progress bar is played sped up"
+     }
+    },
+    {
+     "label": "③ Result",
+     "lines": [
+      {
+       "text": "Convert to runtime bin file successfully!",
+       "out": true
+      },
+      {
+       "text": "32.8 s in all · exit code 0 · resnet_x5.bin",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "Times are measured"
+     }
+    }
+   ],
+   "notes": "The checker passed, so next is makertbin, the real conversion. The first half of the command is unchanged; the second half is now hb_mapper makertbin, with config.yaml as the argument. It starts with the versions and the yaml check. There is one warning: the calibration directory suffix doesn't match cal_data_type; the parameter takes precedence, so we can ignore it. Then it reads the calibration data: the name of the first image and its md5 are both printed. Next comes Horizon NN Model Convert, which covers the stages we talked about earlier. This time, calibration uses 200 samples, with a batch of 8. The calibration settings are the same as we described: max and kl, percentile, similarity 0.995. Calibration takes tens of seconds, and the screen shows a progress bar; the waiting part we play sped up. Finally it selects max-percentile, with percentile 0.99995. Then quantization, and then compilation: this time, the compiler's estimated FPS is 428.67. Next, the node table and the output similarity: the cosine similarity of logits is 0.999941. Last, the summary of the model information, including march, input type, mean, and scale. The last line: Convert to runtime bin file successfully, 32.8 seconds in all, exit code 0.",
+   "dense": true
+  },
+  {
+   "layout": "code",
+   "title": "S100: This Step Runs on CPU",
+   "eyebrow": "PTQ · CPU",
+   "heading": "S100: ==this step runs on CPU==",
+   "blocks": [
+    {
+     "label": "① Command (with --gpus all added)",
+     "lines": [
+      {
+       "text": "$ docker run --rm --entrypoint '' --gpus all … <S series image> \\",
+       "hl": true
+      },
+      "  bash -c 'hb_compile --config config.yaml'"
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "CUDA_VISIBLE_DEVICES not set"
+     }
+    },
+    {
+     "label": "② Log",
+     "lines": [
+      {
+       "text": "After calibration starts, onnxruntime errors: HzCalibration",
+       "out": true
+      },
+      {
+       "text": "ERROR-OCCUR-DURING hmct.api.build_model",
+       "out": true
+      },
+      {
+       "text": "Exit code 255 · no hbm produced",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "On this machine this step did not get to use the GPU"
+     }
+    },
+    {
+     "label": "③ Forcing the CPU also runs through",
+     "lines": [
+      {
+       "text": "-e CUDA_VISIBLE_DEVICES=-1",
+       "hl": true
+      },
+      {
+       "text": "Forced onto CPU: runs all the way through · PTQ needs no GPU",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "Run again on the next page; the same-version CPU image also works"
+     }
+    }
+   ],
+   "notes": "Now the S100. First, the log from a run where we did not force the CPU. The command is docker run with gpus all, and inside is hb_compile, with config.yaml as the argument. The earlier part of the log is all normal: hbdk 4.7.5, hmct 2.6.5, hb_compile 3.5.3. The calibration data is 200 images, and march is nash-e. At the calibration step, onnxruntime reports an error, and the log says ERROR. The error happens in build_model, with exit code 255, and no hbm is produced. On this machine, this step did not get to use the GPU. Set the environment variable CUDA_VISIBLE_DEVICES to minus one to force the CPU, and it runs all the way through. This shows exactly that PTQ does not depend on a GPU.",
+   "dense": true
+  },
+  {
+   "layout": "code",
+   "title": "S100 hb_compile",
+   "eyebrow": "Convert · hb_compile",
+   "heading": "S100: ==the full hb_compile log==",
+   "blocks": [
+    {
+     "label": "① Command",
+     "lines": [
+      {
+       "text": "$ docker run --rm --entrypoint '' --gpus all \\",
+       "hl": true
+      },
+      {
+       "text": "  -e CUDA_VISIBLE_DEVICES=-1 … <S series image> \\",
+       "hl": true
+      },
+      "  bash -c 'hb_compile --config config.yaml'"
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "Measured 217.5 s"
+     }
+    },
+    {
+     "label": "② Log sections",
+     "lines": [
+      {
+       "text": "Versions · yaml · warnings → 200 images → nash-e · opset 11 → 19",
+       "out": true
+      },
+      {
+       "text": "CUDA failure / EP Error: CPU fallback, 14 times; no effect on result",
+       "out": true
+      },
+      {
+       "text": "Selected kl · num_bin 1024 → quantize → per-node similarity table",
+       "out": true
+      },
+      {
+       "text": "compile model (~170 s, sped up) → Successfully compile the hbm model",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "Estimated FPS 2430.87 · latency 411.4 µs"
+     }
+    },
+    {
+     "label": "③ Result",
+     "lines": [
+      {
+       "text": "logits similarity: Calibrated 0.999913 · Quantized 0.999856",
+       "out": true
+      },
+      {
+       "text": "Inputs data_y + data_uv · output logits · exit code 0",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "resnet_s100.hbm"
+     }
+    }
+   ],
+   "notes": "With CUDA_VISIBLE_DEVICES set to minus one, let's run it again. The command has just this one extra parameter, and is otherwise the same as before. It starts with the versions and the yaml check. There are a few warnings: norm_type and cal_data_type are deprecated, and using them as in the Sample is fine. Then it reads the calibration data: 200 images, and the md5 of the first one is printed too. Next is Horizon NN Model Convert, with march nash-e. The input ONNX is opset 11, and the tool converts it to opset 19. Now the calibration settings: two methods, max and kl, percentiles 0.99995 and 1.0, and a target similarity of 0.995. Calibration starts. Lots of CUDA failure and EP Error messages appear on screen. These are the messages from the container trying the GPU without success and automatically falling back to the CPU, 14 times in all. They don't affect the result, and calibration keeps going. Calibration finishes, and kl is selected, with num_bin 1024. Next it quantizes, exports the model, and then checks the parameters. Then comes the node-by-node similarity table: every layer's cosine similarity after calibration is above 0.98. The last table is logits: 0.999913 after calibration, and 0.999856 after quantization. Then it enters compile model, the slowest step, about 170 seconds as measured, and we play it sped up. Successfully compile the hbm model appears, and the compile succeeds. The compiler's estimated FPS is 2430.87, again only an estimate. Finally it prints the model information: march is nash-e, plus the memory use of each part. There are two inputs, data_y and data_uv, and this is the split NV12. The output is logits. The last line: hb_compile completes running, 217.5 seconds in all, exit code 0.",
+   "dense": true
+  },
+  {
+   "layout": "section",
+   "title": "Chapter 05",
+   "num": "05",
+   "heading": "Artifacts and Verification",
+   "sub": "Look at the artifacts, read the similarity, go back to the Sample on the board",
+   "notes": "Part five: artifacts and verification."
+  },
+  {
+   "layout": "code",
+   "title": "Artifacts & quant_info",
+   "eyebrow": "Artifacts",
+   "heading": "Looking at the ==artifacts== and quant_info",
+   "blocks": [
+    {
+     "label": "① X5 · build/",
+     "lines": [
+      {
+       "text": "resnet_x5.bin  11,081,570 bytes  sha256 7f8fa575…",
+       "hl": true
+      },
+      "original / optimized / calibrated / quantized .onnx",
+      "resnet_x5_quant_info.json · main_graph_subgraph_0.html / .json"
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "One onnx per step"
+     }
+    },
+    {
+     "label": "② S100 · build/",
+     "lines": [
+      {
+       "text": "resnet_s100.hbm  12,193,304 bytes  sha256 a506767b…",
+       "hl": true
+      },
+      "resnet_s100_quantized_model.bc · advice / node_info .csv",
+      "resnet_s100_quant_info.json · hb_compile.log"
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "Compile reports: html / json"
+     }
+    },
+    {
+     "label": "③ quant_info /fc/Gemm (50 entries in all)",
+     "lines": [
+      "X5   thresholds 3.865509   cosine_similarity 0.999941",
+      "S100 thresholds 2.823619   cosine_similarity 0.999913"
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "The two sides use different definitions; no size comparison"
+     }
+    }
+   ],
+   "notes": "With the compile done, let's look at the artifacts. In the X5's build directory, resnet_x5.bin is the final artifact, 11,081,570 bytes. The onnx files beside it correspond to each step of the flow: original, optimized, calibrated, quantized. quant_info.json records the quantization information for each node, and the html and json files are the compile reports. Use sha256 to note the artifact's fingerprint; the bin starts with 7f8fa575. In the S100's build directory, resnet_s100.hbm is 12,193,304 bytes. There are also two csv files, advice and node_info, a bc file, and hb_compile.log. The hbm's sha256 starts with a506767b. Now open quant_info: one entry per node, 50 entries in all. Look at the fc node: thresholds is 3.865509, and cosine_similarity is 0.999941. This similarity matches the logits line in the log. The S100 is the same: thresholds is 2.823619, and the similarity is 0.999913. The two sides use different definitions, so we don't compare which is bigger.",
+   "dense": true
+  },
+  {
+   "layout": "diagram",
+   "title": "Reading Similarity",
+   "eyebrow": "Cosine Similarity",
+   "heading": "How to ==read similarity==",
+   "height": 560,
+   "scene": [
+    {
+     "type": "text",
+     "id": "r1",
+     "x": 20,
+     "y": 40,
+     "text": "S100 · hb_compile log",
+     "size": 24,
+     "anchor": "start",
+     "color": "ink2"
+    },
+    {
+     "type": "box",
+     "id": "fl",
+     "x": 20,
+     "y": 70,
+     "w": 250,
+     "h": 110,
+     "label": "Float",
+     "kind": "neutral",
+     "size": 30
+    },
+    {
+     "type": "box",
+     "id": "ca",
+     "x": 690,
+     "y": 70,
+     "w": 250,
+     "h": 110,
+     "label": "Calibrated",
+     "kind": "neutral",
+     "size": 30
+    },
+    {
+     "type": "box",
+     "id": "qt",
+     "x": 1330,
+     "y": 70,
+     "w": 250,
+     "h": 110,
+     "label": "Quantized",
+     "kind": "bpu",
+     "sub": "fixed-point",
+     "size": 30,
+     "sub_size": 22
+    },
+    {
+     "type": "arrow",
+     "id": "c_a",
+     "points": [
+      [
+       272,
+       125
+      ],
+      [
+       688,
+       125
+      ]
+     ],
+     "label": "Calibrated 0.999913",
+     "size": 24,
+     "label_at": [
+      480,
+      102
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "c_q",
+     "points": [
+      [
+       145,
+       182
+      ],
+      [
+       145,
+       235
+      ],
+      [
+       1455,
+       235
+      ],
+      [
+       1455,
+       184
+      ]
+     ],
+     "label": "Quantized 0.999856",
+     "size": 24,
+     "label_at": [
+      800,
+      218
+     ]
+    },
+    {
+     "type": "text",
+     "id": "r2",
+     "x": 20,
+     "y": 300,
+     "text": "X5 · makertbin log",
+     "size": 24,
+     "anchor": "start",
+     "color": "ink2"
+    },
+    {
+     "type": "box",
+     "id": "fx",
+     "x": 20,
+     "y": 330,
+     "w": 250,
+     "h": 110,
+     "label": "Float",
+     "kind": "neutral",
+     "size": 30
+    },
+    {
+     "type": "box",
+     "id": "qx",
+     "x": 1330,
+     "y": 330,
+     "w": 250,
+     "h": 110,
+     "label": "Quantized",
+     "kind": "bpu",
+     "sub": "fixed-point",
+     "size": 30,
+     "sub_size": 22
+    },
+    {
+     "type": "arrow",
+     "id": "x_q",
+     "points": [
+      [
+       272,
+       385
+      ],
+      [
+       1328,
+       385
+      ]
+     ],
+     "label": "Cosine Similarity 0.999941",
+     "size": 24,
+     "label_at": [
+      800,
+      362
+     ]
+    },
+    {
+     "type": "text",
+     "id": "cmp",
+     "x": 800,
+     "y": 470,
+     "text": "The two sides use different definitions; do not compare which is better",
+     "size": 26,
+     "anchor": "middle",
+     "color": "accent",
+     "weight": 700
+    },
+    {
+     "type": "text",
+     "id": "thr",
+     "x": 800,
+     "y": 520,
+     "text": "Output-node similarity below 0.8 usually means obvious accuracy loss · only a reference; in the end, task accuracy counts",
+     "size": 24,
+     "anchor": "middle",
+     "color": "accent",
+     "weight": 700
+    }
+   ],
+   "steps": [
+    {
+     "at": 0,
+     "show": [
+      "r1",
+      "fl",
+      "ca",
+      "qt"
+     ],
+     "caption": "S100: three models: float, calibrated, quantized"
+    },
+    {
+     "at": 2000,
+     "show": [
+      "c_a"
+     ],
+     "focus": [
+      "fl",
+      "ca",
+      "c_a"
+     ],
+     "on": [
+      "ca"
+     ],
+     "caption": "Calibrated: float vs. calibrated, 0.999913"
+    },
+    {
+     "at": 4200,
+     "show": [
+      "c_q"
+     ],
+     "focus": [
+      "fl",
+      "qt",
+      "c_q"
+     ],
+     "on": [
+      "qt"
+     ],
+     "caption": "Quantized: float vs. quantized fixed-point, 0.999856"
+    },
+    {
+     "at": 6600,
+     "show": [
+      "r2",
+      "fx",
+      "qx"
+     ],
+     "focus": [
+      "fx",
+      "qx",
+      "r2"
+     ],
+     "on": [
+      "qx"
+     ],
+     "caption": "X5: only one column, float vs. quantized model"
+    },
+    {
+     "at": 8400,
+     "show": [
+      "x_q"
+     ],
+     "focus": [
+      "fx",
+      "qx",
+      "x_q"
+     ],
+     "caption": "Cosine Similarity: 0.999941"
+    },
+    {
+     "at": 10400,
+     "focus": null,
+     "show": [
+      "cmp"
+     ],
+     "caption": "The two sides use different definitions; do not compare which is better"
+    },
+    {
+     "at": 12000,
+     "show": [
+      "thr"
+     ],
+     "caption": "Below 0.8 usually means obvious accuracy loss; only a reference, task accuracy decides"
+    }
+   ],
+   "notes": "After conversion, look at the similarity first. The S100 log has two columns. Calibrated is the cosine between the float model and the calibrated model: 0.999913. Quantized is the cosine between the float model and the quantized fixed-point model: 0.999856. The X5 has only one column. It is the cosine between the float model and the quantized model: 0.999941. The two sides use different definitions, so don't compare which is better. An output-node similarity below 0.8 usually means an obvious accuracy loss. It is only a reference; in the end, what counts is the task accuracy."
+  },
+  {
+   "layout": "table",
+   "title": "Measured Similarity",
+   "eyebrow": "Similarity",
+   "heading": "The ==similarity== of a few nodes",
+   "lead": "Real run · conversion logs; the two sides use different definitions, so read them separately and do not compare sizes.",
+   "head": [
+    {
+     "html": "Where",
+     "style": "width:300px"
+    },
+    "X5 · Cosine",
+    "S100 · Calibrated / Quantized"
+   ],
+   "row_header": true,
+   "rows": [
+    [
+     "Output logits",
+     "0.999941",
+     "0.999913 / 0.999856"
+    ],
+    [
+     "GlobalAveragePool",
+     "0.997738",
+     "0.997083 / 0.995166"
+    ],
+    [
+     "Lowest node",
+     "0.996568",
+     "— / 0.973402"
+    ]
+   ],
+   "notes": "Now the nodes. Output logits: the X5 is 0.999941, and the S100's Quantized is 0.999856. GlobalAveragePool: the X5 is 0.997738, and the S100's Quantized is 0.995166. The lowest node on the X5 is 0.996568. The S100's Quantized lowest is 0.973402, in the last residual block. All of them are far above 0.8."
+  },
+  {
+   "layout": "diagram",
+   "title": "On-board Verification",
+   "eyebrow": "Verify on Board",
+   "heading": "Back to the Sample: ==six-step verification==",
+   "height": 560,
+   "scene": [
+    {
+     "type": "box",
+     "id": "v0",
+     "x": 20,
+     "y": 70,
+     "w": 230,
+     "h": 150,
+     "label": "① Rename",
+     "kind": "neutral",
+     "sub": "file name only",
+     "size": 28,
+     "sub_size": 22
+    },
+    {
+     "type": "box",
+     "id": "v1",
+     "x": 286,
+     "y": 70,
+     "w": 230,
+     "h": 150,
+     "label": "② scp",
+     "kind": "neutral",
+     "sub": "to a temp dir on the board",
+     "size": 28,
+     "sub_size": 22
+    },
+    {
+     "type": "arrow",
+     "id": "w1",
+     "points": [
+      [
+       252,
+       145
+      ],
+      [
+       283,
+       145
+      ]
+     ]
+    },
+    {
+     "type": "box",
+     "id": "v2",
+     "x": 552,
+     "y": 70,
+     "w": 230,
+     "h": 150,
+     "label": "③ sha256",
+     "kind": "neutral",
+     "sub": "OK on both boards",
+     "size": 28,
+     "sub_size": 22
+    },
+    {
+     "type": "arrow",
+     "id": "w2",
+     "points": [
+      [
+       518,
+       145
+      ],
+      [
+       549,
+       145
+      ]
+     ]
+    },
+    {
+     "type": "box",
+     "id": "v3",
+     "x": 818,
+     "y": 70,
+     "w": 230,
+     "h": 150,
+     "label": "④ model_info",
+     "kind": "neutral",
+     "sub": "inputs and outputs",
+     "size": 28,
+     "sub_size": 22
+    },
+    {
+     "type": "arrow",
+     "id": "w3",
+     "points": [
+      [
+       784,
+       145
+      ],
+      [
+       815,
+       145
+      ]
+     ]
+    },
+    {
+     "type": "box",
+     "id": "v4",
+     "x": 1084,
+     "y": 70,
+     "w": 230,
+     "h": 150,
+     "label": "⑤ main.py",
+     "kind": "neutral",
+     "sub": "read the Top-5",
+     "size": 28,
+     "sub_size": 22
+    },
+    {
+     "type": "arrow",
+     "id": "w4",
+     "points": [
+      [
+       1050,
+       145
+      ],
+      [
+       1081,
+       145
+      ]
+     ]
+    },
+    {
+     "type": "box",
+     "id": "v5",
+     "x": 1350,
+     "y": 70,
+     "w": 230,
+     "h": 150,
+     "label": "⑥ Compare",
+     "kind": "neutral",
+     "sub": "vs. release artifact",
+     "size": 28,
+     "sub_size": 22
+    },
+    {
+     "type": "arrow",
+     "id": "w5",
+     "points": [
+      [
+       1316,
+       145
+      ],
+      [
+       1347,
+       145
+      ]
+     ]
+    },
+    {
+     "type": "text",
+     "id": "n1",
+     "x": 800,
+     "y": 300,
+     "text": "resnet_x5.bin  →  resnet18_bayese_224x224_nv12.bin",
+     "size": 26,
+     "font": "mono",
+     "color": "ink2"
+    },
+    {
+     "type": "text",
+     "id": "n2",
+     "x": 800,
+     "y": 345,
+     "text": "resnet_s100.hbm  →  resnet18_nashe_224x224_nv12.hbm",
+     "size": 26,
+     "font": "mono",
+     "color": "ink2"
+    },
+    {
+     "type": "text",
+     "id": "n3",
+     "x": 800,
+     "y": 430,
+     "text": "The name in model_info does not change: own resnet_x5, release artifact resnet18_224_x5",
+     "size": 26,
+     "anchor": "middle",
+     "color": "accent",
+     "weight": 700
+    }
+   ],
+   "steps": [
+    {
+     "at": 0,
+     "show": [
+      "v0"
+     ],
+     "on": [
+      "v0"
+     ],
+     "caption": "Step 1: rename to the release name"
+    },
+    {
+     "at": 1600,
+     "show": [
+      "n1",
+      "n2"
+     ],
+     "focus": [
+      "v0",
+      "n1",
+      "n2"
+     ],
+     "caption": "File name only, one for each of the two boards"
+    },
+    {
+     "at": 3600,
+     "focus": null,
+     "show": [
+      "n3"
+     ],
+     "caption": "The name recorded inside the model does not change: own resnet_x5, release artifact resnet18_224_x5"
+    },
+    {
+     "at": 5200,
+     "show": [
+      "w1",
+      "v1"
+     ],
+     "focus": [
+      "v1",
+      "w1"
+     ],
+     "on": [
+      "v1"
+     ],
+     "caption": "Step 2: scp to a temporary directory on the board"
+    },
+    {
+     "at": 6800,
+     "show": [
+      "w2",
+      "v2"
+     ],
+     "focus": [
+      "v2",
+      "w2"
+     ],
+     "on": [
+      "v2"
+     ],
+     "caption": "Step 3: check the sha256"
+    },
+    {
+     "at": 8400,
+     "show": [
+      "w3",
+      "v3"
+     ],
+     "focus": [
+      "v3",
+      "w3"
+     ],
+     "on": [
+      "v3"
+     ],
+     "caption": "Step 4: model_info shows inputs and outputs"
+    },
+    {
+     "at": 10000,
+     "show": [
+      "w4",
+      "v4"
+     ],
+     "focus": [
+      "v4",
+      "w4"
+     ],
+     "on": [
+      "v4"
+     ],
+     "caption": "Step 5: main.py reads the Top-5"
+    },
+    {
+     "at": 11600,
+     "show": [
+      "w5",
+      "v5"
+     ],
+     "focus": [
+      "v5",
+      "w5"
+     ],
+     "on": [
+      "v5"
+     ],
+     "caption": "Step 6: compare with the release artifact"
+    }
+   ],
+   "notes": "The artifacts go back into the Sample for board verification, in six steps. Step one, rename to the release name, changing only the file name. The name recorded inside the model doesn't change: our own model-name prefix is resnet_x5, and the release artifact's is resnet18_224_x5. This prefix was specified by us at conversion time, so it differs from the release artifact, and that doesn't affect use. Step two, copy to a temporary directory on the board with scp. Step three, check the sha256: OK on both boards. Step four, model_info to look at the inputs and outputs. Step five, main.py to read the Top-5. Step six, compare with the release artifact."
+  },
+  {
+   "layout": "code",
+   "title": "X5 Verification",
+   "eyebrow": "Verify · X5",
+   "heading": "X5: our own artifact ==on the board==",
+   "blocks": [
+    {
+     "label": "① Model information",
+     "lines": [
+      "$ hrt_model_exec model_info \\",
+      "  --model_file <own artifact>",
+      {
+       "text": "→ resnet_x5 · data · NV12 · (1,3,224,224)",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "--dry-run shows the input protocol: packed_nv12"
+     }
+    },
+    {
+     "label": "② Run main.py",
+     "lines": [
+      {
+       "text": "$ python3 samples/vision/resnet/runtime/python/main.py \\",
+       "hl": true
+      },
+      "  --target x5 --asset-id <ID> --model-path <own .bin>",
+      {
+       "text": "Rank 1: class=270, label=white wolf, …, score=0.997102",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "--test-img and --label-file omitted"
+     }
+    }
+   ],
+   "notes": "Let's start with the X5. model_info: model name resnet_x5, input data, NV12, 1, 3, 224, 224, and the source is pyramid. The model name is our own; its prefix differs from the release artifact's resnet18_224_x5. The dry run shows packed_nv12, so the input structure is the same as the release artifact's. Run main.py with target x5, using our own bin. First place: white wolf, score 0.997102.",
+   "lead": "model_info shows the inputs; then run main.py with our own .bin (--asset-id reuses the release artifact's ID)."
+  },
+  {
+   "layout": "code",
+   "title": "S100 Verification",
+   "eyebrow": "Verify · S100",
+   "heading": "S100: our own artifact ==on the board==",
+   "blocks": [
+    {
+     "label": "① Model information",
+     "lines": [
+      "$ hrt_model_exec model_info \\",
+      "  --model_file <own artifact>",
+      {
+       "text": "→ resnet_s100 · data_y + data_uv · U8",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "--dry-run shows the input protocol: split_nv12"
+     }
+    },
+    {
+     "label": "② Run main.py",
+     "lines": [
+      {
+       "text": "$ python3 samples/vision/resnet/runtime/python/main.py \\",
+       "hl": true
+      },
+      "  --target s100 --asset-id <ID> --model-path <own .hbm>",
+      {
+       "text": "Rank 1: class=270, label=white wolf, …, score=0.998149",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "Only target changes to s100"
+     }
+    }
+   ],
+   "notes": "Now the S100. In model_info there are two inputs: data_y and data_uv. Y is 1, 224, 224, 1, and UV is 1, 112, 112, 2. The dry run shows split_nv12. Run main.py, changing only the target to s100, and using our own hbm. First place is again white wolf, with a score of 0.998149. The model name is again our own resnet_s100, and the release artifact's is resnet18_224_s100.",
+   "lead": "The same two steps; only target, asset-id and the artifact change."
+  },
+  {
+   "layout": "table",
+   "title": "Compare with the Release",
+   "eyebrow": "Compare",
+   "heading": "Our own ==vs.== the release artifact",
+   "lead": "Real run · X5U / S100, Top-1 scores; compare Top-1 and score magnitude; five classes need not match.",
+   "head": [
+    {
+     "html": "Image · board",
+     "style": "width:260px"
+    },
+    "Our own",
+    "Release artifact",
+    "Note"
+   ],
+   "row_header": true,
+   "rows": [
+    [
+     "White wolf · X5",
+     {
+      "html": "0.997102",
+      "cls": "hc"
+     },
+     "0.998090",
+     "Top-5 classes and order identical"
+    ],
+    [
+     "White wolf · S100",
+     {
+      "html": "0.998149",
+      "cls": "hc"
+     },
+     "0.998109",
+     "First two match; places 3–5 differ slightly"
+    ],
+    [
+     "Zebra · X5",
+     {
+      "html": "0.999962",
+      "cls": "hc"
+     },
+     "0.999974",
+     "Top-1 is zebra in both"
+    ],
+    [
+     "Zebra · S100",
+     {
+      "html": "0.999976",
+      "cls": "hc"
+     },
+     "0.999971",
+     "Top-1 is zebra in both"
+    ]
+   ],
+   "notes": "Let's compare with the release artifact. Top-1 is white wolf in both, and the zebra image is the same too. On the X5, our own model and the release artifact have exactly the same Top-5 classes, in the same order. On the S100, the first two match the release artifact. Third to fifth place have scores on the order of one ten-thousandth, and the order and a few classes differ slightly. The white wolf's Top-1 score: X5 own 0.997102, release artifact 0.998090. S100 own 0.998149, release artifact 0.998109. So look at Top-1 and the order of magnitude of the scores; the five classes need not match exactly."
+  },
+  {
+   "layout": "table",
+   "title": "Board Speed",
+   "eyebrow": "Speed",
+   "heading": "Board ==speed==",
+   "lead": "Real run · perf, 200 frames, single thread; each board is measured on its own, with no cross-board comparison.",
+   "head": [
+    {
+     "html": "Board",
+     "style": "width:200px"
+    },
+    "Own · three latencies (ms)",
+    "Own · FPS",
+    "Release artifact"
+   ],
+   "row_header": true,
+   "rows": [
+    [
+     "X5U",
+     "3.108 · 3.066 · 3.118",
+     "320.4 · 325.0 · 319.6",
+     "3.112 ms · 320.1"
+    ],
+    [
+     "S100",
+     "0.638 · 0.630 · 0.630",
+     "1524 · 1543 · 1542",
+     "0.641 ms · 1514"
+    ]
+   ],
+   "notes": "Now speed, using perf, 200 frames, single thread. On the X5, our own model ran three times, 3.066 to 3.118 milliseconds, and the release artifact is 3.112 milliseconds. On the S100, ours is 0.630 to 0.638 milliseconds, and the release artifact 0.641 milliseconds. That works out to about 320 frames per second on the X5, and over fifteen hundred frames per second on the S100. Ours and the release artifact differ by less than two percent. Each board is measured on its own, with no cross-board comparison. The frame rate the compiler gives in the log is only an estimate."
+  },
+  {
+   "layout": "diagram",
+   "title": "How Evaluation Works",
+   "eyebrow": "Evaluation Pipeline",
+   "heading": "How ==evaluation== works",
+   "height": 560,
+   "scene": [
+    {
+     "type": "box",
+     "id": "e0",
+     "x": 25,
+     "y": 40,
+     "w": 270,
+     "h": 160,
+     "label": "1 Data",
+     "kind": "neutral",
+     "sub": "ImageNetV2",
+     "size": 32,
+     "sub_size": 22
+    },
+    {
+     "type": "text",
+     "id": "f0",
+     "x": 160,
+     "y": 232,
+     "text": "10,000 images · 1000 classes",
+     "size": 22,
+     "anchor": "middle",
+     "color": "ink2"
+    },
+    {
+     "type": "box",
+     "id": "e1",
+     "x": 345,
+     "y": 40,
+     "w": 270,
+     "h": 160,
+     "label": "2 Preprocess",
+     "kind": "neutral",
+     "sub": "resize · crop 224",
+     "size": 32,
+     "sub_size": 22
+    },
+    {
+     "type": "text",
+     "id": "f1",
+     "x": 480,
+     "y": 232,
+     "text": "Same rule on both paths",
+     "size": 22,
+     "anchor": "middle",
+     "color": "ink2"
+    },
+    {
+     "type": "arrow",
+     "id": "ea1",
+     "points": [
+      [
+       297,
+       120
+      ],
+      [
+       342,
+       120
+      ]
+     ]
+    },
+    {
+     "type": "box",
+     "id": "e2",
+     "x": 665,
+     "y": 40,
+     "w": 270,
+     "h": 160,
+     "label": "3 Model",
+     "kind": "neutral",
+     "sub": "FP32 or quantized",
+     "size": 32,
+     "sub_size": 22
+    },
+    {
+     "type": "text",
+     "id": "f2",
+     "x": 800,
+     "y": 232,
+     "text": "Outputs 1000 scores",
+     "size": 22,
+     "anchor": "middle",
+     "color": "ink2"
+    },
+    {
+     "type": "arrow",
+     "id": "ea2",
+     "points": [
+      [
+       617,
+       120
+      ],
+      [
+       662,
+       120
+      ]
+     ]
+    },
+    {
+     "type": "box",
+     "id": "e3",
+     "x": 985,
+     "y": 40,
+     "w": 270,
+     "h": 160,
+     "label": "4 Take Top-K",
+     "kind": "neutral",
+     "sub": "sort the scores",
+     "size": 32,
+     "sub_size": 22
+    },
+    {
+     "type": "text",
+     "id": "f3",
+     "x": 1120,
+     "y": 232,
+     "text": "Take the top 5",
+     "size": 22,
+     "anchor": "middle",
+     "color": "ink2"
+    },
+    {
+     "type": "arrow",
+     "id": "ea3",
+     "points": [
+      [
+       937,
+       120
+      ],
+      [
+       982,
+       120
+      ]
+     ]
+    },
+    {
+     "type": "box",
+     "id": "e4",
+     "x": 1305,
+     "y": 40,
+     "w": 270,
+     "h": 160,
+     "label": "5 Statistics",
+     "kind": "neutral",
+     "sub": "Top-1 / Top-5",
+     "size": 32,
+     "sub_size": 22
+    },
+    {
+     "type": "text",
+     "id": "f4",
+     "x": 1440,
+     "y": 232,
+     "text": "correct ÷ total",
+     "size": 22,
+     "anchor": "middle",
+     "color": "ink2"
+    },
+    {
+     "type": "arrow",
+     "id": "ea4",
+     "points": [
+      [
+       1257,
+       120
+      ],
+      [
+       1302,
+       120
+      ]
+     ]
+    },
+    {
+     "type": "text",
+     "id": "nt",
+     "x": 160,
+     "y": 268,
+     "text": "Not the ILSVRC2012 val set",
+     "size": 24,
+     "weight": 700,
+     "anchor": "middle",
+     "color": "red"
+    },
+    {
+     "type": "text",
+     "id": "def",
+     "x": 800,
+     "y": 322,
+     "text": "Top-1: first place = label  ·  Top-5: label is among the top 5",
+     "size": 27,
+     "weight": 700,
+     "anchor": "middle",
+     "color": "blue"
+    },
+    {
+     "type": "box",
+     "id": "fp",
+     "x": 230,
+     "y": 380,
+     "w": 520,
+     "h": 110,
+     "label": "evaluate.py",
+     "kind": "cpu",
+     "sub": "computer · float ONNX",
+     "size": 30,
+     "sub_size": 22
+    },
+    {
+     "type": "box",
+     "id": "bd",
+     "x": 850,
+     "y": 380,
+     "w": 520,
+     "h": 110,
+     "label": "evaluate_board.py",
+     "kind": "bpu",
+     "sub": "on the board · .bin / .hbm",
+     "size": 30,
+     "sub_size": 22
+    }
+   ],
+   "steps": [
+    {
+     "at": 0,
+     "show": [
+      "e0",
+      "f0"
+     ],
+     "on": [
+      "e0"
+     ],
+     "caption": "Data: ImageNetV2 MatchedFrequency"
+    },
+    {
+     "at": 2000,
+     "show": [
+      "nt"
+     ],
+     "caption": "Not the ILSVRC2012 val set; the numbers cannot be compared with each other"
+    },
+    {
+     "at": 4000,
+     "show": [
+      "ea1",
+      "e1",
+      "f1"
+     ],
+     "focus": [
+      "e1",
+      "f1",
+      "ea1"
+     ],
+     "on": [
+      "e1"
+     ],
+     "caption": "Preprocessing: resize, crop to 224"
+    },
+    {
+     "at": 6000,
+     "show": [
+      "ea2",
+      "e2",
+      "f2"
+     ],
+     "focus": [
+      "e2",
+      "f2",
+      "ea2"
+     ],
+     "on": [
+      "e2"
+     ],
+     "caption": "Model: outputs 1000 scores"
+    },
+    {
+     "at": 8000,
+     "show": [
+      "ea3",
+      "e3",
+      "f3"
+     ],
+     "focus": [
+      "e3",
+      "f3",
+      "ea3"
+     ],
+     "on": [
+      "e3"
+     ],
+     "caption": "Top-K: sort the scores, take the top 5"
+    },
+    {
+     "at": 10000,
+     "show": [
+      "def"
+     ],
+     "focus": [
+      "e3",
+      "def"
+     ],
+     "caption": "Top-1: first place is the label; Top-5: the label is in the top 5"
+    },
+    {
+     "at": 12000,
+     "show": [
+      "ea4",
+      "e4",
+      "f4"
+     ],
+     "focus": [
+      "e4",
+      "f4",
+      "ea4"
+     ],
+     "on": [
+      "e4"
+     ],
+     "caption": "Statistics: Top-1 and Top-5"
+    },
+    {
+     "at": 14000,
+     "focus": null,
+     "show": [
+      "fp"
+     ],
+     "on": [
+      "fp"
+     ],
+     "caption": "On the computer, evaluate.py evaluates the float ONNX"
+    },
+    {
+     "at": 16000,
+     "show": [
+      "bd"
+     ],
+     "on": [
+      "bd"
+     ],
+     "caption": "On the board, evaluate_board.py evaluates the bin or hbm"
+    }
+   ],
+   "notes": "Stage five, evaluation. Evaluation means comparing accuracy on a dataset, and the pipeline has five steps: data, preprocessing, model, take the top few, and statistics. The data is the MatchedFrequency set of ImageNetV2: ten thousand images, one thousand classes. Note that it is not the ILSVRC 2012 validation set, so the numbers cannot be compared with that set's. Preprocessing is resize and crop to 224, with the same rule on both paths. The model gives one thousand scores, which are sorted to take the top five. If the first place equals the label, it counts as Top-1 correct; if the label is among the top five, it counts as Top-5 correct. The statistic is the proportion of correct images out of the total. On the PC, evaluate.py evaluates the float ONNX. On the board, evaluate_board.py evaluates the bin or hbm."
+  },
+  {
+   "layout": "code",
+   "title": "FP32 Evaluation Demo",
+   "eyebrow": "Evaluate · FP32",
+   "heading": "FP32 evaluation: ==demo subset==",
+   "lead": "Real run · 200-image demo subset, not representative of the full dataset; all 1834 images: Top-1 60.74% · Top-5 81.52%. Other arguments omitted.",
+   "blocks": [
+    {
+     "label": "① Evaluate on the computer (evaluate.py)",
+     "lines": [
+      {
+       "text": "$ python samples/vision/resnet/evaluator/evaluate.py \\",
+       "hl": true
+      },
+      "  --model resnet18 --manifest <list> --expected-images 200 \\",
+      "  --export-dir <export> --images-root <data> --output <new dir>"
+     ],
+     "note": {
+      "k": "Key point",
+      "p": "An image count that does not match the list is an error; the output directory must be new"
+     }
+    },
+    {
+     "label": "② Look at the result (evaluation.json)",
+     "lines": [
+      "$ jq -c '.metrics, .correct' evaluation.json",
+      {
+       "text": "{\"top1\":0.625,\"top5\":0.835}",
+       "out": true
+      },
+      {
+       "text": "{\"top1\":125,\"top5\":167}",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "Demo subset",
+      "p": "Top-1 62.5% · Top-5 83.5%; covers only 124 classes"
+     }
+    }
+   ],
+   "notes": "First, let's demonstrate a float evaluation on the PC. The evaluation list is a subset for demonstration, not the full dataset. Here only 200 images are used: Top-1 is 62.5%, and Top-5 is 83.5%. The demonstration list has 1834 images in all. Running all of them gives 60.74% and 81.52%. These images cover only some of the classes. The numbers only demonstrate how to measure; they don't represent the accuracy on the full dataset. They are also not compared with the numbers in the README. The command has two safeguards: a mismatch between the image count and the list is an error, and the output directory must be new."
+  },
+  {
+   "layout": "code",
+   "title": "Board Evaluation Commands",
+   "eyebrow": "Evaluate · Board",
+   "heading": "On-board evaluation: ==a real run==",
+   "dense": true,
+   "blocks": [
+    {
+     "label": "① X5 · .bin (run on the board)",
+     "lines": [
+      {
+       "text": "$ python3 .../evaluator/evaluate_board.py --target x5 --variant resnet18 \\",
+       "hl": true
+      },
+      "  --model own/resnet18_bayese_224x224_nv12.bin --model-sha256 7f8fa575…c3374a \\",
+      "  --campaign campaign.json --manifest manifest.json --data-root data --output x5_demo200",
+      {
+       "text": "{\"target\": \"x5\", \"count\": 200, \"top1\": 0.63, \"top5\": 0.84}",
+       "out": true
+      }
+     ],
+     "wide": true
+    },
+    {
+     "label": "② S100 · .hbm (swap target, model, checksum and output directory; the rest as for the X5)",
+     "lines": [
+      {
+       "text": "$ python3 .../evaluate_board.py --target s100 --model own/resnet18_nashe_…nv12.hbm …",
+       "hl": true
+      },
+      {
+       "text": "{\"target\": \"s100\", \"count\": 200, \"top1\": 0.635, \"top5\": 0.845}",
+       "out": true
+      }
+     ],
+     "wide": true
+    },
+    {
+     "label": "③ Three-way comparison: Top-1 / Top-5 / per-image Top-1 agreement with FP32 (200-image demo subset; only shows the flow runs through)",
+     "lines": [
+      "FP32 (ONNX)      62.5%   83.5%   —",
+      {
+       "text": "X5   .bin        63.0%   84.0%   177 / 200",
+       "hl": true
+      },
+      {
+       "text": "S100 .hbm        63.5%   84.5%   182 / 200",
+       "hl": true
+      }
+     ],
+     "wide": true
+    }
+   ],
+   "notes": "For evaluation on the board we use evaluate_board.py, and below are the actual run records on the X5 and the S100. First the X5, where the model parameter is our own bin. model-sha256 guarantees that exactly this file is what gets evaluated. campaign supplies the preprocessing rules and the image count, and manifest is the image list. The output is one line of JSON: 200 images, Top-1 is 63.0%, and Top-5 is 84.0%. For the S100, swap in the target, the model file, the checksum, and the output directory, and everything else is the same. Its result is Top-1 63.5%, and Top-5 84.5%. Putting the three results together: float is 62.5% and 83.5%. The X5 is 63.0% and 84.0%, and the S100 is 63.5% and 84.5%. The board gets one or two more images right than float, which is within noise, so we can't say quantization improved the accuracy. Looking image by image, the images whose Top-1 class matches float number 177 on the X5 and 182 on the S100. This is the 200-image demo subset, and it is not compared with the README numbers. This page says just one thing: the flow runs through. We suggest you try it after class: run the float and the board evaluation with the same list, and compare the two results."
+  },
+  {
+   "layout": "bullets",
+   "variant": "split",
+   "title": "Five Rules",
+   "eyebrow": "Rules",
+   "heading": "The ==five rules== of conversion",
+   "lead": "When it will not run, or the numbers do not match, check these five first.",
+   "items": [
+    {
+     "mark": "num",
+     "text": "The image needs --entrypoint ''"
+    },
+    {
+     "mark": "num",
+     "text": "PTQ runs on the CPU alone; a GPU is only an optional speed-up; CUDA messages in the log can be ignored"
+    },
+    {
+     "mark": "num",
+     "text": "Calibration preprocessing must match deployment"
+    },
+    {
+     "mark": "num",
+     "text": "Switching board types means converting again (S100P uses nash-m)"
+    },
+    {
+     "mark": "num",
+     "text": "Verify with Top-1 and the order of magnitude of the scores"
+    }
+   ],
+   "notes": "Finally, five rules. One, the image needs an empty entrypoint, otherwise you get 126. Two, PTQ can be done on the CPU alone, and the GPU is only an optional speed-up; the CUDA messages in the log can be ignored. Three, the calibration preprocessing must match the deployment. Four, artifacts are compiled per board type, and switching board types means converting again. The S100P needs a separate conversion with nash-m. Five, for verification, look at Top-1 and the order of magnitude of the scores."
+  },
+  {
+   "layout": "bullets",
+   "variant": "numbered",
+   "title": "Lesson Summary",
+   "eyebrow": "Summary",
+   "heading": "Lesson Summary",
+   "items": [
+    "Open the OE: docker run into the container, confirm versions with pip list",
+    "Set up: conversion directory → working directory → export ONNX → calibration data → YAML placeholders",
+    "Compile: X5 checker → makertbin; S100 hb_compile",
+    "Read the logs, artifacts and similarity, then put them back into the Sample and verify on the board",
+    "Numbers from the 200-image demo subset only show the flow runs through; both boards give white wolf as Top-1"
+   ],
+   "notes": "Let's review the operations in this lesson. One, open the OE: docker run into the container, and confirm the versions with pip list. Two, set up the environment: following the conversion directory, create the working directory, export ONNX, prepare the calibration data, and replace the YAML placeholders. Three, compile: on the X5, checker first and then makertbin; on the S100, a single hb_compile. Four, read the logs, the artifacts, and the similarity, then put them back into the Sample and verify on the board. The numbers in this lesson come from a 200-image demo subset, and they only show that the flow runs through. The artifacts on the X5 and the S100 both give white wolf as Top-1."
+  },
+  {
+   "layout": "closing",
+   "title": "Next Lesson",
+   "eyebrow": "Up Next · Lesson 2-04",
+   "heading": "Next lesson: ==quantizing YOLO==",
+   "lead": "Taking YOLO as the example: a detection model's output head differs from classification, so where does the postprocessing go; then calibration methods, per-layer / per-channel, int8 / int16 mixed precision, and accuracy troubleshooting.",
+   "cards": [
+    {
+     "icon": "grid",
+     "tone": "orange",
+     "k": "Different output head",
+     "d": "Output structure of detection vs. classification"
+    },
+    {
+     "icon": "book-open",
+     "tone": "blue",
+     "k": "Calibration and accuracy",
+     "d": "Per-layer / per-channel, mixed precision"
+    },
+    {
+     "icon": "rocket",
+     "tone": "green",
+     "k": "Accuracy troubleshooting",
+     "d": "What to check when similarity is low"
+    }
+   ],
+   "full_logo": true,
+   "notes": "Next lesson, Lesson 4 of Chapter 2: quantization, using YOLO as the example. A detection model's output head is completely different from a classification model's, so where does the postprocessing go? We'll also cover calibration methods, per-layer versus per-channel, int8 and int16 mixed precision, and accuracy troubleshooting, all in one go."
+  }
+ ]
+}
