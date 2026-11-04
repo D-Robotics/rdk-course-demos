@@ -1,0 +1,2038 @@
+{
+  "meta": {
+    "title": "[RDK Classroom] Chapter 2 Model Zoo · Lesson 4 | YOLO Quantization",
+    "lang": "en",
+    "mode": "deck",
+    "tag": "RDK Classroom 2-04",
+    "footer": "YOLO Quantization",
+    "theme": {},
+    "rebuild": "value-line-20261105",
+    "sections": [
+      {
+        "num": "01",
+        "title": "Output Heads",
+        "sub": "Multi-scale · DFL protocol"
+      },
+      {
+        "num": "02",
+        "title": "Cut & Decode",
+        "sub": "Export cut-point · decode_dfl"
+      },
+      {
+        "num": "03",
+        "title": "Mapper & Sensitive Layers",
+        "sub": "One command · Softmax · int16"
+      },
+      {
+        "num": "04",
+        "title": "On-board & Accuracy Triage",
+        "sub": "model_info · measured · debug"
+      }
+    ]
+  },
+  "slides": [
+    {
+      "layout": "series-cover",
+      "chapter": 2,
+      "chapter_name": "Model Zoo",
+      "lesson": 4,
+      "title": "YOLO Quantization",
+      "highlight": "YOLO",
+      "subtitle": "YOLO opts: cut post · less compute · better on board",
+      "visual": "assets/yolo11-detect-cover.webp",
+      "theme": "light",
+      "notes": "Chapter 2 Model Zoo, lesson 4: YOLO quantization. Last lesson we finished a full ResNet PTQ. This lesson moves to detection—how to cut the heads, where post-process lives, and how to raise sensitive layers. The toolchain adds YOLO-specific opts: cut post-process from the graph, decode on the board, and tune sensitive layers—cutting compute so detection runs better on the board. About fifteen minutes: a clear route, and commands you can follow."
+    },
+    {
+      "layout": "cards",
+      "title": "Lesson Route",
+      "eyebrow": "Roadmap",
+      "heading": "This lesson: ==four questions==",
+      "lead": "YOLO-specific opts → less compute → better on board.",
+      "cols": 2,
+      "cards": [
+        {
+          "num": "01",
+          "title": "Heads",
+          "text": "Multi-scale outs; protocol from export bindings."
+        },
+        {
+          "num": "02",
+          "title": "Cut & decode",
+          "text": "Cut post at export; decode_dfl on board."
+        },
+        {
+          "num": "03",
+          "title": "Mapper",
+          "text": "One mapper; Softmax; int16 if needed."
+        },
+        {
+          "num": "04",
+          "title": "Triage",
+          "text": "model_info + main; triage by drop size."
+        }
+      ],
+      "notes": "Four questions. The toolchain adds YOLO-specific opts—cut post-process, decode on board, raise sensitive layers—so compute drops and detection runs better on the board. First, output heads: classification is one logits path; detection is three strides, each with cls and DFL. Second, cut and decode: export drops post-process; the board restores it with decode_dfl. Third, mapper and sensitive layers: one command into the toolchain; Softmax needs its own setting; raise int16 if still short. Fourth, on-board verify—if accuracy drops, triage before you touch knobs."
+    },
+    {
+      "layout": "links",
+      "title": "Companion Resources",
+      "eyebrow": "Resources",
+      "heading": "Course materials and entry points",
+      "items": [
+        {
+          "k": "Course content (notes)",
+          "d": "RDK Classroom notes · Pages",
+          "url": "https://d-robotics.github.io/rdk-course-demos/zh/"
+        },
+        {
+          "k": "Course repo",
+          "d": "rdk-course-demos (notes + HTML decks)",
+          "url": "https://github.com/D-Robotics/rdk-course-demos"
+        },
+        {
+          "k": "RDK Model Zoo",
+          "d": "ultralytics_yolo Sample",
+          "url": "https://github.com/D-Robotics/rdk_model_zoo"
+        },
+        {
+          "k": "YOLO conversion",
+          "d": "Export · mapper · sensitive layers",
+          "url": "https://github.com/D-Robotics/rdk_model_zoo/tree/main/samples/vision/ultralytics_yolo/conversion"
+        },
+        {
+          "k": "X5 OE docs",
+          "d": "accuracy_tune / toolchain",
+          "url": "https://developer.d-robotics.cc/oe_x5_doc"
+        },
+        {
+          "k": "S OE docs",
+          "d": "accuracy_debug / toolchain",
+          "url": "https://developer.d-robotics.cc/oe_s_doc"
+        }
+      ],
+      "notes": "Open with the course Pages and the course repository."
+    },
+    {
+      "layout": "section",
+      "title": "Part 01",
+      "eyebrow": "Chapter 01",
+      "heading": "Output Heads",
+      "num": "01",
+      "lead": "Contrast with ResNet first: detection is not one logits path.",
+      "notes": "Part one: detection model output heads.",
+      "sub": "Not one logits path: multi-scale, multi-tensor, protocol must match."
+    },
+    {
+      "layout": "diagram",
+      "title": "Head Contrast",
+      "eyebrow": "Heads · ResNet vs YOLO",
+      "heading": "Not one logits path: ==three cls + DFL==",
+      "height": 560,
+      "scene": [
+        {
+          "type": "band",
+          "id": "bl",
+          "x": 20,
+          "y": 50,
+          "w": 520,
+          "h": 360,
+          "label": "ResNet (contrast)",
+          "label_at": [
+            280,
+            35
+          ],
+          "anchor": "middle"
+        },
+        {
+          "type": "box",
+          "id": "rin",
+          "x": 110,
+          "y": 120,
+          "w": 340,
+          "h": 100,
+          "label": "Input 224",
+          "kind": "cpu",
+          "size": 30,
+          "sub": "Single feature path",
+          "sub_size": 20
+        },
+        {
+          "type": "arrow",
+          "id": "ra",
+          "points": [
+            [
+              280,
+              222
+            ],
+            [
+              280,
+              260
+            ]
+          ]
+        },
+        {
+          "type": "box",
+          "id": "rout",
+          "x": 110,
+          "y": 270,
+          "w": 340,
+          "h": 100,
+          "label": "One logits path",
+          "kind": "neutral",
+          "size": 28,
+          "sub": "1000-d · Softmax in runtime",
+          "sub_size": 18
+        },
+        {
+          "type": "band",
+          "id": "by",
+          "x": 580,
+          "y": 50,
+          "w": 1000,
+          "h": 360,
+          "label": "YOLO Detect (DFL)",
+          "label_at": [
+            1080,
+            35
+          ],
+          "anchor": "middle"
+        },
+        {
+          "type": "box",
+          "id": "yin",
+          "x": 620,
+          "y": 110,
+          "w": 280,
+          "h": 90,
+          "label": "Input 640",
+          "kind": "cpu",
+          "size": 28,
+          "sub": "backbone / neck",
+          "sub_size": 18
+        },
+        {
+          "type": "box",
+          "id": "s8",
+          "x": 960,
+          "y": 70,
+          "w": 280,
+          "h": 80,
+          "label": "stride 8 · 80×80",
+          "kind": "bpu",
+          "size": 24,
+          "sub": "cls + DFL 64",
+          "sub_size": 18
+        },
+        {
+          "type": "box",
+          "id": "s16",
+          "x": 960,
+          "y": 170,
+          "w": 280,
+          "h": 80,
+          "label": "stride 16 · 40×40",
+          "kind": "bpu",
+          "size": 24,
+          "sub": "cls + DFL 64",
+          "sub_size": 18
+        },
+        {
+          "type": "box",
+          "id": "s32",
+          "x": 960,
+          "y": 270,
+          "w": 280,
+          "h": 80,
+          "label": "stride 32 · 20×20",
+          "kind": "bpu",
+          "size": 24,
+          "sub": "cls + DFL 64",
+          "sub_size": 18
+        },
+        {
+          "type": "box",
+          "id": "cut",
+          "x": 1290,
+          "y": 150,
+          "w": 260,
+          "h": 120,
+          "label": "Export cut-point",
+          "kind": "neutral",
+          "size": 28,
+          "sub": "Six tensors stay in-graph",
+          "sub_size": 18
+        },
+        {
+          "type": "arrow",
+          "id": "a8",
+          "points": [
+            [
+              900,
+              155
+            ],
+            [
+              958,
+              110
+            ]
+          ],
+          "mode": "flow",
+          "color": "orange"
+        },
+        {
+          "type": "arrow",
+          "id": "a16",
+          "points": [
+            [
+              900,
+              155
+            ],
+            [
+              958,
+              210
+            ]
+          ],
+          "mode": "flow",
+          "color": "orange"
+        },
+        {
+          "type": "arrow",
+          "id": "a32",
+          "points": [
+            [
+              900,
+              155
+            ],
+            [
+              958,
+              310
+            ]
+          ],
+          "mode": "flow",
+          "color": "orange"
+        },
+        {
+          "type": "arrow",
+          "id": "c8",
+          "points": [
+            [
+              1240,
+              110
+            ],
+            [
+              1288,
+              180
+            ]
+          ],
+          "mode": "flow",
+          "color": "blue"
+        },
+        {
+          "type": "arrow",
+          "id": "c16",
+          "points": [
+            [
+              1240,
+              210
+            ],
+            [
+              1288,
+              210
+            ]
+          ],
+          "mode": "flow",
+          "color": "blue"
+        },
+        {
+          "type": "arrow",
+          "id": "c32",
+          "points": [
+            [
+              1240,
+              310
+            ],
+            [
+              1288,
+              240
+            ]
+          ],
+          "mode": "flow",
+          "color": "blue"
+        },
+        {
+          "type": "arrow",
+          "id": "track",
+          "points": [
+            [
+              620,
+              500
+            ],
+            [
+              1540,
+              500
+            ]
+          ],
+          "mode": "flow",
+          "head": true
+        },
+        {
+          "type": "token",
+          "id": "tk",
+          "x": 760,
+          "y": 500,
+          "label": "Feat",
+          "w": 130,
+          "h": 44,
+          "size": 22,
+          "kind": "light"
+        },
+        {
+          "type": "text",
+          "id": "foot",
+          "x": 800,
+          "y": 430,
+          "text": "~8400 cells · DFL ≠ YOLO26 · post-process on board",
+          "size": 22,
+          "anchor": "middle",
+          "color": "ink2"
+        }
+      ],
+      "steps": [
+        {
+          "at": 0,
+          "show": [
+            "bl",
+            "rin",
+            "ra",
+            "rout"
+          ],
+          "on": [
+            "rin"
+          ],
+          "caption": "Classification: one feature path → one logits path"
+        },
+        {
+          "at": 1800,
+          "show": [
+            "by",
+            "yin",
+            "track",
+            "tk"
+          ],
+          "on": [
+            "yin"
+          ],
+          "focus": [
+            "by",
+            "yin",
+            "track",
+            "tk"
+          ],
+          "caption": "Detection: 640 input into backbone / neck"
+        },
+        {
+          "at": 3600,
+          "show": [
+            "s8",
+            "s16",
+            "s32",
+            "a8",
+            "a16",
+            "a32"
+          ],
+          "on": [
+            "s16"
+          ],
+          "focus": [
+            "s8",
+            "s16",
+            "s32",
+            "a8",
+            "a16",
+            "a32",
+            "yin",
+            "track",
+            "tk"
+          ],
+          "move": [
+            {
+              "id": "tk",
+              "path": [
+                [
+                  760,
+                  500
+                ],
+                [
+                  1100,
+                  500
+                ]
+              ]
+            }
+          ],
+          "text": {
+            "tk": "Multi-scale"
+          },
+          "caption": "Three strides: each layer cls logits + DFL 64"
+        },
+        {
+          "at": 5600,
+          "show": [
+            "cut",
+            "c8",
+            "c16",
+            "c32",
+            "foot"
+          ],
+          "on": [
+            "cut"
+          ],
+          "focus": [
+            "cut",
+            "c8",
+            "c16",
+            "c32",
+            "s8",
+            "s16",
+            "s32",
+            "track",
+            "tk",
+            "foot"
+          ],
+          "move": [
+            {
+              "id": "tk",
+              "path": [
+                [
+                  1100,
+                  500
+                ],
+                [
+                  1420,
+                  500
+                ]
+              ]
+            }
+          ],
+          "text": {
+            "tk": "Six outs"
+          },
+          "caption": "Export cut-point: six tensors stay in-graph"
+        }
+      ],
+      "notes": "Contrast with 2-03's single classification output: YOLO is multi-scale multi-tensor. Tokens stay on the bottom rail, never inside boxes."
+    },
+    {
+      "layout": "table",
+      "title": "Output Shapes",
+      "eyebrow": "Shapes · model_info",
+      "heading": "Six tensors: ==shapes and protocol==",
+      "lead": "80 classes · 640 · NHWC; do not guess protocol from tensor count alone.",
+      "headers": [
+        "Path",
+        "Meaning",
+        "valid shape"
+      ],
+      "rows": [
+        [
+          "cls8",
+          "stride8 class",
+          "1×80×80×80"
+        ],
+        [
+          "DFL8",
+          "stride8 box",
+          "1×80×80×64"
+        ],
+        [
+          "cls16",
+          "stride16 class",
+          "1×40×40×80"
+        ],
+        [
+          "DFL16",
+          "stride16 box",
+          "1×40×40×64"
+        ],
+        [
+          "cls32",
+          "stride32 class",
+          "1×20×20×80"
+        ],
+        [
+          "DFL32",
+          "stride32 box",
+          "1×20×20×64"
+        ]
+      ],
+      "note": "DFL ≠ YOLO26 direct-LTRB; follow conversion README and runtime bindings.",
+      "notes": "Cross-check against board logs."
+    },
+    {
+      "layout": "bullets",
+      "title": "Protocol Differences",
+      "eyebrow": "Protocol",
+      "heading": "DFL vs YOLO26: ==not interchangeable==",
+      "lead": "Same task, different output contracts; runtime bindings must match.",
+      "variant": "numbered",
+      "items": [
+        {
+          "title": "DFL family",
+          "text": "YOLOv5u/v8/v9/v10/11/12/13: three cls + three DFL (64 channels)."
+        },
+        {
+          "title": "YOLO26",
+          "text": "direct-LTRB: three cls + three 4-channel boxes; separate exporter."
+        },
+        {
+          "title": "How to tell",
+          "text": "Read export notes and runtime bindings—do not count output tensors alone."
+        },
+        {
+          "title": "Task extensions",
+          "text": "Seg adds mask coeffs/prototypes; pose adds keypoints; classify Softmax stays in runtime."
+        }
+      ],
+      "notes": "DFL-family and YOLO26 protocols differ; artifacts are not interchangeable. Compatibility follows export notes and runtime bindings—do not guess from tensor count. Seg, pose, and classify extend the detect protocol."
+    },
+    {
+      "layout": "section",
+      "title": "Part 02",
+      "num": "02",
+      "heading": "Cut & Decode",
+      "sub": "Where export stops · what the board restores",
+      "lead": "Shorter graphs mean less work for the BPU.",
+      "eyebrow": "Part 02",
+      "notes": "Part two: where post-process lives."
+    },
+    {
+      "layout": "diagram",
+      "title": "Cut & Decode",
+      "eyebrow": "Cut · Decode",
+      "heading": "Graph stops at logits · ==decode_dfl on board==",
+      "height": 560,
+      "scene": [
+        {
+          "type": "band",
+          "id": "pc",
+          "x": 20,
+          "y": 60,
+          "w": 1560,
+          "h": 320,
+          "label": "Host export / compile → board post-process",
+          "label_at": [
+            800,
+            45
+          ],
+          "anchor": "middle"
+        },
+        {
+          "type": "box",
+          "id": "s0",
+          "x": 40,
+          "y": 130,
+          "w": 250,
+          "h": 170,
+          "label": "1 Ultralytics",
+          "kind": "neutral",
+          "size": 26,
+          "sub": ".pt weights",
+          "sub_size": 20
+        },
+        {
+          "type": "text",
+          "id": "u0",
+          "x": 165,
+          "y": 345,
+          "text": "export_monkey_patch",
+          "size": 18,
+          "anchor": "middle",
+          "color": "ink2"
+        },
+        {
+          "type": "box",
+          "id": "s1",
+          "x": 340,
+          "y": 130,
+          "w": 250,
+          "h": 170,
+          "label": "2 ONNX cut",
+          "kind": "bpu",
+          "size": 26,
+          "sub": "Stop at cls/DFL logits",
+          "sub_size": 18
+        },
+        {
+          "type": "text",
+          "id": "u1",
+          "x": 465,
+          "y": 345,
+          "text": "No post-process in graph",
+          "size": 20,
+          "anchor": "middle",
+          "color": "ink2"
+        },
+        {
+          "type": "box",
+          "id": "s2",
+          "x": 640,
+          "y": 130,
+          "w": 250,
+          "h": 170,
+          "label": "3 mapper",
+          "kind": "neutral",
+          "size": 28,
+          "sub": ".bin / .hbm",
+          "sub_size": 20
+        },
+        {
+          "type": "text",
+          "id": "u2",
+          "x": 765,
+          "y": 345,
+          "text": "Compile in OE",
+          "size": 20,
+          "anchor": "middle",
+          "color": "ink2"
+        },
+        {
+          "type": "box",
+          "id": "s3",
+          "x": 940,
+          "y": 130,
+          "w": 280,
+          "h": 170,
+          "label": "4 Board decode",
+          "kind": "cpu",
+          "size": 26,
+          "sub": "score · DFL · xyxy",
+          "sub_size": 18
+        },
+        {
+          "type": "text",
+          "id": "u3",
+          "x": 1080,
+          "y": 345,
+          "text": "decode_dfl",
+          "size": 20,
+          "anchor": "middle",
+          "color": "ink2"
+        },
+        {
+          "type": "box",
+          "id": "s4",
+          "x": 1280,
+          "y": 130,
+          "w": 270,
+          "h": 170,
+          "label": "5 NMS",
+          "kind": "neutral",
+          "size": 28,
+          "sub": "Per binding IoU",
+          "sub_size": 20
+        },
+        {
+          "type": "text",
+          "id": "u4",
+          "x": 1415,
+          "y": 345,
+          "text": "Boxes out",
+          "size": 20,
+          "anchor": "middle",
+          "color": "ink2"
+        },
+        {
+          "type": "arrow",
+          "id": "a1",
+          "points": [
+            [
+              292,
+              215
+            ],
+            [
+              338,
+              215
+            ]
+          ]
+        },
+        {
+          "type": "arrow",
+          "id": "a2",
+          "points": [
+            [
+              592,
+              215
+            ],
+            [
+              638,
+              215
+            ]
+          ]
+        },
+        {
+          "type": "arrow",
+          "id": "a3",
+          "points": [
+            [
+              892,
+              215
+            ],
+            [
+              938,
+              215
+            ]
+          ]
+        },
+        {
+          "type": "arrow",
+          "id": "a4",
+          "points": [
+            [
+              1222,
+              215
+            ],
+            [
+              1278,
+              215
+            ]
+          ]
+        },
+        {
+          "type": "arrow",
+          "id": "track",
+          "points": [
+            [
+              60,
+              500
+            ],
+            [
+              1540,
+              500
+            ]
+          ],
+          "mode": "flow",
+          "head": true
+        },
+        {
+          "type": "token",
+          "id": "tk",
+          "x": 165,
+          "y": 500,
+          "label": "Weights",
+          "w": 130,
+          "h": 44,
+          "size": 22,
+          "kind": "light"
+        },
+        {
+          "type": "text",
+          "id": "cap",
+          "x": 800,
+          "y": 450,
+          "text": "Shorter graph = less BPU work · filter early to save compute",
+          "size": 22,
+          "anchor": "middle",
+          "color": "ink2"
+        }
+      ],
+      "steps": [
+        {
+          "at": 0,
+          "show": [
+            "pc",
+            "s0",
+            "u0",
+            "track",
+            "tk"
+          ],
+          "on": [
+            "s0"
+          ],
+          "caption": "Weights into graph: export_monkey_patch"
+        },
+        {
+          "at": 2000,
+          "show": [
+            "a1",
+            "s1",
+            "u1"
+          ],
+          "on": [
+            "s1"
+          ],
+          "focus": [
+            "s1",
+            "u1",
+            "a1",
+            "track",
+            "tk"
+          ],
+          "move": [
+            {
+              "id": "tk",
+              "path": [
+                [
+                  165,
+                  500
+                ],
+                [
+                  465,
+                  500
+                ]
+              ]
+            }
+          ],
+          "text": {
+            "tk": "logits"
+          },
+          "caption": "Cut-point: Softmax / dist2bbox / NMS stay out of ONNX"
+        },
+        {
+          "at": 4000,
+          "show": [
+            "a2",
+            "s2",
+            "u2"
+          ],
+          "on": [
+            "s2"
+          ],
+          "focus": [
+            "s2",
+            "u2",
+            "a2",
+            "track",
+            "tk"
+          ],
+          "move": [
+            {
+              "id": "tk",
+              "path": [
+                [
+                  465,
+                  500
+                ],
+                [
+                  765,
+                  500
+                ]
+              ]
+            }
+          ],
+          "text": {
+            "tk": "Artifact"
+          },
+          "caption": "mapper compiles to .bin / .hbm inside OE"
+        },
+        {
+          "at": 6000,
+          "show": [
+            "a3",
+            "s3",
+            "u3"
+          ],
+          "on": [
+            "s3"
+          ],
+          "focus": [
+            "s3",
+            "u3",
+            "a3",
+            "track",
+            "tk"
+          ],
+          "move": [
+            {
+              "id": "tk",
+              "path": [
+                [
+                  765,
+                  500
+                ],
+                [
+                  1080,
+                  500
+                ]
+              ]
+            }
+          ],
+          "text": {
+            "tk": "Decode"
+          },
+          "caption": "Board decode_dfl: filter → expectation → xyxy"
+        },
+        {
+          "at": 8000,
+          "show": [
+            "a4",
+            "s4",
+            "u4",
+            "cap"
+          ],
+          "on": [
+            "s4"
+          ],
+          "focus": [
+            "s4",
+            "u4",
+            "a4",
+            "cap",
+            "track",
+            "tk"
+          ],
+          "move": [
+            {
+              "id": "tk",
+              "path": [
+                [
+                  1080,
+                  500
+                ],
+                [
+                  1415,
+                  500
+                ]
+              ]
+            }
+          ],
+          "text": {
+            "tk": "Boxes"
+          },
+          "caption": "NMS then boxes; cut-point and decoder are a pair"
+        }
+      ],
+      "notes": "Structure mirrors 2-03 PTQ five stages: token stays on the bottom rail."
+    },
+    {
+      "layout": "code",
+      "title": "Export Commands",
+      "eyebrow": "export_monkey_patch",
+      "heading": "Export: ==export_monkey_patch.py==",
+      "lead": "Commands from the conversion README; run from the repo root.",
+      "blocks": [
+        {
+          "label": "① X5 (opset 11)",
+          "note": {
+            "k": "Note",
+            "p": "DFL detector; ONNX next to weights"
+          },
+          "lines": [
+            {
+              "text": "python …/export_monkey_patch.py \\",
+              "hl": true
+            },
+            "  --platform x5 --pt /models/yolo11n.pt \\",
+            "  --require-local --opset 11"
+          ]
+        },
+        {
+          "label": "② S600 (opset 19)",
+          "note": {
+            "k": "Note",
+            "p": "S-series default opset 19"
+          },
+          "lines": [
+            {
+              "text": "python …/export_monkey_patch.py \\",
+              "hl": true
+            },
+            "  --platform s600 --pt /models/yolo11n.pt \\",
+            "  --require-local --opset 19"
+          ]
+        }
+      ],
+      "notes": "Real commands—not a comment-only page."
+    },
+    {
+      "layout": "code",
+      "title": "Calibration & Layout",
+      "eyebrow": "conversion · calibrate",
+      "heading": "conversion layout and ==calibration sampling==",
+      "lead": "Repo ships no calibration set; default sample is 20 images—prepare 20–50 representative ones.",
+      "blocks": [
+        {
+          "label": "① Key conversion files",
+          "note": {
+            "k": "Note",
+            "p": "Export patch · mapper · X5 template"
+          },
+          "lines": [
+            {
+              "text": "ls samples/vision/ultralytics_yolo/conversion/",
+              "hl": true
+            },
+            {
+              "text": "→ export_monkey_patch.py  mapper.py",
+              "out": true
+            },
+            {
+              "text": "→ mapper_x5.py  mapper_s.py  config_x5.yaml",
+              "out": true
+            }
+          ]
+        },
+        {
+          "label": "② Calibration sampling (README)",
+          "note": {
+            "k": "Note",
+            "p": "X5 raw RGB; S uses /255 npy"
+          },
+          "lines": [
+            {
+              "text": "# default --cal-sample true --cal-sample-num 20",
+              "hl": true
+            },
+            "# full set: --cal-sample false",
+            "# NMS defaults: X5 detect 0.70 · S detect 0.45"
+          ]
+        }
+      ],
+      "notes": "conversion holds the export patch, mapper, and X5 config template. Prepare your own calibration images—scripts default to twenty; twenty to fifty representative images is better. Remember NMS defaults: X5 detect 0.70, S detect 0.45; S YOLOv10 has no NMS."
+    },
+    {
+      "layout": "section",
+      "title": "Part 03",
+      "num": "03",
+      "heading": "Mapper & Sensitive Layers",
+      "sub": "One command · Softmax · int16",
+      "lead": "Run mapper in OE; set sensitive layers separately.",
+      "eyebrow": "Part 03",
+      "notes": "Part three: conversion commands and sensitive layers. How to open OE was lesson 2-03—here we go straight to mapper."
+    },
+    {
+      "layout": "bullets",
+      "title": "Two Toolchains",
+      "eyebrow": "Toolchains",
+      "heading": "One ONNX, ==two toolchains==",
+      "lead": "Differences are in the conversion README; mapper.py dispatches by --platform.",
+      "variant": "numbered",
+      "items": [
+        {
+          "title": "X5",
+          "text": "hb_mapper makertbin · bayes-e · raw RGB/NCHW calib · artifact .bin"
+        },
+        {
+          "title": "S series",
+          "text": "hb_compile · nash-e/m/p · normalized npy calib · artifact .hbm"
+        },
+        {
+          "title": "Shared opts",
+          "text": "Both enable Softmax int8; --quantized int16 raises whole-net precision."
+        },
+        {
+          "title": "Nash opt level",
+          "text": "No O3—use O0 / O1 / O2."
+        }
+      ],
+      "notes": "X5 uses hb_mapper → .bin; S uses hb_compile → .hbm. Calibration formats differ: X5 raw RGB, S NumPy divided by 255. Both enable Softmax int8; add quantized int16 when needed. Nash has no O3."
+    },
+    {
+      "layout": "code",
+      "title": "Mapper X5",
+      "eyebrow": "mapper · X5",
+      "heading": "X5: ==one mapper==",
+      "lead": "README command → hb_mapper makertbin · bayes-e · .bin",
+      "blocks": [
+        {
+          "label": "① Command",
+          "note": {
+            "k": "Note",
+            "p": "Work subdirs cleared by default on success"
+          },
+          "lines": [
+            {
+              "text": "python …/conversion/mapper.py \\",
+              "hl": true
+            },
+            "  --platform x5 \\",
+            "  --onnx /models/yolo11n.onnx \\",
+            "  --cal-images /datasets/calibration \\",
+            "  --output-dir /models/compiled"
+          ]
+        },
+        {
+          "label": "② Expected artifact name",
+          "note": {
+            "k": "Note",
+            "p": "Same name needs explicit --overwrite"
+          },
+          "lines": [
+            {
+              "text": "ls /models/compiled/\\",
+              "hl": true
+            },
+            "  yolo11n_bayese_640x640_nv12.bin",
+            {
+              "text": "→ yolo11n_bayese_640x640_nv12.bin",
+              "out": true
+            }
+          ]
+        }
+      ],
+      "notes": "X5 mapper."
+    },
+    {
+      "layout": "code",
+      "title": "Mapper S600",
+      "eyebrow": "mapper · S600",
+      "heading": "S600: ==one mapper==",
+      "lead": "README command → hb_compile · nash-p · .hbm",
+      "blocks": [
+        {
+          "label": "① Command",
+          "note": {
+            "k": "Note",
+            "p": "S100→nash-e · S100P→nash-m"
+          },
+          "lines": [
+            {
+              "text": "python …/conversion/mapper.py \\",
+              "hl": true
+            },
+            "  --platform s600 --march nash-p \\",
+            "  --onnx /models/yolo11n.onnx \\",
+            "  --cal-images /datasets/calibration \\",
+            "  --output-dir /models/compiled"
+          ]
+        },
+        {
+          "label": "② Expected artifact name",
+          "note": {
+            "k": "Note",
+            "p": "Nash opt levels O0/O1/O2"
+          },
+          "lines": [
+            {
+              "text": "ls /models/compiled/\\",
+              "hl": true
+            },
+            "  yolo11n_nashp_640x640_nv12.hbm",
+            {
+              "text": "→ yolo11n_nashp_640x640_nv12.hbm",
+              "out": true
+            }
+          ]
+        }
+      ],
+      "notes": "S600 mapper."
+    },
+    {
+      "layout": "code",
+      "title": "Softmax Config",
+      "eyebrow": "Sensitive · Softmax",
+      "heading": "Sensitive layer: how to write ==Softmax==",
+      "lead": "From config_x5.yaml and conversion README; defaults include it—check first on failure.",
+      "blocks": [
+        {
+          "label": "① X5 (config_x5.yaml)",
+          "note": {
+            "k": "Note",
+            "p": "int16 adds set_all_nodes_int16"
+          },
+          "lines": [
+            {
+              "text": "optimization: set_Softmax_input_int8,\\",
+              "hl": true
+            },
+            {
+              "text": "             set_Softmax_output_int8",
+              "hl": true
+            }
+          ]
+        },
+        {
+          "label": "② S (quant_config)",
+          "note": {
+            "k": "Note",
+            "p": "Write into S config.yaml"
+          },
+          "lines": [
+            {
+              "text": "quant_config: {\"op_config\": {\"softmax\":",
+              "hl": true
+            },
+            {
+              "text": "               {\"qtype\": \"int8\"}}}",
+              "hl": true
+            }
+          ]
+        }
+      ],
+      "notes": "On X5 put set_Softmax_input_int8 and set_Softmax_output_int8 under optimization; on S set softmax qtype to int8 via quant_config. If the whole net is still short, both sides add --quantized int16."
+    },
+    {
+      "layout": "diagram",
+      "title": "Sensitive Layers",
+      "eyebrow": "Sensitive Layers",
+      "heading": "Softmax and ==int16==",
+      "height": 560,
+      "scene": [
+        {
+          "type": "box",
+          "id": "def",
+          "x": 40,
+          "y": 120,
+          "w": 400,
+          "h": 200,
+          "label": "Default int8",
+          "kind": "neutral",
+          "size": 32,
+          "sub": "Enough for most layers",
+          "sub_size": 22
+        },
+        {
+          "type": "box",
+          "id": "sm",
+          "x": 520,
+          "y": 120,
+          "w": 480,
+          "h": 200,
+          "label": "Softmax sensitive",
+          "kind": "bpu",
+          "size": 28,
+          "sub": "X5: set_Softmax_*_int8\nS: quant_config softmax",
+          "sub_size": 18
+        },
+        {
+          "type": "box",
+          "id": "i16",
+          "x": 1080,
+          "y": 120,
+          "w": 460,
+          "h": 200,
+          "label": "--quantized int16",
+          "kind": "cpu",
+          "size": 28,
+          "sub": "Raise whole-net precision · slower/larger",
+          "sub_size": 20
+        },
+        {
+          "type": "arrow",
+          "id": "a1",
+          "points": [
+            [
+              440,
+              220
+            ],
+            [
+              518,
+              220
+            ]
+          ]
+        },
+        {
+          "type": "arrow",
+          "id": "a2",
+          "points": [
+            [
+              1000,
+              220
+            ],
+            [
+              1078,
+              220
+            ]
+          ]
+        },
+        {
+          "type": "text",
+          "id": "t1",
+          "x": 800,
+          "y": 380,
+          "text": "Watch Softmax first; try int16 if still dropping",
+          "size": 24,
+          "anchor": "middle",
+          "color": "ink2"
+        },
+        {
+          "type": "arrow",
+          "id": "track",
+          "points": [
+            [
+              40,
+              500
+            ],
+            [
+              1540,
+              500
+            ]
+          ],
+          "mode": "flow",
+          "head": true
+        },
+        {
+          "type": "token",
+          "id": "tk",
+          "x": 240,
+          "y": 500,
+          "label": "int8",
+          "w": 120,
+          "h": 44,
+          "size": 22,
+          "kind": "light"
+        }
+      ],
+      "steps": [
+        {
+          "at": 0,
+          "show": [
+            "def",
+            "track",
+            "tk"
+          ],
+          "on": [
+            "def"
+          ],
+          "caption": "Default whole-net int8"
+        },
+        {
+          "at": 2200,
+          "show": [
+            "sm",
+            "a1"
+          ],
+          "on": [
+            "sm"
+          ],
+          "focus": [
+            "sm",
+            "a1",
+            "track",
+            "tk"
+          ],
+          "move": [
+            {
+              "id": "tk",
+              "path": [
+                [
+                  240,
+                  500
+                ],
+                [
+                  760,
+                  500
+                ]
+              ]
+            }
+          ],
+          "text": {
+            "tk": "Softmax"
+          },
+          "caption": "Sensitive: enable Softmax opts separately"
+        },
+        {
+          "at": 4400,
+          "show": [
+            "i16",
+            "a2",
+            "t1"
+          ],
+          "on": [
+            "i16"
+          ],
+          "focus": [
+            "i16",
+            "a2",
+            "t1",
+            "track",
+            "tk"
+          ],
+          "move": [
+            {
+              "id": "tk",
+              "path": [
+                [
+                  760,
+                  500
+                ],
+                [
+                  1310,
+                  500
+                ]
+              ]
+            }
+          ],
+          "text": {
+            "tk": "int16"
+          },
+          "caption": "Still short? use --quantized int16"
+        }
+      ],
+      "notes": "Config from conversion/config_x5.yaml and the README."
+    },
+    {
+      "layout": "table",
+      "title": "Artifact Names",
+      "eyebrow": "Artifacts",
+      "heading": "Default ==artifact filenames==",
+      "lead": "When the ONNX stem is yolo11n and input is 640×640:",
+      "headers": [
+        "Target",
+        "march",
+        "Filename"
+      ],
+      "rows": [
+        [
+          "X5",
+          "bayes-e",
+          "yolo11n_bayese_640x640_nv12.bin"
+        ],
+        [
+          "S100",
+          "nash-e",
+          "yolo11n_nashe_640x640_nv12.hbm"
+        ],
+        [
+          "S100P",
+          "nash-m",
+          "yolo11n_nashm_640x640_nv12.hbm"
+        ],
+        [
+          "S600",
+          "nash-p",
+          "yolo11n_nashp_640x640_nv12.hbm"
+        ]
+      ],
+      "note": "Published detect names may include _detect_; follow download_model / measured results.",
+      "notes": "Artifact table."
+    },
+    {
+      "layout": "section",
+      "title": "Part 04",
+      "num": "04",
+      "heading": "On-board & Accuracy Triage",
+      "sub": "model_info · main · how to debug",
+      "lead": "Trust only on-board measurements—not README-cited mAP.",
+      "eyebrow": "Part 04",
+      "notes": "Part four: on-board verification and how to triage accuracy drops."
+    },
+    {
+      "layout": "code",
+      "title": "model_info S600",
+      "eyebrow": "Verify · model_info",
+      "heading": "S600: ==model_info==",
+      "lead": "Under /tmp/course_2-04/ check output tensors (measured: 6).",
+      "blocks": [
+        {
+          "label": "① Command",
+          "lines": [
+            "mkdir -p /tmp/course_2-04 && cd /tmp/course_2-04",
+            {
+              "text": "hrt_model_exec model_info --model_file \\",
+              "hl": true
+            },
+            "  yolo11n_detect_nashp_640x640_nv12.hbm"
+          ],
+          "note": {
+            "k": "Note",
+            "p": "Copy Model Zoo /opt/hobot artifact into the temp dir"
+          }
+        },
+        {
+          "label": "② Log highlights (measured)",
+          "lines": [
+            {
+              "text": "→ This model file has 1 model",
+              "out": true
+            },
+            {
+              "text": "→ input: images_y + images_uv · NV12 split",
+              "out": true
+            },
+            {
+              "text": "→ outputs: 6 tensors · F32 · 80/64 channels paired",
+              "out": true
+            },
+            {
+              "text": "→ MARCH: nash-p · INPUT_TYPE_RT: nv12",
+              "out": true
+            }
+          ],
+          "note": {
+            "k": "Note",
+            "p": "Six outs = 3×cls + 3×DFL"
+          }
+        }
+      ],
+      "notes": "S600 model_info."
+    },
+    {
+      "layout": "code",
+      "title": "main S600",
+      "eyebrow": "Verify · S600",
+      "heading": "S600: ==main.py==",
+      "lead": "Measured bus.jpg → 5 boxes; NMS default 0.45.",
+      "blocks": [
+        {
+          "label": "① Command",
+          "note": {
+            "k": "Note",
+            "p": "Use absolute path for --img-save-path"
+          },
+          "lines": [
+            {
+              "text": "python …/runtime/python/main.py \\",
+              "hl": true
+            },
+            "  --platform s600 --family yolo11 \\",
+            "  --task detect --model-path <hbm> \\",
+            "  --test-img …/bus.jpg \\",
+            "  --img-save-path /tmp/course_2-04/out.jpg"
+          ]
+        },
+        {
+          "label": "② Detection Report",
+          "note": {
+            "k": "Note",
+            "p": "Model Zoo artifact, measured"
+          },
+          "lines": [
+            {
+              "text": "→ 5 objects · person×4 + bus 0.92",
+              "out": true
+            }
+          ]
+        }
+      ],
+      "notes": "S600 with yolo11n, NMS default 0.45. Measured five boxes: four persons and one bus."
+    },
+    {
+      "layout": "code",
+      "title": "main X5",
+      "eyebrow": "Verify · X5",
+      "heading": "X5: ==same-image cross-check==",
+      "lead": "Cross-family yolov8n; measured also 6 outs · 5 boxes; NMS default 0.70.",
+      "blocks": [
+        {
+          "label": "① Command",
+          "note": {
+            "k": "Note",
+            "p": "Platform x5 · family yolov8"
+          },
+          "lines": [
+            {
+              "text": "python …/runtime/python/main.py \\",
+              "hl": true
+            },
+            "  --platform x5 --family yolov8 \\",
+            "  --task detect --model-path <bin> \\",
+            "  --test-img …/bus.jpg \\",
+            "  --img-save-path /tmp/course_2-04/x5.jpg"
+          ]
+        },
+        {
+          "label": "② Detection Report",
+          "note": {
+            "k": "Note",
+            "p": "Cross-check only—not an mAP compare"
+          },
+          "lines": [
+            {
+              "text": "→ 5 objects · person×4 + bus",
+              "out": true
+            }
+          ]
+        }
+      ],
+      "notes": "X5 uses yolov8n for cross-family contrast, NMS default 0.70. Same six outputs and five boxes."
+    },
+    {
+      "layout": "table",
+      "title": "Board Measured",
+      "eyebrow": "Board Measured",
+      "heading": "This lesson's ==board measurements==",
+      "lead": "Source: board-tests/measured.json · Model Zoo artifacts · bus.jpg.",
+      "headers": [
+        "Board",
+        "Artifact",
+        "Outs",
+        "Dets",
+        "Notes"
+      ],
+      "rows": [
+        [
+          "S600",
+          "yolo11n_detect_nashp_…hbm",
+          "6",
+          "5",
+          "NMS 0.45 · person×4 + bus"
+        ],
+        [
+          "X5",
+          "yolov8n_detect_bayese_…bin",
+          "6",
+          "5",
+          "NMS 0.70 · cross-family"
+        ]
+      ],
+      "note": "Scores/classes are in board logs; slides never paste README mAP citations.",
+      "notes": "Board measured table. Speak scores from the log in narration; do not put README mAP on the slide."
+    },
+    {
+      "layout": "diagram",
+      "title": "Accuracy Triage",
+      "eyebrow": "Accuracy Triage",
+      "heading": "Accuracy dropped: ==triage before you act==",
+      "height": 560,
+      "scene": [
+        {
+          "type": "box",
+          "id": "fp",
+          "x": 40,
+          "y": 140,
+          "w": 320,
+          "h": 180,
+          "label": "① Float align",
+          "kind": "neutral",
+          "size": 28,
+          "sub": "Exported ONNX ≈ train",
+          "sub_size": 20
+        },
+        {
+          "type": "box",
+          "id": "cfg",
+          "x": 440,
+          "y": 60,
+          "w": 360,
+          "h": 140,
+          "label": "Large drop",
+          "kind": "bpu",
+          "size": 28,
+          "sub": "Check calib / preprocess / cut",
+          "sub_size": 20
+        },
+        {
+          "type": "box",
+          "id": "sens",
+          "x": 440,
+          "y": 260,
+          "w": 360,
+          "h": 140,
+          "label": "Small drop",
+          "kind": "cpu",
+          "size": 28,
+          "sub": "Softmax / int16",
+          "sub_size": 20
+        },
+        {
+          "type": "box",
+          "id": "ok",
+          "x": 900,
+          "y": 140,
+          "w": 320,
+          "h": 180,
+          "label": "② Re-measure",
+          "kind": "ok",
+          "size": 28,
+          "sub": "model_info + main",
+          "sub_size": 20
+        },
+        {
+          "type": "box",
+          "id": "tool",
+          "x": 1280,
+          "y": 140,
+          "w": 280,
+          "h": 180,
+          "label": "③ Tools",
+          "kind": "neutral",
+          "size": 26,
+          "sub": "accuracy_tune\naccuracy_debug",
+          "sub_size": 18
+        },
+        {
+          "type": "arrow",
+          "id": "a1",
+          "points": [
+            [
+              360,
+              200
+            ],
+            [
+              400,
+              200
+            ],
+            [
+              400,
+              130
+            ],
+            [
+              438,
+              130
+            ]
+          ]
+        },
+        {
+          "type": "arrow",
+          "id": "a2",
+          "points": [
+            [
+              360,
+              260
+            ],
+            [
+              400,
+              260
+            ],
+            [
+              400,
+              330
+            ],
+            [
+              438,
+              330
+            ]
+          ]
+        },
+        {
+          "type": "arrow",
+          "id": "b1",
+          "points": [
+            [
+              800,
+              130
+            ],
+            [
+              840,
+              130
+            ],
+            [
+              840,
+              230
+            ],
+            [
+              898,
+              230
+            ]
+          ]
+        },
+        {
+          "type": "arrow",
+          "id": "b2",
+          "points": [
+            [
+              800,
+              330
+            ],
+            [
+              840,
+              330
+            ],
+            [
+              840,
+              250
+            ],
+            [
+              898,
+              250
+            ]
+          ]
+        },
+        {
+          "type": "arrow",
+          "id": "c1",
+          "points": [
+            [
+              1220,
+              230
+            ],
+            [
+              1278,
+              230
+            ]
+          ]
+        },
+        {
+          "type": "arrow",
+          "id": "track",
+          "points": [
+            [
+              40,
+              500
+            ],
+            [
+              1540,
+              500
+            ]
+          ],
+          "mode": "flow",
+          "head": true
+        },
+        {
+          "type": "token",
+          "id": "tk",
+          "x": 200,
+          "y": 500,
+          "label": "Acc.",
+          "w": 120,
+          "h": 44,
+          "size": 22,
+          "kind": "light"
+        },
+        {
+          "type": "text",
+          "id": "foot",
+          "x": 800,
+          "y": 450,
+          "text": "No README citation values · trust local / board measurements",
+          "size": 22,
+          "anchor": "middle",
+          "color": "accent"
+        }
+      ],
+      "steps": [
+        {
+          "at": 0,
+          "show": [
+            "fp",
+            "track",
+            "tk"
+          ],
+          "on": [
+            "fp"
+          ],
+          "caption": "Confirm float export matches training"
+        },
+        {
+          "at": 2200,
+          "show": [
+            "cfg",
+            "sens",
+            "a1",
+            "a2"
+          ],
+          "on": [
+            "cfg"
+          ],
+          "focus": [
+            "cfg",
+            "sens",
+            "a1",
+            "a2",
+            "track",
+            "tk"
+          ],
+          "move": [
+            {
+              "id": "tk",
+              "path": [
+                [
+                  200,
+                  500
+                ],
+                [
+                  620,
+                  500
+                ]
+              ]
+            }
+          ],
+          "text": {
+            "tk": "Triage"
+          },
+          "caption": "Large drop → config; small drop → sensitive layers"
+        },
+        {
+          "at": 4400,
+          "show": [
+            "ok",
+            "tool",
+            "b1",
+            "b2",
+            "c1",
+            "foot"
+          ],
+          "on": [
+            "ok"
+          ],
+          "focus": [
+            "ok",
+            "tool",
+            "foot",
+            "track",
+            "tk"
+          ],
+          "move": [
+            {
+              "id": "tk",
+              "path": [
+                [
+                  620,
+                  500
+                ],
+                [
+                  1040,
+                  500
+                ]
+              ]
+            }
+          ],
+          "text": {
+            "tk": "Retest"
+          },
+          "caption": "Re-measure on board, then accuracy tools"
+        }
+      ],
+      "notes": "Triage first: confirm float export matches training; large drops are usually config/pipeline; small drops check Softmax and int16; then re-measure on board with model_info and main. Numbers come from measurements—not README citations."
+    },
+    {
+      "layout": "bullets",
+      "title": "Takeaways",
+      "eyebrow": "Takeaways",
+      "heading": "Leave with ==five lines==",
+      "lead": "Together: YOLO opts → less compute → better on board.",
+      "variant": "numbered",
+      "items": [
+        {
+          "title": "Output heads",
+          "text": "Three-stride cls + DFL; protocol follows export and runtime bindings."
+        },
+        {
+          "title": "Cut-point",
+          "text": "Export stops at logits; decode_dfl on board—filter before boxing."
+        },
+        {
+          "title": "One mapper",
+          "text": "X5 → .bin; S → .hbm; keep the work dir on failure."
+        },
+        {
+          "title": "Sensitive layers",
+          "text": "Softmax int8 separately; then --quantized int16 if needed."
+        },
+        {
+          "title": "Accuracy triage",
+          "text": "Large drop → config/calib; small drop → sensitive; trust board measurements."
+        }
+      ],
+      "notes": "Leave with five lines. Together: YOLO-specific opts—cut post-process, decode on board, raise sensitive layers—cut compute so detection runs better on the board. Heads are multi-scale multi-tensor; protocol follows export and bindings. Cut stops at logits; decode is on board. One mapper—platform decides the suffix. Softmax separately; raise int16 if needed. Accuracy drops: triage first; trust measurements only."
+    },
+    {
+      "layout": "closing",
+      "title": "Next Lesson",
+      "eyebrow": "Up Next · Lesson 2-05",
+      "heading": "Next: ==Train Your Own YOLO==",
+      "lead": "Train YOLO + feature map / NV12",
+      "cards": [
+        {
+          "icon": "grid",
+          "tone": "orange",
+          "k": "Own weights",
+          "d": "From .pt to on-board artifact"
+        },
+        {
+          "icon": "book-open",
+          "tone": "blue",
+          "k": "feature map",
+          "d": "Clear the path before changing input"
+        },
+        {
+          "icon": "rocket",
+          "tone": "green",
+          "k": "NV12",
+          "d": "Deploy input protocol"
+        }
+      ],
+      "full_logo": true,
+      "notes": "Next is lesson 2-05: train your own YOLO, plus feature map and NV12. Train one YOLO, clear the full path with feature map first, then switch to NV12—including a full OE hands-on."
+    }
+  ]
+}
