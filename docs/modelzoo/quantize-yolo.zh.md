@@ -8,7 +8,7 @@
 >
 > 学习方式：概念讲解 + conversion README 原命令 + 板上 `model_info` / `main` 实测。OE 开箱回指 **2-03**，本课直接进 mapper
 >
-> 配套视频：**待发布**
+> 配套视频：[B 站观看「以 YOLO 为例讲量化」](https://www.bilibili.com/video/BV1UWxR6vExi/)
 >
 > 配套课件：[查看中文 HTML 课件源码](https://github.com/D-Robotics/rdk-course-demos/blob/develop/02_modelzoo/04_quantize-yolo/lesson-2-04.zh.html) · [English slide source](https://github.com/D-Robotics/rdk-course-demos/blob/develop/02_modelzoo/04_quantize-yolo/lesson-2-04.html)
 
