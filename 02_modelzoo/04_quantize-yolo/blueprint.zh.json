@@ -1,0 +1,2038 @@
+{
+  "meta": {
+    "title": "【RDK 小课堂】第 2 章 Model Zoo · 第 4 课｜以 YOLO 为例讲量化",
+    "lang": "zh-CN",
+    "mode": "deck",
+    "tag": "RDK 小课堂 2-04",
+    "footer": "YOLO 量化",
+    "theme": {},
+    "rebuild": "value-line-20261105",
+    "sections": [
+      {
+        "num": "01",
+        "title": "输出头",
+        "sub": "多尺度 · DFL 协议"
+      },
+      {
+        "num": "02",
+        "title": "切图与解码",
+        "sub": "导出切点 · decode_dfl"
+      },
+      {
+        "num": "03",
+        "title": "mapper 与敏感层",
+        "sub": "一条命令 · Softmax · int16"
+      },
+      {
+        "num": "04",
+        "title": "上板与精度分流",
+        "sub": "model_info · 实测 · 排查"
+      }
+    ]
+  },
+  "slides": [
+    {
+      "layout": "series-cover",
+      "chapter": 2,
+      "chapter_name": "Model Zoo",
+      "lesson": 4,
+      "title": "YOLO量化",
+      "highlight": "YOLO",
+      "subtitle": "针对 YOLO：切后处理 · 减算量 · 板上更好跑",
+      "visual": "assets/yolo11-detect-cover.webp",
+      "theme": "light",
+      "notes": "第二章 Model Zoo 第四课：以 YOLO 为例讲量化。上一课我们跟着做完了 ResNet 的完整 PTQ。这一课换到检测：输出头怎么切、后处理放哪、敏感层怎么抬。工具链针对 YOLO 做了特定优化：切掉后处理、板端解码、敏感层单独抬，显著减少计算量，板上更好跑。大约十五分钟，把路线讲清楚，命令都能跟做。"
+    },
+    {
+      "layout": "cards",
+      "title": "本课路线",
+      "eyebrow": "Roadmap",
+      "heading": "本课按==四个问题==走",
+      "lead": "针对 YOLO 的特定优化：切后处理、板端解码、敏感层单独抬 → 显著减算量 → 板上更好跑。",
+      "cols": 2,
+      "cards": [
+        {
+          "num": "01",
+          "title": "输出头",
+          "text": "多尺度多路输出；协议看导出绑定。"
+        },
+        {
+          "num": "02",
+          "title": "切图与解码",
+          "text": "导出切掉后处理；板端 decode_dfl——少算、更好跑。"
+        },
+        {
+          "num": "03",
+          "title": "mapper 敏感层",
+          "text": "一条 mapper；Softmax；必要时 int16。"
+        },
+        {
+          "num": "04",
+          "title": "上板与分流",
+          "text": "model_info + main；按掉点幅度分流。"
+        }
+      ],
+      "notes": "这一课按四个问题走。工具链针对 YOLO 做了特定优化：切后处理、板端解码、敏感层单独抬，显著减算量，板上更好跑。第一，输出头：分类是一路 logits，检测是三路 stride 各带 cls 与 DFL。第二，切图与解码：导出把后处理切掉，板端用 decode_dfl 补回来。第三，mapper 与敏感层：一条命令进工具链，Softmax 要单独设，不够再抬 int16。第四，上板验证，精度掉了先分流再动手。"
+    },
+    {
+      "layout": "links",
+      "title": "配套资源",
+      "eyebrow": "Resources",
+      "heading": "课程资料与入口",
+      "items": [
+        {
+          "k": "课程内容（中文讲义）",
+          "d": "RDK 小课堂讲义 · Pages",
+          "url": "https://d-robotics.github.io/rdk-course-demos/zh/"
+        },
+        {
+          "k": "课程仓库",
+          "d": "rdk-course-demos（讲义 + 课件 HTML）",
+          "url": "https://github.com/D-Robotics/rdk-course-demos"
+        },
+        {
+          "k": "RDK Model Zoo",
+          "d": "ultralytics_yolo Sample",
+          "url": "https://github.com/D-Robotics/rdk_model_zoo"
+        },
+        {
+          "k": "YOLO conversion",
+          "d": "导出 · mapper · 敏感层",
+          "url": "https://github.com/D-Robotics/rdk_model_zoo/tree/main/samples/vision/ultralytics_yolo/conversion"
+        },
+        {
+          "k": "X5 OE 文档",
+          "d": "accuracy_tune / 工具链",
+          "url": "https://developer.d-robotics.cc/oe_x5_doc"
+        },
+        {
+          "k": "S OE 文档",
+          "d": "accuracy_debug / 工具链",
+          "url": "https://developer.d-robotics.cc/oe_s_doc"
+        }
+      ],
+      "notes": "开头必须挂课程内容 Pages 与课程仓库。"
+    },
+    {
+      "layout": "section",
+      "title": "章节 01",
+      "eyebrow": "Chapter 01",
+      "heading": "输出头",
+      "num": "01",
+      "lead": "先对照 ResNet：检测不是一路 logits。",
+      "notes": "第一部分：检测模型的输出头。",
+      "sub": "检测不是一路 logits：多尺度、多路输出、协议要配对。"
+    },
+    {
+      "layout": "diagram",
+      "title": "输出头对照",
+      "eyebrow": "Heads · ResNet vs YOLO",
+      "heading": "不是一路 logits：==三路 cls + DFL==",
+      "height": 560,
+      "scene": [
+        {
+          "type": "band",
+          "id": "bl",
+          "x": 20,
+          "y": 50,
+          "w": 520,
+          "h": 360,
+          "label": "ResNet（对照）",
+          "label_at": [
+            280,
+            35
+          ],
+          "anchor": "middle"
+        },
+        {
+          "type": "box",
+          "id": "rin",
+          "x": 110,
+          "y": 120,
+          "w": 340,
+          "h": 100,
+          "label": "输入 224",
+          "kind": "cpu",
+          "size": 30,
+          "sub": "单路特征",
+          "sub_size": 20
+        },
+        {
+          "type": "arrow",
+          "id": "ra",
+          "points": [
+            [
+              280,
+              222
+            ],
+            [
+              280,
+              260
+            ]
+          ]
+        },
+        {
+          "type": "box",
+          "id": "rout",
+          "x": 110,
+          "y": 270,
+          "w": 340,
+          "h": 100,
+          "label": "一路 logits",
+          "kind": "neutral",
+          "size": 28,
+          "sub": "1000 维 · Softmax 在 runtime",
+          "sub_size": 18
+        },
+        {
+          "type": "band",
+          "id": "by",
+          "x": 580,
+          "y": 50,
+          "w": 1000,
+          "h": 360,
+          "label": "YOLO Detect（DFL）",
+          "label_at": [
+            1080,
+            35
+          ],
+          "anchor": "middle"
+        },
+        {
+          "type": "box",
+          "id": "yin",
+          "x": 620,
+          "y": 110,
+          "w": 280,
+          "h": 90,
+          "label": "输入 640",
+          "kind": "cpu",
+          "size": 28,
+          "sub": "backbone / neck",
+          "sub_size": 18
+        },
+        {
+          "type": "box",
+          "id": "s8",
+          "x": 960,
+          "y": 70,
+          "w": 280,
+          "h": 80,
+          "label": "stride 8 · 80×80",
+          "kind": "bpu",
+          "size": 24,
+          "sub": "cls + DFL 64",
+          "sub_size": 18
+        },
+        {
+          "type": "box",
+          "id": "s16",
+          "x": 960,
+          "y": 170,
+          "w": 280,
+          "h": 80,
+          "label": "stride 16 · 40×40",
+          "kind": "bpu",
+          "size": 24,
+          "sub": "cls + DFL 64",
+          "sub_size": 18
+        },
+        {
+          "type": "box",
+          "id": "s32",
+          "x": 960,
+          "y": 270,
+          "w": 280,
+          "h": 80,
+          "label": "stride 32 · 20×20",
+          "kind": "bpu",
+          "size": 24,
+          "sub": "cls + DFL 64",
+          "sub_size": 18
+        },
+        {
+          "type": "box",
+          "id": "cut",
+          "x": 1290,
+          "y": 150,
+          "w": 260,
+          "h": 120,
+          "label": "导出切点",
+          "kind": "neutral",
+          "size": 28,
+          "sub": "六路张量停在图里",
+          "sub_size": 18
+        },
+        {
+          "type": "arrow",
+          "id": "a8",
+          "points": [
+            [
+              900,
+              155
+            ],
+            [
+              958,
+              110
+            ]
+          ],
+          "mode": "flow",
+          "color": "orange"
+        },
+        {
+          "type": "arrow",
+          "id": "a16",
+          "points": [
+            [
+              900,
+              155
+            ],
+            [
+              958,
+              210
+            ]
+          ],
+          "mode": "flow",
+          "color": "orange"
+        },
+        {
+          "type": "arrow",
+          "id": "a32",
+          "points": [
+            [
+              900,
+              155
+            ],
+            [
+              958,
+              310
+            ]
+          ],
+          "mode": "flow",
+          "color": "orange"
+        },
+        {
+          "type": "arrow",
+          "id": "c8",
+          "points": [
+            [
+              1240,
+              110
+            ],
+            [
+              1288,
+              180
+            ]
+          ],
+          "mode": "flow",
+          "color": "blue"
+        },
+        {
+          "type": "arrow",
+          "id": "c16",
+          "points": [
+            [
+              1240,
+              210
+            ],
+            [
+              1288,
+              210
+            ]
+          ],
+          "mode": "flow",
+          "color": "blue"
+        },
+        {
+          "type": "arrow",
+          "id": "c32",
+          "points": [
+            [
+              1240,
+              310
+            ],
+            [
+              1288,
+              240
+            ]
+          ],
+          "mode": "flow",
+          "color": "blue"
+        },
+        {
+          "type": "arrow",
+          "id": "track",
+          "points": [
+            [
+              620,
+              500
+            ],
+            [
+              1540,
+              500
+            ]
+          ],
+          "mode": "flow",
+          "head": true
+        },
+        {
+          "type": "token",
+          "id": "tk",
+          "x": 760,
+          "y": 500,
+          "label": "特征",
+          "w": 130,
+          "h": 44,
+          "size": 22,
+          "kind": "light"
+        },
+        {
+          "type": "text",
+          "id": "foot",
+          "x": 800,
+          "y": 430,
+          "text": "约 8400 格 · DFL ≠ YOLO26 · 后处理在板端",
+          "size": 22,
+          "anchor": "middle",
+          "color": "ink2"
+        }
+      ],
+      "steps": [
+        {
+          "at": 0,
+          "show": [
+            "bl",
+            "rin",
+            "ra",
+            "rout"
+          ],
+          "on": [
+            "rin"
+          ],
+          "caption": "分类：一路特征 → 一路 logits"
+        },
+        {
+          "at": 1800,
+          "show": [
+            "by",
+            "yin",
+            "track",
+            "tk"
+          ],
+          "on": [
+            "yin"
+          ],
+          "focus": [
+            "by",
+            "yin",
+            "track",
+            "tk"
+          ],
+          "caption": "检测：640 输入进 backbone / neck"
+        },
+        {
+          "at": 3600,
+          "show": [
+            "s8",
+            "s16",
+            "s32",
+            "a8",
+            "a16",
+            "a32"
+          ],
+          "on": [
+            "s16"
+          ],
+          "focus": [
+            "s8",
+            "s16",
+            "s32",
+            "a8",
+            "a16",
+            "a32",
+            "yin",
+            "track",
+            "tk"
+          ],
+          "move": [
+            {
+              "id": "tk",
+              "path": [
+                [
+                  760,
+                  500
+                ],
+                [
+                  1100,
+                  500
+                ]
+              ]
+            }
+          ],
+          "text": {
+            "tk": "多尺度"
+          },
+          "caption": "三路 stride：每层 cls logits + DFL 64"
+        },
+        {
+          "at": 5600,
+          "show": [
+            "cut",
+            "c8",
+            "c16",
+            "c32",
+            "foot"
+          ],
+          "on": [
+            "cut"
+          ],
+          "focus": [
+            "cut",
+            "c8",
+            "c16",
+            "c32",
+            "s8",
+            "s16",
+            "s32",
+            "track",
+            "tk",
+            "foot"
+          ],
+          "move": [
+            {
+              "id": "tk",
+              "path": [
+                [
+                  1100,
+                  500
+                ],
+                [
+                  1420,
+                  500
+                ]
+              ]
+            }
+          ],
+          "text": {
+            "tk": "六路"
+          },
+          "caption": "导出切点：六路张量停在图里"
+        }
+      ],
+      "notes": "对照 2-03 的分类一路输出：YOLO 是多尺度多路。token 只走下方轨道，不进盒。"
+    },
+    {
+      "layout": "table",
+      "title": "输出形状表",
+      "eyebrow": "Shapes · model_info",
+      "heading": "六路张量：==形状与协议==",
+      "lead": "80 类 · 640 · NHWC；勿只按张量个数猜协议。",
+      "headers": [
+        "路",
+        "含义",
+        "valid shape"
+      ],
+      "rows": [
+        [
+          "cls8",
+          "stride8 分类",
+          "1×80×80×80"
+        ],
+        [
+          "DFL8",
+          "stride8 框",
+          "1×80×80×64"
+        ],
+        [
+          "cls16",
+          "stride16 分类",
+          "1×40×40×80"
+        ],
+        [
+          "DFL16",
+          "stride16 框",
+          "1×40×40×64"
+        ],
+        [
+          "cls32",
+          "stride32 分类",
+          "1×20×20×80"
+        ],
+        [
+          "DFL32",
+          "stride32 框",
+          "1×20×20×64"
+        ]
+      ],
+      "note": "DFL ≠ YOLO26 direct-LTRB；以 conversion README 与 runtime 绑定为准。",
+      "notes": "对照板测日志。"
+    },
+    {
+      "layout": "bullets",
+      "title": "协议差异",
+      "eyebrow": "Protocol",
+      "heading": "DFL 与 YOLO26：==不可互换==",
+      "lead": "同是检测，输出契约不同；runtime 绑定要对上。",
+      "variant": "numbered",
+      "items": [
+        {
+          "title": "DFL 家族",
+          "text": "YOLOv5u/v8/v9/v10/11/12/13：三路 cls + 三路 DFL（64 通道）。"
+        },
+        {
+          "title": "YOLO26",
+          "text": "direct-LTRB：三路 cls + 三路四通道框；单独导出器。"
+        },
+        {
+          "title": "怎么判断",
+          "text": "看导出说明与 runtime 绑定，不要只数输出张量个数。"
+        },
+        {
+          "title": "任务扩展",
+          "text": "分割多 mask 系数/原型；姿态多关键点；分类 logits 由 runtime Softmax。"
+        }
+      ],
+      "notes": "DFL 家族和 YOLO26 的协议不一样，制品不能互换。判断兼容性要看导出说明和 runtime 绑定，不要只按输出张量个数猜。分割、姿态、分类都是在检测协议之上扩展。"
+    },
+    {
+      "layout": "section",
+      "title": "章节 02",
+      "num": "02",
+      "heading": "切图与解码",
+      "sub": "导出停在哪 · 板端补什么",
+      "lead": "图越短，BPU 越省事。",
+      "eyebrow": "Part 02",
+      "notes": "第二部分：后处理放在哪。"
+    },
+    {
+      "layout": "diagram",
+      "title": "切图与解码",
+      "eyebrow": "Cut · Decode",
+      "heading": "图停在 logits · ==decode_dfl 在板端==",
+      "height": 560,
+      "scene": [
+        {
+          "type": "band",
+          "id": "pc",
+          "x": 20,
+          "y": 60,
+          "w": 1560,
+          "h": 320,
+          "label": "主机导出 / 编译 → 板端后处理",
+          "label_at": [
+            800,
+            45
+          ],
+          "anchor": "middle"
+        },
+        {
+          "type": "box",
+          "id": "s0",
+          "x": 40,
+          "y": 130,
+          "w": 250,
+          "h": 170,
+          "label": "1 Ultralytics",
+          "kind": "neutral",
+          "size": 26,
+          "sub": ".pt 权重",
+          "sub_size": 20
+        },
+        {
+          "type": "text",
+          "id": "u0",
+          "x": 165,
+          "y": 345,
+          "text": "export_monkey_patch",
+          "size": 18,
+          "anchor": "middle",
+          "color": "ink2"
+        },
+        {
+          "type": "box",
+          "id": "s1",
+          "x": 340,
+          "y": 130,
+          "w": 250,
+          "h": 170,
+          "label": "2 ONNX 切点",
+          "kind": "bpu",
+          "size": 26,
+          "sub": "停在 cls/DFL logits",
+          "sub_size": 18
+        },
+        {
+          "type": "text",
+          "id": "u1",
+          "x": 465,
+          "y": 345,
+          "text": "后处理不进图",
+          "size": 20,
+          "anchor": "middle",
+          "color": "ink2"
+        },
+        {
+          "type": "box",
+          "id": "s2",
+          "x": 640,
+          "y": 130,
+          "w": 250,
+          "h": 170,
+          "label": "3 mapper",
+          "kind": "neutral",
+          "size": 28,
+          "sub": ".bin / .hbm",
+          "sub_size": 20
+        },
+        {
+          "type": "text",
+          "id": "u2",
+          "x": 765,
+          "y": 345,
+          "text": "OE 里编译",
+          "size": 20,
+          "anchor": "middle",
+          "color": "ink2"
+        },
+        {
+          "type": "box",
+          "id": "s3",
+          "x": 940,
+          "y": 130,
+          "w": 280,
+          "h": 170,
+          "label": "4 板端解码",
+          "kind": "cpu",
+          "size": 26,
+          "sub": "score · DFL · xyxy",
+          "sub_size": 18
+        },
+        {
+          "type": "text",
+          "id": "u3",
+          "x": 1080,
+          "y": 345,
+          "text": "decode_dfl",
+          "size": 20,
+          "anchor": "middle",
+          "color": "ink2"
+        },
+        {
+          "type": "box",
+          "id": "s4",
+          "x": 1280,
+          "y": 130,
+          "w": 270,
+          "h": 170,
+          "label": "5 NMS",
+          "kind": "neutral",
+          "size": 28,
+          "sub": "按绑定 IoU",
+          "sub_size": 20
+        },
+        {
+          "type": "text",
+          "id": "u4",
+          "x": 1415,
+          "y": 345,
+          "text": "出框",
+          "size": 20,
+          "anchor": "middle",
+          "color": "ink2"
+        },
+        {
+          "type": "arrow",
+          "id": "a1",
+          "points": [
+            [
+              292,
+              215
+            ],
+            [
+              338,
+              215
+            ]
+          ]
+        },
+        {
+          "type": "arrow",
+          "id": "a2",
+          "points": [
+            [
+              592,
+              215
+            ],
+            [
+              638,
+              215
+            ]
+          ]
+        },
+        {
+          "type": "arrow",
+          "id": "a3",
+          "points": [
+            [
+              892,
+              215
+            ],
+            [
+              938,
+              215
+            ]
+          ]
+        },
+        {
+          "type": "arrow",
+          "id": "a4",
+          "points": [
+            [
+              1222,
+              215
+            ],
+            [
+              1278,
+              215
+            ]
+          ]
+        },
+        {
+          "type": "arrow",
+          "id": "track",
+          "points": [
+            [
+              60,
+              500
+            ],
+            [
+              1540,
+              500
+            ]
+          ],
+          "mode": "flow",
+          "head": true
+        },
+        {
+          "type": "token",
+          "id": "tk",
+          "x": 165,
+          "y": 500,
+          "label": "权重",
+          "w": 130,
+          "h": 44,
+          "size": 22,
+          "kind": "light"
+        },
+        {
+          "type": "text",
+          "id": "cap",
+          "x": 800,
+          "y": 450,
+          "text": "图越短 BPU 越省事 · 筛选放前面更省算力",
+          "size": 22,
+          "anchor": "middle",
+          "color": "ink2"
+        }
+      ],
+      "steps": [
+        {
+          "at": 0,
+          "show": [
+            "pc",
+            "s0",
+            "u0",
+            "track",
+            "tk"
+          ],
+          "on": [
+            "s0"
+          ],
+          "caption": "权重进图：export_monkey_patch"
+        },
+        {
+          "at": 2000,
+          "show": [
+            "a1",
+            "s1",
+            "u1"
+          ],
+          "on": [
+            "s1"
+          ],
+          "focus": [
+            "s1",
+            "u1",
+            "a1",
+            "track",
+            "tk"
+          ],
+          "move": [
+            {
+              "id": "tk",
+              "path": [
+                [
+                  165,
+                  500
+                ],
+                [
+                  465,
+                  500
+                ]
+              ]
+            }
+          ],
+          "text": {
+            "tk": "logits"
+          },
+          "caption": "切点：Softmax / dist2bbox / NMS 不进 ONNX"
+        },
+        {
+          "at": 4000,
+          "show": [
+            "a2",
+            "s2",
+            "u2"
+          ],
+          "on": [
+            "s2"
+          ],
+          "focus": [
+            "s2",
+            "u2",
+            "a2",
+            "track",
+            "tk"
+          ],
+          "move": [
+            {
+              "id": "tk",
+              "path": [
+                [
+                  465,
+                  500
+                ],
+                [
+                  765,
+                  500
+                ]
+              ]
+            }
+          ],
+          "text": {
+            "tk": "制品"
+          },
+          "caption": "mapper 在 OE 里编成 .bin / .hbm"
+        },
+        {
+          "at": 6000,
+          "show": [
+            "a3",
+            "s3",
+            "u3"
+          ],
+          "on": [
+            "s3"
+          ],
+          "focus": [
+            "s3",
+            "u3",
+            "a3",
+            "track",
+            "tk"
+          ],
+          "move": [
+            {
+              "id": "tk",
+              "path": [
+                [
+                  765,
+                  500
+                ],
+                [
+                  1080,
+                  500
+                ]
+              ]
+            }
+          ],
+          "text": {
+            "tk": "解码"
+          },
+          "caption": "板端 decode_dfl：筛选 → 期望 → xyxy"
+        },
+        {
+          "at": 8000,
+          "show": [
+            "a4",
+            "s4",
+            "u4",
+            "cap"
+          ],
+          "on": [
+            "s4"
+          ],
+          "focus": [
+            "s4",
+            "u4",
+            "a4",
+            "cap",
+            "track",
+            "tk"
+          ],
+          "move": [
+            {
+              "id": "tk",
+              "path": [
+                [
+                  1080,
+                  500
+                ],
+                [
+                  1415,
+                  500
+                ]
+              ]
+            }
+          ],
+          "text": {
+            "tk": "框"
+          },
+          "caption": "NMS 后出框；切点与解码器成对"
+        }
+      ],
+      "notes": "结构对齐 2-03 PTQ 五阶段：token 走下方轨道。"
+    },
+    {
+      "layout": "code",
+      "title": "导出命令",
+      "eyebrow": "export_monkey_patch",
+      "heading": "导出：==export_monkey_patch.py==",
+      "lead": "conversion README 原命令；从仓库根目录执行。",
+      "blocks": [
+        {
+          "label": "① X5（opset 11）",
+          "note": {
+            "k": "要点",
+            "p": "DFL 检测器；ONNX 写在权重旁"
+          },
+          "lines": [
+            {
+              "text": "python …/export_monkey_patch.py \\",
+              "hl": true
+            },
+            "  --platform x5 --pt /models/yolo11n.pt \\",
+            "  --require-local --opset 11"
+          ]
+        },
+        {
+          "label": "② S600（opset 19）",
+          "note": {
+            "k": "要点",
+            "p": "S 系列默认 opset 19"
+          },
+          "lines": [
+            {
+              "text": "python …/export_monkey_patch.py \\",
+              "hl": true
+            },
+            "  --platform s600 --pt /models/yolo11n.pt \\",
+            "  --require-local --opset 19"
+          ]
+        }
+      ],
+      "notes": "真命令，不是注释页。"
+    },
+    {
+      "layout": "code",
+      "title": "校准与目录",
+      "eyebrow": "conversion · calibrate",
+      "heading": "conversion 目录与==校准采样==",
+      "lead": "仓库不附带校准集；默认采样 20 张，建议准备 20–50 张有代表性的图。",
+      "blocks": [
+        {
+          "label": "① conversion 关键文件",
+          "note": {
+            "k": "要点",
+            "p": "导出补丁 · mapper · X5 模板"
+          },
+          "lines": [
+            {
+              "text": "ls samples/vision/ultralytics_yolo/conversion/",
+              "hl": true
+            },
+            {
+              "text": "→ export_monkey_patch.py  mapper.py",
+              "out": true
+            },
+            {
+              "text": "→ mapper_x5.py  mapper_s.py  config_x5.yaml",
+              "out": true
+            }
+          ]
+        },
+        {
+          "label": "② 校准采样（README）",
+          "note": {
+            "k": "要点",
+            "p": "X5 原始 RGB；S 为 /255 的 npy"
+          },
+          "lines": [
+            {
+              "text": "# 默认 --cal-sample true --cal-sample-num 20",
+              "hl": true
+            },
+            "# 全量：--cal-sample false",
+            "# NMS 默认：X5 检测 0.70 · S 检测 0.45"
+          ]
+        }
+      ],
+      "notes": "conversion 目录里有导出补丁、mapper 和 X5 配置模板。校准图要自己准备，脚本默认抽二十张；建议二十到五十张有代表性的图。顺带记住 NMS 默认：X5 检测零点七，S 检测零点四五；S 的 YOLOv10 无 NMS。"
+    },
+    {
+      "layout": "section",
+      "title": "章节 03",
+      "num": "03",
+      "heading": "mapper 与敏感层",
+      "sub": "一条命令 · Softmax · int16",
+      "lead": "OE 里跑 mapper；敏感层单独设。",
+      "eyebrow": "Part 03",
+      "notes": "第三部分：转换命令与敏感层。OE 怎么开上一课讲过，这里直接进 mapper。"
+    },
+    {
+      "layout": "bullets",
+      "title": "两套工具链",
+      "eyebrow": "Toolchains",
+      "heading": "一个 ONNX，==两套工具链==",
+      "lead": "差异写在 conversion README；mapper.py 按 --platform 分发。",
+      "variant": "numbered",
+      "items": [
+        {
+          "title": "X5",
+          "text": "hb_mapper makertbin · bayes-e · 原始 RGB/NCHW 校准 · 产物 .bin"
+        },
+        {
+          "title": "S 系列",
+          "text": "hb_compile · nash-e/m/p · 归一化 npy 校准 · 产物 .hbm"
+        },
+        {
+          "title": "共同优化",
+          "text": "都加 Softmax int8；--quantized int16 时整网抬精度。"
+        },
+        {
+          "title": "Nash 优化级",
+          "text": "不支持 O3，用 O0 / O1 / O2。"
+        }
+      ],
+      "notes": "X5 走 hb_mapper，产物是 bin；S 系列走 hb_compile，产物是 hbm。校准数据格式也不一样：X5 用原始 RGB，S 用除以二百五十五的 NumPy。两边都会给 Softmax 开 int8 优化；需要时再加 quantized int16。Nash 不支持 O3。"
+    },
+    {
+      "layout": "code",
+      "title": "mapper X5",
+      "eyebrow": "mapper · X5",
+      "heading": "X5：==一条 mapper==",
+      "lead": "README 原命令 → hb_mapper makertbin · bayes-e · .bin",
+      "blocks": [
+        {
+          "label": "① 命令",
+          "note": {
+            "k": "要点",
+            "p": "成功后默认清工作子目录"
+          },
+          "lines": [
+            {
+              "text": "python …/conversion/mapper.py \\",
+              "hl": true
+            },
+            "  --platform x5 \\",
+            "  --onnx /models/yolo11n.onnx \\",
+            "  --cal-images /datasets/calibration \\",
+            "  --output-dir /models/compiled"
+          ]
+        },
+        {
+          "label": "② 期望产物名",
+          "note": {
+            "k": "要点",
+            "p": "同名需显式 --overwrite"
+          },
+          "lines": [
+            {
+              "text": "ls /models/compiled/\\",
+              "hl": true
+            },
+            "  yolo11n_bayese_640x640_nv12.bin",
+            {
+              "text": "→ yolo11n_bayese_640x640_nv12.bin",
+              "out": true
+            }
+          ]
+        }
+      ],
+      "notes": "X5 mapper。"
+    },
+    {
+      "layout": "code",
+      "title": "mapper S600",
+      "eyebrow": "mapper · S600",
+      "heading": "S600：==一条 mapper==",
+      "lead": "README 原命令 → hb_compile · nash-p · .hbm",
+      "blocks": [
+        {
+          "label": "① 命令",
+          "note": {
+            "k": "要点",
+            "p": "S100→nash-e · S100P→nash-m"
+          },
+          "lines": [
+            {
+              "text": "python …/conversion/mapper.py \\",
+              "hl": true
+            },
+            "  --platform s600 --march nash-p \\",
+            "  --onnx /models/yolo11n.onnx \\",
+            "  --cal-images /datasets/calibration \\",
+            "  --output-dir /models/compiled"
+          ]
+        },
+        {
+          "label": "② 期望产物名",
+          "note": {
+            "k": "要点",
+            "p": "Nash 优化级 O0/O1/O2"
+          },
+          "lines": [
+            {
+              "text": "ls /models/compiled/\\",
+              "hl": true
+            },
+            "  yolo11n_nashp_640x640_nv12.hbm",
+            {
+              "text": "→ yolo11n_nashp_640x640_nv12.hbm",
+              "out": true
+            }
+          ]
+        }
+      ],
+      "notes": "S600 mapper。"
+    },
+    {
+      "layout": "code",
+      "title": "Softmax 配置",
+      "eyebrow": "Sensitive · Softmax",
+      "heading": "敏感层：==Softmax== 怎么写",
+      "lead": "来自 config_x5.yaml 与 conversion README；默认已带，失败时先核对。",
+      "blocks": [
+        {
+          "label": "① X5（config_x5.yaml）",
+          "note": {
+            "k": "要点",
+            "p": "int16 另加 set_all_nodes_int16"
+          },
+          "lines": [
+            {
+              "text": "optimization: set_Softmax_input_int8,\\",
+              "hl": true
+            },
+            {
+              "text": "             set_Softmax_output_int8",
+              "hl": true
+            }
+          ]
+        },
+        {
+          "label": "② S（quant_config）",
+          "note": {
+            "k": "要点",
+            "p": "写入 S 的 config.yaml"
+          },
+          "lines": [
+            {
+              "text": "quant_config: {\"op_config\": {\"softmax\":",
+              "hl": true
+            },
+            {
+              "text": "               {\"qtype\": \"int8\"}}}",
+              "hl": true
+            }
+          ]
+        }
+      ],
+      "notes": "X5 在 optimization 里写 set_Softmax_input_int8 和 set_Softmax_output_int8；S 用 quant_config 把 softmax 的 qtype 设成 int8。整网还不够时，两边都加 --quantized int16。"
+    },
+    {
+      "layout": "diagram",
+      "title": "敏感层",
+      "eyebrow": "Sensitive Layers",
+      "heading": "Softmax 与 ==int16==",
+      "height": 560,
+      "scene": [
+        {
+          "type": "box",
+          "id": "def",
+          "x": 40,
+          "y": 120,
+          "w": 400,
+          "h": 200,
+          "label": "默认 int8",
+          "kind": "neutral",
+          "size": 32,
+          "sub": "多数层够用",
+          "sub_size": 22
+        },
+        {
+          "type": "box",
+          "id": "sm",
+          "x": 520,
+          "y": 120,
+          "w": 480,
+          "h": 200,
+          "label": "Softmax 敏感",
+          "kind": "bpu",
+          "size": 28,
+          "sub": "X5: set_Softmax_*_int8\nS: quant_config softmax",
+          "sub_size": 18
+        },
+        {
+          "type": "box",
+          "id": "i16",
+          "x": 1080,
+          "y": 120,
+          "w": 460,
+          "h": 200,
+          "label": "--quantized int16",
+          "kind": "cpu",
+          "size": 28,
+          "sub": "整体抬精度 · 更慢更大",
+          "sub_size": 20
+        },
+        {
+          "type": "arrow",
+          "id": "a1",
+          "points": [
+            [
+              440,
+              220
+            ],
+            [
+              518,
+              220
+            ]
+          ]
+        },
+        {
+          "type": "arrow",
+          "id": "a2",
+          "points": [
+            [
+              1000,
+              220
+            ],
+            [
+              1078,
+              220
+            ]
+          ]
+        },
+        {
+          "type": "text",
+          "id": "t1",
+          "x": 800,
+          "y": 380,
+          "text": "先盯 Softmax；仍掉点再试 int16",
+          "size": 24,
+          "anchor": "middle",
+          "color": "ink2"
+        },
+        {
+          "type": "arrow",
+          "id": "track",
+          "points": [
+            [
+              40,
+              500
+            ],
+            [
+              1540,
+              500
+            ]
+          ],
+          "mode": "flow",
+          "head": true
+        },
+        {
+          "type": "token",
+          "id": "tk",
+          "x": 240,
+          "y": 500,
+          "label": "int8",
+          "w": 120,
+          "h": 44,
+          "size": 22,
+          "kind": "light"
+        }
+      ],
+      "steps": [
+        {
+          "at": 0,
+          "show": [
+            "def",
+            "track",
+            "tk"
+          ],
+          "on": [
+            "def"
+          ],
+          "caption": "默认整网 int8"
+        },
+        {
+          "at": 2200,
+          "show": [
+            "sm",
+            "a1"
+          ],
+          "on": [
+            "sm"
+          ],
+          "focus": [
+            "sm",
+            "a1",
+            "track",
+            "tk"
+          ],
+          "move": [
+            {
+              "id": "tk",
+              "path": [
+                [
+                  240,
+                  500
+                ],
+                [
+                  760,
+                  500
+                ]
+              ]
+            }
+          ],
+          "text": {
+            "tk": "Softmax"
+          },
+          "caption": "敏感层：给 Softmax 单独开优化"
+        },
+        {
+          "at": 4400,
+          "show": [
+            "i16",
+            "a2",
+            "t1"
+          ],
+          "on": [
+            "i16"
+          ],
+          "focus": [
+            "i16",
+            "a2",
+            "t1",
+            "track",
+            "tk"
+          ],
+          "move": [
+            {
+              "id": "tk",
+              "path": [
+                [
+                  760,
+                  500
+                ],
+                [
+                  1310,
+                  500
+                ]
+              ]
+            }
+          ],
+          "text": {
+            "tk": "int16"
+          },
+          "caption": "仍不够再用 --quantized int16"
+        }
+      ],
+      "notes": "配置来自 conversion/config_x5.yaml 与 README。"
+    },
+    {
+      "layout": "table",
+      "title": "产物名",
+      "eyebrow": "Artifacts",
+      "heading": "默认==产物文件名==",
+      "lead": "ONNX 名为 yolo11n、输入 640×640 时：",
+      "headers": [
+        "目标",
+        "march",
+        "文件名"
+      ],
+      "rows": [
+        [
+          "X5",
+          "bayes-e",
+          "yolo11n_bayese_640x640_nv12.bin"
+        ],
+        [
+          "S100",
+          "nash-e",
+          "yolo11n_nashe_640x640_nv12.hbm"
+        ],
+        [
+          "S100P",
+          "nash-m",
+          "yolo11n_nashm_640x640_nv12.hbm"
+        ],
+        [
+          "S600",
+          "nash-p",
+          "yolo11n_nashp_640x640_nv12.hbm"
+        ]
+      ],
+      "note": "detect 发布名可能带 _detect_；以 download_model / 实测为准。",
+      "notes": "产物表。"
+    },
+    {
+      "layout": "section",
+      "title": "章节 04",
+      "num": "04",
+      "heading": "上板与精度分流",
+      "sub": "model_info · main · 怎么排查",
+      "lead": "数字只认板上实测，不用 README 引用 mAP。",
+      "eyebrow": "Part 04",
+      "notes": "第四部分：上板验证，以及精度掉了怎么分流。"
+    },
+    {
+      "layout": "code",
+      "title": "model_info S600",
+      "eyebrow": "Verify · model_info",
+      "heading": "S600：==model_info==",
+      "lead": "在 /tmp/course_2-04/ 下核对输出张量（实测：6 路）。",
+      "blocks": [
+        {
+          "label": "① 命令",
+          "lines": [
+            "mkdir -p /tmp/course_2-04 && cd /tmp/course_2-04",
+            {
+              "text": "hrt_model_exec model_info --model_file \\",
+              "hl": true
+            },
+            "  yolo11n_detect_nashp_640x640_nv12.hbm"
+          ],
+          "note": {
+            "k": "要点",
+            "p": "Model Zoo /opt/hobot 制品拷入临时目录"
+          }
+        },
+        {
+          "label": "② 日志要点（实测）",
+          "lines": [
+            {
+              "text": "→ This model file has 1 model",
+              "out": true
+            },
+            {
+              "text": "→ input: images_y + images_uv · NV12 split",
+              "out": true
+            },
+            {
+              "text": "→ outputs: 6 tensors · F32 · 80/64 通道成对",
+              "out": true
+            },
+            {
+              "text": "→ MARCH: nash-p · INPUT_TYPE_RT: nv12",
+              "out": true
+            }
+          ],
+          "note": {
+            "k": "要点",
+            "p": "六路 = 3×cls + 3×DFL"
+          }
+        }
+      ],
+      "notes": "S600 model_info。"
+    },
+    {
+      "layout": "code",
+      "title": "main S600",
+      "eyebrow": "Verify · S600",
+      "heading": "S600：==main.py==",
+      "lead": "实测 bus.jpg → 5 框；NMS 默认 0.45。",
+      "blocks": [
+        {
+          "label": "① 命令",
+          "note": {
+            "k": "要点",
+            "p": "save 路径用绝对路径"
+          },
+          "lines": [
+            {
+              "text": "python …/runtime/python/main.py \\",
+              "hl": true
+            },
+            "  --platform s600 --family yolo11 \\",
+            "  --task detect --model-path <hbm> \\",
+            "  --test-img …/bus.jpg \\",
+            "  --img-save-path /tmp/course_2-04/out.jpg"
+          ]
+        },
+        {
+          "label": "② Detection Report",
+          "note": {
+            "k": "要点",
+            "p": "Model Zoo 制品实测"
+          },
+          "lines": [
+            {
+              "text": "→ 5 objects · person×4 + bus 0.92",
+              "out": true
+            }
+          ]
+        }
+      ],
+      "notes": "S600 用 yolo11n，默认 NMS 零点四五。实测五个框：四个人和一辆车。"
+    },
+    {
+      "layout": "code",
+      "title": "main X5",
+      "eyebrow": "Verify · X5",
+      "heading": "X5：==同图对照==",
+      "lead": "跨家族 yolov8n；实测同样 6 输出 · 5 框；NMS 默认 0.70。",
+      "blocks": [
+        {
+          "label": "① 命令",
+          "note": {
+            "k": "要点",
+            "p": "平台 x5 · 家族 yolov8"
+          },
+          "lines": [
+            {
+              "text": "python …/runtime/python/main.py \\",
+              "hl": true
+            },
+            "  --platform x5 --family yolov8 \\",
+            "  --task detect --model-path <bin> \\",
+            "  --test-img …/bus.jpg \\",
+            "  --img-save-path /tmp/course_2-04/x5.jpg"
+          ]
+        },
+        {
+          "label": "② Detection Report",
+          "note": {
+            "k": "要点",
+            "p": "对照用，不比 mAP"
+          },
+          "lines": [
+            {
+              "text": "→ 5 objects · person×4 + bus",
+              "out": true
+            }
+          ]
+        }
+      ],
+      "notes": "X5 用 yolov8n 作跨家族对照，默认 NMS 零点七。同样六个输出、五个框。"
+    },
+    {
+      "layout": "table",
+      "title": "板上实测",
+      "eyebrow": "Board Measured",
+      "heading": "本课==板上实测==",
+      "lead": "来源 board-tests/measured.json · Model Zoo 制品 · bus.jpg。",
+      "headers": [
+        "板",
+        "制品",
+        "输出数",
+        "检测数",
+        "备注"
+      ],
+      "rows": [
+        [
+          "S600",
+          "yolo11n_detect_nashp_…hbm",
+          "6",
+          "5",
+          "NMS 0.45 · person×4 + bus"
+        ],
+        [
+          "X5",
+          "yolov8n_detect_bayese_…bin",
+          "6",
+          "5",
+          "NMS 0.70 · 跨家族对照"
+        ]
+      ],
+      "note": "分数与类别见板测日志；页面不用 README mAP 引用值。",
+      "notes": "板上实测表。分数在旁白里念日志，不把 README 的 mAP 贴上页。"
+    },
+    {
+      "layout": "diagram",
+      "title": "精度分流",
+      "eyebrow": "Accuracy Triage",
+      "heading": "精度掉了：==先分流再动手==",
+      "height": 560,
+      "scene": [
+        {
+          "type": "box",
+          "id": "fp",
+          "x": 40,
+          "y": 140,
+          "w": 320,
+          "h": 180,
+          "label": "① 浮点对齐",
+          "kind": "neutral",
+          "size": 28,
+          "sub": "导出 ONNX ≈ 训练",
+          "sub_size": 20
+        },
+        {
+          "type": "box",
+          "id": "cfg",
+          "x": 440,
+          "y": 60,
+          "w": 360,
+          "h": 140,
+          "label": "掉很多",
+          "kind": "bpu",
+          "size": 28,
+          "sub": "查校准/预处理/切点",
+          "sub_size": 20
+        },
+        {
+          "type": "box",
+          "id": "sens",
+          "x": 440,
+          "y": 260,
+          "w": 360,
+          "h": 140,
+          "label": "掉一点",
+          "kind": "cpu",
+          "size": 28,
+          "sub": "Softmax / int16",
+          "sub_size": 20
+        },
+        {
+          "type": "box",
+          "id": "ok",
+          "x": 900,
+          "y": 140,
+          "w": 320,
+          "h": 180,
+          "label": "② 板上复测",
+          "kind": "ok",
+          "size": 28,
+          "sub": "model_info + main",
+          "sub_size": 20
+        },
+        {
+          "type": "box",
+          "id": "tool",
+          "x": 1280,
+          "y": 140,
+          "w": 280,
+          "h": 180,
+          "label": "③ 工具",
+          "kind": "neutral",
+          "size": 26,
+          "sub": "accuracy_tune\naccuracy_debug",
+          "sub_size": 18
+        },
+        {
+          "type": "arrow",
+          "id": "a1",
+          "points": [
+            [
+              360,
+              200
+            ],
+            [
+              400,
+              200
+            ],
+            [
+              400,
+              130
+            ],
+            [
+              438,
+              130
+            ]
+          ]
+        },
+        {
+          "type": "arrow",
+          "id": "a2",
+          "points": [
+            [
+              360,
+              260
+            ],
+            [
+              400,
+              260
+            ],
+            [
+              400,
+              330
+            ],
+            [
+              438,
+              330
+            ]
+          ]
+        },
+        {
+          "type": "arrow",
+          "id": "b1",
+          "points": [
+            [
+              800,
+              130
+            ],
+            [
+              840,
+              130
+            ],
+            [
+              840,
+              230
+            ],
+            [
+              898,
+              230
+            ]
+          ]
+        },
+        {
+          "type": "arrow",
+          "id": "b2",
+          "points": [
+            [
+              800,
+              330
+            ],
+            [
+              840,
+              330
+            ],
+            [
+              840,
+              250
+            ],
+            [
+              898,
+              250
+            ]
+          ]
+        },
+        {
+          "type": "arrow",
+          "id": "c1",
+          "points": [
+            [
+              1220,
+              230
+            ],
+            [
+              1278,
+              230
+            ]
+          ]
+        },
+        {
+          "type": "arrow",
+          "id": "track",
+          "points": [
+            [
+              40,
+              500
+            ],
+            [
+              1540,
+              500
+            ]
+          ],
+          "mode": "flow",
+          "head": true
+        },
+        {
+          "type": "token",
+          "id": "tk",
+          "x": 200,
+          "y": 500,
+          "label": "精度",
+          "w": 120,
+          "h": 44,
+          "size": 22,
+          "kind": "light"
+        },
+        {
+          "type": "text",
+          "id": "foot",
+          "x": 800,
+          "y": 450,
+          "text": "不用 README 引用值 · 以本机/板端实测为准",
+          "size": 22,
+          "anchor": "middle",
+          "color": "accent"
+        }
+      ],
+      "steps": [
+        {
+          "at": 0,
+          "show": [
+            "fp",
+            "track",
+            "tk"
+          ],
+          "on": [
+            "fp"
+          ],
+          "caption": "先确认浮点导出与训练一致"
+        },
+        {
+          "at": 2200,
+          "show": [
+            "cfg",
+            "sens",
+            "a1",
+            "a2"
+          ],
+          "on": [
+            "cfg"
+          ],
+          "focus": [
+            "cfg",
+            "sens",
+            "a1",
+            "a2",
+            "track",
+            "tk"
+          ],
+          "move": [
+            {
+              "id": "tk",
+              "path": [
+                [
+                  200,
+                  500
+                ],
+                [
+                  620,
+                  500
+                ]
+              ]
+            }
+          ],
+          "text": {
+            "tk": "分流"
+          },
+          "caption": "掉很多查配置；掉一点查敏感层"
+        },
+        {
+          "at": 4400,
+          "show": [
+            "ok",
+            "tool",
+            "b1",
+            "b2",
+            "c1",
+            "foot"
+          ],
+          "on": [
+            "ok"
+          ],
+          "focus": [
+            "ok",
+            "tool",
+            "foot",
+            "track",
+            "tk"
+          ],
+          "move": [
+            {
+              "id": "tk",
+              "path": [
+                [
+                  620,
+                  500
+                ],
+                [
+                  1040,
+                  500
+                ]
+              ]
+            }
+          ],
+          "text": {
+            "tk": "复测"
+          },
+          "caption": "板上复测后再用精度工具"
+        }
+      ],
+      "notes": "精度掉了先分流：先确认浮点导出和训练对齐；掉很多多半是配置或流水线，掉一点再查 Softmax 和 int16；最后回到板上用 model_info 和 main 复测。数字以实测为准，不用 README 引用值。"
+    },
+    {
+      "layout": "bullets",
+      "title": "本课小结",
+      "eyebrow": "Takeaways",
+      "heading": "带走==五句话==",
+      "lead": "合起来：针对 YOLO 的特定优化 → 减算量 → 板上更好跑。",
+      "variant": "numbered",
+      "items": [
+        {
+          "title": "输出头",
+          "text": "三路 stride 的 cls + DFL；协议以导出与 runtime 绑定为准。"
+        },
+        {
+          "title": "切点",
+          "text": "导出停在 logits；decode_dfl 在板端，先过滤再算框。"
+        },
+        {
+          "title": "一条 mapper",
+          "text": "X5 → .bin；S → .hbm；失败保留工作目录。"
+        },
+        {
+          "title": "敏感层",
+          "text": "Softmax 单独 int8；不够再 --quantized int16。"
+        },
+        {
+          "title": "精度分流",
+          "text": "掉很多查配置/校准；掉一点查敏感层；以板上实测为准。"
+        }
+      ],
+      "notes": "带走五句。合起来：针对 YOLO 的特定优化——切后处理、板端解码、敏感层单独抬——显著减算量，板上更好跑。一，输出头是多尺度多路，协议看导出和绑定。二，切点停在 logits，解码在板端。三，一条 mapper，平台不同产物后缀不同。四，Softmax 要单独设，不够再抬 int16。五，精度掉了先分流，数字只认实测。"
+    },
+    {
+      "layout": "closing",
+      "title": "下一课",
+      "eyebrow": "Up Next · Lesson 2-05",
+      "heading": "下一课：==自训 YOLO==",
+      "lead": "自训 YOLO + feature map / NV12",
+      "cards": [
+        {
+          "icon": "grid",
+          "tone": "orange",
+          "k": "自训权重",
+          "d": "从 .pt 走到板端制品"
+        },
+        {
+          "icon": "book-open",
+          "tone": "blue",
+          "k": "feature map",
+          "d": "先打通链路再改输入"
+        },
+        {
+          "icon": "rocket",
+          "tone": "green",
+          "k": "NV12",
+          "d": "部署输入协议"
+        }
+      ],
+      "full_logo": true,
+      "notes": "下一课二点零五：自训 YOLO，加上 feature map 和 NV12。自己训一条 YOLO，先用 feature map 把整条链路调通，再改成 NV12；含完整 OE 实操。"
+    }
+  ]
+}
