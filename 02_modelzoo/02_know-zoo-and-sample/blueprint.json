@@ -1,0 +1,1764 @@
+{
+ "meta": {
+  "title": "[RDK Classroom] Chapter 2 Model Zoo · Lesson 2 | Meet RDK Model Zoo",
+  "lang": "en",
+  "mode": "deck",
+  "tag": "RDK Classroom 2-02",
+  "footer": "Meet RDK Model Zoo",
+  "theme": {},
+  "logo_full": "d-robotics-logo-full-en.png"
+ },
+ "slides": [
+  {
+   "layout": "series-cover",
+   "chapter": 2,
+   "chapter_name": "Model Zoo",
+   "lesson": 2,
+   "title": "Meet RDK Model Zoo",
+   "highlight": "Model Zoo",
+   "subtitle": "One codebase, four boards",
+   "visual": "assets/white_wolf.jpg",
+   "theme": "light",
+   "notes": "This is Lesson 2 of Chapter 2 Model Zoo: Meet RDK Model Zoo. At the end of the last lesson we said: next, we open Model Zoo and run the first Sample. This lesson finishes that — see how the main branch supports four boards with one codebase, run the first Sample, and watch ResNet-18 output white wolf."
+  },
+  {
+   "layout": "cards",
+   "title": "This lesson",
+   "eyebrow": "Why This Lesson",
+   "heading": "This lesson answers ==three questions==",
+   "lead": "Last lesson: the BPU only runs quantized, compiled models. This lesson: once you have a model, how do you run it on the board?",
+   "cols": 3,
+   "cards": [
+    {
+     "num": "01",
+     "title": "One codebase, four boards",
+     "text": "How does main support X5, S100, S100P, and S600 at once?"
+    },
+    {
+     "num": "02",
+     "title": "What is inside a Sample",
+     "text": "Where are the directories, entry points, and interfaces?"
+    },
+    {
+     "num": "03",
+     "title": "How to run it and read the results",
+     "text": "Run ResNet-18 on X5 and S100, and read the Top-5."
+    }
+   ],
+   "notes": "Last lesson we learned that the BPU only runs quantized, compiled models — .bin on X5, .hbm on the S series. Once you have a model, how do you run it on the board? This lesson answers three questions: first, how one codebase supports four boards; second, what is inside a Sample and where the entry points are; third, how to run ResNet-18 on X5 and S100 and read the results."
+  },
+  {
+   "layout": "links",
+   "title": "Resources",
+   "eyebrow": "Resources",
+   "heading": "Course materials and entry points",
+   "items": [
+    {
+     "k": "RDK Model Zoo（main）",
+     "d": "The star of this lesson: Samples, artifact manifests, shared utilities",
+     "url": "https://github.com/D-Robotics/rdk_model_zoo"
+    },
+    {
+     "k": "ResNet Sample README",
+     "d": "Support matrix, quick start, expected results",
+     "url": "https://github.com/D-Robotics/rdk_model_zoo/blob/main/samples/vision/resnet/README.md"
+    },
+    {
+     "k": "ResNet model artifacts",
+     "d": "Artifact list, download script, input protocol",
+     "url": "https://github.com/D-Robotics/rdk_model_zoo/blob/main/samples/vision/resnet/model/README.md"
+    },
+    {
+     "k": "ResNet Python runtime guide",
+     "d": "main.py arguments, results, and integration examples",
+     "url": "https://github.com/D-Robotics/rdk_model_zoo/blob/main/samples/vision/resnet/runtime/python/README.md"
+    },
+    {
+     "k": "Release manifests and board aliases",
+     "d": "models.yaml（x5 / s）、platforms.json",
+     "url": "https://github.com/D-Robotics/rdk_model_zoo/tree/main/docs/release"
+    },
+    {
+     "k": "RDK Resource Center",
+     "d": "Board manuals and algorithm toolchain docs",
+     "url": "https://developer.d-robotics.cc/rdk_doc_center/"
+    }
+   ],
+   "notes": "Before we start, get the materials ready. The star of this lesson is RDK Model Zoo on GitHub — we use the main branch and the commit fixed for this lesson. The ResNet README and Python runtime guide live under samples. For concepts, go to the Resource Center. On the board you need login access and reachability to the D-Robotics artifact download site; git-clone the repo into the course folder under /tmp, then run from the repo. If the board cannot reach GitHub, clone on a PC and scp it over."
+  },
+  {
+   "layout": "section",
+   "title": "Part 01",
+   "num": "01",
+   "heading": "One codebase, four boards",
+   "sub": "What Model Zoo is, and how to pick a board",
+   "notes": "Part 1: one codebase, four boards."
+  },
+  {
+   "layout": "cards",
+   "title": "Model Zoo",
+   "eyebrow": "What Is It",
+   "heading": "What ==Model Zoo== is",
+   "lead": "A collection of BPU model samples maintained by D-Robotics. The current delivery line is the main branch (repository VERSION 2.0.0).",
+   "cols": 4,
+   "cards": [
+    {
+     "icon": "grid",
+     "tone": "orange",
+     "title": "Converted models",
+     "text": "Compiled .bin / .hbm — download and run."
+    },
+    {
+     "icon": "code",
+     "tone": "blue",
+     "title": "On-board inference code",
+     "text": "Python entry points with pre/post-processing ready."
+    },
+    {
+     "icon": "book-open",
+     "tone": "green",
+     "title": "Conversion and evaluation",
+     "text": "conversion/ for conversion; evaluator/ for evaluation."
+    },
+    {
+     "icon": "github",
+     "tone": "yellow",
+     "title": "One main line",
+     "text": "main is the unified line; rdk_x5 and rdk_s remain as historical branches."
+    }
+   ],
+   "notes": "First, what Model Zoo is. It is our collection of BPU model samples. Each Sample has converted models, on-board inference code, plus conversion recipes and accuracy evaluation. Boards used to have separate branches; now main is the unified line at VERSION 2.0.0. The historical per-board X5 and S-series branches are still kept."
+  },
+  {
+   "layout": "table",
+   "title": "Repo map",
+   "eyebrow": "Repo Map",
+   "heading": "==Four places== in the repo",
+   "lead": "Every later step uses these four places.",
+   "head": [
+    {
+     "html": "Directory",
+     "style": "width:330px"
+    },
+    "What it holds"
+   ],
+   "row_header": true,
+   "rows": [
+    [
+     "<span class=\"cmd\">samples/</span>",
+     "All Samples, by domain: vision, speech, llm, robotics, vla"
+    ],
+    [
+     "<span class=\"cmd\">utils/</span>",
+     "Shared utilities: image/label I/O, Runtime wrappers"
+    ],
+    [
+     "<span class=\"cmd\">docs/release/</span>",
+     "Artifact manifests models.yaml (x5 / s) and platforms.json"
+    ],
+    [
+     "<span class=\"cmd\">datasets/</span>",
+     "Eval data and class names, e.g. imagenet_classes.names"
+    ]
+   ],
+   "notes": "Next, how the repo is laid out. samples holds every Sample, split by domain into vision, speech, llm, robotics, and vla. utils holds shared tools such as image/label I/O and Runtime wrappers. docs/release holds the artifact manifests — one for X5, one for the S series — plus platforms.json, which maps board identity to a target. datasets holds evaluation data and class names."
+  },
+  {
+   "layout": "diagram",
+   "title": "Select target",
+   "eyebrow": "Select Target",
+   "heading": "One codebase, ==four boards==",
+   "height": 560,
+   "scene": [
+    {
+     "type": "box",
+     "id": "code",
+     "x": 40,
+     "y": 190,
+     "w": 250,
+     "h": 180,
+     "label": "One codebase",
+     "kind": "cpu",
+     "sub": "resnet Sample",
+     "size": 32,
+     "sub_size": 22
+    },
+    {
+     "type": "box",
+     "id": "tgt",
+     "x": 350,
+     "y": 190,
+     "w": 290,
+     "h": 180,
+     "label": "--target",
+     "kind": "cpu",
+     "sub": "auto detects the board",
+     "size": 32,
+     "sub_size": 22,
+     "mono": true
+    },
+    {
+     "type": "box",
+     "id": "reg",
+     "x": 700,
+     "y": 190,
+     "w": 290,
+     "h": 180,
+     "label": "platforms.json",
+     "kind": "neutral",
+     "sub": "board identity → target",
+     "size": 26,
+     "sub_size": 22,
+     "mono": true
+    },
+    {
+     "type": "arrow",
+     "id": "a1",
+     "points": [
+      [
+       292,
+       280
+      ],
+      [
+       348,
+       280
+      ]
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "a2",
+     "points": [
+      [
+       642,
+       280
+      ],
+      [
+       698,
+       280
+      ]
+     ]
+    },
+    {
+     "type": "box",
+     "id": "t0",
+     "x": 1060,
+     "y": 20,
+     "w": 500,
+     "h": 100,
+     "label": "x5 · Bayes-e",
+     "kind": "bpu",
+     "sub": "resnet18_bayese_224x224_nv12.bin",
+     "size": 30,
+     "sub_size": 21
+    },
+    {
+     "type": "arrow",
+     "id": "f0",
+     "points": [
+      [
+       992,
+       280
+      ],
+      [
+       1024,
+       280
+      ],
+      [
+       1024,
+       70
+      ],
+      [
+       1058,
+       70
+      ]
+     ]
+    },
+    {
+     "type": "box",
+     "id": "t1",
+     "x": 1060,
+     "y": 150,
+     "w": 500,
+     "h": 100,
+     "label": "s100 · Nash-e",
+     "kind": "bpu",
+     "sub": "s100/resnet18_nashe_224x224_nv12.hbm",
+     "size": 30,
+     "sub_size": 21
+    },
+    {
+     "type": "arrow",
+     "id": "f1",
+     "points": [
+      [
+       992,
+       280
+      ],
+      [
+       1024,
+       280
+      ],
+      [
+       1024,
+       200
+      ],
+      [
+       1058,
+       200
+      ]
+     ]
+    },
+    {
+     "type": "box",
+     "id": "t2",
+     "x": 1060,
+     "y": 280,
+     "w": 500,
+     "h": 100,
+     "label": "s100p · Nash-m",
+     "kind": "bpu",
+     "sub": "s100p/resnet18_nashm_224x224_nv12.hbm",
+     "size": 30,
+     "sub_size": 21
+    },
+    {
+     "type": "arrow",
+     "id": "f2",
+     "points": [
+      [
+       992,
+       280
+      ],
+      [
+       1024,
+       280
+      ],
+      [
+       1024,
+       330
+      ],
+      [
+       1058,
+       330
+      ]
+     ]
+    },
+    {
+     "type": "box",
+     "id": "t3",
+     "x": 1060,
+     "y": 410,
+     "w": 500,
+     "h": 100,
+     "label": "s600 · Nash-p",
+     "kind": "bpu",
+     "sub": "s600/resnet18_nashp_224x224_nv12.hbm",
+     "size": 30,
+     "sub_size": 21
+    },
+    {
+     "type": "arrow",
+     "id": "f3",
+     "points": [
+      [
+       992,
+       280
+      ],
+      [
+       1024,
+       280
+      ],
+      [
+       1024,
+       460
+      ],
+      [
+       1058,
+       460
+      ]
+     ]
+    },
+    {
+     "type": "text",
+     "id": "foot",
+     "x": 520,
+     "y": 470,
+     "text": "Code stays the same; only target and artifacts change",
+     "size": 30,
+     "weight": 700,
+     "anchor": "middle",
+     "color": "orange"
+    }
+   ],
+   "steps": [
+    {
+     "at": 0,
+     "show": [
+      "code"
+     ],
+     "caption": "One Sample codebase, to run on four boards"
+    },
+    {
+     "at": 1200,
+     "show": [
+      "a1",
+      "tgt"
+     ],
+     "focus": [
+      "code",
+      "a1",
+      "tgt"
+     ],
+     "caption": "Pass --target for the board; use auto to let the program detect it"
+    },
+    {
+     "at": 3400,
+     "show": [
+      "a2",
+      "reg"
+     ],
+     "focus": [
+      "tgt",
+      "a2",
+      "reg"
+     ],
+     "caption": "auto: read board identity, match platforms.json to a target"
+    },
+    {
+     "at": 5600,
+     "show": [
+      "f0",
+      "t0"
+     ],
+     "focus": [
+      "reg",
+      "f0",
+      "t0"
+     ],
+     "on": [
+      "t0"
+     ],
+     "caption": "x5: X5 .bin artifact"
+    },
+    {
+     "at": 7000,
+     "show": [
+      "f1",
+      "t1"
+     ],
+     "focus": [
+      "reg",
+      "f1",
+      "t1"
+     ],
+     "on": [
+      "t1"
+     ],
+     "caption": "s100: S100 .hbm artifact"
+    },
+    {
+     "at": 8400,
+     "show": [
+      "f2",
+      "t2"
+     ],
+     "focus": [
+      "reg",
+      "f2",
+      "t2"
+     ],
+     "on": [
+      "t2"
+     ],
+     "caption": "s100p: S100P .hbm artifact"
+    },
+    {
+     "at": 9800,
+     "show": [
+      "f3",
+      "t3"
+     ],
+     "focus": [
+      "reg",
+      "f3",
+      "t3"
+     ],
+     "on": [
+      "t3"
+     ],
+     "caption": "s600: S600 .hbm artifact"
+    },
+    {
+     "at": 11400,
+     "focus": null,
+     "show": [
+      "foot"
+     ],
+     "caption": "Code stays the same; only target and artifacts change"
+    }
+   ],
+   "notes": "Here is the key: one codebase on four boards. There is only one Sample codebase. You tell it which board with --target: x5, s100, s100p, s600, or auto. With auto, the program reads board identity and matches platforms.json to a target. Once the target is set, the artifact is set too: X5 uses the bayese .bin; S100 uses nashe .hbm; S100P uses nashm; S600 uses nashp. The code stays the same; only target and artifacts change."
+  },
+  {
+   "layout": "table",
+   "title": "Artifact naming",
+   "eyebrow": "Artifacts",
+   "heading": "Artifacts are named ==by board==",
+   "lead": "bayese / nashe / nashm / nashp in the filename are the march — they are not interchangeable.",
+   "head": [
+    {
+     "html": "target",
+     "style": "width:200px"
+    },
+    {
+     "html": "march",
+     "style": "width:200px"
+    },
+    "ResNet-18 artifact (under model/)"
+   ],
+   "row_header": true,
+   "rows": [
+    [
+     "x5",
+     "bayes-e",
+     "<span class=\"cmd\">resnet18_bayese_224x224_nv12.bin</span>"
+    ],
+    [
+     "s100",
+     "nash-e",
+     "<span class=\"cmd\">s100/resnet18_nashe_224x224_nv12.hbm</span>"
+    ],
+    [
+     "s100p",
+     "nash-m",
+     "<span class=\"cmd\">s100p/resnet18_nashm_224x224_nv12.hbm</span>"
+    ],
+    [
+     "s600",
+     "nash-p",
+     "<span class=\"cmd\">s600/resnet18_nashp_224x224_nv12.hbm</span>"
+    ]
+   ],
+   "notes": "Artifact names follow a clear pattern. bayese, nashe, nashm, and nashp in the filename map to each toolchain's march. X5 is bayes-e with a .bin extension; S100 is nash-e, S100P is nash-m, and S600 is nash-p — all .hbm, each in its own subdirectory. Each board uses its own artifact; S100P cannot use an S100 file. Also, model/ itself does not commit binaries — fetch artifacts with the download script."
+  },
+  {
+   "layout": "section",
+   "title": "Part 02",
+   "num": "02",
+   "heading": "Inside a Sample",
+   "sub": "Support matrix, directories, entry points, and interfaces",
+   "notes": "Part 2: inside a Sample."
+  },
+  {
+   "layout": "cards",
+   "title": "Find a Sample",
+   "eyebrow": "Find a Sample",
+   "heading": "First decide ==whether it works for you==",
+   "lead": "All three steps need no board — you can do them on a PC.",
+   "cols": 3,
+   "cards": [
+    {
+     "num": "01",
+     "title": "Read the support matrix",
+     "text": "README support-matrix: target × variant × language."
+    },
+    {
+     "num": "02",
+     "title": "List the release manifest",
+     "text": "`--list-models` lists artifact references in the manifest."
+    },
+    {
+     "num": "03",
+     "title": "Dry-run the selection",
+     "text": "`--dry-run` only resolves the selection; it does not load the model."
+    }
+   ],
+   "notes": "First learn how to tell whether a Sample works on your board. Step one: read the support matrix in the README — which targets ship which variants. Step two: run main.py with --list-models; no board needed, it lists artifacts in the manifest. Step three: add --dry-run to check your selection only — no model load, no on-board SDK. With --target auto it lists every published reference. All three steps work on a PC."
+  },
+  {
+   "layout": "table",
+   "title": "Support matrix",
+   "eyebrow": "Support Matrix",
+   "heading": "How to ==read the support matrix==",
+   "lead": "Find your board's column: — means not published. Sources: ResNet rows from the Sample README; YOLOv8 Detect from the Model Zoo online catalog.",
+   "head": [
+    {
+     "html": "Sample",
+     "style": "width:260px"
+    },
+    "X5",
+    "S100",
+    "S100P",
+    "S600"
+   ],
+   "row_header": true,
+   "rows": [
+    [
+     "ResNet-18 · Python",
+     "✓",
+     "✓",
+     "✓",
+     "✓"
+    ],
+    [
+     "ResNet-18 · C++",
+     "—",
+     "✓",
+     "✓",
+     "✓"
+    ],
+    [
+     "YOLOv8 Detect",
+     "✓",
+     "✓",
+     "✓",
+     "✓"
+    ]
+   ],
+   "notes": "How to read the support matrix. Take ResNet: ResNet-18 has published artifacts on all four boards; C++ covers only the S series — X5 has no C++ runtime. For YOLOv8 Detect, the Model Zoo online catalog lists it for X5, S100, S100P, and S600. Not every model covers all four boards, so before you start, confirm your board and model on the online catalog card tags or hardware filter."
+  },
+  {
+   "layout": "table",
+   "title": "Directory skeleton",
+   "eyebrow": "Directory",
+   "heading": "A Sample's ==six directories==",
+   "lead": "Using `samples/vision/resnet/` as the example.",
+   "head": [
+    {
+     "html": "Directory",
+     "style": "width:210px"
+    },
+    "What it owns",
+    {
+     "html": "Directory",
+     "style": "width:210px"
+    },
+    "What it owns"
+   ],
+   "row_header": true,
+   "rows": [
+    [
+     "<span class=\"cmd\">model/</span>",
+     "Artifact fetch; no binaries checked in",
+     "<span class=\"cmd\">conversion/</span>",
+     "Export and quantization recipes"
+    ],
+    [
+     "<span class=\"cmd\">runtime/</span>",
+     "Code that runs on the board",
+     "<span class=\"cmd\">evaluator/</span>",
+     "Accuracy on a dataset"
+    ],
+    [
+     "<span class=\"cmd\">test_data/</span>",
+     "Inputs you can run directly",
+     "<span class=\"cmd\">tests/</span>",
+     "Behavior and numeric regression"
+    ]
+   ],
+   "notes": "Open a Sample such as samples/vision/resnet — there are six directories. model handles fetching model artifacts; conversion holds export and quantization recipes (next lesson); runtime holds on-board code; evaluator measures accuracy on a dataset; test_data has inputs you can run directly; tests are regression tests. Each Sample README also uses fixed sections — learn one, and the others are easy to find."
+  },
+  {
+   "layout": "diagram",
+   "title": "Unified interface",
+   "eyebrow": "Runtime",
+   "heading": "Entry point, args, ==model class==",
+   "height": 560,
+   "scene": [
+    {
+     "type": "box",
+     "id": "m",
+     "x": 40,
+     "y": 20,
+     "w": 440,
+     "h": 130,
+     "label": "main.py",
+     "kind": "cpu",
+     "sub": "Entry: args → model → predict",
+     "size": 34,
+     "sub_size": 22,
+     "mono": true
+    },
+    {
+     "type": "box",
+     "id": "c",
+     "x": 580,
+     "y": 20,
+     "w": 440,
+     "h": 130,
+     "label": "cli.py",
+     "kind": "cpu",
+     "sub": "Args · artifact pick · list · dry-run",
+     "size": 34,
+     "sub_size": 22,
+     "mono": true
+    },
+    {
+     "type": "box",
+     "id": "k",
+     "x": 1120,
+     "y": 20,
+     "w": 440,
+     "h": 130,
+     "label": "classify.py",
+     "kind": "cpu",
+     "sub": "ResNetClassifier model class",
+     "size": 34,
+     "sub_size": 22,
+     "mono": true
+    },
+    {
+     "type": "arrow",
+     "id": "am",
+     "points": [
+      [
+       482,
+       85
+      ],
+      [
+       578,
+       85
+      ]
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "ac",
+     "points": [
+      [
+       1022,
+       85
+      ],
+      [
+       1118,
+       85
+      ]
+     ]
+    },
+    {
+     "type": "band",
+     "id": "pred",
+     "x": 70,
+     "y": 235,
+     "w": 1190,
+     "h": 190,
+     "label": "predict()",
+     "label_at": [
+      665,
+      222
+     ],
+     "anchor": "middle"
+    },
+    {
+     "type": "box",
+     "id": "p1",
+     "x": 100,
+     "y": 265,
+     "w": 300,
+     "h": 130,
+     "label": "preprocess",
+     "kind": "cpu",
+     "sub": "Resize · crop · to NV12",
+     "size": 30,
+     "sub_size": 22,
+     "mono": true
+    },
+    {
+     "type": "box",
+     "id": "p2",
+     "x": 520,
+     "y": 265,
+     "w": 300,
+     "h": 130,
+     "label": "infer",
+     "kind": "bpu",
+     "sub": "BPU runs the model",
+     "size": 30,
+     "sub_size": 22,
+     "mono": true
+    },
+    {
+     "type": "box",
+     "id": "p3",
+     "x": 940,
+     "y": 265,
+     "w": 300,
+     "h": 130,
+     "label": "postprocess",
+     "kind": "cpu",
+     "sub": "softmax · Top-K",
+     "size": 30,
+     "sub_size": 22,
+     "mono": true
+    },
+    {
+     "type": "box",
+     "id": "res",
+     "x": 1340,
+     "y": 265,
+     "w": 220,
+     "h": 130,
+     "label": "Result",
+     "kind": "neutral",
+     "sub": "Top-K classification",
+     "size": 30,
+     "sub_size": 22
+    },
+    {
+     "type": "arrow",
+     "id": "b1",
+     "points": [
+      [
+       402,
+       330
+      ],
+      [
+       518,
+       330
+      ]
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "b2",
+     "points": [
+      [
+       822,
+       330
+      ],
+      [
+       938,
+       330
+      ]
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "b3",
+     "points": [
+      [
+       1242,
+       330
+      ],
+      [
+       1338,
+       330
+      ]
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "track",
+     "points": [
+      [
+       100,
+       455
+      ],
+      [
+       1500,
+       455
+      ]
+     ],
+     "mode": "flow",
+     "head": true
+    },
+    {
+     "type": "token",
+     "id": "tk",
+     "x": 160,
+     "y": 455,
+     "label": "Image",
+     "w": 130,
+     "h": 44,
+     "size": 22,
+     "kind": "light"
+    },
+    {
+     "type": "box",
+     "id": "ut",
+     "x": 40,
+     "y": 492,
+     "w": 1520,
+     "h": 56,
+     "label": "utils/py_utils: shared image/label I/O and Runtime wrappers",
+     "kind": "ghost",
+     "size": 24
+    }
+   ],
+   "steps": [
+    {
+     "at": 0,
+     "show": [
+      "m"
+     ],
+     "caption": "main.py is a thin entry point"
+    },
+    {
+     "at": 1600,
+     "show": [
+      "am",
+      "c"
+     ],
+     "focus": [
+      "m",
+      "am",
+      "c"
+     ],
+     "caption": "cli.py owns args, artifact selection, listing, and dry-run"
+    },
+    {
+     "at": 3600,
+     "show": [
+      "ac",
+      "k"
+     ],
+     "focus": [
+      "c",
+      "ac",
+      "k"
+     ],
+     "caption": "classify.py holds the ResNetClassifier model class"
+    },
+    {
+     "at": 5600,
+     "focus": null,
+     "show": [
+      "pred",
+      "p1",
+      "p2",
+      "p3",
+      "b1",
+      "b2",
+      "res",
+      "b3"
+     ],
+     "caption": "predict() calls three stages in order"
+    },
+    {
+     "at": 7200,
+     "show": [
+      "track",
+      "tk"
+     ],
+     "focus": [
+      "p1",
+      "track",
+      "tk"
+     ],
+     "on": [
+      "p1"
+     ],
+     "move": [
+      {
+       "id": "tk",
+       "path": [
+        [
+         160,
+         455
+        ],
+        [
+         250,
+         455
+        ]
+       ]
+      }
+     ],
+     "caption": "preprocess: CPU resize, crop, convert to NV12"
+    },
+    {
+     "at": 8000,
+     "text": {
+      "tk": "NV12"
+     }
+    },
+    {
+     "at": 9000,
+     "focus": [
+      "p2",
+      "track",
+      "tk"
+     ],
+     "on": [
+      "p2"
+     ],
+     "move": [
+      {
+       "id": "tk",
+       "path": [
+        [
+         250,
+         455
+        ],
+        [
+         670,
+         455
+        ]
+       ]
+      }
+     ],
+     "caption": "infer: hand the model to the BPU"
+    },
+    {
+     "at": 10800,
+     "text": {
+      "tk": "Output"
+     },
+     "focus": [
+      "p3",
+      "track",
+      "tk"
+     ],
+     "on": [
+      "p3"
+     ],
+     "move": [
+      {
+       "id": "tk",
+       "path": [
+        [
+         670,
+         455
+        ],
+        [
+         1090,
+         455
+        ]
+       ]
+      }
+     ],
+     "caption": "postprocess: softmax, take Top-K"
+    },
+    {
+     "at": 12600,
+     "text": {
+      "tk": "Top-5"
+     },
+     "focus": [
+      "res",
+      "track",
+      "tk"
+     ],
+     "move": [
+      {
+       "id": "tk",
+       "path": [
+        [
+         1090,
+         455
+        ],
+        [
+         1450,
+         455
+        ]
+       ]
+      }
+     ],
+     "caption": "You get the classification result"
+    },
+    {
+     "at": 14200,
+     "focus": null,
+     "show": [
+      "ut"
+     ],
+     "caption": "Switch to detect/seg Samples — the interface names stay the same"
+    }
+   ],
+   "notes": "Next, the Python under runtime. main.py is a thin entry: parse args, build the model, call predict, print results. Args, artifact selection, listing, and dry-run live in cli.py. Real inference is in classify.py's ResNetClassifier: predict calls preprocess, infer, then postprocess. Pre/post run on the CPU; infer goes to the BPU. Switch to a detect or seg Sample — the interface names stay the same."
+  },
+  {
+   "layout": "cards",
+   "title": "Artifact selection",
+   "eyebrow": "Artifact Selection",
+   "heading": "How to ==pick the right artifact==",
+   "lead": "Three ideas decide which file actually runs.",
+   "cols": 3,
+   "cards": [
+    {
+     "icon": "list-checks",
+     "tone": "orange",
+     "title": "manifest",
+     "text": "One line per artifact under docs/release — URL and format come from it."
+    },
+    {
+     "icon": "puzzle",
+     "tone": "blue",
+     "title": "asset-id and path",
+     "text": "asset-id is the manifest name; model-path is the local file — they must match."
+    },
+    {
+     "icon": "target",
+     "tone": "green",
+     "title": "Pre-run check",
+     "text": "If target disagrees with detected hardware, it errors out."
+    }
+   ],
+   "notes": "How do you make sure the right file runs? Three ideas. First, the manifest under docs/release — one line per artifact; download URL and format come from it. Second, asset-id and model-path: asset-id is the full name in the manifest, model-path is the local file — they must be paired, because the filename alone does not reveal the input protocol. Third, the pre-run check: if the requested target disagrees with detected hardware, the program errors out instead of forcing a run."
+  },
+  {
+   "layout": "compare",
+   "title": "Input protocol",
+   "eyebrow": "Input Protocol",
+   "heading": "Two ==input protocols==",
+   "left": {
+    "badge": "RDK X5",
+    "title": "packed NV12",
+    "good": false,
+    "items": [
+     "One input tensor",
+     "1-D uint8 buffer",
+     "224×224: 75,264 bytes",
+     "Artifact format .bin"
+    ]
+   },
+   "right": {
+    "badge": "S100 · S100P · S600",
+    "title": "split NV12",
+    "good": false,
+    "items": [
+     "Two inputs: Y and UV",
+     "Y：(1,224,224,1)",
+     "UV：(1,112,112,2)",
+     "Artifact format .hbm"
+    ]
+   },
+   "notes": "The same code can run on four boards also because pre-processing prepares data for the input protocol. X5 models have one packed-NV12 input — a 1-D uint8 buffer; a 224×224 image is 75,264 bytes. S-series models have two inputs, Y and UV split: Y is (1,224,224,1), UV is (1,112,112,2). You do not assemble this yourself; check tensors with model_info and the protocol with --dry-run."
+  },
+  {
+   "layout": "section",
+   "title": "Part 03",
+   "num": "03",
+   "heading": "Run it on the board",
+   "sub": "Once on X5, once on S100",
+   "notes": "Part 3: run it on the board."
+  },
+  {
+   "layout": "code",
+   "title": "X5 prep",
+   "eyebrow": "Demo · X5",
+   "heading": "X5: identify the board, download the model",
+   "lead": "On the board: git clone https://github.com/D-Robotics/rdk_model_zoo.git (/tmp/course_2-02/).",
+   "blocks": [
+    {
+     "label": "① Identify the board",
+     "lines": [
+      "$ cat /sys/class/boardinfo/soc_name \\",
+      "  /sys/class/socinfo/soc_name \\",
+      "  2>/dev/null | tr -d '\\0'"
+     ],
+     "note": {
+      "k": "Key",
+      "p": "Output: X5U (measured)"
+     }
+    },
+    {
+     "label": "② Download ResNet-18",
+     "lines": [
+      {
+       "text": "$ bash samples/vision/resnet/model/download.sh x5 18",
+       "hl": true
+      },
+      {
+       "text": "→ resnet18_bayese…nv12.bin · 11.08 MB",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "Key",
+      "p": "You get resnet18_<wbr>bayese_<wbr>224x224_<wbr>nv12.bin"
+     }
+    }
+   ],
+   "notes": "Start on X5. On the board, git-clone the repo into the course folder under /tmp and enter the repo root; then identify the board by reading soc_name — measured output is X5U; then download ResNet-18 with download.sh to get an ~11.08 MB .bin. Run all commands from the repo root. Keep the trailing 2>/dev/null when reading identity: X5 has no boardinfo, S100 has no socinfo."
+  },
+  {
+   "layout": "code",
+   "title": "X5 run",
+   "eyebrow": "Demo · X5",
+   "heading": "X5: inspect the model, run the Sample",
+   "lead": "model_info for input tensors; --dry-run for the protocol; then run main.py.",
+   "blocks": [
+    {
+     "label": "③ Model info",
+     "lines": [
+      "$ hrt_model_exec model_info \\",
+      "  --model_file <model file>",
+      {
+       "text": "input data · NV12 · (1,3,224,224)",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "Key",
+      "p": "Input protocol: packed_nv12 (shown by `--dry-run`)"
+     }
+    },
+    {
+     "label": "④ Run main.py",
+     "lines": [
+      {
+       "text": "$ python3 samples/vision/resnet/runtime/python/main.py \\",
+       "hl": true
+      },
+      "  --target x5 --variant 18",
+      {
+       "text": "Rank1 white wolf · 0.998090",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "Key",
+      "p": "Defaults: in-repo white_wolf.JPEG and ImageNet labels."
+     }
+    }
+   ],
+   "notes": "Step three: use model_info to inspect input tensors — X5 has a single NV12 input named data; the protocol, shown later with --dry-run, is packed_nv12. Step four: run main.py with --target x5 --variant 18 and the defaults — the in-repo white wolf image and ImageNet labels. The terminal prints Top-5; rank 1 is white wolf at 0.998090."
+  },
+  {
+   "layout": "code",
+   "title": "S100 prep",
+   "eyebrow": "Demo · S100",
+   "heading": "S100: identify the board, download the model",
+   "lead": "Same command shape — only change target and the download argument.",
+   "blocks": [
+    {
+     "label": "① Identify the board",
+     "lines": [
+      "$ cat /sys/class/boardinfo/soc_name \\",
+      "  /sys/class/socinfo/soc_name \\",
+      "  2>/dev/null | tr -d '\\0'"
+     ],
+     "note": {
+      "k": "Key",
+      "p": "Output: S100 (measured)"
+     }
+    },
+    {
+     "label": "② Download ResNet-18",
+     "lines": [
+      {
+       "text": "$ bash samples/vision/resnet/model/download.sh s100 18",
+       "hl": true
+      },
+      {
+       "text": "→ s100/resnet18_nashe…nv12.hbm · 12.19 MB",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "Key",
+      "p": "You get s100/resnet18_<wbr>nashe_<wbr>224x224_<wbr>nv12.hbm"
+     }
+    }
+   ],
+   "notes": "On S100, the same two steps. Read soc_name — output is S100; pass s100 to download.sh and get an ~12.19 MB .hbm. The command shape does not change."
+  },
+  {
+   "layout": "code",
+   "title": "S100 run",
+   "eyebrow": "Demo · S100",
+   "heading": "S100: inspect the model, run the Sample",
+   "lead": "Same model_info, --dry-run, and main.py.",
+   "blocks": [
+    {
+     "label": "③ Model info",
+     "lines": [
+      "$ hrt_model_exec model_info \\",
+      "  --model_file <model file>",
+      {
+       "text": "input data_y + data_uv · U8",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "Key",
+      "p": "Input protocol: split_nv12 (shown by `--dry-run`)"
+     }
+    },
+    {
+     "label": "④ Run main.py",
+     "lines": [
+      {
+       "text": "$ python3 samples/vision/resnet/runtime/python/main.py \\",
+       "hl": true
+      },
+      "  --target s100 --variant 18",
+      {
+       "text": "Rank1 white wolf · 0.998109",
+       "out": true
+      }
+     ],
+     "note": {
+      "k": "Key",
+      "p": "Only change target to s100."
+     }
+    }
+   ],
+   "notes": "model_info again: S100 has two inputs, data_y and data_uv; the protocol, shown later with --dry-run, is split_nv12. Run main.py with only --target changed to s100 and --variant still 18 — rank 1 is again white wolf at 0.998109."
+  },
+  {
+   "layout": "table",
+   "title": "Read results",
+   "eyebrow": "Read Results",
+   "heading": "How to ==read the results==",
+   "lead": "Measured (X5U / S100): order matches the README. X5 Top-1 0.998090; S100 Top-1 0.998109.",
+   "head": [
+    {
+     "html": "Rank",
+     "style": "width:160px"
+    },
+    "Class",
+    "X5 score",
+    "S100 score"
+   ],
+   "row_header": true,
+   "rows": [
+    [
+     "1",
+     "white wolf (270)",
+     {
+      "html": "0.998090",
+      "cls": "hc"
+     },
+     {
+      "html": "0.998109",
+      "cls": "hc"
+     }
+    ],
+    [
+     "2",
+     "timber wolf",
+     "0.000592",
+     "0.000565"
+    ],
+    [
+     "3",
+     "ice bear",
+     "0.000189",
+     "0.000185"
+    ],
+    [
+     "4",
+     "Arctic fox",
+     "0.000126",
+     "0.000137"
+    ],
+    [
+     "5",
+     "Samoyed",
+     "0.000080",
+     "0.000087"
+    ]
+   ],
+   "notes": "Reading the results. Each row has three fields: class is the ImageNet-1k index, label is the name, score is after softmax. Measured order matches the README: white wolf, timber wolf, ice bear, Arctic fox, Samoyed. X5 rank-1 score is 0.998090; S100 is 0.998109; both class 270. For accuracy, the README reference Top-1 on ImageNetV2 for ResNet-18 is 58.91% on X5, 58.79% on S100, and 59.35% for the float model."
+  },
+  {
+   "layout": "diagram",
+   "title": "Four steps to run a Sample",
+   "eyebrow": "Four Steps",
+   "heading": "Run a Sample in ==four steps==",
+   "height": 560,
+   "scene": [
+    {
+     "type": "box",
+     "id": "s0",
+     "x": 40,
+     "y": 120,
+     "w": 330,
+     "h": 200,
+     "label": "① Download the artifact",
+     "kind": "neutral",
+     "sub": "download.sh <target> 18",
+     "size": 34,
+     "sub_size": 21
+    },
+    {
+     "type": "text",
+     "id": "u0",
+     "x": 205,
+     "y": 372,
+     "text": "Artifact lands under model/",
+     "size": 24,
+     "anchor": "middle",
+     "color": "ink2"
+    },
+    {
+     "type": "box",
+     "id": "s1",
+     "x": 450,
+     "y": 120,
+     "w": 330,
+     "h": 200,
+     "label": "② Inspect model info",
+     "kind": "neutral",
+     "sub": "hrt_model_exec model_info",
+     "size": 34,
+     "sub_size": 21
+    },
+    {
+     "type": "text",
+     "id": "u1",
+     "x": 615,
+     "y": 372,
+     "text": "Confirm inputs and outputs",
+     "size": 24,
+     "anchor": "middle",
+     "color": "ink2"
+    },
+    {
+     "type": "arrow",
+     "id": "a1",
+     "points": [
+      [
+       372,
+       220
+      ],
+      [
+       446,
+       220
+      ]
+     ]
+    },
+    {
+     "type": "box",
+     "id": "s2",
+     "x": 860,
+     "y": 120,
+     "w": 330,
+     "h": 200,
+     "label": "③ Run the Sample",
+     "kind": "neutral",
+     "sub": "main.py --target <board>",
+     "size": 34,
+     "sub_size": 21
+    },
+    {
+     "type": "text",
+     "id": "u2",
+     "x": 1025,
+     "y": 372,
+     "text": "Default image: white_wolf.JPEG",
+     "size": 24,
+     "anchor": "middle",
+     "color": "ink2"
+    },
+    {
+     "type": "arrow",
+     "id": "a2",
+     "points": [
+      [
+       782,
+       220
+      ],
+      [
+       856,
+       220
+      ]
+     ]
+    },
+    {
+     "type": "box",
+     "id": "s3",
+     "x": 1270,
+     "y": 120,
+     "w": 330,
+     "h": 200,
+     "label": "④ Read the results",
+     "kind": "neutral",
+     "sub": "Top-5 · class · score",
+     "size": 34,
+     "sub_size": 21
+    },
+    {
+     "type": "text",
+     "id": "u3",
+     "x": 1435,
+     "y": 372,
+     "text": "Compare with README references",
+     "size": 24,
+     "anchor": "middle",
+     "color": "ink2"
+    },
+    {
+     "type": "arrow",
+     "id": "a3",
+     "points": [
+      [
+       1192,
+       220
+      ],
+      [
+       1266,
+       220
+      ]
+     ]
+    },
+    {
+     "type": "arrow",
+     "id": "track",
+     "points": [
+      [
+       100,
+       450
+      ],
+      [
+       1500,
+       450
+      ]
+     ],
+     "mode": "flow",
+     "head": true
+    },
+    {
+     "type": "token",
+     "id": "tk",
+     "x": 205,
+     "y": 450,
+     "label": "Artifact",
+     "w": 120,
+     "h": 44,
+     "size": 22,
+     "kind": "light"
+    },
+    {
+     "type": "text",
+     "id": "swap",
+     "x": 800,
+     "y": 530,
+     "text": "Switch boards: change only target and artifacts — the four steps stay",
+     "size": 30,
+     "weight": 700,
+     "anchor": "middle",
+     "color": "orange"
+    }
+   ],
+   "steps": [
+    {
+     "at": 0,
+     "show": [
+      "s0",
+      "u0"
+     ],
+     "on": [
+      "s0"
+     ],
+     "caption": "Step 1: download the artifact"
+    },
+    {
+     "at": 2000,
+     "show": [
+      "a1",
+      "s1",
+      "u1",
+      "track",
+      "tk"
+     ],
+     "focus": [
+      "s1",
+      "u1",
+      "a1",
+      "track",
+      "tk"
+     ],
+     "on": [
+      "s1"
+     ],
+     "move": [
+      {
+       "id": "tk",
+       "path": [
+        [
+         205,
+         450
+        ],
+        [
+         615,
+         450
+        ]
+       ]
+      }
+     ],
+     "caption": "Step 2: model_info for inputs/outputs"
+    },
+    {
+     "at": 4200,
+     "show": [
+      "a2",
+      "s2",
+      "u2"
+     ],
+     "focus": [
+      "s2",
+      "u2",
+      "a2",
+      "track",
+      "tk"
+     ],
+     "on": [
+      "s2"
+     ],
+     "move": [
+      {
+       "id": "tk",
+       "path": [
+        [
+         615,
+         450
+        ],
+        [
+         1025,
+         450
+        ]
+       ]
+      }
+     ],
+     "text": {
+      "tk": "Image"
+     },
+     "caption": "Step 3: run main.py"
+    },
+    {
+     "at": 6400,
+     "show": [
+      "a3",
+      "s3",
+      "u3"
+     ],
+     "focus": [
+      "s3",
+      "u3",
+      "a3",
+      "track",
+      "tk"
+     ],
+     "on": [
+      "s3"
+     ],
+     "move": [
+      {
+       "id": "tk",
+       "path": [
+        [
+         1025,
+         450
+        ],
+        [
+         1435,
+         450
+        ]
+       ]
+      }
+     ],
+     "text": {
+      "tk": "Top-5"
+     },
+     "caption": "Step 4: read the Top-5"
+    },
+    {
+     "at": 8600,
+     "focus": null,
+     "show": [
+      "swap"
+     ],
+     "caption": "Switch boards: change only target and artifacts — the four steps stay"
+    }
+   ],
+   "notes": "Compress today's work into four steps. First, download the artifact with target and variant. Second, use model_info for inputs and outputs. Third, run main.py with --target for the board. Fourth, read the results — white wolf ranks first in Top-5; compare with the README. Switch boards by changing only target and artifacts — the four steps stay the same."
+  },
+  {
+   "layout": "section",
+   "title": "Part 04",
+   "num": "04",
+   "heading": "Switch boards and pitfalls",
+   "sub": "What to change when you switch boards",
+   "notes": "Part 4: switch boards and pitfalls."
+  },
+  {
+   "layout": "cards",
+   "title": "Switch board",
+   "eyebrow": "Switch Board",
+   "heading": "Switching boards changes ==three places==",
+   "lead": "Test image, label file, and other args stay put.",
+   "cols": 3,
+   "cards": [
+    {
+     "num": "01",
+     "title": "target",
+     "text": "Change x5 to s100 / s100p / s600, or use auto."
+    },
+    {
+     "num": "02",
+     "title": "Download argument",
+     "text": "Change download.sh's first argument to match."
+    },
+    {
+     "num": "03",
+     "title": "Artifact path",
+     "text": "S-series artifacts live under s100/, s100p/, s600/."
+    }
+   ],
+   "notes": "Switching boards changes three places only. First, --target: x5 → s100 / s100p / s600, or auto. Second, download.sh's first argument, kept in sync. Third, S-series artifacts live under s100/, s100p/, s600/ — the path follows. Test image, label file, and other args stay put."
+  },
+  {
+   "layout": "bullets",
+   "variant": "split",
+   "title": "Common pitfalls",
+   "eyebrow": "Pitfalls",
+   "heading": "==Five== common pitfalls",
+   "lead": "When it will not run, check these five first.",
+   "items": [
+    {
+     "mark": "x",
+     "text": "S100P cannot use S100 artifacts"
+    },
+    {
+     "mark": "x",
+     "text": "target / hardware mismatch errors out"
+    },
+    {
+     "mark": "info",
+     "text": "Older images may lack PyYAML/Pillow"
+    },
+    {
+     "mark": "info",
+     "text": "Inference does not auto-download — fetch first"
+    },
+    {
+     "mark": "note",
+     "text": "C++ defaults to zebra — add a flag for white wolf"
+    }
+   ],
+   "notes": "Five common pitfalls. First, S100P cannot use S100 artifacts — different march. Second, if target disagrees with detected hardware, the program errors out. Third, older or slim images may lack PyYAML/Pillow — install with pip; both boards used here already had them. Fourth, inference does not auto-download — run download.sh first. Fifth, the S-series C++ run.sh defaults to a zebra image; add --test-img for white wolf."
+  },
+  {
+   "layout": "closing",
+   "title": "Next lesson",
+   "eyebrow": "Up Next · Lesson 2-03",
+   "heading": "Next: ==quantize against the Sample==",
+   "lead": "Next lesson (2-03): quantize against the Sample — using ResNet, walk a full PTQ from ONNX and calibration data to `.bin` / `.hbm`, put the artifacts back into the Sample, and verify on the board with today's method.",
+   "cards": [
+    {
+     "icon": "grid",
+     "tone": "orange",
+     "k": "One codebase, four boards",
+     "d": "Pick the board with target; artifacts follow march."
+    },
+    {
+     "icon": "book-open",
+     "tone": "blue",
+     "k": "A Sample's six directories",
+     "d": "Entry points: main.py, cli.py, model class."
+    },
+    {
+     "icon": "rocket",
+     "tone": "green",
+     "k": "ResNet-18 end to end",
+     "d": "See Top-5 on X5 and S100."
+    }
+   ],
+   "full_logo": true,
+   "notes": "Recap: main picks the board with --target — one codebase maps to four boards' artifacts; a Sample has six directories with entry points main.py, cli.py, and the model class; we ran ResNet-18 on X5 and S100. Next lesson (Chapter 2, Lesson 3): quantize against the Sample — using ResNet, walk a full PTQ from ONNX and calibration data to .bin / .hbm, put the artifacts back into the Sample, and verify on the board with today's method."
+  }
+ ]
+}

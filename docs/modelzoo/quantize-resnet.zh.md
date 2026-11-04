@@ -8,7 +8,7 @@
 >
 > 学习方式：概念讲解 + 电脑端转换实操 + 上板验证（一次只演示一块板）
 >
-> 配套视频：<!-- TODO: B 站视频发布后补充链接 -->**待发布**
+> 配套视频：[B 站观看](https://www.bilibili.com/video/BV1cPxw6zEjn/)
 >
 > 配套课件：[查看中文 HTML 课件源码](https://github.com/D-Robotics/rdk-course-demos/blob/develop/02_modelzoo/03_quantize-resnet/lesson-2-03.zh.html) · [English slide source](https://github.com/D-Robotics/rdk-course-demos/blob/develop/02_modelzoo/03_quantize-resnet/lesson-2-03.html)
 
