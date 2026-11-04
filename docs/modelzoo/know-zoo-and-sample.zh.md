@@ -8,6 +8,8 @@
 >
 > 学习方式：概念讲解 + 上板实操（一次只演示一块板）。仓库在板上 `git clone https://github.com/D-Robotics/rdk_model_zoo.git` 后即可运行（工作目录建议 `/tmp/course_2-02/`）。板子需能登录，并能访问 `archive.d-robotics.cc` 以下载制品
 >
+> 配套视频：[B 站观看](https://www.bilibili.com/video/BV1CYnd6SEUg/)
+>
 > 配套课件：[查看中文 HTML 课件源码](https://github.com/D-Robotics/rdk-course-demos/blob/develop/02_modelzoo/02_know-zoo-and-sample/lesson-2-02.zh.html)
 
 ---

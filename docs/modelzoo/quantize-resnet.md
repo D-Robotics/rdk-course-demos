@@ -8,7 +8,7 @@
 >
 > Learning format: concept explanation + conversion on the computer + verification on the board (one board at a time)
 >
-> Video: <!-- TODO: add the video link after publishing -->**Coming soon**
+> Video: [YouTube](https://youtu.be/BpJedPg73AY) · [Watch on Bilibili (in Chinese)](https://www.bilibili.com/video/BV1cPxw6zEjn/)
 >
 > Slides: [Open English HTML slides on GitHub](https://github.com/D-Robotics/rdk-course-demos/blob/develop/02_modelzoo/03_quantize-resnet/lesson-2-03.html) · [中文课件源码](https://github.com/D-Robotics/rdk-course-demos/blob/develop/02_modelzoo/03_quantize-resnet/lesson-2-03.zh.html)
 
