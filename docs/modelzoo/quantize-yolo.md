@@ -8,7 +8,7 @@
 >
 > Learning format: concepts + conversion README commands + on-board `model_info` / `main`. OE open-box points back to **2-03**; this lesson goes straight to mapper
 >
-> Video: [YouTube](https://youtu.be/Yu4utO5rLPU) · [Watch on Bilibili (in Chinese)](https://www.bilibili.com/video/BV1UWxR6vExi/)
+> Video: [YouTube](https://youtu.be/dmpAuKscgTI) · [Watch on Bilibili (in Chinese)](https://www.bilibili.com/video/BV1UWxR6vExi/)
 >
 > Slides: [Open English HTML slides on GitHub](https://github.com/D-Robotics/rdk-course-demos/blob/develop/02_modelzoo/04_quantize-yolo/lesson-2-04.html) · [中文课件源码](https://github.com/D-Robotics/rdk-course-demos/blob/develop/02_modelzoo/04_quantize-yolo/lesson-2-04.zh.html)
 
