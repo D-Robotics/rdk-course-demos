@@ -61,7 +61,7 @@ python3 02_modelzoo/05_train-yolo-featuremap-nv12/conversion/scripts/check_fm_id
   --expect-sha256 f728b1d3113953cc43c93226657e99712d01fcfb83fce6f3f2dc69b39c2852fb
 ```
 
-`x5-fm` / `s100-fm` 拒绝最大值大于 1 的文件。`x5-nv12` 不套用这条 0..1 规则，反过来会拒绝一份已经是 0..1 的文件。`s100-nv12` 拒绝一份仍是 0..255 的文件。
+`x5-fm` / `s100-fm` 要求 float32 NCHW `1x3x640x640`（或调用者用 `--shape` 指定的形状），数值在 0..1。`x5-nv12` 的合法范围是 0..255，暗图不会因为最大值不超过 1 被拒绝。`s100-nv12` 的合法范围是 0..1。模型身份只在传入 `--expect-sha256` 或 `--manifest` 时核对；不传就不能当成已经核对了当前主线。历史 bin 不会被单独写进黑名单。上面的示例把当前主镜 `f728b1d3…` 的完整 sha256 显式钉住。
 
 ## 已记录的单图主线
 

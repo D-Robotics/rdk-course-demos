@@ -164,63 +164,131 @@ def check_cosine_does_not_prove_domain() -> None:
         raise AssertionError("scaled vector should leave the original magnitude")
 
 
+def run_checker(checker: Path, *args: str) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        [sys.executable, str(checker), *args],
+        capture_output=True, text=True,
+    )
+
+
 def check_identity_gate() -> None:
-    """The public checker refuses the old 0..255 featuremap domain and the historical bin."""
+    """Contract checks. A matching hash is not a blacklist, and a dark NV12 image is legal."""
+    import hashlib
+
     checker = Path(__file__).resolve().parent / "check_fm_identity.py"
+    shape = (1, 3, 8, 8)
+    shape_arg = "1x3x8x8"
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
-        raw = np.full((1, 3, 2, 2), 200.0, dtype=np.float32)
-        unit = raw / 255.0
-        old_fm = root / "old.rgbchw"
-        new_fm = root / "new.rgbchw"
-        nv12 = root / "nv12.rgbchw"
-        old_fm.write_bytes(raw.tobytes())
-        new_fm.write_bytes(unit.tobytes())
-        nv12.write_bytes(raw.tobytes())
-        bad = subprocess.run(
-            [sys.executable, str(checker), "--role", "x5-fm", "--cal", str(old_fm)],
-            capture_output=True, text=True,
-        )
-        if bad.returncode == 0:
+
+        def raw_file(name: str, values: np.ndarray) -> Path:
+            path = root / name
+            path.write_bytes(np.ascontiguousarray(values, dtype=np.float32).tobytes())
+            return path
+
+        def npy_file(name: str, values: np.ndarray) -> Path:
+            path = root / name
+            np.save(path, np.ascontiguousarray(values))
+            return path
+
+        unit = np.full(shape, 0.25, dtype=np.float32)
+        wide = np.full(shape, 200.0, dtype=np.float32)
+        dark = np.full(shape, 0.2, dtype=np.float32)
+        fm = raw_file("fm.rgbchw", unit)
+        old = raw_file("old.rgbchw", wide)
+        nv12 = raw_file("nv12.rgbchw", wide)
+        dark_nv12 = raw_file("dark.rgbchw", dark)
+        s_nv12 = npy_file("s_nv12.npy", unit)
+
+        rejected_domain = run_checker(checker, "--role", "x5-fm", "--shape", shape_arg, "--cal", str(old))
+        if rejected_domain.returncode == 0:
             raise AssertionError("0..255 featuremap file was accepted")
-        ok = subprocess.run(
-            [sys.executable, str(checker), "--role", "x5-fm", "--cal", str(new_fm)],
-            capture_output=True, text=True,
-        )
-        if ok.returncode != 0:
-            raise AssertionError(ok.stderr or ok.stdout)
-        swapped = subprocess.run(
-            [sys.executable, str(checker), "--role", "x5-nv12", "--cal", str(new_fm)],
-            capture_output=True, text=True,
-        )
-        if swapped.returncode == 0:
-            raise AssertionError("0..1 file was accepted as X5 NV12")
-        nv12_ok = subprocess.run(
-            [sys.executable, str(checker), "--role", "x5-nv12", "--cal", str(nv12)],
-            capture_output=True, text=True,
-        )
-        if nv12_ok.returncode != 0:
-            raise AssertionError(nv12_ok.stderr or nv12_ok.stdout)
+        current = run_checker(checker, "--role", "x5-fm", "--shape", shape_arg, "--cal", str(fm))
+        if current.returncode != 0:
+            raise AssertionError(current.stderr or current.stdout)
+        full = np.zeros((1, 3, 640, 640), dtype=np.float32)
+        full_path = raw_file("full.rgbchw", full)
+        full_ok = run_checker(checker, "--role", "x5-fm", "--cal", str(full_path))
+        if full_ok.returncode != 0:
+            raise AssertionError(full_ok.stderr or full_ok.stdout)
+
         historical = root / "historical.bin"
-        historical.write_bytes(b"not-the-mainline-bin")
-        digest_proc = subprocess.run(
-            ["sha256sum", str(historical)], capture_output=True, text=True, check=True,
+        historical.write_bytes(b"round3-aee-stand-in")
+        historical_sha = hashlib.sha256(historical.read_bytes()).hexdigest()
+        pinned = run_checker(
+            checker, "--role", "x5-fm", "--model", str(historical),
+            "--expect-sha256", historical_sha,
         )
-        digest = digest_proc.stdout.split()[0]
-        rejected = subprocess.run(
-            [sys.executable, str(checker), "--role", "x5-fm", "--model", str(historical),
-             "--expect-sha256", "0" * 64],
-            capture_output=True, text=True,
-        )
-        if rejected.returncode == 0:
-            raise AssertionError("mismatched model sha was accepted")
-        pinned = subprocess.run(
-            [sys.executable, str(checker), "--role", "x5-fm", "--model", str(historical),
-             "--expect-sha256", digest],
-            capture_output=True, text=True,
-        )
-        if pinned.returncode != 0:
+        if pinned.returncode != 0 or "matches" not in pinned.stdout:
             raise AssertionError(pinned.stderr or pinned.stdout)
+        wrong = run_checker(
+            checker, "--role", "x5-fm", "--model", str(historical),
+            "--expect-sha256", "0" * 64,
+        )
+        if wrong.returncode == 0:
+            raise AssertionError("mismatched model sha was accepted")
+        unpinned = run_checker(checker, "--role", "x5-fm", "--model", str(historical))
+        if unpinned.returncode != 0 or "identity not pinned" not in unpinned.stdout:
+            raise AssertionError(unpinned.stderr or unpinned.stdout)
+        if "matches" in unpinned.stdout:
+            raise AssertionError("unpinned run claimed an identity match")
+        manifest = root / "manifest.json"
+        manifest.write_text(json_dumps({"model_sha256": historical_sha}), encoding="utf-8")
+        via_manifest = run_checker(
+            checker, "--role", "x5-fm", "--model", str(historical), "--manifest", str(manifest),
+        )
+        if via_manifest.returncode != 0:
+            raise AssertionError(via_manifest.stderr or via_manifest.stdout)
+
+        nan = unit.copy()
+        nan.flat[0] = np.nan
+        nan_path = raw_file("nan.rgbchw", nan)
+        if run_checker(checker, "--role", "x5-fm", "--shape", shape_arg, "--cal", str(nan_path)).returncode == 0:
+            raise AssertionError("NaN featuremap was accepted")
+        empty_npy = root / "empty.npy"
+        np.save(empty_npy, np.zeros((0,), dtype=np.float32))
+        if run_checker(checker, "--role", "s100-fm", "--cal", str(empty_npy)).returncode == 0:
+            raise AssertionError("empty npy was accepted")
+        empty_raw = root / "empty.rgbchw"
+        empty_raw.write_bytes(b"")
+        if run_checker(checker, "--role", "x5-fm", "--shape", shape_arg, "--cal", str(empty_raw)).returncode == 0:
+            raise AssertionError("empty raw file was accepted")
+        bad_dtype = npy_file("f64.npy", unit.astype(np.float64))
+        if run_checker(checker, "--role", "s100-fm", "--shape", shape_arg, "--cal", str(bad_dtype)).returncode == 0:
+            raise AssertionError("float64 npy was accepted")
+        nhwc = np.transpose(unit, (0, 2, 3, 1))
+        nhwc_path = npy_file("nhwc.npy", nhwc)
+        if run_checker(checker, "--role", "s100-fm", "--shape", shape_arg, "--cal", str(nhwc_path)).returncode == 0:
+            raise AssertionError("NHWC shape was accepted as NCHW")
+        negative = unit.copy()
+        negative.flat[0] = -0.01
+        if run_checker(
+            checker, "--role", "x5-fm", "--shape", shape_arg, "--cal", str(raw_file("neg.rgbchw", negative)),
+        ).returncode == 0:
+            raise AssertionError("negative featuremap was accepted")
+        if run_checker(checker, "--role", "x5-fm", "--shape", shape_arg, "--cal", str(npy_file("fm.npy", unit))).returncode == 0:
+            raise AssertionError("npy container was accepted for x5-fm")
+
+        if run_checker(checker, "--role", "x5-nv12", "--shape", shape_arg, "--cal", str(nv12)).returncode != 0:
+            raise AssertionError("legal 0..255 X5 NV12 file was rejected")
+        if run_checker(checker, "--role", "x5-nv12", "--shape", shape_arg, "--cal", str(dark_nv12)).returncode != 0:
+            raise AssertionError("dark X5 NV12 image was rejected")
+        bright = np.full(shape, 300.0, dtype=np.float32)
+        if run_checker(
+            checker, "--role", "x5-nv12", "--shape", shape_arg, "--cal", str(raw_file("hi.rgbchw", bright)),
+        ).returncode == 0:
+            raise AssertionError("X5 NV12 value above 255 was accepted")
+        if run_checker(checker, "--role", "s100-nv12", "--shape", shape_arg, "--cal", str(s_nv12)).returncode != 0:
+            raise AssertionError("legal S100 NV12 0..1 file was rejected")
+        if run_checker(
+            checker, "--role", "s100-nv12", "--shape", shape_arg, "--cal", str(npy_file("wide.npy", wide)),
+        ).returncode == 0:
+            raise AssertionError("0..255 file was accepted as S100 NV12")
+
+
+def json_dumps(payload: dict[str, str]) -> str:
+    import json
+    return json.dumps(payload)
 
 
 def main() -> int:

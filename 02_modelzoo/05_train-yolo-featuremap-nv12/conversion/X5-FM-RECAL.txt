@@ -30,4 +30,6 @@ Before a private push or infer script runs:
 
     python3 conversion/scripts/check_fm_identity.py --role x5-fm --cal ONE.rgbchw --model FEATUREMAP.bin --expect-sha256 f728b1d3113953cc43c93226657e99712d01fcfb83fce6f3f2dc69b39c2852fb
 
+That pin is the current cast. Omit --expect-sha256 and the command only prints a sha256; it does not claim the file is the current mainline. A historical bin is accepted when its own hash is the expected one. The checker does not blacklist one historical file. It still rejects a featuremap tensor whose values are outside 0..1.
+
 See board-tests/measured.json.
