@@ -122,15 +122,24 @@ def check_files() -> None:
         expect[:, 0] = 200
         expect[:, 1] = 80
         expect[:, 2] = 40
-        assert_close("x5 featuremap 0..255", x5_fm, expect)
-        assert_close("x5 nv12 matches x5 featuremap bytes", x5_nv12, x5_fm)
-        assert_close("s100 featuremap /255", s_fm, expect / 255.0)
-        assert_close("s100 nv12 matches s100 featuremap", s_nv12, s_fm)
-        if float(s_nv12.max()) > 1.0 or float(x5_nv12.max()) <= 1.0:
-            raise AssertionError("NV12 files collapsed onto one numeric domain")
-        # The script must not pre-apply the YAML scale on top of /255.
-        if np.allclose(s_nv12, expect / 255.0 / 255.0):
+        train = expect / 255.0
+        assert_close("x5 featuremap matches ONNX 0..1", x5_fm, train)
+        assert_close("s100 featuremap matches ONNX 0..1", s_fm, train)
+        assert_close("x5 and s100 featuremap share the 0..1 domain", x5_fm, s_fm)
+        assert_close("x5 nv12 stays 0..255", x5_nv12, expect)
+        assert_close("s100 nv12 stays a single /255", s_nv12, train)
+        if np.allclose(x5_fm, x5_nv12):
+            raise AssertionError("X5 featuremap must not reuse the NV12 0..255 file")
+        if float(x5_fm.max()) > 1.0 or float(x5_nv12.max()) <= 1.0:
+            raise AssertionError("X5 featuremap and X5 NV12 collapsed onto one domain")
+        if np.allclose(s_nv12, train / 255.0):
             raise AssertionError("S100 NV12 file was divided by 255 twice")
+        # Containers stay different: raw tofile versus npy, even when values match.
+        x5_path = next((out / "cal_featuremap_x5_rgbchw").glob("*.rgbchw"))
+        if x5_path.read_bytes()[:6] == b"\x93NUMPY":
+            raise AssertionError("X5 featuremap must stay a raw .rgbchw, not an .npy")
+        if not str(next((out / "cal_featuremap_s100_npy").glob("*.npy"))).endswith(".npy"):
+            raise AssertionError("S100 featuremap suffix changed")
         jpg = next((out / "cal_images").glob("*.jpg"))
         bgr = cv2.imread(str(jpg))
         if bgr is None or bgr.shape[:2] != (HEIGHT, WIDTH):
@@ -140,9 +149,25 @@ def check_files() -> None:
             raise AssertionError("saved calibration JPG is not the source BGR image")
 
 
+def check_cosine_does_not_prove_domain() -> None:
+    """A positive scale leaves cosine at 1 while the values change.
+
+    This is why a high cosine between a wrong-domain bin and ORT is not a
+    pass. The historical board figures are not re-run here.
+    """
+    values = np.array([1.11, -0.4, 0.2], dtype=np.float64)
+    scaled = values * 255.0
+    cosine = float(np.dot(values, scaled) / (np.linalg.norm(values) * np.linalg.norm(scaled)))
+    if abs(cosine - 1.0) > 1e-9:
+        raise AssertionError(f"expected cosine 1 for a positive scale, got {cosine}")
+    if np.max(np.abs(scaled)) <= np.max(np.abs(values)):
+        raise AssertionError("scaled vector should leave the original magnitude")
+
+
 def main() -> int:
     check_yaml_text()
     check_files()
+    check_cosine_does_not_prove_domain()
     print("cal domain file checks passed (OE compilers were not run)")
     return 0
 

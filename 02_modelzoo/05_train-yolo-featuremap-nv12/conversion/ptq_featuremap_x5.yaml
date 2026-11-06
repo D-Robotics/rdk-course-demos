@@ -1,6 +1,8 @@
-# 2-05 · featuremap PTQ · X5 (bayes-e) · selftrain YOLO11n
-# Compile (oe-x5): hb_mapper makertbin --config ptq_featuremap_x5.yaml --model-type onnx
-# Working dir inside container: /workspace/course_2-05
+# 2-05 · featuremap PTQ · X5 (bayes-e) · self-trained YOLO11n
+# hb_mapper makertbin --config ptq_featuremap_x5.yaml --model-type onnx
+# norm_type stays no_preprocess: this file is the float ONNX input.
+# cal_featuremap_x5_rgbchw/*.rgbchw must already be float32 NCHW in 0..1.
+# Do not write 0..255 here. The NV12 YAML is separate and still uses data_scale.
 
 model_parameters:
   onnx_model: './onnx/selftrain_yolo11n_detect_opset11.onnx'

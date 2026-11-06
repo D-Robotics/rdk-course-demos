@@ -15,10 +15,10 @@
 
 | 文件 | 板 | 输入 | march | 校准（磁盘现状） |
 | --- | --- | --- | --- | --- |
-| `ptq_featuremap_x5.yaml` | X5 | featuremap | `bayes-e` | `cal_featuremap_x5_rgbchw/`（`.rgbchw`，float32 **0..255**） |
+| `ptq_featuremap_x5.yaml` | X5 | featuremap | `bayes-e` | `cal_featuremap_x5_rgbchw/`（原始 `.rgbchw`，float32 **/255 → 0..1**；`norm_type` 仍是 `no_preprocess`） |
 | `ptq_featuremap_s100.yaml` | S100 | featuremap | `nash-e` | `cal_featuremap_s100_npy/`（`.npy`，float32 **/255 → 0..1**） |
 | `ptq_nv12_x5.yaml` | X5 | nv12 + rgb | `bayes-e` | `cal_nv12_rgb_f32/`（`.rgbchw`，float32 **0..255**；YAML 含 `norm_type: data_scale` + `scale_value≈1/255` 字段） |
-| `ptq_nv12_s100.yaml` | S100 | nv12 + rgb | `nash-e` | `cal_nv12_s100_npy/`（`.npy`，float32 **/255 → 0..1**；YAML 同样含 `data_scale` 字段。工具链如何组合「已 /255 文件 + data_scale」**待核**，这里只记录文件和字段，不写成已验证闭环） |
+| `ptq_nv12_s100.yaml` | S100 | nv12 + rgb | `nash-e` | `cal_nv12_s100_npy/`（`.npy`，float32 **/255 → 0..1**；YAML 仍含 `data_scale`。这是量化阶段才插入的运行时前处理，不是对 npy 再乘一次，也不是 featuremap 的依据） |
 | `scripts/prepare_cal_data.py` | — | — | — | 从 JPG/PNG 生成上述四类校准目录 |
 | `MARCH.md` | — | — | — | 本课 march 与公开出处 |
 
@@ -42,10 +42,12 @@ python3 02_modelzoo/05_train-yolo-featuremap-nv12/conversion/scripts/prepare_cal
 
 脚本只做 BGR→RGB、resize、HWC→NCHW float32，然后：
 
-- X5 featuremap 与 X5 NV12：同一份 **0..255**，`tofile` 成 `.rgbchw`
-- S100 featuremap 与 S100 NV12：同一份 **除以 255 一次**，`np.save` 成 `.npy`
+- X5 featuremap：再除以 255，`tofile` 成原始 `.rgbchw`（数值 0..1，YAML 仍是 `no_preprocess`）
+- S100 featuremap：除以 255 一次，`np.save` 成 `.npy`（数值 0..1，YAML 仍是 `no_preprocess`）
+- X5 NV12：保持 0..255 `.rgbchw`。YAML `data_scale` 不动
+- S100 NV12：除以 255 一次的 `.npy`。YAML `data_scale` 不动，不再除第二次
 
-它不会把 S100 的 npy 再乘 `1/255`，也不会删掉 YAML 里的 `scale_value`。
+旧的 `cal_featuremap_x5_rgbchw/*.rgbchw` 若仍是 0..255，必须删掉后重跑本脚本。只改文件不够，X5 featuremap 的 `.bin` 还要重编再上板。这一步本仓库没有做。
 
 校验文件域（不调用 OE，通过也不表示量化精度已验证）：
 
@@ -84,17 +86,25 @@ hb_compile --config ptq_nv12_s100.yaml
    https://github.com/D-Robotics/rdk_model_zoo/blob/218a3e78970c3f1ee117d59586cf8dd3ada3864f/samples/vision/ultralytics_yolo/conversion/workflow.py  
    https://github.com/D-Robotics/rdk_model_zoo/blob/218a3e78970c3f1ee117d59586cf8dd3ada3864f/samples/vision/ultralytics_yolo/conversion/README_cn.md
 
-因此现在只能分开记录，不能合成「S100 已经 /255，YAML 再缩放一次并已证实」：
+8. Ultralytics 检测训练在 `Format` 之后、进网络之前做 `/255`。`v8.3.0` 与当前 `main`（`4ecb2b5b5457954a1276115b5bcb42f09c358cd6`）的 `DetectionTrainer.preprocess_batch` 都是 `batch["img"].float() / 255`。`Format._format_img` 只做 HWC→CHW，不把除法写进图。ONNX 导出追踪的是网络本身（检测输出名默认 `output0`），不插入这个 Div。推理侧 `predictor.preprocess` 对 ndarray 做 `.div_(255)`，对已经是 tensor 的输入则要求调用方自己处于 0..1。  
+   https://github.com/ultralytics/ultralytics/blob/v8.3.0/ultralytics/models/yolo/detect/train.py  
+   https://github.com/ultralytics/ultralytics/blob/4ecb2b5b5457954a1276115b5bcb42f09c358cd6/ultralytics/models/yolo/detect/train.py  
+   https://github.com/ultralytics/ultralytics/blob/4ecb2b5b5457954a1276115b5bcb42f09c358cd6/ultralytics/engine/exporter.py  
+   https://github.com/ultralytics/ultralytics/blob/4ecb2b5b5457954a1276115b5bcb42f09c358cd6/ultralytics/engine/predictor.py
 
-- S100 文档把校准数据对准浮点模型，把 mean/scale 放在随后的量化阶段写进编译模型。这**支持**「npy 的 /255 与 YAML `data_scale` 不是同一次乘法」这一种读法，但本仓库没有 `hb_compile` 日志，所以讲义保持待核。
-- X5 文档要求校准文件不要预先做已融合的 mean/scale。这与 X5 NV12 磁盘 0..255、YAML 仍保留 `data_scale` 同向。同样没有本地编译。
-- featuremap 两份都是 `no_preprocess`，配置里没有 scale 可融合。上游「X5 不除 255」只描述带 `data_scale` 的 NV12 配方，不能自动证明 X5 featuremap 的 0..255 已经对齐 Ultralytics ONNX（图外通常还有一次 /255）。这一格也待核。本 PR 不改文件数值，也不删 YAML scale。
+两条路径不要互相证明：
+
+- **featuremap + `no_preprocess`**：文件就是 ONNX 输入，所以两板 featuremap 都写成 0..1。X5 仍是原始 `.rgbchw`，S100 仍是 `.npy`。这来自 Ultralytics 的训练前处理，不来自 NV12 配方。
+- **X5 NV12**：校准文件保持 0..255，YAML `data_scale` 保留。X5 文档里的 HzPreprocess 公式是 `((input[-128,127] + 128) - mean) * scale`，scale 在工具链里做。不要把 featuremap 改成同样的 0..255，也不要删掉这个 scale。
+- **S100 NV12**：校准 npy 按浮点模型输入写成 0..1；YAML `data_scale` 留在量化阶段，写进编译后的运行时前处理。文档没有把它写成对 npy 再乘 1/255。本仓库仍然没有 `hb_compile` 日志。不要用这条 NV12 惯例反过来解释 featuremap。
+
+余弦不能单独当域检查。正数倍缩放后余弦仍是 1，数值范围会变。旧 X5 featuremap `.bin` 用 /255 喂入时，曾报告三路 80 通道 cls 最大值约 -2.37 / -5.50 / -4.61，而 ORT(/255) 的 `output0` 最大值约 +1.11，余弦仍约 0.983。那次对照属于错域旧制品。本仓库没有那份 `.bin`，没有重跑 ORT，这三个数不能写成新测值。
 
 ## 尚需的最小实测
 
-云端没有 OE，也没有 X5 / S100。下面四项不要求完整 mAP。
+云端没有 OE，也没有板卡。脚本测试只检查新文件的数值。下面几步都还没做，所以不能写「实测通过」：
 
-1. 用同一张图生成 640×640 校准文件。用 ONNX Runtime 跑自训 ONNX：输入 A 为 0..255，输入 B 为 /255。看首个卷积输出的数量级，确认这张 ONNX 的输入域是 A 还是 B。
-2. S100：把 `ptq_nv12_s100.yaml` 编译到出现 `calibrated_model.onnx`。用**同一份 /255 npy** 比较原始 ONNX 与 calibrated 模型（或工具打印的 Calibrated Cosine）。余弦高且数量级一致，才说明校准没有把 npy 再乘 1/255。激活大约缩小 255 倍，才是「YAML 对校准数据又缩放了一次」。
-3. X5：对 `ptq_nv12_x5.yaml` 做同样对照。ONNX 侧用第 1 步确认的训练域，校准文件用磁盘上的 0..255。
-4. 两板 featuremap：在 `no_preprocess` 下把校准模型分别对 ONNX(A) 和 ONNX(B)。哪一侧余弦高，featuremap 文件就应该用哪一个域。在这步有结果之前，不要把 X5 featuremap 的 0..255 写成已经与 ONNX 对齐。
+1. 删掉旧的 `cal_featuremap_x5_rgbchw/`（里面是 0..255），用本脚本按 640 重新生成。抽一个 `.rgbchw`，确认 float32 最大值 ≤ 1。
+2. 用新的 0..1 校准文件重编 X5 featuremap `.bin`。用同一张 0..1 输入对比新 bin 与 ORT。看类别通道的最大值和符号，不要只看余弦。
+3. S100 featuremap 文件本来就是 0..1 `.npy`。若板上制品是用旧脚本编的，X5 这一路必须重编；S100 只有在当时 npy 不是 /255 时才要重编。无论哪一路，本 PR 都没有新的板端时延或检测数。
+4. NV12 两份 YAML 的 `scale_value` 不要改。X5 NV12 校准继续用 0..255；S100 NV12 校准继续用已经 /255 的 npy。

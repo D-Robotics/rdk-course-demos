@@ -14,9 +14,9 @@ The HTML slides are self-contained; open them in a browser. Use ←/→ to chang
 
 The lesson trains YOLO11n on coco128 (default 40 epochs), then runs four OE conversions: X5 `bayes-e` and S100 `nash-e`, each with a featuremap config and an NV12 config. Lesson 2-06 is the inference API; lesson 2-07 is the deeper Sample change. This directory does not change those lessons.
 
-The companion video is not published yet. Board latency and detection counts printed in the handbook are draft anchors. This commit does not include `board-tests/measured.json`, weights, ONNX, calibration tensors, or compiled models, and it does not claim those numbers were re-measured here.
+The companion video is not published yet. The handbook figures 26.739 ms, 32.193 ms, and 5 dets are pre-fix slide anchors. This commit does not include weights, ONNX, calibration tensors, or compiled models, and it does not claim a new board pass.
 
-S100 calibration files are divided by 255 on disk while the NV12 YAML still lists `data_scale`. That combination is recorded as pending toolchain confirmation. See `conversion/README.md`. Do not read the YAML scale as a proven second multiply, and do not delete it until the OE check in that README is done.
+X5 featuremap calibration is now float32 0..1 in a raw `.rgbchw`, with `norm_type: no_preprocess` unchanged. S100 featuremap stays 0..1 `.npy` and `no_preprocess`. NV12 YAMLs keep `data_scale`. Regenerating the X5 featuremap files and recompiling the `.bin` is still required before any new on-board number. See `conversion/README.md`.
 
 ---
 
@@ -36,6 +36,6 @@ HTML 课件为单文件，直接用浏览器打开。←/→ 翻页，N 显示�
 
 本课范围：coco128 上自训 YOLO11n，默认 40 epoch；X5 `bayes-e` 与 S100 `nash-e` 各做 featuremap 和 NV12，共四轮 OE。2-06 是推理接口，2-07 是 Sample 深改，本目录不改这两课。
 
-配套视频尚未发布。讲义里的时延和检测数是课件草稿锚点。本次提交没有 `board-tests/measured.json`、权重、ONNX、校准张量或编译制品，也没有在板上复测这些数字。
+配套视频尚未发布。讲义里的 26.739 ms、32.193 ms 和 5 dets 是修正前的课件锚点。本次提交没有权重、ONNX、校准张量或编译制品，也没有新的板端通过结果。
 
-S100 校准文件在磁盘上已除以 255，NV12 YAML 仍写着 `data_scale`。这个组合记为待工具链确认，说明见 `conversion/README.md`。在那里的 OE 对照做完之前，不要把它写成已经证实的第二次缩放，也不要删掉 YAML 里的 scale。
+X5 featuremap 校准现为 float32 0..1 的原始 `.rgbchw`，`norm_type` 仍是 `no_preprocess`。S100 featuremap 仍是 0..1 的 `.npy`，同样 `no_preprocess`。NV12 YAML 的 `data_scale` 没有改。旧的 0..255 X5 featuremap 文件要删掉重生成，`.bin` 要重编之后才能写新的板上数字。说明见 `conversion/README.md`。

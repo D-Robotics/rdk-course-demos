@@ -1,0 +1,24 @@
+X5 featuremap calibration domain fix
+==================================
+
+Apply from the course directory that already contains conversion/scripts/prepare_cal_data.py:
+
+    patch -p1 < x5-fm-cal-domain.patch
+
+Or replace conversion/scripts/prepare_cal_data.py with the prepare_cal_data.py shipped next to this note.
+
+What changes
+- X5 featuremap .rgbchw values become float32 RGB NCHW / 255 (0..1).
+- File format stays raw .rgbchw (tofile), not .npy.
+- ptq_featuremap_x5.yaml norm_type stays no_preprocess. No scale_value is added.
+- X5 NV12 .rgbchw stays 0..255. ptq_nv12_x5.yaml data_scale stays.
+- S100 featuremap .npy stays /255. S100 NV12 .npy stays /255. Both NV12 scale_value lines stay.
+
+What you still have to do
+1. Delete the old cal_featuremap_x5_rgbchw directory (those files are 0..255).
+2. Re-run prepare_cal_data.py at 640.
+3. Recompile the X5 featuremap .bin with hb_mapper. Do not reuse the old .bin.
+4. Compare the new bin with ONNX Runtime on a 0..1 input. Check class-channel maxima, not cosine alone.
+5. Do not publish the old 26.739 ms / 32.193 ms / 5 dets as the new board result.
+
+This package contains no model, calibration image, weight, or private path.

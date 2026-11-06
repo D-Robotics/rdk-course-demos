@@ -1,0 +1,58 @@
+diff --git a/conversion/scripts/prepare_cal_data.py b/conversion/scripts/prepare_cal_data.py
+index 3fc4b91..a99f20f 100755
+--- a/conversion/scripts/prepare_cal_data.py
++++ b/conversion/scripts/prepare_cal_data.py
+@@ -1,14 +1,20 @@
+ #!/usr/bin/env python3
+-"""Prepare PTQ calibration tensors for 2-05 (X5 .rgbchw / S .npy / NV12 rgb f32).
++"""Prepare PTQ calibration tensors for 2-05.
+ 
+-Follows Zoo ultralytics_yolo/conversion/workflow.prepare_calibration:
+-  BGR->RGB, resize WxH, HWC->NCHW float32;
+-  X5 featuremap: raw (no /255) -> .rgbchw via tofile
+-  S featuremap: /255 -> .npy via np.save
+-  X5 NV12 cal: RGB float32 0..255 .rgbchw (YAML lists data_scale≈1/255; no OE-math claim here)
+-  S100 NV12 cal: /255 .npy on disk (same file convention as S100 FM).
+-  How OE/S consumes S100 /255 files together with YAML data_scale is pending upstream—
+-  do not treat as a proven /255-then-×scale loop in course copy.
++Featuremap files match the Ultralytics ONNX input (float32 RGB NCHW, 0..1).
++DetectionTrainer.preprocess_batch divides by 255 before the forward, and ONNX
++export does not insert that Div. Both featuremap YAMLs stay norm_type
++no_preprocess, so the file is the network input:
++
++  X5 featuremap: (tensor / 255) -> raw float32 .rgbchw via tofile
++  S100 featuremap: (tensor / 255) -> .npy via np.save
++
++NV12 is a different contract and is not changed here:
++
++  X5 NV12: 0..255 .rgbchw; YAML data_scale stays (HzPreprocess)
++  S100 NV12: /255 .npy; YAML data_scale stays (inserted at the quantize stage)
++
++Do not copy the NV12 file rule onto featuremap, and do not drop NV12 scale.
+ """
+ from __future__ import annotations
+ import argparse
+@@ -66,15 +72,15 @@ def main():
+         dst_jpg = dirs["images"] / f"{stem}.jpg"
+         cv2.imwrite(str(dst_jpg), bgr)
+         tensor = to_nchw(bgr, args.width, args.height)  # 0..255 float32 NCHW
+-        # X5 featuremap
+-        (dirs["x5_fm"] / f"{stem}.rgbchw").write_bytes(tensor.tobytes())
+-        # S featuremap (/255)
+-        np.save(str(dirs["s_fm"] / f"{stem}.npy"), tensor / 255.0)
+-        # X5 NV12 cal: float32 RGB NCHW 0..255 on disk; YAML separately lists data_scale≈1/255
++        train_domain = tensor / 255.0  # ONNX / DetectionTrainer input, 0..1
++        # X5 featuremap: same 0..1 values, still a raw .rgbchw. YAML stays no_preprocess.
++        (dirs["x5_fm"] / f"{stem}.rgbchw").write_bytes(np.ascontiguousarray(train_domain).tobytes())
++        # S100 featuremap: 0..1 .npy. YAML stays no_preprocess.
++        np.save(str(dirs["s_fm"] / f"{stem}.npy"), train_domain)
++        # X5 NV12: pre-scale 0..255. YAML data_scale is unchanged.
+         (dirs["nv12"] / f"{stem}.rgbchw").write_bytes(tensor.tobytes())
+-        # S100 NV12 cal: /255 .npy on disk (same file status as S100 FM; Zoo README).
+-        # YAML also lists data_scale—toolchain consumption of that combo is pending upstream.
+-        np.save(str(dirs["nv12_s"] / f"{stem}.npy"), tensor / 255.0)
++        # S100 NV12: /255 once. YAML data_scale is unchanged; do not divide again.
++        np.save(str(dirs["nv12_s"] / f"{stem}.npy"), train_domain)
+         print(f"[{i}/{len(imgs)}] {path.name} -> {stem}")
+     print("done:")
+     for k, d in dirs.items():
