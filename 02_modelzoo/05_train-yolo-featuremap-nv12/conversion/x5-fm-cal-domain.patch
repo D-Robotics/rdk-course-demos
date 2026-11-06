@@ -1,5 +1,3 @@
-diff --git a/conversion/scripts/prepare_cal_data.py b/conversion/scripts/prepare_cal_data.py
-index 3fc4b91..a99f20f 100755
 --- a/conversion/scripts/prepare_cal_data.py
 +++ b/conversion/scripts/prepare_cal_data.py
 @@ -1,14 +1,20 @@
@@ -32,7 +30,29 @@ index 3fc4b91..a99f20f 100755
  """
  from __future__ import annotations
  import argparse
-@@ -66,15 +72,15 @@ def main():
+@@ -18,18 +24,21 @@
+ 
+ IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
+ 
++
+ def list_images(src: Path, limit: int) -> list[Path]:
+     files = sorted(p for p in src.rglob("*") if p.suffix.lower() in IMAGE_EXTS)
+     if not files:
+         raise SystemExit(f"no images under {src}")
+     return files[:limit]
+ 
++
+ def to_nchw(img_bgr, w: int, h: int) -> np.ndarray:
+     rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
+     rgb = cv2.resize(rgb, (w, h), interpolation=cv2.INTER_LINEAR)
+     chw = np.transpose(rgb, (2, 0, 1))
+     return np.expand_dims(chw, 0).astype(np.float32)
+ 
++
+ def main():
+     ap = argparse.ArgumentParser()
+     ap.add_argument("--src", required=True, help="dir of JPG/PNG")
+@@ -66,19 +75,20 @@
          dst_jpg = dirs["images"] / f"{stem}.jpg"
          cv2.imwrite(str(dst_jpg), bgr)
          tensor = to_nchw(bgr, args.width, args.height)  # 0..255 float32 NCHW
@@ -56,3 +76,8 @@ index 3fc4b91..a99f20f 100755
          print(f"[{i}/{len(imgs)}] {path.name} -> {stem}")
      print("done:")
      for k, d in dirs.items():
+         print(f"  {k}: {d} ({len(list(d.glob('*')))} files)")
+ 
++
+ if __name__ == "__main__":
+     main()

@@ -39,7 +39,6 @@
       "title": "Self-train YOLO",
       "highlight": "Self-train",
       "subtitle": "feature map first, then NV12",
-      "visual": "assets/yolo11-detect-cover.webp",
       "theme": "light",
       "notes": "Chapter 2 Model Zoo, lesson 5: self-train YOLO—tune the quantization path with feature map first, then switch to NV12. Model is YOLO11n detect; dataset is the public mini-set coco128. Dual boards: X5 and S100. [Read] YOLO as yolo; feature map as a whole word; NV12 per handbook."
     },
@@ -391,7 +390,7 @@
           "label": "float32 input tensor",
           "kind": "ok",
           "size": 24,
-          "sub": "X5·rgbchw / S·npy",
+          "sub": "both boards 0..1",
           "sub_size": 16,
           "on": true
         },
@@ -470,7 +469,7 @@
           "id": "r_q",
           "x": 1200,
           "y": 380,
-          "text": "Compare ONNX vs quant with that board’s own cal tensor",
+          "text": "Same 0..1 domain: compare ONNX vs quant per board file",
           "size": 18,
           "anchor": "middle",
           "color": "green"
@@ -564,7 +563,7 @@
             "r_npy",
             "right_band"
           ],
-          "caption": "Per-board float32 cal: X5 .rgbchw 0..255; S100 .npy /255 (0..1); compare ONNX vs quant with that board’s own cal tensor—do not mix"
+          "caption": "Both FM boards use 0..1: X5 .rgbchw, S100 .npy; compare ONNX vs quant with that board’s file—containers differ, do not mix"
         },
         {
           "at": 22000,
@@ -579,7 +578,7 @@
           "caption": "Once the full path works, then consider NV12 or RGB"
         }
       ],
-      "notes": "Left: jumping to NV12 or RGB forces cal through color and normalize—too many variables when the path fails. Right: feature map is the float32 input tensor fed to the network. Cal is per board—X5 .rgbchw in zero-to-two-fifty-five; S100 .npy after divide-by-two-fifty-five. Compare ONNX vs quant with that board’s own cal tensor and toolchain; do not mix boards or say one shared npy. Once it works, switch to NV12 or RGB. [Read] feature map whole word; NV12 per handbook; YOLO as yolo."
+      "notes": "Left: jumping to NV12 or RGB forces cal through color and normalize—too many variables when the path fails. Right: feature map is the float32 input tensor fed to the network, matching the self-train ONNX domain of zero-to-one. Both boards share that numeric domain; only the container differs—X5 .rgbchw, S100 .npy. Compare with that board’s file; do not mix. This is a single-image input-domain loop, not an mAP or generalization accuracy cert. Once it works, switch to NV12 or RGB. [Read] feature map whole word; NV12 per handbook; YOLO as yolo."
     },
     {
       "layout": "bullets",
@@ -591,7 +590,7 @@
       "items": [
         {
           "mark": "check",
-          "text": "Cal tensors: float32 (.npy / .rgbchw per board)"
+          "text": "Cal tensors: float32 0..1 (X5 .rgbchw / S100 .npy)"
         },
         {
           "mark": "check",
@@ -631,8 +630,8 @@
       "layout": "table",
       "title": "YAML · FM Side-by-side",
       "eyebrow": "conversion/",
-      "heading": "Same FM ==fields== · different cal ranges",
-      "lead": "Files ptq_featuremap_{x5,s100}.yaml; no_preprocess; X5 cal 0..255 .rgbchw, S100 /255 .npy.",
+      "heading": "Same FM ==fields== · same 0..1 domain",
+      "lead": "ptq_featuremap_{x5,s100}.yaml; both no_preprocess; both 0..1—X5 .rgbchw, S100 .npy.",
       "head": [
         "Item",
         "X5 FM",
@@ -662,11 +661,11 @@
         ],
         [
           "cal",
-          "x5_rgbchw 0..255",
-          "s100_npy /255"
+          "rgbchw 0..1",
+          "npy 0..1"
         ]
       ],
-      "notes": "FM side-by-side: both boards use featuremap and no_preprocess; they differ in march and calibration—X5 is zero-to-two-fifty-five rgbchw, S100 is divide-by-two-fifty-five npy. [Read] bayes-e / nash-e = arch name + pause + letter."
+      "notes": "FM side-by-side: both boards use featuremap and no_preprocess with the same 0..1 domain; they differ in march and file container—X5 rgbchw, S100 npy. Self-train ONNX expects 0..1. This is a single-image input-domain loop, not an mAP cert. [Read] bayes-e / nash-e = arch name + pause + letter."
     },
     {
       "layout": "code",
@@ -871,7 +870,7 @@
       "title": "X5-FM On Board",
       "eyebrow": "Round 1 · X5",
       "heading": "model_info + ==one-frame infer==",
-      "lead": "On board, only write under /tmp/course_2-05/. If host cosine is not measured yet, mark pending board measurement.",
+      "lead": "On board, only write under /tmp/course_2-05/. NEW: feed /255 only; Infer 31.316 ms; six heads vs ORT cosine ≥0.991; 8 dets.",
       "blocks": [
         {
           "label": "hrt_model_exec (sketch)",
@@ -886,17 +885,17 @@
               "hl": true
             },
             {
-              "text": "# infer: same float32 input → dump outputs",
+              "text": "# infer: /255 float32 → dump (do not feed 0..255)",
               "hl": false
             }
           ],
           "note": {
-            "k": "Board",
-            "p": "input F32/DDR · infer 26.739 ms"
+            "k": "Board NEW",
+            "p": "F32/DDR · 31.316 ms · 8 dets"
           }
         }
       ],
-      "notes": "X5 on board. model_info should show input F32 from DDR; then one full infer—this lesson’s board measure is about twenty-six point seven milliseconds. If host ONNX↔quant cosine is unmeasured, mark pending board measurement."
+      "notes": "X5 feature map on board. model_info should show input F32 from DDR. This round’s PR19 rebuild, fed divide-by-two-fifty-five only: Infer thirty-one point three one six milliseconds; all six heads vs ORT cosine at least zero point nine nine one; decode yields eight detections on the same image and thresholds as ORT. This is a single-image input-domain loop, not an mAP or full accuracy verification. The old twenty-six point seven three nine millisecond anchor was the pre-fix zero-to-two-fifty-five cal domain—do not present it as current FM."
     },
     {
       "layout": "code",
@@ -946,7 +945,7 @@
               "hl": true
             },
             {
-              "text": "# board infer ≈ 32.193 ms",
+              "text": "# OLD infer ≈ 32.193 ms @ measured.json 2026-11-02; not remeasured this round",
               "hl": false
             }
           ],
@@ -956,7 +955,7 @@
           }
         }
       ],
-      "notes": "S100 on board. Check model_info and one-frame infer; this lesson’s board measure is about thirty-two point two milliseconds. Host cosine likewise: write it only if measured, else pending board measurement."
+      "notes": "S100 feature map on board. Check model_info and one-frame infer. This round did not remeasure S100 FM; the old about thirty-two point one nine three milliseconds is from measured.json on two thousand twenty-six eleven oh-two—do not pair it with NEW X5 as the current two-board anchor. Numeric domain is still zero-to-one; file is npy."
     },
     {
       "layout": "bullets",
@@ -1296,7 +1295,7 @@
       "title": "YAML · NV12 Side-by-side",
       "eyebrow": "data_scale",
       "heading": "Use ==data_scale== ≈1/255 · cal per board",
-      "lead": "ptq_nv12_{x5,s100}.yaml; YAML lists data_scale≈1/255 (not mean+scale). On disk: X5 cal 0..255 .rgbchw, S100 /255 .npy—how the toolchain combines them is pending upstream; this lesson does not claim a proven /255-then-×scale loop.",
+      "lead": "ptq_nv12_{x5,s100}.yaml; YAML data_scale≈1/255 (not mean+scale). X5 on-disk 0..255 + mapper HzPreprocess; S100 on-disk /255, calibrate sees 0..1, then insert_image_preprocess at quantize—data_scale is for runtime, not a second /255.",
       "head": [
         "Item",
         "X5 NV12",
@@ -1329,7 +1328,7 @@
           "Y + UV"
         ]
       ],
-      "notes": "NV12 side-by-side: rt to nv12, train to rgb; YAML lists data_scale about one over two-fifty-five—not data_mean_and_scale. On disk: X5 cal is zero-to-two-fifty-five rgbchw; S100 cal is divide-by-two-fifty-five npy, same file status as S100 FM. Keep disk range and YAML fields as separate facts; how OE/S consumes /255 files with data_scale is pending upstream—do not narrate a proven closed loop. X5 packed; S100 Y+UV. YAML follows conversion/. [Read] NV12—never NVR."
+      "notes": "NV12 side-by-side: rt to nv12, train to rgb; YAML uses data_scale about one over two-fifty-five—not data_mean_and_scale. X5: on-disk zero-to-two-fifty-five rgbchw, then mapper HzPreprocess. S100: on-disk already /255 npy; compile calibrates on 0..1, then inserts image preprocess at quantize; YAML data_scale is for runtime—not a second divide at cal time. Do not reuse the old X5 featuremap zero-to-two-fifty-five story for NV12 or FM. X5 packed; S100 Y+UV. YAML follows conversion/. [Read] NV12—never NVR."
     },
     {
       "layout": "code",

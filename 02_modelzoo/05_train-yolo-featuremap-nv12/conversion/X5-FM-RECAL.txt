@@ -1,24 +1,26 @@
-X5 featuremap calibration domain fix
-==================================
+X5 featuremap calibration domain
+================================
 
-Apply from the course directory that already contains conversion/scripts/prepare_cal_data.py:
+The script that matches the recorded rebuild is:
 
-    patch -p1 < x5-fm-cal-domain.patch
+    sha256 79716b4ad94a1222013b5a8cceb0aac95fac2a8b8cf1b02af16b94001aef012b
+    conversion/scripts/prepare_cal_data.py
 
-Or replace conversion/scripts/prepare_cal_data.py with the prepare_cal_data.py shipped next to this note.
+From a course directory that still has the older script (X5 featuremap written as 0..255):
 
-What changes
-- X5 featuremap .rgbchw values become float32 RGB NCHW / 255 (0..1).
-- File format stays raw .rgbchw (tofile), not .npy.
-- ptq_featuremap_x5.yaml norm_type stays no_preprocess. No scale_value is added.
-- X5 NV12 .rgbchw stays 0..255. ptq_nv12_x5.yaml data_scale stays.
-- S100 featuremap .npy stays /255. S100 NV12 .npy stays /255. Both NV12 scale_value lines stay.
+    patch -p1 < conversion/x5-fm-cal-domain.patch
 
-What you still have to do
-1. Delete the old cal_featuremap_x5_rgbchw directory (those files are 0..255).
-2. Re-run prepare_cal_data.py at 640.
-3. Recompile the X5 featuremap .bin with hb_mapper. Do not reuse the old .bin.
-4. Compare the new bin with ONNX Runtime on a 0..1 input. Check class-channel maxima, not cosine alone.
-5. Do not publish the old 26.739 ms / 32.193 ms / 5 dets as the new board result.
+What the script writes
+- X5 featuremap: float32 RGB NCHW / 255, raw .rgbchw. YAML stays no_preprocess.
+- S100 featuremap: /255 .npy. YAML stays no_preprocess.
+- X5 NV12: 0..255 .rgbchw. YAML data_scale stays.
+- S100 NV12: /255 .npy once. YAML data_scale stays.
 
-This package contains no model, calibration image, weight, or private path.
+Recorded X5 featuremap check (one image, not mAP)
+- bin sha256 aee69bc13281483525a62c38121e1612128aceb7d399d261af5cddcec0336b75
+- hrt_model_exec one frame, input 0..1 only: 31.316 ms
+- six heads vs ORT(/255) cosine >= 0.991
+- decode_dfl score 0.25 / nms 0.45: board 8 dets, ORT 8 dets, classes {45:3, 50:1, 49:4}
+- Do not cite 26.739 ms, S100 32.193 ms, or NV12 5 dets as this result.
+
+See board-tests/measured.json.

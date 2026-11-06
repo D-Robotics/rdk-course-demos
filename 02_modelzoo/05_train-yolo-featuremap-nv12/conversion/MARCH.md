@@ -5,7 +5,7 @@
 | 板 | `march` | 依据（公开） |
 |----|---------|--------------|
 | X5 | `bayes-e` | Model Zoo `ultralytics_yolo` workflow / `config_x5` |
-| S100 | `nash-e` | Model Zoo README_cn「S100 → nash-e」；`workflow.s_toolchain` 默认。公开 OE 检查页写明 S100 使用 `nash-e`：https://developer.d-robotics.cc/oe_s_doc/en/guide/ptq/ptq_tool/hb_compile/check.html 。本仓库没有重跑 `hb_compile --help` |
+| S100 | `nash-e` | Model Zoo README_cn「S100 → nash-e」；`workflow.s_toolchain` 默认；OE `hb_compile --help` 的 `--march` 枚举含 `nash-e` |
 
 本课不录 S100P（`nash-m`）/ S600（`nash-p`）。
 

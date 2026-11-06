@@ -26,11 +26,7 @@
 | [X5 环境安装 / OE Docker](https://developer.d-robotics.cc/oe_x5_doc/cn/oe_mapper/source/env_install.html) | X5 OE 容器与 PTQ 环境 |
 | [S 系列环境部署（含 CPU / GPU Docker）](https://developer.d-robotics.cc/oe_s_doc/guide/env_install) | S 系列提供 CPU 与 GPU 两套 Docker，可按需选择；PTQ 用 CPU 镜像即可完整做完 |
 | [hrt_model_exec 工具介绍](https://developer.d-robotics.cc/oe_s_doc/guide/ucp/runtime/tool_introduction/hrt_model_exec) | 板端 `model_info` / `infer` |
-| 本课板测汇总 | 课件草稿锚点；`board-tests/measured.json` **未入库**，本 PR 未复测 |
-
-!!! note "旧数字不能当新测值"
-    下文出现的 **26.739 ms / 32.193 ms / 5 dets** 是修正 X5 featuremap 校准域之前的课件草稿。X5 featuremap 旧文件是 0..255，而 ONNX 输入是 0..1。新的 0..1 校准还没有重编，也没有上板。这些数字不是新测值。细节见 [conversion/README.md](https://github.com/D-Robotics/rdk-course-demos/blob/develop/02_modelzoo/05_train-yolo-featuremap-nv12/conversion/README.md)。
-
+| 本课板测汇总 | 课内 `board-tests/measured.json`（featuremap infer、NV12 Sample） |
 
 ---
 
@@ -55,7 +51,7 @@
 - 对照改 YAML 关键字段：`input_type_*`、`norm_type`、校准数据格式，以及 X5 `bayes-e` / S100 `nash-e`；
 - 在 OE 里按量化课完整流程走完（打开 OE → 配环境 → 导出 → YAML+编译 → 产物 → 上板 → 评估），featuremap 与 NV12 **各走一遍**；
 - 在板上 `/tmp/course_2-05/` 完成：`model_info` + **一帧完整 infer**（featuremap），以及 Sample **跑通一帧**（NV12）；
-- 知道旧课件上的 **26.739 ms / 32.193 ms / 5 dets** 不能当作这次修正后的实测。新校准重编和板测还没有做。
+- 读懂本课锁定实测：X5 featuremap Infer **31.316 ms（NEW · PR19 · 仅 /255）**；六头 vs ORT 余弦 ≥0.991；同图 decode **8 dets**（bowl×3 / broccoli×1 / orange×4）。S100 FM 本回合未重测（旧测 32.193 ms @ `measured.json` 2026-11-02，勿与 NEW X5 并列成当前双板）。NV12 Sample 各 **5 dets**（`bus.jpg`，属 NV12 旧测，非 FM）。
 
 ---
 
@@ -157,12 +153,12 @@ RGB 通道排布与 NV12（Y + 交错 UV）是不同**输入协议**；dtype/lay
 | layout | NCHW / NCHW | NCHW / NCHW |
 | norm | `no_preprocess` | `no_preprocess` |
 | cal_dir | `cal_featuremap_x5_rgbchw` | `cal_featuremap_s100_npy` |
-| 校准文件数值 | float32 **/255 → 0..1**（原始 `.rgbchw`） | float32 **/255 → 0..1**（`.npy`） |
+| 校准数值域 | float32 **0..1**（像素÷255 → raw `.rgbchw` tofile） | float32 **0..1**（`/255` → `.npy`） |
+| 容器 | `.rgbchw` | `.npy` |
 
-两板 featuremap 的数值域都是 Ultralytics 训练时送进网络的 0..1：`DetectionTrainer.preprocess_batch` 在 `Format` 之后做 `/255`，ONNX 导出不包含这个 Div。`norm_type: no_preprocess` 不会再缩放，所以文件本身必须是 0..1。容器仍然不同：X5 是 `tofile` 的 `.rgbchw`，S100 是 `.npy`。不能说成同一份 npy，也不能用 NV12「X5 保持 0..255」来写 featuremap。
-
-旧的 X5 featuremap `.rgbchw` 若还是 0..255，要删掉后用当前脚本重生成，再重编 `.bin`。这一步还没有在板上做完。Host 对照 ORT 时用该板自己的 0..1 文件。板端硬要求仍是一帧完整 infer，只跑 `model_info` 不算过关。余弦在整体放大时可以仍然很高，不能单靠余弦判断域对了。见 [conversion/README.md](https://github.com/D-Robotics/rdk-course-demos/blob/develop/02_modelzoo/05_train-yolo-featuremap-nv12/conversion/README.md)。
-
+自训 ONNX 期望输入域 **0..1**（Ultralytics 训练外部 ÷255；ONNX 图中无 Div）。两板 FM 数值域相同，**仅容器不同**——对照时用该板自己的校准文件与工具链，**不能混用**，也不要说「同一份 npy」。  
+YAML 两板均为 `norm_type: no_preprocess`。板端硬要求：**一帧完整 infer**，只跑 `model_info` 不算过关。  
+**边界**：本节与 PR19 板测是**单图输入域闭环**验证，**不是** mAP 或泛化精度认证，禁止写成「全精度验证」。
 
 ### 5.2 第二步 · NV12（引入预处理）
 
@@ -189,25 +185,26 @@ RGB 通道排布与 NV12（Y + 交错 UV）是不同**输入协议**；dtype/lay
 | layout train | NCHW | NCHW（另含 shape `1x3x640x640`） |
 | norm / scale | `data_scale` / ≈1/255 | 同左 |
 | cal_dir | `cal_nv12_rgb_f32` | `cal_nv12_s100_npy` |
-| 校准文件（磁盘） | float32 **0..255** `.rgbchw`。YAML `data_scale` 保留，由 X5 的 HzPreprocess 做 ×1/255。这不是 featuremap 的写法 | float32 **/255 → 0..1** `.npy`。YAML `data_scale` 保留，按 S100 文档在量化阶段插入运行时前处理，不是对 npy 再乘一次。本仓库没有 `hb_compile` 日志 |
+| 校准（磁盘） | float32 **0..255** `.rgbchw` | float32 **/255 → 0..1** `.npy` |
+| 工具链消费（已证） | mapper **HzPreprocess**（YAML `data_scale`≈1/255） | 编译**先 calibrate（见 0..1）→ 再 quantize 时 `insert_image_preprocess`**；YAML `data_scale` 用于 **runtime**，**不是**校准二次 `/255` |
 
-协议差异（本课实测口径）：
+协议差异：
 
 - **X5**：packed 单输入 NV12；
 - **S100**：拆成 `images_y` + `images_uv` 双输入。
 
-**不能泛称两板校准数值范围一样**——必须按上表分板写。
+**不能**用旧「X5 FM=0..255」口径类比 NV12 或当前 FM；FM 与 NV12 是两套合同。
 
 ### 5.3 闭环：数据准备 → 数值范围 → 校准 → 运行输入
 
 | 路径 | 数据准备 | 张量范围 | YAML 归一化 | 运行输入（rt） |
 |---|---|---|---|---|
-| X5 FM | `prepare_cal_data.py` → `.rgbchw`（/255） | 0..1 | `no_preprocess`（文件即 ONNX 输入） | featuremap float32 |
-| S100 FM | 同脚本 → `.npy`（/255） | 0..1 | `no_preprocess`（文件即 ONNX 输入） | featuremap float32 |
-| X5 NV12 | 同脚本 → `cal_nv12_rgb_f32` `.rgbchw` | 0..255 | `data_scale`×1/255，走 HzPreprocess | nv12 UINT8（packed） |
-| S100 NV12 | 同脚本 → `cal_nv12_s100_npy` `.npy`（/255） | 0..1 | `data_scale`×1/255，量化阶段才插入；不要对 npy 再除 255 | nv12 UINT8（Y+UV） |
+| X5 FM | `prepare_cal_data.py` → `.rgbchw`（值÷255） | **0..1** | `no_preprocess` | featuremap float32 |
+| S100 FM | 同脚本 → `.npy`（/255） | **0..1** | `no_preprocess` | featuremap float32 |
+| X5 NV12 | 同脚本 → `cal_nv12_rgb_f32` `.rgbchw` | **0..255** | `data_scale`≈1/255 → mapper **HzPreprocess** | nv12 UINT8（packed） |
+| S100 NV12 | 同脚本 → `cal_nv12_s100_npy` `.npy`（/255） | **0..1** | calibrate 见 0..1；quantize 插预处理；`data_scale` 给 **runtime**（非二次 /255） | nv12 UINT8（Y+UV） |
 
-featuremap 已与训练域对齐之后，再改 NV12，差别才主要来自前处理。旧的 0..255 X5 featuremap 制品不能当这个对照的基线。输出头协议（本课两侧均为 6 个输出张量）应保持一致。新 bin / hbm 的时延和检测数要等重编和板测，本课现在没有这组新数字。
+改字段后重新编译；**差异应主要来自预处理**。输出头协议（本课两侧均为 6 个输出张量）应保持一致。
 
 ---
 
@@ -288,18 +285,23 @@ hrt_model_exec infer \
 | dtype / 来源 | F32 · DDR | F32 · ddr |
 | 输出张量数 | 6 | 6 |
 
-### 7.3 本课锁定的 featuremap 时延
+### 7.3 本课锁定的 featuremap 时延 / 域闭环（NEW）
 
-下面的毫秒数来自修正前的课件草稿（草稿文件名 `board-tests/measured.json`，板名 `x5-8g` / `s100`）。该文件没有入库。X5 featuremap 旧校准是 0..255，与 ONNX 的 0..1 不符。这些数不能当作新校准重编后的测值。
+**当前主锚点（PR19 · 2026-11-06 · x5-8g · 仅 /255 喂数）**
 
-![featuremap 一帧实测：X5 26.739 ms · S100 32.193 ms](../assets/images/modelzoo/lesson-2-05-zh-3b2bc524ee30.jpg)
-
-| 板 | featuremap infer |
+| 项 | NEW |
 |---|---|
-| X5（`bayes-e`） | **26.739 ms** |
-| S100（`nash-e`） | **32.193 ms** |
+| X5 FM Infer | **31.316 ms** |
+| 制品 bin sha256 | `aee69bc13281483525a62c38121e1612128aceb7d399d261af5cddcec0336b75` |
+| 六头 vs ORT(/255) cosine | 全部 **≥0.991** |
+| 后处理 | Zoo `decode_dfl`，score=**0.25** / nms=**0.45** |
+| 检测 | board **8 dets** ≈ ORT **8 dets**；类多重集 **{45:3, 50:1, 49:4}**（bowl×3 / broccoli×1 / orange×4） |
 
-重新录屏和上板之后才能写新的时延。在那之前，不要把上表当成新结果。
+**边界**：以上是**单图输入域闭环**验证，**不是** mAP 或泛化精度认证。
+
+**OLD（不得冒充当前 FM）**：`board-tests/measured.json`（2026-11-02）X5 FM Infer **26.739 ms**（旧 0..255 cal 域）；S100 FM Infer **32.193 ms**（本回合未重测）。图注若仍写旧数，以本表 NEW 为准。
+
+![featuremap 一帧实测（图为历史排版；数字以本表 NEW/OLD 归属为准）](../assets/images/modelzoo/lesson-2-05-zh-3b2bc524ee30.jpg)
 
 ### 7.4 NV12：回到 Sample 跑通一帧
 
@@ -354,7 +356,7 @@ python3 samples/vision/ultralytics_yolo/runtime/python/main.py \
 
 ### Q2：featuremap 余弦很高，NV12 Sample 却很差？
 
-先看 featuremap 文件是不是 0..1。余弦在输入被整体放大时仍可以很高，所以还要看类别通道的最大值和符号。然后再查 NV12 的 `input_type_*`、`data_scale`≈1/255、X5 packed / S100 Y+UV。输出头协议若变了，回查 2-04 的导出切点。
+优先查预处理与校准：`input_type_*`、`norm_type`（本课 NV12 为 `data_scale`≈1/255）、校准图/张量范围是否代表真实输入分布，以及 X5 packed / S100 Y+UV 是否按板别配置。输出头协议若变了，要回查导出切点（2-04）。
 
 ### Q3：S100 必须用 GPU Docker 吗？
 
@@ -377,8 +379,8 @@ python3 samples/vision/ultralytics_yolo/runtime/python/main.py \
 ## 本课小结
 
 - **自训**：YOLO11n + coco128 + 缩时角标，导出切点对齐 2-04；
-- **featuremap**：`no_preprocess`，两板校准文件都是 0..1；X5 用 `.rgbchw`，S100 用 `.npy`。旧的 26.739 / 32.193 ms 不是新测值；
-- **NV12**：X5 校准 0..255 走 HzPreprocess，S100 校准 0..1 且 `data_scale` 在量化阶段插入。旧的两侧 5 dets 不是新测值；
+- **featuremap**：排除预处理变量；两板数值域 **0..1**；NEW X5 Infer **31.316 ms**、8 dets vs ORT（单图域闭环，非 mAP）；S100 FM 本回合未重测（OLD 32.193 ms）；
+- **NV12**：X5 磁盘 0..255 + HzPreprocess；S100 /255 + runtime `data_scale`（非二次 /255）；Sample 各 **5 dets**（旧 NV12，非 FM）；
 - 下一课预告：**2-06《推理接口》**——Python / C++ 如何加载模型与读结果。
 
 ---

@@ -24,17 +24,20 @@ import numpy as np
 
 IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
 
+
 def list_images(src: Path, limit: int) -> list[Path]:
     files = sorted(p for p in src.rglob("*") if p.suffix.lower() in IMAGE_EXTS)
     if not files:
         raise SystemExit(f"no images under {src}")
     return files[:limit]
 
+
 def to_nchw(img_bgr, w: int, h: int) -> np.ndarray:
     rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
     rgb = cv2.resize(rgb, (w, h), interpolation=cv2.INTER_LINEAR)
     chw = np.transpose(rgb, (2, 0, 1))
     return np.expand_dims(chw, 0).astype(np.float32)
+
 
 def main():
     ap = argparse.ArgumentParser()
@@ -85,6 +88,7 @@ def main():
     print("done:")
     for k, d in dirs.items():
         print(f"  {k}: {d} ({len(list(d.glob('*')))} files)")
+
 
 if __name__ == "__main__":
     main()

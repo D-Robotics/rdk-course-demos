@@ -25,11 +25,7 @@
 | [RDK S Series Algorithm Toolchain Guide](https://developer.d-robotics.cc/rdk_doc/en/rdk_s/04_toolchain_development) | S-series toolchain entry; versions follow the docs |
 | [S-series env install (CPU and GPU Docker)](https://developer.d-robotics.cc/oe_s_doc/guide/env_install) | Official images include CPU and GPU variants; PTQ can finish on CPU |
 | [hrt_model_exec](https://developer.d-robotics.cc/oe_s_doc/guide/ucp/runtime/tool_introduction/hrt_model_exec) | On-board `model_info` / `infer` |
-| Lesson measurements | Draft slide anchors; `board-tests/measured.json` is **not in this repo**, and this PR did not re-measure |
-
-!!! note "Old numbers are not the new measurement"
-    The **26.739 ms / 32.193 ms / 5 dets** figures below belong to the slides from before the X5 featuremap domain fix. Those X5 files were 0..255; the ONNX input is 0..1. The new 0..1 calibration has not been recompiled or run on a board. See [conversion/README.md](https://github.com/D-Robotics/rdk-course-demos/blob/develop/02_modelzoo/05_train-yolo-featuremap-nv12/conversion/README.md).
-
+| Lesson measurements | In-tree `board-tests/measured.json` |
 
 ---
 
@@ -50,7 +46,7 @@ This lesson’s spine: **train YOLO11n → feature map path first → then NV12 
 - Edit the YAML fields and `march` values (`bayes-e` / `nash-e`);
 - Run the full OE flow twice (featuremap and NV12) for both boards;
 - On board: `model_info` + **one full featuremap infer**, then one NV12 Sample frame under `/tmp/course_2-05/`;
-- Treat **26.739 ms / 32.193 ms / 5 dets** as pre-fix slide figures. Recompile and board measurement of the corrected calibration are not done.
+- Cite the locked numbers: X5 featuremap Infer **31.316 ms (NEW · PR19 · /255 only)**; six heads vs ORT cosine ≥0.991; same-image decode **8 dets** (bowl×3 / broccoli×1 / orange×4). S100 FM was **not** remeasured this round (OLD 32.193 ms @ `measured.json` 2026-11-02—do not pair with NEW X5 as the current two-board anchor). NV12 Sample **5 dets** each on `bus.jpg` are OLD NV12, not FM.
 
 ---
 
@@ -127,12 +123,12 @@ Docs:
 | rt / train | featuremap / featuremap | featuremap / featuremap |
 | norm | `no_preprocess` | `no_preprocess` |
 | cal_dir | `cal_featuremap_x5_rgbchw` | `cal_featuremap_s100_npy` |
-| File values | float32 **/255 → 0..1** (raw `.rgbchw`) | float32 **/255 → 0..1** (`.npy`) |
+| Cal numeric domain | float32 **0..1** (pixels/255 → raw `.rgbchw` tofile) | float32 **0..1** (`/255` → `.npy`) |
+| Container | `.rgbchw` | `.npy` |
 
-Both featuremap files are the 0..1 tensor Ultralytics feeds the network. `DetectionTrainer.preprocess_batch` divides by 255 after `Format`, and ONNX export does not contain that Div. `norm_type: no_preprocess` applies no further scale, so the file itself must be 0..1. The containers stay different: X5 is a raw `.rgbchw`, S100 is `.npy`. Do not call them one shared npy, and do not copy the NV12 rule “X5 stays 0..255” onto featuremap.
-
-Delete any old X5 featuremap `.rgbchw` that is still 0..255, regenerate with the current script, and recompile the `.bin`. That board run is not done. Host ORT checks use that board’s own 0..1 file. One full infer frame is still required. Cosine can stay high under a global scale change, so it is not a domain check by itself. See [conversion/README.md](https://github.com/D-Robotics/rdk-course-demos/blob/develop/02_modelzoo/05_train-yolo-featuremap-nv12/conversion/README.md).
-
+Self-train ONNX expects **0..1** (Ultralytics divides by 255 outside the graph; ONNX has no Div). Both FM boards share that domain; **only the container differs**—compare with that board’s own cal file and toolchain; **do not mix**, and do not say “one shared npy”.  
+Both YAMLs keep `norm_type: no_preprocess`. Hard requirement on board: **one full infer frame**, not `model_info` alone.  
+**Boundary:** this section and the PR19 board check are a **single-image input-domain loop**, **not** an mAP or generalization accuracy certification—do not call it “full accuracy verification”.
 
 ### 5.2 Then NV12
 
@@ -153,20 +149,21 @@ This lesson matches Model Zoo `ultralytics_yolo/conversion/config_x5.yaml`: NV12
 | rt / train | nv12 / rgb | nv12 / rgb |
 | norm / scale | `data_scale` / ≈1/255 | same |
 | cal_dir | `cal_nv12_rgb_f32` | `cal_nv12_s100_npy` |
-| Calibration file | float32 **0..255** `.rgbchw`. YAML `data_scale` stays; X5 HzPreprocess applies ×1/255. This is not the featuremap rule | float32 **/255 → 0..1** `.npy`. YAML `data_scale` stays and, per the S100 docs, is inserted at the quantize stage. It is not a second multiply of the npy. This repo has no `hb_compile` log |
+| Cal (on disk) | float32 **0..255** `.rgbchw` | float32 **/255 → 0..1** `.npy` |
+| Toolchain (verified) | mapper **HzPreprocess** (YAML `data_scale`≈1/255) | Compile **calibrates first (sees 0..1) → then `insert_image_preprocess` at quantize**; YAML `data_scale` is for **runtime**, **not** a second `/255` at cal time |
 
-X5: packed NV12. S100: `images_y` + `images_uv`. **Do not claim both boards share one cal numeric range**—write them per board.
+X5: packed NV12. S100: `images_y` + `images_uv`. **Do not** reuse the old “X5 FM=0..255” story for NV12 or current FM—FM and NV12 are separate contracts.
 
 ### 5.3 Closed loop: prepare → range → calibrate → runtime
 
 | Path | Prepare | Tensor range | YAML norm | Runtime (rt) |
 |---|---|---|---|---|
-| X5 FM | `prepare_cal_data.py` → `.rgbchw` (/255) | 0..1 | `no_preprocess` (file is the ONNX input) | featuremap float32 |
-| S100 FM | same → `.npy` (/255) | 0..1 | `no_preprocess` (file is the ONNX input) | featuremap float32 |
-| X5 NV12 | same → `cal_nv12_rgb_f32` | 0..255 | `data_scale` ×1/255 via HzPreprocess | nv12 UINT8 packed |
-| S100 NV12 | same → `cal_nv12_s100_npy` (/255) | 0..1 | `data_scale` ×1/255 inserted at quantize time; do not divide the npy again | nv12 UINT8 Y+UV |
+| X5 FM | `prepare_cal_data.py` → `.rgbchw` (values/255) | **0..1** | `no_preprocess` | featuremap float32 |
+| S100 FM | same → `.npy` (/255) | **0..1** | `no_preprocess` | featuremap float32 |
+| X5 NV12 | same → `cal_nv12_rgb_f32` | **0..255** | `data_scale`≈1/255 → mapper **HzPreprocess** | nv12 UINT8 packed |
+| S100 NV12 | same → `cal_nv12_s100_npy` (/255) | **0..1** | calibrate sees 0..1; quantize inserts preprocess; `data_scale` for **runtime** (not a second /255) | nv12 UINT8 Y+UV |
 
-Only after featuremap matches the training domain should an NV12 gap be read as pre-processing. The old 0..255 X5 featuremap artifact is not that baseline. Output head count stays 6. New latency and detection counts wait on recompile and a board run; this lesson does not have them.
+Differences after the switch should come mainly from pre-processing; output head count stays 6 in this lesson.
 
 ---
 
@@ -202,16 +199,23 @@ Board writes **only** `/tmp/course_2-05/`.
 | featuremap | `selftrain_yolo11n_detect_bayese_640x640_featuremap.bin` | `selftrain_yolo11n_detect_nashe_640x640_featuremap.hbm` |
 | NV12 | `selftrain_yolo11n_detect_bayese_640x640_nv12.bin` | `selftrain_yolo11n_detect_nashe_640x640_nv12.hbm` |
 
-### Featuremap infer anchors
+### Featuremap infer anchors (NEW vs OLD)
 
-The milliseconds below are pre-fix slide figures (the draft named `board-tests/measured.json`, boards `x5-8g` / `s100`). That file is not in this repo. The old X5 featuremap calibration was 0..255, which does not match the ONNX 0..1 input. Do not reuse the table as the result of the corrected build.
+**Current primary anchor (PR19 · 2026-11-06 · x5-8g · /255 feed only)**
 
-![Measured featuremap latency](../assets/images/modelzoo/lesson-2-05-zh-3b2bc524ee30.jpg)
-
-| Board | featuremap infer |
+| Item | NEW |
 |---|---|
-| X5 | **26.739 ms** |
-| S100 | **32.193 ms** |
+| X5 FM Infer | **31.316 ms** |
+| Artifact bin sha256 | `aee69bc13281483525a62c38121e1612128aceb7d399d261af5cddcec0336b75` |
+| Six heads vs ORT(/255) cosine | all **≥0.991** |
+| Post-process | Zoo `decode_dfl`, score=**0.25** / nms=**0.45** |
+| Detections | board **8 dets** ≈ ORT **8 dets**; class multiset **{45:3, 50:1, 49:4}** (bowl×3 / broccoli×1 / orange×4) |
+
+**Boundary:** single-image **input-domain loop**, **not** an mAP or generalization accuracy certification.
+
+**OLD (do not present as current FM):** `board-tests/measured.json` (2026-11-02) X5 FM Infer **26.739 ms** (old 0..255 cal domain); S100 FM Infer **32.193 ms** (not remeasured this round).
+
+![Measured featuremap latency (legacy figure; use NEW/OLD table above)](../assets/images/modelzoo/lesson-2-05-zh-3b2bc524ee30.jpg)
 
 ### NV12 Sample
 
@@ -263,7 +267,7 @@ Course rule: temporary per-lesson directory only.
 
 ## Lesson recap
 
-Train → featuremap (both boards, files in 0..1, `no_preprocess`) → NV12 (X5 file 0..255 through HzPreprocess; S100 file 0..1 with `data_scale` inserted at quantize time). The old 26.739 / 32.193 ms and 5 dets are not the new measurement. Next: **Lesson 2-06 Inference APIs**.
+Train → featuremap (NEW X5 31.316 ms / 8 dets domain loop; S100 FM OLD 32.193 ms not remeasured) → NV12 (OLD Sample 5 dets each). Next: **Lesson 2-06 Inference APIs**.
 
 ---
 

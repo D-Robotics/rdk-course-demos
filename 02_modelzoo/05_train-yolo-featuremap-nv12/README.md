@@ -14,9 +14,9 @@ The HTML slides are self-contained; open them in a browser. Use ←/→ to chang
 
 The lesson trains YOLO11n on coco128 (default 40 epochs), then runs four OE conversions: X5 `bayes-e` and S100 `nash-e`, each with a featuremap config and an NV12 config. Lesson 2-06 is the inference API; lesson 2-07 is the deeper Sample change. This directory does not change those lessons.
 
-The companion video is not published yet. The handbook figures 26.739 ms, 32.193 ms, and 5 dets are pre-fix slide anchors. This commit does not include weights, ONNX, calibration tensors, or compiled models, and it does not claim a new board pass.
+The companion video is not published yet. This directory does not contain weights, ONNX, calibration tensors, or the compiled `.bin`.
 
-X5 featuremap calibration is now float32 0..1 in a raw `.rgbchw`, with `norm_type: no_preprocess` unchanged. S100 featuremap stays 0..1 `.npy` and `no_preprocess`. NV12 YAMLs keep `data_scale`. Regenerating the X5 featuremap files and recompiling the `.bin` is still required before any new on-board number. See `conversion/README.md`.
+X5 featuremap files are float32 0..1 raw `.rgbchw`, and `norm_type` stays `no_preprocess`. The recorded single-image check is in [`board-tests/measured.json`](board-tests/measured.json): Infer 31.316 ms, six-head cosine versus ORT(/255) at least 0.991, and 8 detections at score 0.25 / NMS 0.45. That check is not an mAP result. S100 32.193 ms was not remeasured. The NV12 Sample count of 5 detections is not this featuremap result. The old X5 26.739 ms figure used the previous 0..255 calibration. See `conversion/README.md`.
 
 ---
 
@@ -36,6 +36,6 @@ HTML 课件为单文件，直接用浏览器打开。←/→ 翻页，N 显示�
 
 本课范围：coco128 上自训 YOLO11n，默认 40 epoch；X5 `bayes-e` 与 S100 `nash-e` 各做 featuremap 和 NV12，共四轮 OE。2-06 是推理接口，2-07 是 Sample 深改，本目录不改这两课。
 
-配套视频尚未发布。讲义里的 26.739 ms、32.193 ms 和 5 dets 是修正前的课件锚点。本次提交没有权重、ONNX、校准张量或编译制品，也没有新的板端通过结果。
+配套视频尚未发布。本目录不包含权重、ONNX、校准张量或编译好的 `.bin`。
 
-X5 featuremap 校准现为 float32 0..1 的原始 `.rgbchw`，`norm_type` 仍是 `no_preprocess`。S100 featuremap 仍是 0..1 的 `.npy`，同样 `no_preprocess`。NV12 YAML 的 `data_scale` 没有改。旧的 0..255 X5 featuremap 文件要删掉重生成，`.bin` 要重编之后才能写新的板上数字。说明见 `conversion/README.md`。
+X5 featuremap 文件是 float32 0..1 的原始 `.rgbchw`，`norm_type` 仍是 `no_preprocess`。已记录的单图核对在 [`board-tests/measured.json`](board-tests/measured.json)：Infer 31.316 ms，六头相对 ORT(/255) 的余弦至少 0.991，score 0.25 / NMS 0.45 下 8 个检测。这不是 mAP。S100 的 32.193 ms 没有重测。NV12 Sample 的 5 个检测不是这次 featuremap 结果。X5 旧的 26.739 ms 来自之前的 0..255 校准。说明见 `conversion/README.md`。

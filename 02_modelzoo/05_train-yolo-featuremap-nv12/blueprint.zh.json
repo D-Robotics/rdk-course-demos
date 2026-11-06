@@ -39,7 +39,6 @@
       "title": "自训YOLO",
       "highlight": "自训",
       "subtitle": "先 feature map，再 NV12",
-      "visual": "assets/yolo11-detect-cover.webp",
       "theme": "light",
       "notes": "第二章 Model Zoo 第五课：自训 YOLO，先用 feature map 把量化链路调通，再改成 NV12。模型是 YOLO11n 检测，数据集用公开迷你集 coco128。双录 X5 与 S100。【读法备忘】YOLO 念 yolo；feature map 整词；NV12 按手册。"
     },
@@ -410,7 +409,7 @@
           "label": "float32 输入张量",
           "kind": "ok",
           "size": 24,
-          "sub": "X5·rgbchw / S·npy",
+          "sub": "两板均为 0..1",
           "sub_size": 16,
           "on": true
         },
@@ -489,7 +488,7 @@
           "id": "r_q",
           "x": 1200,
           "y": 380,
-          "text": "按该板校准张量对照 ONNX 与量化",
+          "text": "同域 0..1 张量对照 ONNX 与量化",
           "size": 18,
           "anchor": "middle",
           "color": "green"
@@ -583,7 +582,7 @@
             "r_npy",
             "right_band"
           ],
-          "caption": "分板 float32 校准：X5 为 .rgbchw、0..255；S100 为 .npy、/255（0..1）；用该板自己的校准张量对照 ONNX 与量化，不能混用"
+          "caption": "两板 FM 数值域都是 0..1：X5 存 .rgbchw，S100 存 .npy；用该板文件对照 ONNX 与量化，容器不同不能混用"
         },
         {
           "at": 22000,
@@ -598,7 +597,7 @@
           "caption": "整条链路调通之后，再考虑改成 NV12 或 RGB"
         }
       ],
-      "notes": "先看左侧：一上来 NV12 或 RGB，校准要过颜色和归一化，变量多，链路不通时难判断。再看右侧：feature map 是直接喂网络的 float32 输入张量；校准按板分写——X5 用 .rgbchw、数值域零到二百五十五；S100 用 .npy、数值域除以二百五十五。对照 ONNX 与量化时，用该板自己的校准张量与该板工具链，不能混用，也不要说同一份 npy。通了再改 NV12 或 RGB。【读法备忘】feature map 整词；NV12 按手册；YOLO 念 yolo。"
+      "notes": "先看左侧：一上来 NV12 或 RGB，校准要过颜色和归一化，变量多，链路不通时难判断。再看右侧：feature map 是直接喂网络的 float32 输入张量，与自训 ONNX 输入域一致，都是零到一。两板数值域相同，只是容器不同——X5 用 .rgbchw，S100 用 .npy；对照时用该板文件，不能混用。这是单图输入域闭环验证，不是 mAP 或泛化精度认证。通了再改 NV12 或 RGB。【读法备忘】feature map 整词；NV12 按手册；YOLO 念 yolo。"
     },
     {
       "layout": "bullets",
@@ -610,7 +609,7 @@
       "items": [
         {
           "mark": "check",
-          "text": "校准张量：float32（.npy / .rgbchw 按板）"
+          "text": "校准张量：float32 0..1（X5 .rgbchw / S100 .npy）"
         },
         {
           "mark": "check",
@@ -651,7 +650,7 @@
       "title": "YAML·FM 并排",
       "eyebrow": "conversion/",
       "heading": "两板 FM ==同字段== · 校准范围不同",
-      "lead": "文件 ptq_featuremap_{x5,s100}.yaml；norm=no_preprocess；X5 cal 0..255 .rgbchw，S100 /255 .npy。",
+      "lead": "ptq_featuremap_{x5,s100}.yaml；两板都 no_preprocess；数值域都是 0..1——X5 .rgbchw，S100 .npy。",
       "head": [
         "项",
         "X5 FM",
@@ -681,11 +680,11 @@
         ],
         [
           "cal",
-          "x5_rgbchw 0..255",
-          "s100_npy /255"
+          "rgbchw 0..1",
+          "npy 0..1"
         ]
       ],
-      "notes": "FM 并排：两板字段同为 featuremap 与 no_preprocess；差别在 march 与校准：X5 是零到二百五十五的 rgbchw，S100 是除以二百五十五的 npy。【读法备忘】bayes-e / nash-e = 架构名 + 停顿 + 型号字母。"
+      "notes": "FM 并排：两板都是 featuremap 与 no_preprocess，数值域都是零到一；差别在 march 与文件容器——X5 是 rgbchw，S100 是 npy。自训 ONNX 期望零到一；这是单图输入域闭环，不是 mAP 认证。【读法备忘】bayes-e / nash-e = 架构名 + 停顿 + 型号字母。"
     },
     {
       "layout": "code",
@@ -876,7 +875,7 @@
       "title": "X5-FM 上板",
       "eyebrow": "Round 1 · X5",
       "heading": "model_info + ==一帧 infer==",
-      "lead": "板上只写 /tmp/course_2-05/。Host 余弦若尚未测，画面标待板测。",
+      "lead": "板上只写 /tmp/course_2-05/。NEW：仅喂 /255；Infer 31.316 ms；六头 vs ORT 余弦≥0.991；8 dets。",
       "blocks": [
         {
           "label": "hrt_model_exec（示意）",
@@ -891,17 +890,17 @@
               "hl": true
             },
             {
-              "text": "# infer：同一份 float32 输入 → dump 输出",
+              "text": "# infer：/255 float32 → dump（勿喂 0..255）",
               "hl": false
             }
           ],
           "note": {
-            "k": "板测",
-            "p": "输入 F32/DDR · infer 26.739 ms"
+            "k": "板测 NEW",
+            "p": "F32/DDR · 31.316 ms · 8 dets"
           }
         }
       ],
-      "notes": "X5 上板。model_info 核对接输入是 F32、来源 DDR；再跑一帧完整 infer，本课板测约二十六点七毫秒。Host 上 ONNX 与量化余弦若未测，标待板测。"
+      "notes": "X5 feature map 上板。model_info 核对接输入是 F32、来源 DDR；本回合 PR19 重编制品、只喂除以二百五十五：Infer 三十一点三一六毫秒；六输出头与 ORT 余弦均不低于零点九九一；decode 得八个检测，与 ORT 同图同阈值。这是单图输入域闭环验证，不是 mAP 或全精度认证。旧锚点二十六点七三九毫秒属修正前零到二百五十五校准域，不得写成当前 FM。"
     },
     {
       "layout": "code",
@@ -951,7 +950,7 @@
               "hl": true
             },
             {
-              "text": "# 板测 infer ≈ 32.193 ms",
+              "text": "# OLD infer ≈ 32.193 ms @ measured.json 2026-11-02；本回合未重测",
               "hl": false
             }
           ],
@@ -961,7 +960,7 @@
           }
         }
       ],
-      "notes": "S100 上板。核对 model_info 与一帧 infer；本课板测约三十二点二毫秒。Host 余弦同样：有测才写，否则待板测。"
+      "notes": "S100 feature map 上板。核对 model_info 与一帧 infer。本回合未重测 S100 FM；旧测约三十二点一九三毫秒，见 measured.json，二零二六年十一月二日，勿与 NEW X5 并列成当前双板。数值域与 X5 一样是零到一，文件是 npy。"
     },
     {
       "layout": "bullets",
@@ -1301,7 +1300,7 @@
       "title": "YAML·NV12 并排",
       "eyebrow": "data_scale",
       "heading": "用 ==data_scale== ≈1/255 · 分板校准",
-      "lead": "ptq_nv12_{x5,s100}.yaml；YAML 含 data_scale≈1/255（非 mean+scale）。磁盘校准分板：X5 0..255 .rgbchw，S100 /255 .npy——组合如何被工具链消费待上游核，本文不写成已验证数学闭环。",
+      "lead": "ptq_nv12_{x5,s100}.yaml；YAML data_scale≈1/255（非 mean+scale）。X5 磁盘 0..255 + mapper HzPreprocess；S100 磁盘 /255，校准见 0..1，quantize 再插预处理——data_scale 给 runtime，不是二次 /255。",
       "head": [
         "项",
         "X5 NV12",
@@ -1334,7 +1333,7 @@
           "Y + UV"
         ]
       ],
-      "notes": "NV12 并排：rt 改成 nv12，train 改成 rgb；YAML 写了 data_scale，约一除以二百五十五，不是 data_mean_and_scale。磁盘上：X5 校准是零到二百五十五的 rgbchw；S100 校准是除以二百五十五的 npy，与 S100 FM 文件现状相同。两层事实分开说；工具链如何组合 S100 的 /255 文件与 data_scale 字段，待上游核，口播不写成已证明闭环。X5 是 packed 单路；S100 是 Y 和 UV 分开。本课 YAML 以 conversion/ 为准。【读法备忘】NV12；禁念 NVR。"
+      "notes": "NV12 并排：rt 改 nv12，train 改 rgb；YAML 用 data_scale，约一除以二百五十五，不是 data_mean_and_scale。X5：磁盘校准零到二百五十五的 rgbchw，经 mapper 的 HzPreprocess 进网。S100：磁盘校准已是除以二百五十五的 npy；编译先 calibrate 见到零到一，再在 quantize 插入图像预处理；YAML 的 data_scale 给 runtime 用，不是校准阶段再除一次。不要用旧的 X5 feature map 零到二百五十五口径来类比 NV12 或 FM。X5 packed；S100 是 Y 加 UV。YAML 以 conversion/ 为准。【读法备忘】NV12；禁念 NVR。"
     },
     {
       "layout": "code",

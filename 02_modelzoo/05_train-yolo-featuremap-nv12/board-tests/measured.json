@@ -1,0 +1,53 @@
+{
+  "lesson": "2-05",
+  "limit": "One image, input-domain check only. Not mAP and not a generalization or full-accuracy certificate.",
+  "x5_featuremap": {
+    "date": "2026-11-06",
+    "status": "current",
+    "input": "float32 RGB NCHW 0..1 (/255 only; 0..255 was not used as the pass input)",
+    "calibration_images": 32,
+    "calibration_shape": "1x3x640x640 float32",
+    "calibration_minmax": [0, 1],
+    "script_sha256": "79716b4ad94a1222013b5a8cceb0aac95fac2a8b8cf1b02af16b94001aef012b",
+    "yaml": "ptq_featuremap_x5.yaml",
+    "yaml_norm_type": "no_preprocess",
+    "march": "bayes-e",
+    "compile": "hb_mapper makertbin --config ptq_featuremap_x5.yaml --model-type onnx",
+    "toolchain_image_example": "local/rdk-x5-oe:v1.2.8-server",
+    "bin_sha256": "aee69bc13281483525a62c38121e1612128aceb7d399d261af5cddcec0336b75",
+    "board": "x5-8g",
+    "tool": "hrt_model_exec infer --frame_count 1 --enable_dump true",
+    "infer_ms": 31.316,
+    "heads_vs_ort_div255_cosine": {
+      "output0": 0.9998,
+      "480": 0.9911,
+      "494": 0.9997,
+      "502": 0.9914,
+      "516": 0.9993,
+      "524": 0.9937
+    },
+    "heads_vs_ort_cosine_min": 0.991,
+    "cls80_max_board_ort": {
+      "output0": [0.63, 1.11],
+      "494": [0.38, 0.61],
+      "516": [2.95, 3.06]
+    },
+    "cls_peaks_positive": true,
+    "decode": {
+      "method": "ultralytics_yolo decode_dfl",
+      "score": 0.25,
+      "nms": 0.45
+    },
+    "dets_board": 8,
+    "dets_ort": 8,
+    "class_multiset": {"45": 3, "50": 1, "49": 4}
+  },
+  "not_this_run": {
+    "x5_featuremap_infer_ms_old": 26.739,
+    "x5_featuremap_old_note": "Previous artifact calibrated from 0..255 featuremap files. Do not cite as the current X5 featuremap result.",
+    "s100_featuremap_infer_ms": 32.193,
+    "s100_featuremap_note": "Earlier S100 featuremap reading. S100 was not recompiled or remeasured in this round.",
+    "nv12_sample_dets_each": 5,
+    "nv12_sample_note": "NV12 Sample count on bus.jpg. Not a featuremap result."
+  }
+}
