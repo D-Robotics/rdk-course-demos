@@ -1,0 +1,1535 @@
+{
+  "meta": {
+    "title": "【RDK 小课堂】第 2 章 Model Zoo · 第 5 课｜自训 YOLO：feature map 调通再改 NV12",
+    "lang": "zh-CN",
+    "mode": "deck",
+    "tag": "RDK 小课堂 2-05",
+    "footer": "自训 YOLO · feature map → NV12",
+    "theme": {},
+    "rebuild": "v3-from-scratch-20261105",
+    "sections": [
+      {
+        "num": "1",
+        "title": "自训并导出",
+        "sub": "YOLO11n · 切点"
+      },
+      {
+        "num": "2",
+        "title": "原则与 yaml",
+        "sub": "先 feature map"
+      },
+      {
+        "num": "3",
+        "title": "FM 两板走通",
+        "sub": "X5 · S100"
+      },
+      {
+        "num": "4",
+        "title": "再改 NV12",
+        "sub": "两板 · 回 Sample"
+      }
+    ]
+  },
+  "slides": [
+    {
+      "layout": "series-cover",
+      "chapter": 2,
+      "chapter_name": "Model Zoo",
+      "lesson": 5,
+      "title": "自训YOLO",
+      "highlight": "自训",
+      "subtitle": "先 feature map，再 NV12",
+      "theme": "light",
+      "notes": "第二章 Model Zoo 第五课：自训 YOLO，先用 feature map 把量化链路调通，再改成 NV12。模型是 YOLO11n 检测，数据集用公开迷你集 coco128。双录 X5 与 S100。【读法备忘】YOLO 念 yolo；feature map 整词；NV12 按手册。"
+    },
+    {
+      "layout": "cards",
+      "title": "本课目标",
+      "eyebrow": "Goals",
+      "heading": "学完能==落地==这条路径",
+      "lead": "自训检测 → feature map 两板调通 → 再改 NV12 → 回 Sample 跑一帧。",
+      "cols": 3,
+      "cards": [
+        {
+          "num": "01",
+          "title": "自训并导出",
+          "text": "YOLO11n + coco128；按 2-04 切点导出 ONNX"
+        },
+        {
+          "num": "02",
+          "title": "FM 两板走通",
+          "text": "yaml 改 feature map；X5 与 S100 各完整 OE + 一帧 infer"
+        },
+        {
+          "num": "03",
+          "title": "NV12 + Sample",
+          "text": "改三项重编；放回 ultralytics_yolo 跑通一帧"
+        }
+      ],
+      "notes": "三张卡对应本课落地路径。第一张：自训 YOLO11n，按二点零四切点导出。第二张：改成 feature map，X5 与 S100 各完整走一遍，板上还要一帧完整 infer。第三张：改三项成 NV12，重新编译，放回 Model Zoo Sample 跑通一帧。"
+    },
+    {
+      "layout": "links",
+      "title": "配套资源",
+      "eyebrow": "Resources",
+      "heading": "课程资料与入口",
+      "items": [
+        {
+          "k": "课程内容（中文讲义）",
+          "d": "RDK 小课堂讲义 · Pages",
+          "url": "https://d-robotics.github.io/rdk-course-demos/zh/"
+        },
+        {
+          "k": "课程仓库",
+          "d": "rdk-course-demos（讲义 + 课件 HTML）",
+          "url": "https://github.com/D-Robotics/rdk-course-demos"
+        },
+        {
+          "k": "RDK Model Zoo",
+          "d": "ultralytics_yolo Sample",
+          "url": "https://github.com/D-Robotics/rdk_model_zoo"
+        },
+        {
+          "k": "YOLO conversion",
+          "d": "导出 · mapper · 校准",
+          "url": "https://github.com/D-Robotics/rdk_model_zoo/tree/main/samples/vision/ultralytics_yolo/conversion"
+        },
+        {
+          "k": "X5 OE 文档",
+          "d": "accuracy_tune / 工具链",
+          "url": "https://developer.d-robotics.cc/oe_x5_doc/"
+        },
+        {
+          "k": "S OE 文档",
+          "d": "accuracy_debug / 工具链",
+          "url": "https://developer.d-robotics.cc/oe_s_doc/"
+        }
+      ],
+      "notes": "入口挂上即可：课程讲义 Pages、课程仓库、Model Zoo 的 ultralytics_yolo 与 conversion，以及 X5、S 系列 OE 文档。跟做时再点开。"
+    },
+    {
+      "layout": "agenda",
+      "title": "四段骨架",
+      "eyebrow": "Agenda",
+      "heading": "今天按==四段==走",
+      "one_column": true,
+      "items": [
+        {
+          "num": "1",
+          "t": "自训并导出",
+          "s": "coco128 · 切点 ONNX",
+          "tm": "Part 1"
+        },
+        {
+          "num": "2",
+          "t": "原则与 yaml",
+          "s": "输入协议 · FM YAML 并排",
+          "tm": "Part 2"
+        },
+        {
+          "num": "3",
+          "t": "FM 两板走通",
+          "s": "X5 · S100 各完整一轮",
+          "tm": "Part 3"
+        },
+        {
+          "num": "4",
+          "t": "再改 NV12",
+          "s": "两板重编 · 回 Sample",
+          "tm": "Part 4"
+        }
+      ],
+      "notes": "四段骨架。一段自训导出；二段讲原则并改 yaml；三段 feature map 在 X5 与 S100 各完整走一遍；四段再改 NV12，同样两板完整走，最后回到 Sample。"
+    },
+    {
+      "layout": "section",
+      "num": "1",
+      "heading": "自训并导出",
+      "sub": "YOLO11n · coco128 · 按切点出 ONNX",
+      "notes": "进入第一段：在公开小数据集上微调 YOLO11n，并按二点零四切点导出。"
+    },
+    {
+      "layout": "bullets",
+      "variant": "split",
+      "title": "为何自训",
+      "eyebrow": "Why self-train",
+      "heading": "演示==自己的==检测模型",
+      "lead": "本课要落地的是自训权重上板路径，不是把 Model Zoo 现成制品再跑一遍。",
+      "items": [
+        {
+          "mark": "check",
+          "text": "权重来自本课微调，不是 Zoo 现成包"
+        },
+        {
+          "mark": "info",
+          "text": "数据集：coco128（公开迷你集，非业务数据）"
+        },
+        {
+          "mark": "note",
+          "text": "完整训练在本地跑完，再用训练产物做后续导出与上板"
+        }
+      ],
+      "notes": "为何用自训。权重是本课微调的；数据集是 coco128 公开迷你集，不是业务数据；完整训练在本地跑完，再用训练产物做后续导出与上板。"
+    },
+    {
+      "layout": "code",
+      "title": "训练命令",
+      "eyebrow": "Train",
+      "heading": "YOLO11n · ==40== epoch",
+      "lead": "本课用 coco128；命令骨架可复述，超参可按实测微调",
+      "blocks": [
+        {
+          "label": "detect train",
+          "host": "host: ~/course_2-05",
+          "lines": [
+            {
+              "text": "yolo detect train data=coco128.yaml \\",
+              "hl": false
+            },
+            {
+              "text": "  model=yolo11n.pt epochs=40 imgsz=640 \\",
+              "hl": true
+            },
+            {
+              "text": "  project=datasets/coco128_run/runs/detect \\",
+              "hl": false
+            },
+            {
+              "text": "  name=selftrain",
+              "hl": false
+            }
+          ],
+          "note": {
+            "k": "骨架",
+            "p": "coco128 · yolo11n · 40 epoch · 640"
+          }
+        }
+      ],
+      "notes": "用 coco128 与 yolo11n，默认四十个 epoch，输入六百四十。这是演示用公开迷你集。先把本页命令骨架读清，再接加速实操三段：启动、训练进行、完成与权重；训练过程已缩时展示，中段等待已省略，不假称连续全程。【读法备忘】YOLO 念 yolo；coco128 可按数字读。"
+    },
+    {
+      "layout": "bullets",
+      "variant": "numbered",
+      "title": "训练产物",
+      "eyebrow": "Weights",
+      "heading": "本地跑完再==导出==",
+      "lead": "完整训练在本地跑完，导出用跑完后的权重",
+      "items": [
+        "完整训练在本地或服务器跑完",
+        "后续编译与上板都基于这份自训权重",
+        "导出用的是跑完后的 best 或 last 权重"
+      ],
+      "notes": "完整训练在本地跑完，导出用跑完后的权重。"
+    },
+    {
+      "layout": "code",
+      "title": "切点导出",
+      "eyebrow": "Export",
+      "heading": "按 2-04 切点 · 停在 ==logits==",
+      "lead": "工具点名 export_monkey_patch；opset 对照 conversion：X5 常 11，S 常 19。",
+      "blocks": [
+        {
+          "label": "export_monkey_patch",
+          "host": "zoo: ultralytics_yolo/conversion",
+          "lines": [
+            {
+              "text": "python export_monkey_patch.py \\",
+              "hl": true
+            },
+            {
+              "text": "  --weights best.pt --imgsz 640 \\",
+              "hl": false
+            },
+            {
+              "text": "  --opset 11   # X5；S100 用 19",
+              "hl": false
+            }
+          ],
+          "note": {
+            "k": "参见",
+            "p": "切点原理见 2-04；本课按同样切点导出"
+          }
+        }
+      ],
+      "notes": "按二点零四约定，用 export_monkey_patch 导出；ONNX 停在分类与框分布 logits；YOLO26 的 LTRB 不可与 DFL 混用。opset：X5 常用十一，S 系列常用十九，以文档为准。跟做时可对照导出录屏：录屏导出文件 sha 前缀 a9e88f08，与冻结编译输入 e6a57789 图与 ORT 一致，但文件 sha 不同；后续 OE 编译用的是冻结件，不能冒同一文件。【读法备忘】DFL 拆字母；logits 整词。"
+    },
+    {
+      "layout": "section",
+      "num": "2",
+      "heading": "原则与 yaml",
+      "sub": "输入协议 · feature map · YAML 并排 · 再谈 NV12",
+      "notes": "进入第二段：讲清为何所有模型先用 feature map 调通，并把 conversion yaml 改到位。"
+    },
+    {
+      "layout": "diagram",
+      "title": "为何先 feature map",
+      "eyebrow": "Principle",
+      "heading": "所有模型==先==用 feature map 调通",
+      "height": 560,
+      "delay": 400,
+      "caption": "整条链路调通之后，再考虑改成 NV12 或 RGB",
+      "scene": [
+        {
+          "type": "text",
+          "id": "ttl",
+          "x": 800,
+          "y": 36,
+          "text": "先 feature map，再改输入协议",
+          "size": 28,
+          "anchor": "middle",
+          "color": "ink",
+          "weight": 600
+        },
+        {
+          "type": "band",
+          "id": "left_band",
+          "x": 40,
+          "y": 70,
+          "w": 720,
+          "h": 420,
+          "label": "直接上 NV12 / RGB",
+          "label_at": [
+            400.0,
+            56
+          ],
+          "anchor": "middle"
+        },
+        {
+          "type": "band",
+          "id": "right_band",
+          "x": 840,
+          "y": 70,
+          "w": 720,
+          "h": 420,
+          "label": "先 feature map",
+          "label_at": [
+            1200.0,
+            56
+          ],
+          "anchor": "middle",
+          "blue": true
+        },
+        {
+          "type": "box",
+          "id": "l_img",
+          "x": 80,
+          "y": 130,
+          "w": 200,
+          "h": 70,
+          "label": "校准图",
+          "kind": "neutral",
+          "size": 24,
+          "sub": "颜色空间未定",
+          "sub_size": 16
+        },
+        {
+          "type": "box",
+          "id": "l_pp",
+          "x": 320,
+          "y": 130,
+          "w": 200,
+          "h": 70,
+          "label": "预处理",
+          "kind": "cpu",
+          "size": 24,
+          "sub": "mean / scale / 排布",
+          "sub_size": 16
+        },
+        {
+          "type": "box",
+          "id": "l_net",
+          "x": 560,
+          "y": 130,
+          "w": 160,
+          "h": 70,
+          "label": "网络",
+          "kind": "bpu",
+          "size": 24
+        },
+        {
+          "type": "arrow",
+          "id": "la1",
+          "points": [
+            [
+              280,
+              165
+            ],
+            [
+              320,
+              165
+            ]
+          ],
+          "head": true,
+          "mode": "draw"
+        },
+        {
+          "type": "arrow",
+          "id": "la2",
+          "points": [
+            [
+              520,
+              165
+            ],
+            [
+              560,
+              165
+            ]
+          ],
+          "head": true,
+          "mode": "draw"
+        },
+        {
+          "type": "box",
+          "id": "l_var",
+          "x": 120,
+          "y": 250,
+          "w": 580,
+          "h": 90,
+          "label": "变量多：颜色 · 归一化 · 排布",
+          "kind": "bad",
+          "size": 22
+        },
+        {
+          "type": "text",
+          "id": "l_q",
+          "x": 400,
+          "y": 380,
+          "text": "链路不通时，难判断是量化还是预处理",
+          "size": 18,
+          "anchor": "middle",
+          "color": "red"
+        },
+        {
+          "type": "box",
+          "id": "r_npy",
+          "x": 900,
+          "y": 130,
+          "w": 220,
+          "h": 70,
+          "label": "float32 输入张量",
+          "kind": "ok",
+          "size": 24,
+          "sub": "两板均为 0..1",
+          "sub_size": 16,
+          "on": true
+        },
+        {
+          "type": "box",
+          "id": "r_net",
+          "x": 1180,
+          "y": 130,
+          "w": 160,
+          "h": 70,
+          "label": "网络",
+          "kind": "bpu",
+          "size": 24,
+          "on": true
+        },
+        {
+          "type": "box",
+          "id": "r_cmp",
+          "x": 1380,
+          "y": 130,
+          "w": 140,
+          "h": 70,
+          "label": "对照",
+          "kind": "cpu",
+          "size": 24,
+          "sub": "ONNX↔量化",
+          "sub_size": 16
+        },
+        {
+          "type": "arrow",
+          "id": "ra1",
+          "points": [
+            [
+              1120,
+              165
+            ],
+            [
+              1180,
+              165
+            ]
+          ],
+          "head": true,
+          "mode": "draw",
+          "color": "orange"
+        },
+        {
+          "type": "arrow",
+          "id": "ra2",
+          "points": [
+            [
+              1340,
+              165
+            ],
+            [
+              1380,
+              165
+            ]
+          ],
+          "head": true,
+          "mode": "draw",
+          "color": "orange"
+        },
+        {
+          "type": "box",
+          "id": "r_ok",
+          "x": 920,
+          "y": 250,
+          "w": 580,
+          "h": 90,
+          "label": "无颜色 / 归一化变量 · 校准=真实输入",
+          "kind": "ok",
+          "size": 22
+        },
+        {
+          "type": "text",
+          "id": "r_q",
+          "x": 1200,
+          "y": 380,
+          "text": "同域 0..1 张量对照 ONNX 与量化",
+          "size": 18,
+          "anchor": "middle",
+          "color": "green"
+        },
+        {
+          "type": "text",
+          "id": "foot",
+          "x": 800,
+          "y": 520,
+          "text": "通了之后，再改成 NV12 或 RGB",
+          "size": 22,
+          "anchor": "middle",
+          "color": "orange",
+          "weight": 600
+        }
+      ],
+      "steps": [
+        {
+          "at": 0,
+          "show": [
+            "ttl",
+            "left_band",
+            "l_img",
+            "l_pp",
+            "l_net",
+            "la1",
+            "la2"
+          ],
+          "focus": [
+            "l_img",
+            "l_pp",
+            "l_net",
+            "la1",
+            "la2",
+            "left_band",
+            "ttl"
+          ],
+          "caption": "若一上来就按 NV12 或 RGB 编：校准要过颜色空间和归一化"
+        },
+        {
+          "at": 5500,
+          "show": [
+            "l_var",
+            "l_q"
+          ],
+          "on": [
+            "l_var"
+          ],
+          "focus": [
+            "l_var",
+            "l_q",
+            "l_img",
+            "l_pp",
+            "left_band"
+          ],
+          "caption": "变量一多，链路不通时分不清是量化问题还是预处理问题"
+        },
+        {
+          "at": 11000,
+          "show": [
+            "right_band",
+            "r_npy",
+            "r_net",
+            "r_cmp",
+            "ra1",
+            "ra2"
+          ],
+          "focus": [
+            "right_band",
+            "r_npy",
+            "r_net",
+            "r_cmp",
+            "ra1",
+            "ra2"
+          ],
+          "caption": "所以所有模型第一步先用 feature map：校准数据就是模型真正的输入张量"
+        },
+        {
+          "at": 16500,
+          "show": [
+            "r_ok",
+            "r_q"
+          ],
+          "on": [
+            "r_ok",
+            "r_npy"
+          ],
+          "focus": [
+            "r_ok",
+            "r_q",
+            "r_npy",
+            "right_band"
+          ],
+          "caption": "两板 FM 数值域都是 0..1：X5 存 .rgbchw，S100 存 .npy；用该板文件对照 ONNX 与量化，容器不同不能混用"
+        },
+        {
+          "at": 22000,
+          "show": [
+            "foot"
+          ],
+          "focus": [
+            "foot",
+            "right_band",
+            "r_ok"
+          ],
+          "caption": "整条链路调通之后，再考虑改成 NV12 或 RGB"
+        }
+      ],
+      "notes": "先看左侧：一上来 NV12 或 RGB，校准要过颜色和归一化，变量多，链路不通时难判断。再看右侧：feature map 是直接喂网络的 float32 输入张量，与自训 ONNX 输入域一致，都是零到一。两板数值域相同，只是容器不同——X5 用 .rgbchw，S100 用 .npy；对照时用该板文件，不能混用。这是单图输入域闭环验证，不是 mAP 或泛化精度认证。通了再改 NV12 或 RGB。【读法备忘】feature map 整词；NV12 按手册；YOLO 念 yolo。"
+    },
+    {
+      "layout": "bullets",
+      "variant": "split",
+      "title": "FM 是什么",
+      "eyebrow": "Feature map",
+      "heading": "OE 的 featuremap ==不是== 中间层",
+      "lead": "这里的 featuremap = 直接喂给网络的 float32 输入张量，与 ONNX 输入一致。",
+      "items": [
+        {
+          "mark": "check",
+          "text": "校准张量：float32 0..1（X5 .rgbchw / S100 .npy）"
+        },
+        {
+          "mark": "check",
+          "text": "与网络真实输入一致，便于 ONNX↔量化对照"
+        },
+        {
+          "mark": "note",
+          "text": "不是 CNN 中间层 feature map；通了再改 NV12/RGB 协议"
+        }
+      ],
+      "notes": "OE 的 featuremap 是直接喂给网络的 float32 输入张量，不是 CNN 中间层。校准与网络真实输入一致，方便对照；调通后再改输入协议。【读法备忘】feature map 整词。"
+    },
+    {
+      "layout": "bullets",
+      "variant": "split",
+      "title": "输入协议",
+      "eyebrow": "rt · train",
+      "heading": "rt 对接边缘 · train 是==输入域==",
+      "lead": "train 不是「再训练」：它描述浮点模型当初的输入域；rt 描述板上实际喂入格式。",
+      "items": [
+        {
+          "mark": "info",
+          "text": "train_*：原始浮点模型输入（本课 FM=featuremap，NV12 段=rgb）"
+        },
+        {
+          "mark": "info",
+          "text": "rt_*：边缘对接输入（FM=featuremap；NV12=nv12）"
+        },
+        {
+          "mark": "check",
+          "text": "dtype/layout 与颜色协议分开看：NV12≠RGB 通道排布"
+        }
+      ],
+      "notes": "输入协议：train 描述浮点模型输入域，不是再训练；rt 描述板上实际喂入。feature map 阶段两边都是 featuremap；NV12 阶段 rt 改 nv12、train 改 rgb。RGB 与 NV12 是不同输入协议。详见 X5 / S OE 文档。"
+    },
+    {
+      "layout": "table",
+      "title": "YAML·FM 并排",
+      "eyebrow": "conversion/",
+      "heading": "两板 FM ==同字段== · 校准范围不同",
+      "lead": "ptq_featuremap_{x5,s100}.yaml；两板都 no_preprocess；数值域都是 0..1——X5 .rgbchw，S100 .npy。",
+      "head": [
+        "项",
+        "X5 FM",
+        "S100 FM"
+      ],
+      "rows": [
+        [
+          "YAML",
+          "ptq_featuremap_x5",
+          "ptq_featuremap_s100"
+        ],
+        [
+          "march",
+          {
+            "html": "bayes-e",
+            "cls": "hc"
+          },
+          {
+            "html": "nash-e",
+            "cls": "hc"
+          }
+        ],
+        [
+          "rt/train · norm",
+          "featuremap · no_pp",
+          "featuremap · no_pp"
+        ],
+        [
+          "cal",
+          "rgbchw 0..1",
+          "npy 0..1"
+        ]
+      ],
+      "notes": "FM 并排：两板都是 featuremap 与 no_preprocess，数值域都是零到一；差别在 march 与文件容器——X5 是 rgbchw，S100 是 npy。自训 ONNX 期望零到一；这是单图输入域闭环，不是 mAP 认证。【读法备忘】bayes-e / nash-e = 架构名 + 停顿 + 型号字母。"
+    },
+    {
+      "layout": "code",
+      "title": "yaml→featuremap",
+      "eyebrow": "YAML",
+      "heading": "以 conversion 为底 ==改字段==",
+      "lead": "主线仍是 ultralytics_yolo/conversion；字段可对照 yolo26_depth / efficient_sam。",
+      "blocks": [
+        {
+          "label": "input_parameters（节选）",
+          "host": "ptq_featuremap_x5.yaml",
+          "lines": [
+            {
+              "text": "input_type_rt: 'featuremap'",
+              "hl": true
+            },
+            {
+              "text": "input_type_train: 'featuremap'",
+              "hl": true
+            },
+            {
+              "text": "input_layout_train/rt: 'NCHW'",
+              "hl": false
+            },
+            {
+              "text": "norm_type: 'no_preprocess'",
+              "hl": true
+            }
+          ],
+          "note": {
+            "k": "校准",
+            "p": "cal_data_type: float32 · 指向 npy 目录"
+          }
+        }
+      ],
+      "notes": "yaml 关键字段：featuremap 与 no_preprocess。layout 用 NCHW；校准类型 float32；还要改 onnx_model、shape、march 与校准目录。"
+    },
+    {
+      "layout": "table",
+      "title": "双板字段",
+      "eyebrow": "X5 · S100",
+      "heading": "同一套思路 · ==两套== 配置",
+      "lead": "march、opset、校准目录、产物后缀按板分开，不要混用。",
+      "head": [
+        "项",
+        "X5",
+        "S100"
+      ],
+      "rows": [
+        [
+          "march",
+          {
+            "html": "bayes-e",
+            "cls": "hc"
+          },
+          {
+            "html": "nash-e",
+            "cls": "hc"
+          }
+        ],
+        [
+          "ONNX opset",
+          "常 11",
+          "常 19"
+        ],
+        [
+          "OE 入口",
+          "oe-x5 · hb_mapper",
+          "oe-s · hb_compile"
+        ],
+        [
+          "产物",
+          ".bin · …_featuremap",
+          ".hbm · …_featuremap"
+        ],
+        [
+          "校准示例",
+          "cal_featuremap_x5_…",
+          "cal_featuremap_s100_npy"
+        ]
+      ],
+      "notes": "对照表：march 分别是 bayes-e 与 nash-e；opset 与 OE 工具不同；产物 X5 是 bin，S100 是 hbm；校准目录分开。【读法备忘】bayes-e / nash-e = 架构名 + 停顿 + 型号字母。"
+    },
+    {
+      "layout": "bullets",
+      "variant": "split",
+      "title": "Sample 硬限制",
+      "eyebrow": "Runtime",
+      "heading": "现成 Sample ==只接受 NV12==",
+      "lead": "feature map 制品放不进 ultralytics_yolo 现成 runtime，须换验证工具。",
+      "items": [
+        {
+          "mark": "x",
+          "text": "FM 制品 → 现成 Sample：接不上"
+        },
+        {
+          "mark": "check",
+          "text": "验证用 hrt_model_exec 或 hbm_runtime"
+        },
+        {
+          "mark": "note",
+          "text": "旧接口对 featuremap 支持不佳 · 细节留给 2-06"
+        }
+      ],
+      "notes": "硬限制必须讲：不要把 feature map 制品塞进现成 Sample；板上用 hrt_model_exec 或 hbm_runtime；推理 API 细节留给二点零六。"
+    },
+    {
+      "layout": "section",
+      "num": "3",
+      "heading": "FM 两板走通",
+      "sub": "X5 与 S100 · 各完整走一轮",
+      "notes": "进入第三段：feature map 制品在 X5 与 S100 上各完整走手册五点一，两块板都完整演示。"
+    },
+    {
+      "layout": "flow",
+      "title": "§5.1 一步不跳",
+      "eyebrow": "Checklist",
+      "heading": "每块板都走完 ==六步==",
+      "lead": "两块板步骤可以对称，但每一轮都要走该板、该协议的真实步骤",
+      "steps": [
+        {
+          "t": "开 OE",
+          "s": "oe-x5 / oe-s",
+          "on": true
+        },
+        {
+          "t": "环境",
+          "s": "挂载 · cwd",
+          "num": "02"
+        },
+        {
+          "t": "编译",
+          "s": "YAML + 日志",
+          "num": "03"
+        },
+        {
+          "t": "产物",
+          "s": "bin / hbm",
+          "num": "04"
+        },
+        {
+          "t": "上板",
+          "s": "model_info",
+          "num": "05"
+        },
+        {
+          "t": "评估",
+          "s": "一帧 infer",
+          "num": "06"
+        }
+      ],
+      "notes": "六步清单压成三条：开容器、环境、YAML 与编译日志、产物命名、model_info、一帧完整 infer。六步都要走完：核对 model_info 之后，还要跑完一帧完整推理；X5 与 S100 各走一轮。"
+    },
+    {
+      "layout": "code",
+      "title": "X5-FM 编译",
+      "eyebrow": "Round 1 · X5",
+      "heading": "oe-x5 · ==featuremap== · bayes-e",
+      "lead": "工作目录 /workspace/course_2-05；产物前缀带 selftrain 与 featuremap。",
+      "blocks": [
+        {
+          "label": "hb_mapper makertbin",
+          "host": "oe-x5: /workspace/course_2-05",
+          "lines": [
+            {
+              "text": "hb_mapper makertbin \\",
+              "hl": false
+            },
+            {
+              "text": "  --config ptq_featuremap_x5.yaml \\",
+              "hl": true
+            },
+            {
+              "text": "  --model-type onnx",
+              "hl": false
+            }
+          ],
+          "note": {
+            "k": "产物",
+            "p": "…_bayese_640x640_featuremap.bin"
+          }
+        }
+      ],
+      "notes": "第一轮：X5 feature map 编译。march 是 bayes-e；产物 selftrain 前缀加 featuremap，避免和 Model Zoo 现成 nv12 包混淆。本页跟做 round4 新编译录屏：命令、校准与编译关键日志、成功与产物；中间的长时间等待已省略，不播漫长空等。"
+    },
+    {
+      "layout": "code",
+      "title": "X5-FM 上板",
+      "eyebrow": "Round 1 · X5",
+      "heading": "model_info + ==一帧 infer==",
+      "lead": "板上只写 /tmp/course_2-05/。主线 bin f728、输入 0..1：Infer 25.772 ms；六头 vs ORT 余弦≥0.991；本图 8 dets。31.316 与 aee 只留历史。",
+      "blocks": [
+        {
+          "label": "hrt_model_exec（示意）",
+          "host": "x5: /tmp/course_2-05",
+          "lines": [
+            {
+              "text": "hrt_model_exec model_info --model_file \\",
+              "hl": false
+            },
+            {
+              "text": "  selftrain_…_featuremap.bin",
+              "hl": true
+            },
+            {
+              "text": "# infer：/255 float32 → dump（勿喂 0..255）",
+              "hl": false
+            }
+          ],
+          "note": {
+            "k": "板测 NEW",
+            "p": "F32/DDR · 25.772 ms · 8 dets"
+          }
+        }
+      ],
+      "notes": "X5 feature map 上板。model_info 核对接输入是 F32、来源 DDR。主线制品 bin f728、输入零到一 rgbchw：屏显 Infer 二十五点七七二毫秒。六输出头与 ORT 余弦均不低于零点九九一；本图 decode 得八个检测。这是本次单帧输入域闭环，不是固定性能，也不是 mAP。旧三十一点三一六与 aee 制品只留历史，不得写成当前主线。"
+    },
+    {
+      "layout": "code",
+      "title": "S100-FM 编译",
+      "eyebrow": "Round 2 · S100",
+      "heading": "oe-s · ==featuremap== · nash-e",
+      "lead": "与 X5 结构对称，但工具与制品扩展名不同；本页是 S100 本轮编译日志",
+      "blocks": [
+        {
+          "label": "hb_compile",
+          "host": "oe-s: /workspace/course_2-05",
+          "lines": [
+            {
+              "text": "hb_compile \\",
+              "hl": false
+            },
+            {
+              "text": "  --config ptq_featuremap_s100.yaml",
+              "hl": true
+            }
+          ],
+          "note": {
+            "k": "产物",
+            "p": "…_nashe_640x640_featuremap.hbm"
+          }
+        }
+      ],
+      "notes": "第二轮：S100 feature map 编译。march 是 nash-e；产物是 hbm。本页同样看配置、校准与成功产物关键节点；中间的长时间等待已省略。"
+    },
+    {
+      "layout": "code",
+      "title": "S100-FM 上板",
+      "eyebrow": "Round 2 · S100",
+      "heading": "model_info + ==一帧 infer==",
+      "lead": "验证工具用板端文档锁定的 hbm_runtime / 等价入口；须完整 infer。",
+      "blocks": [
+        {
+          "label": "板上验证",
+          "host": "s100: /tmp/course_2-05",
+          "lines": [
+            {
+              "text": "# model_info：输入 F32 · march nash-e",
+              "hl": false
+            },
+            {
+              "text": "# infer：cal_featuremap_s100_npy → dump",
+              "hl": true
+            },
+            {
+              "text": "# 主线镜 Infer 33.145 ms；decode 7 dets。32.193 ms 只留历史",
+              "hl": false
+            }
+          ],
+          "note": {
+            "k": "板测",
+            "p": "featuremap.hbm · 一帧跑通"
+          }
+        }
+      ],
+      "notes": "S100 feature map 上板。核对 model_info 与一帧 infer。主线镜屏显 Infer 三十三点一四五毫秒；同屏还要看到 decode 实际执行与七个检测报告连续可读——据实七个，不追八、不与 X5 强行同数。数值域零到一，文件是 npy。这是本次单帧，不是固定性能或 mAP。旧三十二点一九三毫秒只留历史。"
+    },
+    {
+      "layout": "bullets",
+      "variant": "split",
+      "title": "精度不够时",
+      "eyebrow": "Triage",
+      "heading": "不够时回到 ==2-04==",
+      "lead": "本课重点是输入协议与 yaml；精度不够时，可先看校准类型与 Softmax→int16 方向",
+      "items": [
+        {
+          "mark": "info",
+          "text": "校准类型可先试 max / kl"
+        },
+        {
+          "mark": "info",
+          "text": "Softmax → int16 是常见排查方向"
+        },
+        {
+          "mark": "note",
+          "text": "完整排查梯回到第 4 课"
+        }
+      ],
+      "notes": "精度不够时：feature map 两板走通后，若精度不够，校准类型与 Softmax 到 int16 的方向可以先看，详细排查回第 4 课。【读法备忘】Softmax 整词；int16 按数字读。"
+    },
+    {
+      "layout": "section",
+      "num": "4",
+      "heading": "再改 NV12",
+      "sub": "两项板完整重编 · 回 Sample 跑一帧",
+      "notes": "进入第四段：yaml 改成 NV12（rt/train/data_scale），对照并排表，X5 与 S100 再各完整走一遍，最后放回 Sample。"
+    },
+    {
+      "layout": "diagram",
+      "title": "三项改 NV12",
+      "eyebrow": "NV12",
+      "heading": "从 feature map ==改三项==",
+      "height": 560,
+      "delay": 400,
+      "caption": "改完换校准、重新 OE 编译；通了之后若有差别，应主要来自预处理",
+      "scene": [
+        {
+          "type": "text",
+          "id": "ttl",
+          "x": 800,
+          "y": 32,
+          "text": "feature map → NV12：改三项",
+          "size": 28,
+          "anchor": "middle",
+          "color": "ink",
+          "weight": 600
+        },
+        {
+          "type": "band",
+          "id": "fm",
+          "x": 40,
+          "y": 70,
+          "w": 700,
+          "h": 400,
+          "label": "feature map",
+          "label_at": [
+            390.0,
+            56
+          ],
+          "anchor": "middle",
+          "blue": true
+        },
+        {
+          "type": "band",
+          "id": "nv",
+          "x": 860,
+          "y": 70,
+          "w": 700,
+          "h": 400,
+          "label": "NV12",
+          "label_at": [
+            1210.0,
+            56
+          ],
+          "anchor": "middle"
+        },
+        {
+          "type": "box",
+          "id": "f1",
+          "x": 80,
+          "y": 120,
+          "w": 620,
+          "h": 70,
+          "label": "input_type_rt / train: featuremap",
+          "kind": "ok",
+          "size": 22,
+          "mono": true
+        },
+        {
+          "type": "box",
+          "id": "f2",
+          "x": 80,
+          "y": 220,
+          "w": 620,
+          "h": 70,
+          "label": "layout: NCHW · norm: no_preprocess",
+          "kind": "ok",
+          "size": 22
+        },
+        {
+          "type": "box",
+          "id": "f3",
+          "x": 80,
+          "y": 320,
+          "w": 620,
+          "h": 70,
+          "label": "cal: float32 张量（按板）",
+          "kind": "ok",
+          "size": 22
+        },
+        {
+          "type": "box",
+          "id": "n1",
+          "x": 900,
+          "y": 120,
+          "w": 620,
+          "h": 70,
+          "label": "input_type_rt: nv12",
+          "kind": "bpu",
+          "size": 22,
+          "on": true
+        },
+        {
+          "type": "box",
+          "id": "n2",
+          "x": 900,
+          "y": 220,
+          "w": 620,
+          "h": 70,
+          "label": "input_type_train: rgb",
+          "kind": "cpu",
+          "size": 22,
+          "on": true
+        },
+        {
+          "type": "box",
+          "id": "n3",
+          "x": 900,
+          "y": 320,
+          "w": 620,
+          "h": 70,
+          "label": "norm: data_scale + 换校准图",
+          "kind": "neutral",
+          "size": 22,
+          "on": true
+        },
+        {
+          "type": "arrow",
+          "id": "c1",
+          "points": [
+            [
+              720,
+              155
+            ],
+            [
+              900,
+              155
+            ]
+          ],
+          "head": true,
+          "mode": "draw",
+          "color": "orange",
+          "label": "①"
+        },
+        {
+          "type": "arrow",
+          "id": "c2",
+          "points": [
+            [
+              720,
+              255
+            ],
+            [
+              900,
+              255
+            ]
+          ],
+          "head": true,
+          "mode": "draw",
+          "color": "orange",
+          "label": "②"
+        },
+        {
+          "type": "arrow",
+          "id": "c3",
+          "points": [
+            [
+              720,
+              355
+            ],
+            [
+              900,
+              355
+            ]
+          ],
+          "head": true,
+          "mode": "draw",
+          "color": "orange",
+          "label": "③"
+        },
+        {
+          "type": "text",
+          "id": "x5note",
+          "x": 1210,
+          "y": 420,
+          "text": "X5：packed NV12",
+          "size": 18,
+          "anchor": "middle",
+          "color": "ink2"
+        },
+        {
+          "type": "text",
+          "id": "s100note",
+          "x": 1210,
+          "y": 450,
+          "text": "S100：Y + UV split",
+          "size": 18,
+          "anchor": "middle",
+          "color": "ink2"
+        },
+        {
+          "type": "text",
+          "id": "foot",
+          "x": 800,
+          "y": 520,
+          "text": "改完换校准、重新 OE；差异应主要来自预处理",
+          "size": 20,
+          "anchor": "middle",
+          "color": "orange",
+          "weight": 600
+        }
+      ],
+      "steps": [
+        {
+          "at": 0,
+          "show": [
+            "ttl",
+            "fm",
+            "f1",
+            "f2",
+            "f3"
+          ],
+          "focus": [
+            "fm",
+            "f1",
+            "f2",
+            "f3",
+            "ttl"
+          ],
+          "caption": "回顾 feature map：类型、排布与无预处理、按板 float32 校准"
+        },
+        {
+          "at": 5000,
+          "show": [
+            "nv",
+            "n1",
+            "c1"
+          ],
+          "on": [
+            "n1"
+          ],
+          "focus": [
+            "n1",
+            "c1",
+            "f1",
+            "nv"
+          ],
+          "caption": "第一项：input_type_rt 改成 nv12"
+        },
+        {
+          "at": 10000,
+          "show": [
+            "n2",
+            "c2"
+          ],
+          "on": [
+            "n2"
+          ],
+          "focus": [
+            "n2",
+            "c2",
+            "nv"
+          ],
+          "caption": "第二项：input_type_train 改成 rgb"
+        },
+        {
+          "at": 15000,
+          "show": [
+            "n3",
+            "c3"
+          ],
+          "on": [
+            "n3"
+          ],
+          "focus": [
+            "n3",
+            "c3",
+            "nv"
+          ],
+          "caption": "第三项：norm_type 换成带 scale 的预处理，并换校准图片管线"
+        },
+        {
+          "at": 20000,
+          "show": [
+            "x5note",
+            "s100note"
+          ],
+          "focus": [
+            "x5note",
+            "s100note",
+            "n1",
+            "nv"
+          ],
+          "caption": "两块板完整走时注意：X5 是 packed NV12，S100 是 Y 与 UV 分开"
+        },
+        {
+          "at": 25000,
+          "show": [
+            "foot"
+          ],
+          "focus": [
+            "foot",
+            "nv",
+            "fm"
+          ],
+          "caption": "改完换校准、重新 OE 编译；通了之后若有差别，应主要来自预处理"
+        }
+      ],
+      "notes": "先回顾 feature map：类型、排布、无预处理，用 float32 校准。第一项：input_type_rt 改成 nv12。第二项：input_type_train 改成 rgb。第三项：norm 换成 data_scale，并换校准图。X5 是 packed NV12，S100 是 Y 和 UV 分开。改完换校准、重新做 OE；通了之后若有差别，应主要来自预处理。本课 YAML 字段以 conversion/ 为准。【读法备忘】NV12；禁念 NVR；bayes-e / nash-e 架构名+停顿+型号。"
+    },
+    {
+      "layout": "table",
+      "title": "YAML·NV12 并排",
+      "eyebrow": "data_scale",
+      "heading": "用 ==data_scale== ≈1/255 · 分板校准",
+      "lead": "ptq_nv12_{x5,s100}.yaml；YAML data_scale≈1/255（非 mean+scale）。X5 磁盘 0..255 + mapper HzPreprocess；S100 磁盘 /255，校准见 0..1，quantize 再插预处理——data_scale 给 runtime，不是二次 /255。",
+      "head": [
+        "项",
+        "X5 NV12",
+        "S100 NV12"
+      ],
+      "rows": [
+        [
+          "YAML",
+          "ptq_nv12_x5",
+          "ptq_nv12_s100"
+        ],
+        [
+          "rt / train",
+          "nv12 / rgb",
+          "nv12 / rgb"
+        ],
+        [
+          "norm · scale",
+          "data_scale · 1/255",
+          "data_scale · 1/255"
+        ],
+        [
+          "cal 范围",
+          "rgb_f32 0..255",
+          "s100_npy /255"
+        ],
+        [
+          "形态",
+          "packed NV12",
+          "Y + UV"
+        ]
+      ],
+      "notes": "NV12 并排：rt 改 nv12，train 改 rgb；YAML 用 data_scale，约一除以二百五十五，不是 data_mean_and_scale。X5：磁盘校准零到二百五十五的 rgbchw，经 mapper 的 HzPreprocess 进网。S100：磁盘校准已是除以二百五十五的 npy；编译先 calibrate 见到零到一，再在 quantize 插入图像预处理；YAML 的 data_scale 给 runtime 用，不是校准阶段再除一次。不要用旧的 X5 feature map 零到二百五十五口径来类比 NV12 或 FM。X5 packed；S100 是 Y 加 UV。YAML 以 conversion/ 为准。【读法备忘】NV12；禁念 NVR。"
+    },
+    {
+      "layout": "code",
+      "title": "X5-NV12 编译",
+      "eyebrow": "Round 3 · X5",
+      "heading": "重编 · 产物名含 ==nv12==",
+      "lead": "X5 为 packed NV12；校准改走图片管线。",
+      "blocks": [
+        {
+          "label": "hb_mapper makertbin",
+          "host": "oe-x5: /workspace/course_2-05",
+          "lines": [
+            {
+              "text": "hb_mapper makertbin \\",
+              "hl": false
+            },
+            {
+              "text": "  --config ptq_nv12_x5.yaml \\",
+              "hl": true
+            },
+            {
+              "text": "  --model-type onnx",
+              "hl": false
+            }
+          ],
+          "note": {
+            "k": "产物",
+            "p": "…_bayese_640x640_nv12.bin"
+          }
+        }
+      ],
+      "notes": "第三轮：X5 NV12 编译。三项已改；产物前缀带 selftrain 与 nv12；X5 是 packed 单路 NV12 输入。本页看配置与成功产物关键节点；中间的长时间等待已省略。"
+    },
+    {
+      "layout": "code",
+      "title": "X5 Sample 一帧",
+      "eyebrow": "Round 3 · X5",
+      "heading": "放回 ==ultralytics_yolo==",
+      "lead": "model_info：输入变为 NV12；输出头协议应与 FM 一致。然后 main.py 跑一帧。",
+      "blocks": [
+        {
+          "label": "Sample main.py",
+          "host": "x5: ultralytics_yolo/runtime/python",
+          "lines": [
+            {
+              "text": "python main.py --model-path \\",
+              "hl": false
+            },
+            {
+              "text": "  /tmp/course_2-05/…_nv12.bin \\",
+              "hl": true
+            },
+            {
+              "text": "  --image bus.jpg  # 板测 5 dets",
+              "hl": false
+            }
+          ],
+          "note": {
+            "k": "板测",
+            "p": "bus.jpg · 5 个检测框"
+          }
+        }
+      ],
+      "notes": "X5 回到 Sample。现成 Sample 接受 NV12 制品；本课板测 bus 图跑出五个检测——这是 NV12 Sample 一帧跑通，勿与 feature map 的八或七个检测混写。改 Sample 前后处理留给后续课。"
+    },
+    {
+      "layout": "code",
+      "title": "S100-NV12 编译",
+      "eyebrow": "Round 4 · S100",
+      "heading": "Y + UV ==split== · 重新 OE",
+      "lead": "S100 的 NV12 在 model_info 里是 images_y 与 images_uv 两路。",
+      "blocks": [
+        {
+          "label": "hb_compile",
+          "host": "oe-s: /workspace/course_2-05",
+          "lines": [
+            {
+              "text": "hb_compile \\",
+              "hl": false
+            },
+            {
+              "text": "  --config ptq_nv12_s100.yaml",
+              "hl": true
+            }
+          ],
+          "note": {
+            "k": "model_info",
+            "p": "images_y + images_uv · …_nv12.hbm"
+          }
+        }
+      ],
+      "notes": "第四轮：S100 NV12 编译。与 X5 的差别：S100 是 Y 与 UV 分开的两路输入，并重新完整编译。本页看配置与成功产物关键节点；中间的长时间等待已省略。"
+    },
+    {
+      "layout": "code",
+      "title": "S100 Sample 一帧",
+      "eyebrow": "Round 4 · S100",
+      "heading": "同样 ==main.py== 跑通",
+      "lead": "平台参数换 s100；制品换 nashe nv12 hbm。",
+      "blocks": [
+        {
+          "label": "Sample main.py",
+          "host": "s100: ultralytics_yolo/runtime/python",
+          "lines": [
+            {
+              "text": "python main.py --model-path \\",
+              "hl": false
+            },
+            {
+              "text": "  /tmp/course_2-05/…_nashe_…_nv12.hbm \\",
+              "hl": true
+            },
+            {
+              "text": "  --image bus.jpg  # 板测 5 dets",
+              "hl": false
+            }
+          ],
+          "note": {
+            "k": "板测",
+            "p": "bus.jpg · 5 个检测框"
+          }
+        }
+      ],
+      "notes": "S100 Sample。与 X5 对称跑通一帧；本课板测同样五个检测——仍是 NV12 Sample 可读输出，勿与 feature map 检测数混写。精度不够再回二点零四。"
+    },
+    {
+      "layout": "compare",
+      "title": "差异叙事",
+      "eyebrow": "FM vs NV12",
+      "heading": "通了之后 · 差别在==预处理==",
+      "vs": "VS",
+      "left": {
+        "badge": "feature map",
+        "title": "调通量化链路",
+        "good": false,
+        "items": [
+          "输入即 float32 张量",
+          "无颜色 / 归一化变量",
+          "用 hrt / hbm 工具验"
+        ]
+      },
+      "right": {
+        "badge": "NV12",
+        "title": "对接 Sample",
+        "good": true,
+        "items": [
+          "相机常用 NV12 输入",
+          "预处理进 yaml / 运行时",
+          "可放回 ultralytics_yolo"
+        ]
+      },
+      "notes": "差异叙事两卡。左 feature map 负责先调通；右 NV12 对接 Sample 与相机管线。两边都通了之后若有差别，应主要来自预处理。"
+    },
+    {
+      "layout": "bullets",
+      "variant": "numbered",
+      "title": "自检清单",
+      "eyebrow": "Checklist",
+      "heading": "对照初衷 ==勾一遍==",
+      "items": [
+        "能微调 YOLO11n 并按切点导出 ONNX",
+        "能说明为何先 feature map 再改 NV12",
+        "能改 yaml 并在 X5、S100 上完整走通 FM",
+        "知道 FM 制品须用 hrt_model_exec / hbm_runtime",
+        "能改三项成 NV12，两板重编并回 Sample 跑一帧"
+      ],
+      "notes": "自检五条，对应本课初衷。按编号读，学员对照自己是否做到。"
+    },
+    {
+      "layout": "closing",
+      "title": "下一课",
+      "eyebrow": "Next",
+      "heading": "下一课 · 2-06 推理接口",
+      "lead": "本课把自训 YOLO 的 feature map → NV12 路径落地；推理 Python / C++ API 留给下一课。",
+      "cards": [
+        {
+          "icon": "book-open",
+          "tone": "orange",
+          "k": "本课",
+          "d": "自训 · FM · NV12"
+        },
+        {
+          "icon": "chip",
+          "tone": "blue",
+          "k": "双板",
+          "d": "X5 + S100 四轮 OE"
+        },
+        {
+          "icon": "sparkle",
+          "tone": "green",
+          "k": "下课",
+          "d": "2-06 推理接口"
+        }
+      ],
+      "full_logo": true,
+      "notes": "收尾。预告下一课是二点零六推理接口。三张小卡回顾本课与下课分工。"
+    }
+  ]
+}

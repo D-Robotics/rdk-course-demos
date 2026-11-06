@@ -1,0 +1,35 @@
+X5 featuremap calibration domain
+================================
+
+The script that matches the recorded rebuild is:
+
+    sha256 79716b4ad94a1222013b5a8cceb0aac95fac2a8b8cf1b02af16b94001aef012b
+    conversion/scripts/prepare_cal_data.py
+
+From a course directory that still has the older script (X5 featuremap written as 0..255):
+
+    patch -p1 < conversion/x5-fm-cal-domain.patch
+
+What the script writes
+- X5 featuremap: float32 RGB NCHW / 255, raw .rgbchw. YAML stays no_preprocess.
+- S100 featuremap: /255 .npy. YAML stays no_preprocess.
+- X5 NV12: 0..255 .rgbchw. YAML data_scale stays.
+- S100 NV12: /255 .npy once. YAML data_scale stays.
+
+Recorded mainline (one image, not mAP)
+- Frozen compile ONNX e6a57789f03b27c35701226ac7eee84ae530f1a88b2e2eb34dbaf7acb24fe1a0
+- Later export prefix a9e88f08 matches that graph and ORT, but it is a different file and was not the compile input
+- X5 bin f728b1d3113953cc43c93226657e99712d01fcfb83fce6f3f2dc69b39c2852fb
+- Approved-cut live infer 26.663 ms, one run, input 0..1 only. 25.772 ms and 8 dets are a different log. 26.685 ms is an experiment, not the cut
+- six heads vs ORT(/255) cosine >= 0.991
+- decode_dfl score 0.25 / nms 0.45: X5 board 8 dets, ORT 8 dets, classes {45:3, 50:1, 49:4}
+- S100 hbm prefix 35758dce: 33.145 ms and 7 dets. Do not rewrite 7 as 8
+- Do not cite 31.316 ms / aee69bc1, 26.739 ms, S100 32.193 ms, or NV12 5 dets as this cast
+
+Before a private push or infer script runs:
+
+    python3 conversion/scripts/check_fm_identity.py --role x5-fm --cal ONE.rgbchw --model FEATUREMAP.bin --expect-sha256 f728b1d3113953cc43c93226657e99712d01fcfb83fce6f3f2dc69b39c2852fb
+
+That pin is the current cast. Omit --expect-sha256 and the command only prints a sha256; it does not claim the file is the current mainline. A historical bin is accepted when its own hash is the expected one. The checker does not blacklist one historical file. It still rejects a featuremap tensor whose values are outside 0..1.
+
+See board-tests/measured.json.
