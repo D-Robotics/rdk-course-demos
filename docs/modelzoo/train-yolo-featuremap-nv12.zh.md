@@ -8,7 +8,7 @@
 >
 > 学习方式：概念讲解 + PC 侧自训/导出 + OE（工具链 Docker）量化实操 + 板端部署与评估。训练在开发机完成，板端不装训练框架；板上只写 `/tmp/course_2-05/`
 >
-> 配套视频：<!-- TODO: B 站视频发布后补充链接 -->**待发布**
+> 配套视频：成片已审定，公开链接尚未挂上。<!-- TODO: 视频页上线后补充链接 -->
 >
 > 配套课件：[查看中文 HTML 课件源码](https://github.com/D-Robotics/rdk-course-demos/blob/develop/02_modelzoo/05_train-yolo-featuremap-nv12/lesson-2-05.zh.html) · [English slide source](https://github.com/D-Robotics/rdk-course-demos/blob/develop/02_modelzoo/05_train-yolo-featuremap-nv12/lesson-2-05.html)
 
@@ -51,7 +51,7 @@
 - 对照改 YAML 关键字段：`input_type_*`、`norm_type`、校准数据格式，以及 X5 `bayes-e` / S100 `nash-e`；
 - 在 OE 里按量化课完整流程走完（打开 OE → 配环境 → 导出 → YAML+编译 → 产物 → 上板 → 评估），featuremap 与 NV12 **各走一遍**；
 - 在板上 `/tmp/course_2-05/` 完成：`model_info` + **一帧完整 infer**（featuremap），以及 Sample **跑通一帧**（NV12）；
-- 读懂本课主线实测：X5 featuremap 成片镜 Infer **25.772 ms**（bin `f728b1d3…`，只喂 0..1）；六头 vs ORT 余弦 ≥0.991；同图 decode **8 dets**。S100 本轮录到 **33.145 ms / 7 dets**（旧 hbm `35758dce…`，不要改成 8）。NV12 Sample 各 **5 dets** 是 NV12，不是 featuremap。31.316 ms / `aee69bc1…` 和 26.685 ms 都不是这面主镜。
+- 读懂本课两次 X5 读数：成片实拍 Infer 是 **26.663 ms**（单独一次运行）。**25.772 ms** 和 **8 dets** 来自另一次日志与后处理；旁白里的 25.772 只配那份日志，不是 26.663 那一次。26.685 ms 是实验记录，不是成片镜。S100 板上 Infer **33.145 ms**；**7 dets** 是主机对板上 dump 的离板后处理，不是板上 decode。NV12 Sample 各 **5 dets** 不是 featuremap。
 
 ---
 
@@ -294,10 +294,12 @@ hrt_model_exec infer \
 | 冻结编译 ONNX | `e6a57789f03b27c35701226ac7eee84ae530f1a88b2e2eb34dbaf7acb24fe1a0` |
 | 另一次导出 | 前缀 `a9e88f08`。图和 ORT 与冻结件一致，文件不同，**不是**编译输入 |
 | X5 FM bin | `f728b1d3113953cc43c93226657e99712d01fcfb83fce6f3f2dc69b39c2852fb` |
-| X5 FM Infer | **25.772 ms**（成片镜）。同 bin 另一次读数 **26.685 ms**，不要贴到这面镜上 |
+| X5 成片实拍 Infer | **26.663 ms**。单独一次运行，不要写成 25.772 |
+| X5 日志与后处理 | **25.772 ms**，同图 decode **8 dets**。旁白 25.772 只配这次日志，不是 26.663 那一次 |
+| X5 实验记录 | **26.685 ms**。同一份 bin 的实验读数，不是成片镜 |
 | 六头 vs ORT(/255) cosine | 全部 **≥0.991** |
-| X5 后处理 | Zoo `decode_dfl`，score=**0.25** / nms=**0.45**；board **8** ≈ ORT **8**；`{45:3, 50:1, 49:4}` |
-| S100 FM | 旧 hbm 前缀 `35758dce`；本轮新录 **33.145 ms / 7 dets**。不要改成 8 |
+| X5 后处理 | Zoo `decode_dfl`，score=**0.25** / nms=**0.45**；与 ORT 同为 **8**；`{45:3, 50:1, 49:4}`。这组检测数属于 25.772 那次日志 |
+| S100 FM | hbm 前缀 `35758dce`；板上 Infer **33.145 ms**。**7 dets** 是主机离板后处理，不是板上 decode。不要改成 8 |
 
 **边界**：以上是**单图输入域闭环**，**不是** mAP 或泛化精度认证。
 
@@ -381,7 +383,7 @@ python3 samples/vision/ultralytics_yolo/runtime/python/main.py \
 ## 本课小结
 
 - **自训**：YOLO11n + coco128 + 缩时角标，导出切点对齐 2-04；
-- **featuremap**：两板数值域 **0..1**；主镜 X5 **25.772 ms / 8 dets**，S100 **33.145 ms / 7 dets**（单图，非 mAP）。31.316 ms 与 aee 是历史；
+- **featuremap**：两板数值域 **0..1**。成片实拍 X5 **26.663 ms**；25.772 ms 与 8 dets 是另一次日志。S100 板上 **33.145 ms**，7 dets 为离板后处理。单图，非 mAP。31.316 ms 与 aee 是历史；
 - **NV12**：X5 磁盘 0..255 + HzPreprocess；S100 /255 + runtime `data_scale`（非二次 /255）；Sample 各 **5 dets**（旧 NV12，非 FM）；
 - 下一课预告：**2-06《推理接口》**——Python / C++ 如何加载模型与读结果。
 

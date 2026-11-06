@@ -9,9 +9,12 @@
     "reexport_sha256_prefix": "a9e88f08",
     "calibration": "float32 RGB NCHW 0..1",
     "bin_sha256": "f728b1d3113953cc43c93226657e99712d01fcfb83fce6f3f2dc69b39c2852fb",
-    "infer_ms_cast": 25.772,
-    "infer_ms_other_run_same_bin": 26.685,
-    "other_run_note": "Same bin, a separate first board reading. Do not attach 26.685 ms to the 25.772 ms cast.",
+    "approved_cut_live_infer_ms": 26.663,
+    "approved_cut_note": "The live infer shot in the approved cut. One run. Do not describe it as the 25.772 ms log.",
+    "log_and_postprocess_infer_ms": 25.772,
+    "log_and_postprocess_note": "A different run from the 26.663 ms live shot. Narration that says 25.772 matches only this log. The 8 detections below belong here.",
+    "experiment_infer_ms": 26.685,
+    "experiment_note": "Experimental reading of the same bin. Not the approved-cut shot.",
     "input": "float32 0..1 only",
     "heads_vs_ort_div255_cosine": {
       "output0": 0.999804,
@@ -44,9 +47,9 @@
       "score": 0.25,
       "nms": 0.45,
       "dets": 7,
-      "where": "off-board decode of the on-board dump"
+      "where": "Host-side post-process of the on-board dump. Not an on-board decode."
     },
-    "count_note": "Seven detections as measured. Do not rewrite this as eight to match X5."
+    "count_note": "Seven detections from that off-board post-process. Do not rewrite this as eight to match X5, and do not call it an on-board decode."
   },
   "not_this_cast": {
     "x5_featuremap_infer_ms_31_316": 31.316,

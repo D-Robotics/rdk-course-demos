@@ -8,7 +8,7 @@
 >
 > Learning format: concepts + PC train/export + OE (toolchain Docker) PTQ + on-board deploy/eval. Train on the host, not on the board. Board writes only under `/tmp/course_2-05/`
 >
-> Video: <!-- TODO: add Bilibili link after publish -->**To be published**
+> Video: The cut is approved. The public link is not posted yet. <!-- TODO: add the link after the video page is up -->
 >
 > Slides: [Open English HTML slides on GitHub](https://github.com/D-Robotics/rdk-course-demos/blob/develop/02_modelzoo/05_train-yolo-featuremap-nv12/lesson-2-05.html) · [中文课件源码](https://github.com/D-Robotics/rdk-course-demos/blob/develop/02_modelzoo/05_train-yolo-featuremap-nv12/lesson-2-05.zh.html)
 
@@ -46,7 +46,7 @@ This lesson’s spine: **train YOLO11n → feature map path first → then NV12 
 - Edit the YAML fields and `march` values (`bayes-e` / `nash-e`);
 - Run the full OE flow twice (featuremap and NV12) for both boards;
 - On board: `model_info` + **one full featuremap infer**, then one NV12 Sample frame under `/tmp/course_2-05/`;
-- Cite the mainline numbers: X5 featuremap cast Infer **25.772 ms** (bin `f728b1d3…`, 0..1 input only); six heads vs ORT cosine ≥0.991; same-image decode **8 dets**. S100 this round is **33.145 ms / 7 dets** on the existing hbm `35758dce…`—do not rewrite 7 as 8. NV12 Sample **5 dets** are NV12, not featuremap. 31.316 ms / `aee69bc1…` and 26.685 ms are not this cast.
+- Keep the two X5 readings apart. The approved cut’s live infer is **26.663 ms**, one labeled run. **25.772 ms** and **8 dets** come from a different log and post-process; narration that says 25.772 belongs only to that log. **26.685 ms** is an experiment, not the cut. S100 on-board infer is **33.145 ms**; the **7 dets** are host-side post-process of the board dump, not an on-board decode. NV12 Sample **5 dets** are not featuremap.
 
 ---
 
@@ -208,10 +208,12 @@ Board writes **only** `/tmp/course_2-05/`.
 | Frozen compile ONNX | `e6a57789f03b27c35701226ac7eee84ae530f1a88b2e2eb34dbaf7acb24fe1a0` |
 | Later export | prefix `a9e88f08`. Graph and ORT match the frozen file; the file itself differs and **was not** the compile input |
 | X5 FM bin | `f728b1d3113953cc43c93226657e99712d01fcfb83fce6f3f2dc69b39c2852fb` |
-| X5 FM Infer | **25.772 ms** on the cast. Another reading of the same bin is **26.685 ms**; do not attach it to this shot |
+| X5 live infer in the approved cut | **26.663 ms**. One run. Do not write it as 25.772 |
+| X5 log and post-process | **25.772 ms**, same-image decode **8 dets**. Narration of 25.772 matches only this log |
+| X5 experiment | **26.685 ms**. Same bin, not the cut |
 | Six heads vs ORT(/255) cosine | all **≥0.991** |
-| X5 decode | Zoo `decode_dfl`, score=**0.25** / nms=**0.45**; board **8** ≈ ORT **8**; `{45:3, 50:1, 49:4}` |
-| S100 FM | existing hbm prefix `35758dce`; this round **33.145 ms / 7 dets**. Do not rewrite 7 as 8 |
+| X5 decode | Zoo `decode_dfl`, score=**0.25** / nms=**0.45**; both sides **8**; `{45:3, 50:1, 49:4}`. This count belongs to the 25.772 ms log |
+| S100 FM | hbm prefix `35758dce`; on-board infer **33.145 ms**. The **7 dets** are host-side post-process, not an on-board decode. Do not rewrite 7 as 8 |
 
 **Boundary:** one image, **input domain only**, **not** mAP or a generalization certificate.
 
@@ -269,7 +271,7 @@ Course rule: temporary per-lesson directory only.
 
 ## Lesson recap
 
-Train → featuremap (cast X5 25.772 ms / 8 dets, S100 33.145 ms / 7 dets; one image, not mAP) → NV12 (Sample 5 dets, not featuremap). 31.316 ms and the aee bin are history. Next: **Lesson 2-06 Inference APIs**.
+Train → featuremap (approved-cut live infer 26.663 ms; the 25.772 ms log is a different run with 8 dets; S100 on-board 33.145 ms, 7 dets off-board; one image, not mAP) → NV12 (Sample 5 dets, not featuremap). 31.316 ms and the aee bin are history. Next: **Lesson 2-06 Inference APIs**.
 
 ---
 
