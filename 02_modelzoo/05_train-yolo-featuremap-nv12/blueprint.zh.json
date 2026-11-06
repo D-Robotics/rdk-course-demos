@@ -97,12 +97,12 @@
         {
           "k": "X5 OE 文档",
           "d": "accuracy_tune / 工具链",
-          "url": "https://developer.d-robotics.cc/oe_x5_doc"
+          "url": "https://developer.d-robotics.cc/oe_x5_doc/"
         },
         {
           "k": "S OE 文档",
           "d": "accuracy_debug / 工具链",
-          "url": "https://developer.d-robotics.cc/oe_s_doc"
+          "url": "https://developer.d-robotics.cc/oe_s_doc/"
         }
       ],
       "notes": "入口挂上即可：课程讲义 Pages、课程仓库、Model Zoo 的 ultralytics_yolo 与 conversion，以及 X5、S 系列 OE 文档。跟做时再点开。"

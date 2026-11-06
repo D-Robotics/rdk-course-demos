@@ -97,12 +97,12 @@
         {
           "k": "X5 OE docs",
           "d": "accuracy_tune / toolchain",
-          "url": "https://developer.d-robotics.cc/oe_x5_doc"
+          "url": "https://developer.d-robotics.cc/oe_x5_doc/"
         },
         {
           "k": "S OE docs",
           "d": "accuracy_debug / toolchain",
-          "url": "https://developer.d-robotics.cc/oe_s_doc"
+          "url": "https://developer.d-robotics.cc/oe_s_doc/"
         }
       ],
       "notes": "Hang the entry points: course Pages, course repo, Model Zoo ultralytics_yolo and conversion, plus X5 and S-series OE docs. Open them when you follow along."
