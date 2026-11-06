@@ -1,53 +1,62 @@
 {
   "lesson": "2-05",
-  "limit": "One image, input-domain check only. Not mAP and not a generalization or full-accuracy certificate.",
-  "x5_featuremap": {
+  "limit": "Single-image input-domain check. Not mAP and not a generalization or full-accuracy certificate.",
+  "mainline_x5_featuremap": {
+    "status": "current_cast",
     "date": "2026-11-06",
-    "status": "current",
-    "input": "float32 RGB NCHW 0..1 (/255 only; 0..255 was not used as the pass input)",
-    "calibration_images": 32,
-    "calibration_shape": "1x3x640x640 float32",
-    "calibration_minmax": [0, 1],
-    "script_sha256": "79716b4ad94a1222013b5a8cceb0aac95fac2a8b8cf1b02af16b94001aef012b",
-    "yaml": "ptq_featuremap_x5.yaml",
-    "yaml_norm_type": "no_preprocess",
-    "march": "bayes-e",
-    "compile": "hb_mapper makertbin --config ptq_featuremap_x5.yaml --model-type onnx",
-    "toolchain_image_example": "local/rdk-x5-oe:v1.2.8-server",
-    "bin_sha256": "aee69bc13281483525a62c38121e1612128aceb7d399d261af5cddcec0336b75",
-    "board": "x5-8g",
-    "tool": "hrt_model_exec infer --frame_count 1 --enable_dump true",
-    "infer_ms": 31.316,
+    "frozen_onnx_sha256": "e6a57789f03b27c35701226ac7eee84ae530f1a88b2e2eb34dbaf7acb24fe1a0",
+    "frozen_onnx_note": "This is the file the compiler consumed. A later export whose sha256 starts a9e88f08 matches this graph and ORT output, but it is a different file and was not the compile input.",
+    "reexport_sha256_prefix": "a9e88f08",
+    "calibration": "float32 RGB NCHW 0..1",
+    "bin_sha256": "f728b1d3113953cc43c93226657e99712d01fcfb83fce6f3f2dc69b39c2852fb",
+    "infer_ms_cast": 25.772,
+    "infer_ms_other_run_same_bin": 26.685,
+    "other_run_note": "Same bin, a separate first board reading. Do not attach 26.685 ms to the 25.772 ms cast.",
+    "input": "float32 0..1 only",
     "heads_vs_ort_div255_cosine": {
-      "output0": 0.9998,
-      "480": 0.9911,
-      "494": 0.9997,
-      "502": 0.9914,
-      "516": 0.9993,
-      "524": 0.9937
+      "output0": 0.999804,
+      "480": 0.991109,
+      "494": 0.999747,
+      "502": 0.991407,
+      "516": 0.999342,
+      "524": 0.993743
     },
     "heads_vs_ort_cosine_min": 0.991,
-    "cls80_max_board_ort": {
-      "output0": [0.63, 1.11],
-      "494": [0.38, 0.61],
-      "516": [2.95, 3.06]
-    },
     "cls_peaks_positive": true,
     "decode": {
       "method": "ultralytics_yolo decode_dfl",
       "score": 0.25,
-      "nms": 0.45
-    },
-    "dets_board": 8,
-    "dets_ort": 8,
-    "class_multiset": {"45": 3, "50": 1, "49": 4}
+      "nms": 0.45,
+      "dets_board": 8,
+      "dets_ort": 8,
+      "class_multiset": {"45": 3, "50": 1, "49": 4}
+    }
   },
-  "not_this_run": {
-    "x5_featuremap_infer_ms_old": 26.739,
-    "x5_featuremap_old_note": "Previous artifact calibrated from 0..255 featuremap files. Do not cite as the current X5 featuremap result.",
-    "s100_featuremap_infer_ms": 32.193,
-    "s100_featuremap_note": "Earlier S100 featuremap reading. S100 was not recompiled or remeasured in this round.",
+  "mainline_s100_featuremap": {
+    "status": "current_cast",
+    "date": "2026-11-06",
+    "hbm_sha256_prefix": "35758dce",
+    "hbm_note": "Existing S100 artifact. This round recorded it again; it was not a new compile of a new ONNX.",
+    "input": "float32 0..1 npy",
+    "infer_ms": 33.145,
+    "decode": {
+      "method": "ultralytics_yolo decode_dfl",
+      "score": 0.25,
+      "nms": 0.45,
+      "dets": 7,
+      "where": "off-board decode of the on-board dump"
+    },
+    "count_note": "Seven detections as measured. Do not rewrite this as eight to match X5."
+  },
+  "not_this_cast": {
+    "x5_featuremap_infer_ms_31_316": 31.316,
+    "x5_bin_sha256_31_316": "aee69bc13281483525a62c38121e1612128aceb7d399d261af5cddcec0336b75",
+    "x5_31_316_note": "Historical independent evidence. Do not pair it with the f728 cast.",
+    "x5_featuremap_infer_ms_26_739": 26.739,
+    "x5_26_739_note": "Older 0..255 calibration domain.",
+    "s100_featuremap_infer_ms_32_193": 32.193,
+    "s100_32_193_note": "Earlier S100 reading. The current cast is 33.145 ms and 7 detections.",
     "nv12_sample_dets_each": 5,
-    "nv12_sample_note": "NV12 Sample count on bus.jpg. Not a featuremap result."
+    "nv12_sample_note": "NV12 Sample on bus.jpg. Not a featuremap result."
   }
 }

@@ -186,7 +186,7 @@
           }
         }
       ],
-      "notes": "Use coco128 and yolo11n, default forty epochs, input six-forty. Public mini-set for the demo. [Read] YOLO as yolo; coco128 by digits is fine."
+      "notes": "Use coco128 and yolo11n, default forty epochs, input six-forty. Public mini-set for the demo. Read this page’s command skeleton first, then three sped-up ops clips: launch, training in progress, finish and weights. Training is shown sped up; mid waits are omitted—do not claim a continuous full run. [Read] YOLO as yolo; coco128 by digits is fine."
     },
     {
       "layout": "bullets",
@@ -232,7 +232,7 @@
           }
         }
       ],
-      "notes": "Per two-point-oh-four, export with export_monkey_patch; ONNX stops at class and box-distribution logits; YOLO26 LTRB must not mix with DFL. Opset: X5 often eleven, S-series often nineteen—follow the docs. [Read] Spell D-F-L; logits as a whole word."
+      "notes": "Per two-point-oh-four, export with export_monkey_patch; ONNX stops at class and box-distribution logits; YOLO26 LTRB must not mix with DFL. Opset: X5 often eleven, S-series often nineteen—follow the docs. When you follow along, the export cast is fine to play: the recorded export file sha prefix a9e88f08 matches the frozen compile input e6a57789 in graph and ORT bits, but the file hashes differ—later OE still compiles the frozen artifact; do not claim they are the same file. [Read] Spell D-F-L; logits as a whole word."
     },
     {
       "layout": "section",
@@ -863,14 +863,14 @@
           }
         }
       ],
-      "notes": "Round one: X5 feature-map compile. March is bayes-e; prefix with selftrain plus featuremap so it is not confused with a ready Model Zoo nv12 pack. This page shows the full compile log."
+      "notes": "Round one: X5 feature-map compile. March is bayes-e; prefix with selftrain plus featuremap so it is not confused with a ready Model Zoo nv12 pack. Follow the round4 compile cast: command, cal/compile key logs, success and artifact; long waits in the middle are omitted—no endless idle playback."
     },
     {
       "layout": "code",
       "title": "X5-FM On Board",
       "eyebrow": "Round 1 · X5",
       "heading": "model_info + ==one-frame infer==",
-      "lead": "On board, only write under /tmp/course_2-05/. NEW: feed /255 only; Infer 31.316 ms; six heads vs ORT cosine ≥0.991; 8 dets.",
+      "lead": "On board, only write under /tmp/course_2-05/. Mainline bin f728, input 0..1: Infer 25.772 ms; six heads vs ORT cosine ≥0.991; this image 8 dets. 31.316 and aee stay history.",
       "blocks": [
         {
           "label": "hrt_model_exec (sketch)",
@@ -891,11 +891,11 @@
           ],
           "note": {
             "k": "Board NEW",
-            "p": "F32/DDR · 31.316 ms · 8 dets"
+            "p": "F32/DDR · 25.772 ms · 8 dets"
           }
         }
       ],
-      "notes": "X5 feature map on board. model_info should show input F32 from DDR. This round’s PR19 rebuild, fed divide-by-two-fifty-five only: Infer thirty-one point three one six milliseconds; all six heads vs ORT cosine at least zero point nine nine one; decode yields eight detections on the same image and thresholds as ORT. This is a single-image input-domain loop, not an mAP or full accuracy verification. The old twenty-six point seven three nine millisecond anchor was the pre-fix zero-to-two-fifty-five cal domain—do not present it as current FM."
+      "notes": "X5 feature map on board. model_info should show input F32 from DDR. Mainline bin f728 with float32 zero-to-one rgbchw input: on-screen Infer twenty-five point seven seven two milliseconds. All six heads vs ORT cosine at least zero point nine nine one; this image’s decode yields eight detections. This is a single-frame input-domain loop—not fixed performance, and not an mAP claim. The old thirty-one point three one six and aee artifact stay history—do not present them as current mainline."
     },
     {
       "layout": "code",
@@ -923,7 +923,7 @@
           }
         }
       ],
-      "notes": "Round two: S100 feature-map compile. March is nash-e; artifact is hbm."
+      "notes": "Round two: S100 feature-map compile. March is nash-e; artifact is hbm. Same idea: key nodes for config, calibration, and successful artifact; long waits in the middle are omitted."
     },
     {
       "layout": "code",
@@ -945,7 +945,7 @@
               "hl": true
             },
             {
-              "text": "# OLD infer ≈ 32.193 ms @ measured.json 2026-11-02; not remeasured this round",
+              "text": "# Cast Infer 33.145 ms; decode 7 dets. 32.193 ms is historical only",
               "hl": false
             }
           ],
@@ -955,7 +955,7 @@
           }
         }
       ],
-      "notes": "S100 feature map on board. Check model_info and one-frame infer. This round did not remeasure S100 FM; the old about thirty-two point one nine three milliseconds is from measured.json on two thousand twenty-six eleven oh-two—do not pair it with NEW X5 as the current two-board anchor. Numeric domain is still zero-to-one; file is npy."
+      "notes": "S100 feature map on board. Check model_info and one-frame infer. Mainline on-screen Infer thirty-three point one four five milliseconds; the same screen must also show decode actually running and a continuous readable seven-detection report—seven as measured, do not chase eight or force a match with X5. Domain is zero-to-one; file is npy. This single frame is not fixed performance or mAP. The old thirty-two point one nine three milliseconds stays history only."
     },
     {
       "layout": "bullets",
@@ -1360,7 +1360,7 @@
           }
         }
       ],
-      "notes": "Round three: X5 NV12 compile. Three fields changed; prefix carries selftrain and nv12; X5 is packed single-stream NV12 input."
+      "notes": "Round three: X5 NV12 compile. Three fields changed; prefix carries selftrain and nv12; X5 is packed single-stream NV12 input. Key nodes: config and successful artifact; long waits in the middle are omitted."
     },
     {
       "layout": "code",
@@ -1392,7 +1392,7 @@
           }
         }
       ],
-      "notes": "X5 back to Sample. Stock Sample accepts NV12 artifacts; this lesson’s board run on bus yields five detections. Sample pre/post changes are for later lessons—this lesson only needs one frame green."
+      "notes": "X5 back to Sample. Stock Sample accepts NV12 artifacts; this lesson’s board run on bus yields five detections—that is the NV12 Sample one-frame green path; do not mix it with the feature-map eight or seven detections. Sample pre/post changes are for later lessons."
     },
     {
       "layout": "code",
@@ -1420,7 +1420,7 @@
           }
         }
       ],
-      "notes": "Round four: S100 NV12 compile. Versus X5: S100 is two-stream Y and UV split, with a full recompile."
+      "notes": "Round four: S100 NV12 compile. Versus X5: S100 is two-stream Y and UV split, with a full recompile. Key nodes: config and successful artifact; long waits in the middle are omitted."
     },
     {
       "layout": "code",
@@ -1452,7 +1452,7 @@
           }
         }
       ],
-      "notes": "S100 Sample. Mirror X5 for one green frame; this lesson’s board run also yields five detections. If accuracy is low, return to two-point-oh-four."
+      "notes": "S100 Sample. Mirror X5 for one green frame; this lesson’s board run also yields five detections—still the NV12 Sample readable output; do not mix with feature-map detection counts. If accuracy is low, return to two-point-oh-four."
     },
     {
       "layout": "compare",

@@ -51,16 +51,30 @@ hb_compile --config ptq_featuremap_s100.yaml
 hb_compile --config ptq_nv12_s100.yaml
 ```
 
-## 已记录的 X5 featuremap 单图结果
+推送或上板前可以先跑身份检查。公开仓库里没有 `remote_x5_fm_infer.sh` 和 `push_artifacts_to_boards.sh`，这个检查不会替那些私有脚本完成部署：
 
-公开摘要在 [`../board-tests/measured.json`](../board-tests/measured.json)。2026-11-06，x5-8g，只喂 0..1：
+```bash
+python3 02_modelzoo/05_train-yolo-featuremap-nv12/conversion/scripts/check_fm_identity.py \
+  --role x5-fm \
+  --cal /path/to/one.rgbchw \
+  --model /path/to/featuremap.bin \
+  --expect-sha256 f728b1d3113953cc43c93226657e99712d01fcfb83fce6f3f2dc69b39c2852fb
+```
 
-- 新 `.bin` sha256：`aee69bc13281483525a62c38121e1612128aceb7d399d261af5cddcec0336b75`
-- `hrt_model_exec` 一帧 Infer：**31.316 ms**
-- 六个输出头相对 ORT(/255) 的余弦都 ≥ 0.991
-- 三路 80 类 logits 为正峰值
-- `decode_dfl`（score 0.25，nms 0.45）：板端 8 个检测，ORT 8 个，类多重集 `{45:3, 50:1, 49:4}`
+`x5-fm` / `s100-fm` 拒绝最大值大于 1 的文件。`x5-nv12` 不套用这条 0..1 规则，反过来会拒绝一份已经是 0..1 的文件。`s100-nv12` 拒绝一份仍是 0..255 的文件。
+
+## 已记录的单图主线
+
+公开摘要在 [`../board-tests/measured.json`](../board-tests/measured.json)。
+
+- 编译实际用的冻结 ONNX：`e6a57789f03b27c35701226ac7eee84ae530f1a88b2e2eb34dbaf7acb24fe1a0`
+- 另一次导出的 sha256 前缀是 `a9e88f08`。图和 ORT 与冻结件一致，文件不同，**不是**编译输入
+- 主线 X5 `.bin`：`f728b1d3113953cc43c93226657e99712d01fcfb83fce6f3f2dc69b39c2852fb`
+- 成片镜 Infer：**25.772 ms**，只喂 0..1。同 bin 另一次读数 **26.685 ms**，不要贴到这面镜上
+- 六头相对 ORT(/255) 的余弦都 ≥ 0.991，三路类别峰为正
+- `decode_dfl`（score 0.25，nms 0.45）：X5 板端 8 个，ORT 8 个，类多重集 `{45:3, 50:1, 49:4}`
+- S100 沿用 hbm 前缀 `35758dce`。本轮新录 **33.145 ms / 7 dets**。不要改成 8
 
 这是一张图上的输入域核对，不是 mAP，也不是泛化精度认证。
 
-不要把下面的旧数字写成这次 featuremap 结果：X5 旧 Infer 26.739 ms（当时校准文件是 0..255）；S100 32.193 ms（本回合没有重编、没有重测）；NV12 Sample 各 5 dets（`bus.jpg`，不是 featuremap）。
+不要写成这面主镜：31.316 ms 和 bin `aee69bc1…` 是历史；26.739 ms 是更早的 0..255 校准；S100 32.193 ms 是更早读数；NV12 Sample 各 5 dets 不是 featuremap。

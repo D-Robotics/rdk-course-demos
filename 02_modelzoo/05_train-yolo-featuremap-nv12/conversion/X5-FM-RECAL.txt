@@ -16,11 +16,18 @@ What the script writes
 - X5 NV12: 0..255 .rgbchw. YAML data_scale stays.
 - S100 NV12: /255 .npy once. YAML data_scale stays.
 
-Recorded X5 featuremap check (one image, not mAP)
-- bin sha256 aee69bc13281483525a62c38121e1612128aceb7d399d261af5cddcec0336b75
-- hrt_model_exec one frame, input 0..1 only: 31.316 ms
+Recorded mainline (one image, not mAP)
+- Frozen compile ONNX e6a57789f03b27c35701226ac7eee84ae530f1a88b2e2eb34dbaf7acb24fe1a0
+- Later export prefix a9e88f08 matches that graph and ORT, but it is a different file and was not the compile input
+- X5 bin f728b1d3113953cc43c93226657e99712d01fcfb83fce6f3f2dc69b39c2852fb
+- Cast infer 25.772 ms, input 0..1 only. 26.685 ms is another reading of this same bin
 - six heads vs ORT(/255) cosine >= 0.991
-- decode_dfl score 0.25 / nms 0.45: board 8 dets, ORT 8 dets, classes {45:3, 50:1, 49:4}
-- Do not cite 26.739 ms, S100 32.193 ms, or NV12 5 dets as this result.
+- decode_dfl score 0.25 / nms 0.45: X5 board 8 dets, ORT 8 dets, classes {45:3, 50:1, 49:4}
+- S100 hbm prefix 35758dce: 33.145 ms and 7 dets. Do not rewrite 7 as 8
+- Do not cite 31.316 ms / aee69bc1, 26.739 ms, S100 32.193 ms, or NV12 5 dets as this cast
+
+Before a private push or infer script runs:
+
+    python3 conversion/scripts/check_fm_identity.py --role x5-fm --cal ONE.rgbchw --model FEATUREMAP.bin --expect-sha256 f728b1d3113953cc43c93226657e99712d01fcfb83fce6f3f2dc69b39c2852fb
 
 See board-tests/measured.json.

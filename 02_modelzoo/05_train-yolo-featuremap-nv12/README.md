@@ -16,7 +16,7 @@ The lesson trains YOLO11n on coco128 (default 40 epochs), then runs four OE conv
 
 The companion video is not published yet. This directory does not contain weights, ONNX, calibration tensors, or the compiled `.bin`.
 
-X5 featuremap files are float32 0..1 raw `.rgbchw`, and `norm_type` stays `no_preprocess`. The recorded single-image check is in [`board-tests/measured.json`](board-tests/measured.json): Infer 31.316 ms, six-head cosine versus ORT(/255) at least 0.991, and 8 detections at score 0.25 / NMS 0.45. That check is not an mAP result. S100 32.193 ms was not remeasured. The NV12 Sample count of 5 detections is not this featuremap result. The old X5 26.739 ms figure used the previous 0..255 calibration. See `conversion/README.md`.
+X5 featuremap files are float32 0..1 raw `.rgbchw`, and `norm_type` stays `no_preprocess`. The current single-image cast is in [`board-tests/measured.json`](board-tests/measured.json): bin `f728b1d3…`, Infer 25.772 ms, six-head cosine versus ORT(/255) at least 0.991, and 8 detections. S100 this round is 33.145 ms and 7 detections on hbm `35758dce…`. 26.685 ms is another reading of the same X5 bin, not this shot. 31.316 ms and bin `aee69bc1…` are history. The NV12 Sample count of 5 detections is not featuremap. None of this is mAP. See `conversion/README.md`.
 
 ---
 
@@ -38,4 +38,4 @@ HTML 课件为单文件，直接用浏览器打开。←/→ 翻页，N 显示�
 
 配套视频尚未发布。本目录不包含权重、ONNX、校准张量或编译好的 `.bin`。
 
-X5 featuremap 文件是 float32 0..1 的原始 `.rgbchw`，`norm_type` 仍是 `no_preprocess`。已记录的单图核对在 [`board-tests/measured.json`](board-tests/measured.json)：Infer 31.316 ms，六头相对 ORT(/255) 的余弦至少 0.991，score 0.25 / NMS 0.45 下 8 个检测。这不是 mAP。S100 的 32.193 ms 没有重测。NV12 Sample 的 5 个检测不是这次 featuremap 结果。X5 旧的 26.739 ms 来自之前的 0..255 校准。说明见 `conversion/README.md`。
+X5 featuremap 文件是 float32 0..1 的原始 `.rgbchw`，`norm_type` 仍是 `no_preprocess`。当前单图主镜在 [`board-tests/measured.json`](board-tests/measured.json)：bin `f728b1d3…`，Infer 25.772 ms，六头相对 ORT(/255) 的余弦至少 0.991，8 个检测。S100 本轮是 33.145 ms、7 个检测，制品前缀 `35758dce`。26.685 ms 是同一份 X5 bin 的另一次读数，不是这面镜。31.316 ms 和 bin `aee69bc1…` 是历史。NV12 Sample 的 5 个检测不是 featuremap。这些都不是 mAP。说明见 `conversion/README.md`。

@@ -205,7 +205,7 @@
           }
         }
       ],
-      "notes": "用 coco128 与 yolo11n，默认四十个 epoch，输入六百四十。这是演示用公开迷你集。【读法备忘】YOLO 念 yolo；coco128 可按数字读。"
+      "notes": "用 coco128 与 yolo11n，默认四十个 epoch，输入六百四十。这是演示用公开迷你集。先把本页命令骨架读清，再接加速实操三段：启动、训练进行、完成与权重；训练过程已缩时展示，中段等待已省略，不假称连续全程。【读法备忘】YOLO 念 yolo；coco128 可按数字读。"
     },
     {
       "layout": "bullets",
@@ -251,7 +251,7 @@
           }
         }
       ],
-      "notes": "按二点零四约定，用 export_monkey_patch 导出；ONNX 停在分类与框分布 logits；YOLO26 的 LTRB 不可与 DFL 混用。opset：X5 常用十一，S 系列常用十九，以文档为准。【读法备忘】DFL 拆字母；logits 整词。"
+      "notes": "按二点零四约定，用 export_monkey_patch 导出；ONNX 停在分类与框分布 logits；YOLO26 的 LTRB 不可与 DFL 混用。opset：X5 常用十一，S 系列常用十九，以文档为准。跟做时可对照导出录屏：录屏导出文件 sha 前缀 a9e88f08，与冻结编译输入 e6a57789 图与 ORT 一致，但文件 sha 不同；后续 OE 编译用的是冻结件，不能冒同一文件。【读法备忘】DFL 拆字母；logits 整词。"
     },
     {
       "layout": "section",
@@ -868,14 +868,14 @@
           }
         }
       ],
-      "notes": "第一轮：X5 feature map 编译。march 是 bayes-e；产物 selftrain 前缀加 featuremap，避免和 Model Zoo 现成 nv12 包混淆。本页展示完整编译日志。"
+      "notes": "第一轮：X5 feature map 编译。march 是 bayes-e；产物 selftrain 前缀加 featuremap，避免和 Model Zoo 现成 nv12 包混淆。本页跟做 round4 新编译录屏：命令、校准与编译关键日志、成功与产物；中间的长时间等待已省略，不播漫长空等。"
     },
     {
       "layout": "code",
       "title": "X5-FM 上板",
       "eyebrow": "Round 1 · X5",
       "heading": "model_info + ==一帧 infer==",
-      "lead": "板上只写 /tmp/course_2-05/。NEW：仅喂 /255；Infer 31.316 ms；六头 vs ORT 余弦≥0.991；8 dets。",
+      "lead": "板上只写 /tmp/course_2-05/。主线 bin f728、输入 0..1：Infer 25.772 ms；六头 vs ORT 余弦≥0.991；本图 8 dets。31.316 与 aee 只留历史。",
       "blocks": [
         {
           "label": "hrt_model_exec（示意）",
@@ -896,11 +896,11 @@
           ],
           "note": {
             "k": "板测 NEW",
-            "p": "F32/DDR · 31.316 ms · 8 dets"
+            "p": "F32/DDR · 25.772 ms · 8 dets"
           }
         }
       ],
-      "notes": "X5 feature map 上板。model_info 核对接输入是 F32、来源 DDR；本回合 PR19 重编制品、只喂除以二百五十五：Infer 三十一点三一六毫秒；六输出头与 ORT 余弦均不低于零点九九一；decode 得八个检测，与 ORT 同图同阈值。这是单图输入域闭环验证，不是 mAP 或全精度认证。旧锚点二十六点七三九毫秒属修正前零到二百五十五校准域，不得写成当前 FM。"
+      "notes": "X5 feature map 上板。model_info 核对接输入是 F32、来源 DDR。主线制品 bin f728、输入零到一 rgbchw：屏显 Infer 二十五点七七二毫秒。六输出头与 ORT 余弦均不低于零点九九一；本图 decode 得八个检测。这是本次单帧输入域闭环，不是固定性能，也不是 mAP。旧三十一点三一六与 aee 制品只留历史，不得写成当前主线。"
     },
     {
       "layout": "code",
@@ -928,7 +928,7 @@
           }
         }
       ],
-      "notes": "第二轮：S100 feature map 编译。march 是 nash-e；产物是 hbm。"
+      "notes": "第二轮：S100 feature map 编译。march 是 nash-e；产物是 hbm。本页同样看配置、校准与成功产物关键节点；中间的长时间等待已省略。"
     },
     {
       "layout": "code",
@@ -950,7 +950,7 @@
               "hl": true
             },
             {
-              "text": "# OLD infer ≈ 32.193 ms @ measured.json 2026-11-02；本回合未重测",
+              "text": "# 主线镜 Infer 33.145 ms；decode 7 dets。32.193 ms 只留历史",
               "hl": false
             }
           ],
@@ -960,7 +960,7 @@
           }
         }
       ],
-      "notes": "S100 feature map 上板。核对 model_info 与一帧 infer。本回合未重测 S100 FM；旧测约三十二点一九三毫秒，见 measured.json，二零二六年十一月二日，勿与 NEW X5 并列成当前双板。数值域与 X5 一样是零到一，文件是 npy。"
+      "notes": "S100 feature map 上板。核对 model_info 与一帧 infer。主线镜屏显 Infer 三十三点一四五毫秒；同屏还要看到 decode 实际执行与七个检测报告连续可读——据实七个，不追八、不与 X5 强行同数。数值域零到一，文件是 npy。这是本次单帧，不是固定性能或 mAP。旧三十二点一九三毫秒只留历史。"
     },
     {
       "layout": "bullets",
@@ -1365,7 +1365,7 @@
           }
         }
       ],
-      "notes": "第三轮：X5 NV12 编译。三项已改；产物前缀带 selftrain 与 nv12；X5 是 packed 单路 NV12 输入。"
+      "notes": "第三轮：X5 NV12 编译。三项已改；产物前缀带 selftrain 与 nv12；X5 是 packed 单路 NV12 输入。本页看配置与成功产物关键节点；中间的长时间等待已省略。"
     },
     {
       "layout": "code",
@@ -1397,7 +1397,7 @@
           }
         }
       ],
-      "notes": "X5 回到 Sample。现成 Sample 接受 NV12 制品；本课板测 bus 图跑出五个检测。改 Sample 前后处理留给后续课，本课只跑通一帧。"
+      "notes": "X5 回到 Sample。现成 Sample 接受 NV12 制品；本课板测 bus 图跑出五个检测——这是 NV12 Sample 一帧跑通，勿与 feature map 的八或七个检测混写。改 Sample 前后处理留给后续课。"
     },
     {
       "layout": "code",
@@ -1425,7 +1425,7 @@
           }
         }
       ],
-      "notes": "第四轮：S100 NV12 编译。与 X5 的差别：S100 是 Y 与 UV 分开的两路输入，并重新完整编译。"
+      "notes": "第四轮：S100 NV12 编译。与 X5 的差别：S100 是 Y 与 UV 分开的两路输入，并重新完整编译。本页看配置与成功产物关键节点；中间的长时间等待已省略。"
     },
     {
       "layout": "code",
@@ -1457,7 +1457,7 @@
           }
         }
       ],
-      "notes": "S100 Sample。与 X5 对称跑通一帧；本课板测同样五个检测。精度不够再回二点零四。"
+      "notes": "S100 Sample。与 X5 对称跑通一帧；本课板测同样五个检测——仍是 NV12 Sample 可读输出，勿与 feature map 检测数混写。精度不够再回二点零四。"
     },
     {
       "layout": "compare",

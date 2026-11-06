@@ -46,7 +46,7 @@ This lesson’s spine: **train YOLO11n → feature map path first → then NV12 
 - Edit the YAML fields and `march` values (`bayes-e` / `nash-e`);
 - Run the full OE flow twice (featuremap and NV12) for both boards;
 - On board: `model_info` + **one full featuremap infer**, then one NV12 Sample frame under `/tmp/course_2-05/`;
-- Cite the locked numbers: X5 featuremap Infer **31.316 ms (NEW · PR19 · /255 only)**; six heads vs ORT cosine ≥0.991; same-image decode **8 dets** (bowl×3 / broccoli×1 / orange×4). S100 FM was **not** remeasured this round (OLD 32.193 ms @ `measured.json` 2026-11-02—do not pair with NEW X5 as the current two-board anchor). NV12 Sample **5 dets** each on `bus.jpg` are OLD NV12, not FM.
+- Cite the mainline numbers: X5 featuremap cast Infer **25.772 ms** (bin `f728b1d3…`, 0..1 input only); six heads vs ORT cosine ≥0.991; same-image decode **8 dets**. S100 this round is **33.145 ms / 7 dets** on the existing hbm `35758dce…`—do not rewrite 7 as 8. NV12 Sample **5 dets** are NV12, not featuremap. 31.316 ms / `aee69bc1…` and 26.685 ms are not this cast.
 
 ---
 
@@ -74,7 +74,7 @@ yolo detect train data=coco128.yaml model=yolo11n.pt epochs=40 imgsz=640
 
 ### 4.2 Export cut-point (see lesson 2-04)
 
-Stop the graph at multi-scale **cls + DFL logits**; keep post-process in runtime. Do not mix YOLO26 LTRB with DFL. Opset habits (often 11 on X5 / 19 on S) follow the conversion README.
+Stop the graph at multi-scale **cls + DFL logits**; keep post-process in runtime. Do not mix YOLO26 LTRB with DFL. Opset habits (often 11 on X5 / 19 on S) follow the conversion README. The mainline compile consumed frozen ONNX `e6a57789…`. A later export prefixed `a9e88f08` matches that graph and ORT output, but it is a different file and was not the compile input.
 
 ### 4.3 Naming
 
@@ -201,19 +201,21 @@ Board writes **only** `/tmp/course_2-05/`.
 
 ### Featuremap infer anchors (NEW vs OLD)
 
-**Current primary anchor (PR19 · 2026-11-06 · x5-8g · /255 feed only)**
+**Current cast (2026-11-06 · 0..1 input only)**
 
-| Item | NEW |
+| Item | Mainline |
 |---|---|
-| X5 FM Infer | **31.316 ms** |
-| Artifact bin sha256 | `aee69bc13281483525a62c38121e1612128aceb7d399d261af5cddcec0336b75` |
+| Frozen compile ONNX | `e6a57789f03b27c35701226ac7eee84ae530f1a88b2e2eb34dbaf7acb24fe1a0` |
+| Later export | prefix `a9e88f08`. Graph and ORT match the frozen file; the file itself differs and **was not** the compile input |
+| X5 FM bin | `f728b1d3113953cc43c93226657e99712d01fcfb83fce6f3f2dc69b39c2852fb` |
+| X5 FM Infer | **25.772 ms** on the cast. Another reading of the same bin is **26.685 ms**; do not attach it to this shot |
 | Six heads vs ORT(/255) cosine | all **≥0.991** |
-| Post-process | Zoo `decode_dfl`, score=**0.25** / nms=**0.45** |
-| Detections | board **8 dets** ≈ ORT **8 dets**; class multiset **{45:3, 50:1, 49:4}** (bowl×3 / broccoli×1 / orange×4) |
+| X5 decode | Zoo `decode_dfl`, score=**0.25** / nms=**0.45**; board **8** ≈ ORT **8**; `{45:3, 50:1, 49:4}` |
+| S100 FM | existing hbm prefix `35758dce`; this round **33.145 ms / 7 dets**. Do not rewrite 7 as 8 |
 
-**Boundary:** single-image **input-domain loop**, **not** an mAP or generalization accuracy certification.
+**Boundary:** one image, **input domain only**, **not** mAP or a generalization certificate.
 
-**OLD (do not present as current FM):** `board-tests/measured.json` (2026-11-02) X5 FM Infer **26.739 ms** (old 0..255 cal domain); S100 FM Infer **32.193 ms** (not remeasured this round).
+**History (not this cast):** 31.316 ms belongs to bin `aee69bc1…`. 26.739 ms is the older 0..255 calibration. S100 32.193 ms is an earlier reading. The NV12 Sample count of 5 dets is not featuremap.
 
 ![Measured featuremap latency (legacy figure; use NEW/OLD table above)](../assets/images/modelzoo/lesson-2-05-zh-3b2bc524ee30.jpg)
 
@@ -267,7 +269,7 @@ Course rule: temporary per-lesson directory only.
 
 ## Lesson recap
 
-Train → featuremap (NEW X5 31.316 ms / 8 dets domain loop; S100 FM OLD 32.193 ms not remeasured) → NV12 (OLD Sample 5 dets each). Next: **Lesson 2-06 Inference APIs**.
+Train → featuremap (cast X5 25.772 ms / 8 dets, S100 33.145 ms / 7 dets; one image, not mAP) → NV12 (Sample 5 dets, not featuremap). 31.316 ms and the aee bin are history. Next: **Lesson 2-06 Inference APIs**.
 
 ---
 

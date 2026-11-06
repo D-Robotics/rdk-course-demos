@@ -164,10 +164,70 @@ def check_cosine_does_not_prove_domain() -> None:
         raise AssertionError("scaled vector should leave the original magnitude")
 
 
+def check_identity_gate() -> None:
+    """The public checker refuses the old 0..255 featuremap domain and the historical bin."""
+    checker = Path(__file__).resolve().parent / "check_fm_identity.py"
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        raw = np.full((1, 3, 2, 2), 200.0, dtype=np.float32)
+        unit = raw / 255.0
+        old_fm = root / "old.rgbchw"
+        new_fm = root / "new.rgbchw"
+        nv12 = root / "nv12.rgbchw"
+        old_fm.write_bytes(raw.tobytes())
+        new_fm.write_bytes(unit.tobytes())
+        nv12.write_bytes(raw.tobytes())
+        bad = subprocess.run(
+            [sys.executable, str(checker), "--role", "x5-fm", "--cal", str(old_fm)],
+            capture_output=True, text=True,
+        )
+        if bad.returncode == 0:
+            raise AssertionError("0..255 featuremap file was accepted")
+        ok = subprocess.run(
+            [sys.executable, str(checker), "--role", "x5-fm", "--cal", str(new_fm)],
+            capture_output=True, text=True,
+        )
+        if ok.returncode != 0:
+            raise AssertionError(ok.stderr or ok.stdout)
+        swapped = subprocess.run(
+            [sys.executable, str(checker), "--role", "x5-nv12", "--cal", str(new_fm)],
+            capture_output=True, text=True,
+        )
+        if swapped.returncode == 0:
+            raise AssertionError("0..1 file was accepted as X5 NV12")
+        nv12_ok = subprocess.run(
+            [sys.executable, str(checker), "--role", "x5-nv12", "--cal", str(nv12)],
+            capture_output=True, text=True,
+        )
+        if nv12_ok.returncode != 0:
+            raise AssertionError(nv12_ok.stderr or nv12_ok.stdout)
+        historical = root / "historical.bin"
+        historical.write_bytes(b"not-the-mainline-bin")
+        digest_proc = subprocess.run(
+            ["sha256sum", str(historical)], capture_output=True, text=True, check=True,
+        )
+        digest = digest_proc.stdout.split()[0]
+        rejected = subprocess.run(
+            [sys.executable, str(checker), "--role", "x5-fm", "--model", str(historical),
+             "--expect-sha256", "0" * 64],
+            capture_output=True, text=True,
+        )
+        if rejected.returncode == 0:
+            raise AssertionError("mismatched model sha was accepted")
+        pinned = subprocess.run(
+            [sys.executable, str(checker), "--role", "x5-fm", "--model", str(historical),
+             "--expect-sha256", digest],
+            capture_output=True, text=True,
+        )
+        if pinned.returncode != 0:
+            raise AssertionError(pinned.stderr or pinned.stdout)
+
+
 def main() -> int:
     check_yaml_text()
     check_files()
     check_cosine_does_not_prove_domain()
+    check_identity_gate()
     print("cal domain file checks passed (OE compilers were not run)")
     return 0
 

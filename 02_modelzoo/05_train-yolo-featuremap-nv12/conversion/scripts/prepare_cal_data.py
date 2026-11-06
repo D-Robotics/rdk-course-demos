@@ -76,7 +76,10 @@ def main():
         cv2.imwrite(str(dst_jpg), bgr)
         tensor = to_nchw(bgr, args.width, args.height)  # 0..255 float32 NCHW
         train_domain = tensor / 255.0  # ONNX / DetectionTrainer input, 0..1
+        if float(train_domain.min()) < 0.0 or float(train_domain.max()) > 1.0:
+            raise SystemExit(f"{path.name}: featuremap left the 0..1 ONNX domain")
         # X5 featuremap: same 0..1 values, still a raw .rgbchw. YAML stays no_preprocess.
+        # Do not write `tensor` here. That 0..255 buffer is only for X5 NV12.
         (dirs["x5_fm"] / f"{stem}.rgbchw").write_bytes(np.ascontiguousarray(train_domain).tobytes())
         # S100 featuremap: 0..1 .npy. YAML stays no_preprocess.
         np.save(str(dirs["s_fm"] / f"{stem}.npy"), train_domain)

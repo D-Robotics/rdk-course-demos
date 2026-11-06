@@ -51,7 +51,7 @@
 - 对照改 YAML 关键字段：`input_type_*`、`norm_type`、校准数据格式，以及 X5 `bayes-e` / S100 `nash-e`；
 - 在 OE 里按量化课完整流程走完（打开 OE → 配环境 → 导出 → YAML+编译 → 产物 → 上板 → 评估），featuremap 与 NV12 **各走一遍**；
 - 在板上 `/tmp/course_2-05/` 完成：`model_info` + **一帧完整 infer**（featuremap），以及 Sample **跑通一帧**（NV12）；
-- 读懂本课锁定实测：X5 featuremap Infer **31.316 ms（NEW · PR19 · 仅 /255）**；六头 vs ORT 余弦 ≥0.991；同图 decode **8 dets**（bowl×3 / broccoli×1 / orange×4）。S100 FM 本回合未重测（旧测 32.193 ms @ `measured.json` 2026-11-02，勿与 NEW X5 并列成当前双板）。NV12 Sample 各 **5 dets**（`bus.jpg`，属 NV12 旧测，非 FM）。
+- 读懂本课主线实测：X5 featuremap 成片镜 Infer **25.772 ms**（bin `f728b1d3…`，只喂 0..1）；六头 vs ORT 余弦 ≥0.991；同图 decode **8 dets**。S100 本轮录到 **33.145 ms / 7 dets**（旧 hbm `35758dce…`，不要改成 8）。NV12 Sample 各 **5 dets** 是 NV12，不是 featuremap。31.316 ms / `aee69bc1…` 和 26.685 ms 都不是这面主镜。
 
 ---
 
@@ -95,7 +95,7 @@ yolo detect train data=coco128.yaml model=yolo11n.pt epochs=40 imgsz=640
 
 - **YOLO26 LTRB** 与 DFL 协议不可混用；
 - opset 常见习惯值：X5 侧常 **11**、S 侧常 **19**，**以 conversion README / 工具链文档为准**；
-- 导出产物放入 OE 可访问的共享工作目录后再编译。
+- 导出产物放入 OE 可访问的共享工作目录后再编译。本课主线编译用的是冻结 ONNX `e6a57789…`。另一次导出的文件前缀是 `a9e88f08`，图和 ORT 与冻结件一致，但文件不同，不能写成编译输入。
 
 ### 4.3 命名与制品后缀
 
@@ -287,19 +287,21 @@ hrt_model_exec infer \
 
 ### 7.3 本课锁定的 featuremap 时延 / 域闭环（NEW）
 
-**当前主锚点（PR19 · 2026-11-06 · x5-8g · 仅 /255 喂数）**
+**当前主镜（2026-11-06 · 只喂 0..1）**
 
-| 项 | NEW |
+| 项 | 主线 |
 |---|---|
-| X5 FM Infer | **31.316 ms** |
-| 制品 bin sha256 | `aee69bc13281483525a62c38121e1612128aceb7d399d261af5cddcec0336b75` |
+| 冻结编译 ONNX | `e6a57789f03b27c35701226ac7eee84ae530f1a88b2e2eb34dbaf7acb24fe1a0` |
+| 另一次导出 | 前缀 `a9e88f08`。图和 ORT 与冻结件一致，文件不同，**不是**编译输入 |
+| X5 FM bin | `f728b1d3113953cc43c93226657e99712d01fcfb83fce6f3f2dc69b39c2852fb` |
+| X5 FM Infer | **25.772 ms**（成片镜）。同 bin 另一次读数 **26.685 ms**，不要贴到这面镜上 |
 | 六头 vs ORT(/255) cosine | 全部 **≥0.991** |
-| 后处理 | Zoo `decode_dfl`，score=**0.25** / nms=**0.45** |
-| 检测 | board **8 dets** ≈ ORT **8 dets**；类多重集 **{45:3, 50:1, 49:4}**（bowl×3 / broccoli×1 / orange×4） |
+| X5 后处理 | Zoo `decode_dfl`，score=**0.25** / nms=**0.45**；board **8** ≈ ORT **8**；`{45:3, 50:1, 49:4}` |
+| S100 FM | 旧 hbm 前缀 `35758dce`；本轮新录 **33.145 ms / 7 dets**。不要改成 8 |
 
-**边界**：以上是**单图输入域闭环**验证，**不是** mAP 或泛化精度认证。
+**边界**：以上是**单图输入域闭环**，**不是** mAP 或泛化精度认证。
 
-**OLD（不得冒充当前 FM）**：`board-tests/measured.json`（2026-11-02）X5 FM Infer **26.739 ms**（旧 0..255 cal 域）；S100 FM Infer **32.193 ms**（本回合未重测）。图注若仍写旧数，以本表 NEW 为准。
+**历史（不得冒充主镜）**：31.316 ms 对应 bin `aee69bc1…`；26.739 ms 是更早的 0..255 校准；S100 32.193 ms 是更早读数。NV12 Sample 的 5 dets 不是 featuremap。
 
 ![featuremap 一帧实测（图为历史排版；数字以本表 NEW/OLD 归属为准）](../assets/images/modelzoo/lesson-2-05-zh-3b2bc524ee30.jpg)
 
@@ -379,7 +381,7 @@ python3 samples/vision/ultralytics_yolo/runtime/python/main.py \
 ## 本课小结
 
 - **自训**：YOLO11n + coco128 + 缩时角标，导出切点对齐 2-04；
-- **featuremap**：排除预处理变量；两板数值域 **0..1**；NEW X5 Infer **31.316 ms**、8 dets vs ORT（单图域闭环，非 mAP）；S100 FM 本回合未重测（OLD 32.193 ms）；
+- **featuremap**：两板数值域 **0..1**；主镜 X5 **25.772 ms / 8 dets**，S100 **33.145 ms / 7 dets**（单图，非 mAP）。31.316 ms 与 aee 是历史；
 - **NV12**：X5 磁盘 0..255 + HzPreprocess；S100 /255 + runtime `data_scale`（非二次 /255）；Sample 各 **5 dets**（旧 NV12，非 FM）；
 - 下一课预告：**2-06《推理接口》**——Python / C++ 如何加载模型与读结果。
 
