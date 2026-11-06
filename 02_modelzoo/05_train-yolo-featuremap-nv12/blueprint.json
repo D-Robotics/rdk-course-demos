@@ -1,0 +1,1544 @@
+{
+  "meta": {
+    "title": "[RDK Classroom] Chapter 2 Model Zoo · Lesson 5 | Self-train YOLO: feature map first, then NV12",
+    "lang": "en",
+    "mode": "deck",
+    "tag": "RDK Classroom 2-05",
+    "footer": "Self-train YOLO · feature map → NV12",
+    "theme": {},
+    "rebuild": "v3-en-align-zh-lock-20261105",
+    "sections": [
+      {
+        "num": "1",
+        "title": "Self-train & export",
+        "sub": "YOLO11n · cut point"
+      },
+      {
+        "num": "2",
+        "title": "Principle & yaml",
+        "sub": "input protocol · FM YAML"
+      },
+      {
+        "num": "3",
+        "title": "FM on both boards",
+        "sub": "X5 · S100"
+      },
+      {
+        "num": "4",
+        "title": "Then NV12",
+        "sub": "Both boards · Sample"
+      }
+    ]
+  },
+  "slides": [
+    {
+      "layout": "series-cover",
+      "chapter": 2,
+      "chapter_name": "Model Zoo",
+      "lesson": 5,
+      "title": "Self-train YOLO",
+      "highlight": "Self-train",
+      "subtitle": "feature map first, then NV12",
+      "visual": "assets/yolo11-detect-cover.webp",
+      "theme": "light",
+      "notes": "Chapter 2 Model Zoo, lesson 5: self-train YOLO—tune the quantization path with feature map first, then switch to NV12. Model is YOLO11n detect; dataset is the public mini-set coco128. Dual boards: X5 and S100. [Read] YOLO as yolo; feature map as a whole word; NV12 per handbook."
+    },
+    {
+      "layout": "cards",
+      "title": "Lesson Goals",
+      "eyebrow": "Goals",
+      "heading": "Leave able to ==ship== this path",
+      "lead": "Self-train detect → feature map on both boards → then NV12 → one Sample frame.",
+      "cols": 3,
+      "cards": [
+        {
+          "num": "01",
+          "title": "Self-train & export",
+          "text": "YOLO11n + coco128; export ONNX at the 2-04 cut point"
+        },
+        {
+          "num": "02",
+          "title": "FM on both boards",
+          "text": "yaml → feature map; full OE + one-frame infer on X5 and S100"
+        },
+        {
+          "num": "03",
+          "title": "NV12 + Sample",
+          "text": "Change three fields, rebuild; drop back into ultralytics_yolo for one frame"
+        }
+      ],
+      "notes": "Three cards map the landing path. One: self-train YOLO11n and export at the two-point-oh-four cut. Two: switch to feature map; run X5 and S100 end to end, including one full on-board infer. Three: change three fields to NV12, rebuild, and run one frame in the Model Zoo Sample."
+    },
+    {
+      "layout": "links",
+      "title": "Companion Resources",
+      "eyebrow": "Resources",
+      "heading": "Course materials and entry points",
+      "items": [
+        {
+          "k": "Course notes (Pages)",
+          "d": "RDK Classroom notes · Pages",
+          "url": "https://d-robotics.github.io/rdk-course-demos/zh/"
+        },
+        {
+          "k": "Course repo",
+          "d": "rdk-course-demos (notes + HTML decks)",
+          "url": "https://github.com/D-Robotics/rdk-course-demos"
+        },
+        {
+          "k": "RDK Model Zoo",
+          "d": "ultralytics_yolo Sample",
+          "url": "https://github.com/D-Robotics/rdk_model_zoo"
+        },
+        {
+          "k": "YOLO conversion",
+          "d": "export · mapper · calibration",
+          "url": "https://github.com/D-Robotics/rdk_model_zoo/tree/main/samples/vision/ultralytics_yolo/conversion"
+        },
+        {
+          "k": "X5 OE docs",
+          "d": "accuracy_tune / toolchain",
+          "url": "https://developer.d-robotics.cc/oe_x5_doc"
+        },
+        {
+          "k": "S OE docs",
+          "d": "accuracy_debug / toolchain",
+          "url": "https://developer.d-robotics.cc/oe_s_doc"
+        }
+      ],
+      "notes": "Hang the entry points: course Pages, course repo, Model Zoo ultralytics_yolo and conversion, plus X5 and S-series OE docs. Open them when you follow along."
+    },
+    {
+      "layout": "agenda",
+      "title": "Four-part Skeleton",
+      "eyebrow": "Agenda",
+      "heading": "Today in ==four== parts",
+      "one_column": true,
+      "items": [
+        "Self-train & export: coco128 · cut-point ONNX",
+        "Principle & yaml: why feature map first",
+        "FM on both boards: full round on X5 and S100",
+        "Then NV12: rebuild both · back to Sample"
+      ],
+      "notes": "Four-part skeleton. Part one: self-train and export. Part two: principle and yaml edits. Part three: feature map end-to-end on X5 and S100. Part four: switch to NV12 the same way on both boards, then return to Sample.",
+      "lead": "Self-train export → principle & yaml → FM both boards → NV12 both boards back to Sample."
+    },
+    {
+      "layout": "section",
+      "num": "1",
+      "heading": "Self-train & export",
+      "sub": "YOLO11n · coco128 · ONNX at the cut point",
+      "notes": "Part one: fine-tune YOLO11n on a public mini-set, then export at the two-point-oh-four cut."
+    },
+    {
+      "layout": "bullets",
+      "variant": "split",
+      "title": "Why Self-train",
+      "eyebrow": "Why self-train",
+      "heading": "Demo ==your own== detector",
+      "lead": "This lesson lands the self-trained weights on board—not re-running a ready Model Zoo artifact.",
+      "items": [
+        {
+          "mark": "check",
+          "text": "Weights come from this lesson’s fine-tune, not a Zoo ready pack"
+        },
+        {
+          "mark": "info",
+          "text": "Dataset: coco128 (public mini-set, not production data)"
+        },
+        {
+          "mark": "note",
+          "text": "Full training finishes locally; later steps use those trained weights"
+        }
+      ],
+      "notes": "Why self-train. Weights are this lesson’s fine-tune; dataset is the public coco128 mini-set—not production data; full training finishes locally, then later export and board steps use those trained weights."
+    },
+    {
+      "layout": "code",
+      "title": "Train Command",
+      "eyebrow": "Train",
+      "heading": "YOLO11n · ==40== epoch",
+      "lead": "This lesson uses coco128; command skeleton is repeatable—tune hypers from your run.",
+      "blocks": [
+        {
+          "label": "detect train",
+          "host": "host: ~/course_2-05",
+          "lines": [
+            {
+              "text": "yolo detect train data=coco128.yaml \\",
+              "hl": false
+            },
+            {
+              "text": "  model=yolo11n.pt epochs=40 imgsz=640 \\",
+              "hl": true
+            },
+            {
+              "text": "  project=datasets/coco128_run/runs/detect \\",
+              "hl": false
+            },
+            {
+              "text": "  name=selftrain",
+              "hl": false
+            }
+          ],
+          "note": {
+            "k": "Skeleton",
+            "p": "coco128 · yolo11n · 40 epoch · 640"
+          }
+        }
+      ],
+      "notes": "Use coco128 and yolo11n, default forty epochs, input six-forty. Public mini-set for the demo. [Read] YOLO as yolo; coco128 by digits is fine."
+    },
+    {
+      "layout": "bullets",
+      "variant": "numbered",
+      "title": "Trained Weights",
+      "eyebrow": "Weights",
+      "heading": "Train fully, then ==export==",
+      "lead": "Full training finishes locally; export uses the finished weights.",
+      "items": [
+        "Full training finishes locally or on a server",
+        "Later compile and board steps use these self-trained weights",
+        "Export uses the finished best or last weights"
+      ],
+      "notes": "Full training finishes locally; export uses the finished weights."
+    },
+    {
+      "layout": "code",
+      "title": "Cut-point Export",
+      "eyebrow": "Export",
+      "heading": "2-04 cut · stop at ==logits==",
+      "lead": "Tool: export_monkey_patch; opset follows conversion—X5 often 11, S often 19.",
+      "blocks": [
+        {
+          "label": "export_monkey_patch",
+          "host": "zoo: ultralytics_yolo/conversion",
+          "lines": [
+            {
+              "text": "python export_monkey_patch.py \\",
+              "hl": true
+            },
+            {
+              "text": "  --weights best.pt --imgsz 640 \\",
+              "hl": false
+            },
+            {
+              "text": "  --opset 11   # X5; S100 uses 19",
+              "hl": false
+            }
+          ],
+          "note": {
+            "k": "See",
+            "p": "Cut-point rationale in 2-04; this lesson exports the same way"
+          }
+        }
+      ],
+      "notes": "Per two-point-oh-four, export with export_monkey_patch; ONNX stops at class and box-distribution logits; YOLO26 LTRB must not mix with DFL. Opset: X5 often eleven, S-series often nineteen—follow the docs. [Read] Spell D-F-L; logits as a whole word."
+    },
+    {
+      "layout": "section",
+      "num": "2",
+      "heading": "Principle & yaml",
+      "sub": "feature map first · then NV12",
+      "notes": "Part two: why every model starts with feature map, and get the conversion yaml right."
+    },
+    {
+      "layout": "diagram",
+      "title": "Why Feature Map First",
+      "eyebrow": "Principle",
+      "heading": "Every model ==first== tunes with feature map",
+      "height": 560,
+      "delay": 400,
+      "caption": "Once the full path works, then consider NV12 or RGB",
+      "scene": [
+        {
+          "type": "text",
+          "id": "ttl",
+          "x": 800,
+          "y": 36,
+          "text": "feature map first, then change the input protocol",
+          "size": 28,
+          "anchor": "middle",
+          "color": "ink",
+          "weight": 600
+        },
+        {
+          "type": "band",
+          "id": "left_band",
+          "x": 40,
+          "y": 70,
+          "w": 720,
+          "h": 420,
+          "label": "Jump straight to NV12 / RGB",
+          "label_at": [
+            400.0,
+            56
+          ],
+          "anchor": "middle"
+        },
+        {
+          "type": "band",
+          "id": "right_band",
+          "x": 840,
+          "y": 70,
+          "w": 720,
+          "h": 420,
+          "label": "feature map first",
+          "label_at": [
+            1200.0,
+            56
+          ],
+          "anchor": "middle",
+          "blue": true
+        },
+        {
+          "type": "box",
+          "id": "l_img",
+          "x": 80,
+          "y": 130,
+          "w": 200,
+          "h": 70,
+          "label": "Cal images",
+          "kind": "neutral",
+          "size": 24,
+          "sub": "color space TBD",
+          "sub_size": 16
+        },
+        {
+          "type": "box",
+          "id": "l_pp",
+          "x": 320,
+          "y": 130,
+          "w": 200,
+          "h": 70,
+          "label": "Preprocess",
+          "kind": "cpu",
+          "size": 24,
+          "sub": "mean / scale / layout",
+          "sub_size": 16
+        },
+        {
+          "type": "box",
+          "id": "l_net",
+          "x": 560,
+          "y": 130,
+          "w": 160,
+          "h": 70,
+          "label": "Network",
+          "kind": "bpu",
+          "size": 24
+        },
+        {
+          "type": "arrow",
+          "id": "la1",
+          "points": [
+            [
+              280,
+              165
+            ],
+            [
+              320,
+              165
+            ]
+          ],
+          "head": true,
+          "mode": "draw"
+        },
+        {
+          "type": "arrow",
+          "id": "la2",
+          "points": [
+            [
+              520,
+              165
+            ],
+            [
+              560,
+              165
+            ]
+          ],
+          "head": true,
+          "mode": "draw"
+        },
+        {
+          "type": "box",
+          "id": "l_var",
+          "x": 120,
+          "y": 250,
+          "w": 580,
+          "h": 90,
+          "label": "Many vars: color · normalize · layout",
+          "kind": "bad",
+          "size": 22
+        },
+        {
+          "type": "text",
+          "id": "l_q",
+          "x": 400,
+          "y": 380,
+          "text": "When the path fails, hard to tell quant vs preprocess",
+          "size": 18,
+          "anchor": "middle",
+          "color": "red"
+        },
+        {
+          "type": "box",
+          "id": "r_npy",
+          "x": 900,
+          "y": 130,
+          "w": 220,
+          "h": 70,
+          "label": "float32 input tensor",
+          "kind": "ok",
+          "size": 24,
+          "sub": "X5·rgbchw / S·npy",
+          "sub_size": 16,
+          "on": true
+        },
+        {
+          "type": "box",
+          "id": "r_net",
+          "x": 1180,
+          "y": 130,
+          "w": 160,
+          "h": 70,
+          "label": "Network",
+          "kind": "bpu",
+          "size": 24,
+          "on": true
+        },
+        {
+          "type": "box",
+          "id": "r_cmp",
+          "x": 1380,
+          "y": 130,
+          "w": 140,
+          "h": 70,
+          "label": "Compare",
+          "kind": "cpu",
+          "size": 24,
+          "sub": "ONNX↔quant",
+          "sub_size": 16
+        },
+        {
+          "type": "arrow",
+          "id": "ra1",
+          "points": [
+            [
+              1120,
+              165
+            ],
+            [
+              1180,
+              165
+            ]
+          ],
+          "head": true,
+          "mode": "draw",
+          "color": "orange"
+        },
+        {
+          "type": "arrow",
+          "id": "ra2",
+          "points": [
+            [
+              1340,
+              165
+            ],
+            [
+              1380,
+              165
+            ]
+          ],
+          "head": true,
+          "mode": "draw",
+          "color": "orange"
+        },
+        {
+          "type": "box",
+          "id": "r_ok",
+          "x": 920,
+          "y": 250,
+          "w": 580,
+          "h": 90,
+          "label": "No color / normalize vars · cal = real input",
+          "kind": "ok",
+          "size": 22
+        },
+        {
+          "type": "text",
+          "id": "r_q",
+          "x": 1200,
+          "y": 380,
+          "text": "Compare ONNX vs quant with that board’s own cal tensor",
+          "size": 18,
+          "anchor": "middle",
+          "color": "green"
+        },
+        {
+          "type": "text",
+          "id": "foot",
+          "x": 800,
+          "y": 520,
+          "text": "Once it works, switch to NV12 or RGB",
+          "size": 22,
+          "anchor": "middle",
+          "color": "orange",
+          "weight": 600
+        }
+      ],
+      "steps": [
+        {
+          "at": 0,
+          "show": [
+            "ttl",
+            "left_band",
+            "l_img",
+            "l_pp",
+            "l_net",
+            "la1",
+            "la2"
+          ],
+          "focus": [
+            "l_img",
+            "l_pp",
+            "l_net",
+            "la1",
+            "la2",
+            "left_band",
+            "ttl"
+          ],
+          "caption": "If you compile NV12 or RGB first: cal must pass color space and normalize"
+        },
+        {
+          "at": 5500,
+          "show": [
+            "l_var",
+            "l_q"
+          ],
+          "on": [
+            "l_var"
+          ],
+          "focus": [
+            "l_var",
+            "l_q",
+            "l_img",
+            "l_pp",
+            "left_band"
+          ],
+          "caption": "With many variables, a broken path hides whether it is quant or preprocess"
+        },
+        {
+          "at": 11000,
+          "show": [
+            "right_band",
+            "r_npy",
+            "r_net",
+            "r_cmp",
+            "ra1",
+            "ra2"
+          ],
+          "focus": [
+            "right_band",
+            "r_npy",
+            "r_net",
+            "r_cmp",
+            "ra1",
+            "ra2"
+          ],
+          "caption": "So every model starts with feature map: cal data is the model’s true input tensor"
+        },
+        {
+          "at": 16500,
+          "show": [
+            "r_ok",
+            "r_q"
+          ],
+          "on": [
+            "r_ok",
+            "r_npy"
+          ],
+          "focus": [
+            "r_ok",
+            "r_q",
+            "r_npy",
+            "right_band"
+          ],
+          "caption": "Per-board float32 cal: X5 .rgbchw 0..255; S100 .npy /255 (0..1); compare ONNX vs quant with that board’s own cal tensor—do not mix"
+        },
+        {
+          "at": 22000,
+          "show": [
+            "foot"
+          ],
+          "focus": [
+            "foot",
+            "right_band",
+            "r_ok"
+          ],
+          "caption": "Once the full path works, then consider NV12 or RGB"
+        }
+      ],
+      "notes": "Left: jumping to NV12 or RGB forces cal through color and normalize—too many variables when the path fails. Right: feature map is the float32 input tensor fed to the network. Cal is per board—X5 .rgbchw in zero-to-two-fifty-five; S100 .npy after divide-by-two-fifty-five. Compare ONNX vs quant with that board’s own cal tensor and toolchain; do not mix boards or say one shared npy. Once it works, switch to NV12 or RGB. [Read] feature map whole word; NV12 per handbook; YOLO as yolo."
+    },
+    {
+      "layout": "bullets",
+      "variant": "split",
+      "title": "What FM Means",
+      "eyebrow": "Feature map",
+      "heading": "OE featuremap is ==not== a mid-layer",
+      "lead": "Here featuremap = the float32 tensor fed straight into the network, matching the ONNX input.",
+      "items": [
+        {
+          "mark": "check",
+          "text": "Cal tensors: float32 (.npy / .rgbchw per board)"
+        },
+        {
+          "mark": "check",
+          "text": "Matches real network input—easy ONNX↔quant compare"
+        },
+        {
+          "mark": "note",
+          "text": "Not a CNN mid-layer feature map; then change NV12/RGB protocol"
+        }
+      ],
+      "notes": "OE featuremap is the float32 tensor fed straight into the network—not a CNN mid-layer. Cal matches real network input for compare; change the input protocol only after it works. [Read] feature map whole word."
+    },
+    {
+      "layout": "bullets",
+      "variant": "split",
+      "title": "Input Protocol",
+      "eyebrow": "rt · train",
+      "heading": "rt meets the edge · train is the ==input domain==",
+      "lead": "train does not mean “train again”: it is the float model’s input domain; rt is what the board actually feeds.",
+      "items": [
+        {
+          "mark": "info",
+          "text": "train_*: float model input (FM=featuremap; NV12 stage=rgb)"
+        },
+        {
+          "mark": "info",
+          "text": "rt_*: edge runtime input (FM=featuremap; NV12=nv12)"
+        },
+        {
+          "mark": "check",
+          "text": "Keep dtype/layout apart from color protocol: NV12 ≠ RGB layout"
+        }
+      ],
+      "notes": "Input protocol: train describes the float model input domain—not retraining; rt describes what the board actually feeds. In the feature-map stage both sides are featuremap; in the NV12 stage rt becomes nv12 and train becomes rgb. RGB and NV12 are different input protocols. See X5 / S OE docs."
+    },
+    {
+      "layout": "table",
+      "title": "YAML · FM Side-by-side",
+      "eyebrow": "conversion/",
+      "heading": "Same FM ==fields== · different cal ranges",
+      "lead": "Files ptq_featuremap_{x5,s100}.yaml; no_preprocess; X5 cal 0..255 .rgbchw, S100 /255 .npy.",
+      "head": [
+        "Item",
+        "X5 FM",
+        "S100 FM"
+      ],
+      "rows": [
+        [
+          "YAML",
+          "ptq_featuremap_x5",
+          "ptq_featuremap_s100"
+        ],
+        [
+          "march",
+          {
+            "html": "bayes-e",
+            "cls": "hc"
+          },
+          {
+            "html": "nash-e",
+            "cls": "hc"
+          }
+        ],
+        [
+          "rt/train · norm",
+          "featuremap · no_pp",
+          "featuremap · no_pp"
+        ],
+        [
+          "cal",
+          "x5_rgbchw 0..255",
+          "s100_npy /255"
+        ]
+      ],
+      "notes": "FM side-by-side: both boards use featuremap and no_preprocess; they differ in march and calibration—X5 is zero-to-two-fifty-five rgbchw, S100 is divide-by-two-fifty-five npy. [Read] bayes-e / nash-e = arch name + pause + letter."
+    },
+    {
+      "layout": "code",
+      "title": "yaml→featuremap",
+      "eyebrow": "YAML",
+      "heading": "Start from conversion · ==edit fields==",
+      "lead": "Trunk stays ultralytics_yolo/conversion; fields also compare yolo26_depth / efficient_sam.",
+      "blocks": [
+        {
+          "label": "input_parameters (excerpt)",
+          "host": "ptq_featuremap_x5.yaml",
+          "lines": [
+            {
+              "text": "input_type_rt: 'featuremap'",
+              "hl": true
+            },
+            {
+              "text": "input_type_train: 'featuremap'",
+              "hl": true
+            },
+            {
+              "text": "input_layout_train/rt: 'NCHW'",
+              "hl": false
+            },
+            {
+              "text": "norm_type: 'no_preprocess'",
+              "hl": true
+            }
+          ],
+          "note": {
+            "k": "Cal",
+            "p": "cal_data_type: float32 · point at the npy dir"
+          }
+        }
+      ],
+      "notes": "YAML key fields: featuremap and no_preprocess; layout NCHW; cal type float32; plus onnx_model, shape, march, and the cal directory."
+    },
+    {
+      "layout": "table",
+      "title": "Two-board Fields",
+      "eyebrow": "X5 · S100",
+      "heading": "One idea · ==two== configs",
+      "lead": "Keep march, opset, cal dirs, and artifact suffixes per board—do not mix the two board YAML fields.",
+      "head": [
+        "Item",
+        "X5",
+        "S100"
+      ],
+      "rows": [
+        [
+          "march",
+          {
+            "html": "bayes-e",
+            "cls": "hc"
+          },
+          {
+            "html": "nash-e",
+            "cls": "hc"
+          }
+        ],
+        [
+          "ONNX opset",
+          "often 11",
+          "often 19"
+        ],
+        [
+          "OE entry",
+          "oe-x5 · hb_mapper",
+          "oe-s · hb_compile"
+        ],
+        [
+          "Artifact",
+          ".bin · …_featuremap",
+          ".hbm · …_featuremap"
+        ],
+        [
+          "Cal example",
+          "cal_featuremap_x5_…",
+          "cal_featuremap_s100_npy"
+        ]
+      ],
+      "notes": "Comparison table. Speak row by row: march is bayes-e vs nash-e; opset and OE tools differ; X5 artifact is bin, S100 is hbm; keep cal dirs separate. [Read] bayes-e / nash-e = arch name + pause + letter."
+    },
+    {
+      "layout": "bullets",
+      "variant": "split",
+      "title": "Sample Hard Limit",
+      "eyebrow": "Runtime",
+      "heading": "Stock Sample ==NV12 only==",
+      "lead": "A feature-map Model Zoo artifact will not drop into the stock ultralytics_yolo runtime—use other verify tools.",
+      "items": [
+        {
+          "mark": "x",
+          "text": "FM artifact → stock Sample: will not connect"
+        },
+        {
+          "mark": "check",
+          "text": "Verify with hrt_model_exec or hbm_runtime"
+        },
+        {
+          "mark": "note",
+          "text": "Legacy APIs are weak on featuremap · details in 2-06"
+        }
+      ],
+      "notes": "Hard limit must be said: do not drop a feature-map artifact into stock Sample; on board use hrt_model_exec or hbm_runtime; inference API details are left for two-point-oh-six."
+    },
+    {
+      "layout": "section",
+      "num": "3",
+      "heading": "FM on both boards",
+      "sub": "X5 and S100 · one full round each",
+      "notes": "Part three: take the feature-map artifact through handbook section 5.1 on X5 and S100—full demo on both boards."
+    },
+    {
+      "layout": "flow",
+      "title": "§5.1 No Skipped Steps",
+      "eyebrow": "Checklist",
+      "heading": "Each board finishes ==six== steps",
+      "lead": "Steps can mirror across boards, but every round must run that board’s and protocol’s real steps.",
+      "steps": [
+        {
+          "t": "开 OE",
+          "s": "oe-x5 / oe-s",
+          "on": true
+        },
+        {
+          "t": "环境",
+          "s": "挂载 · cwd",
+          "num": "02"
+        },
+        {
+          "t": "编译",
+          "s": "YAML + 日志",
+          "num": "03"
+        },
+        {
+          "t": "产物",
+          "s": "bin / hbm",
+          "num": "04"
+        },
+        {
+          "t": "上板",
+          "s": "model_info",
+          "num": "05"
+        },
+        {
+          "t": "评估",
+          "s": "一帧 infer",
+          "num": "06"
+        }
+      ],
+      "notes": "Six-step checklist compressed to three lines: open the container, env, YAML and compile log, artifact naming, model_info, one full infer. All six must finish—after model_info, still run one full infer; X5 and S100 each get a round.",
+      "items": [
+        {
+          "mark": "num",
+          "text": "① Open OE · ② Env · ③ Compile"
+        },
+        {
+          "mark": "num",
+          "text": "④ Artifact · ⑤ model_info · ⑥ One-frame infer"
+        },
+        {
+          "mark": "note",
+          "text": "After model_info, still finish one full infer"
+        }
+      ]
+    },
+    {
+      "layout": "code",
+      "title": "X5-FM Compile",
+      "eyebrow": "Round 1 · X5",
+      "heading": "oe-x5 · ==featuremap== · bayes-e",
+      "lead": "Workdir /workspace/course_2-05; artifact prefix carries selftrain and featuremap.",
+      "blocks": [
+        {
+          "label": "hb_mapper makertbin",
+          "host": "oe-x5: /workspace/course_2-05",
+          "lines": [
+            {
+              "text": "hb_mapper makertbin \\",
+              "hl": false
+            },
+            {
+              "text": "  --config ptq_featuremap_x5.yaml \\",
+              "hl": true
+            },
+            {
+              "text": "  --model-type onnx",
+              "hl": false
+            }
+          ],
+          "note": {
+            "k": "Artifact",
+            "p": "…_bayese_640x640_featuremap.bin"
+          }
+        }
+      ],
+      "notes": "Round one: X5 feature-map compile. March is bayes-e; prefix with selftrain plus featuremap so it is not confused with a ready Model Zoo nv12 pack. This page shows the full compile log."
+    },
+    {
+      "layout": "code",
+      "title": "X5-FM On Board",
+      "eyebrow": "Round 1 · X5",
+      "heading": "model_info + ==one-frame infer==",
+      "lead": "On board, only write under /tmp/course_2-05/. If host cosine is not measured yet, mark pending board measurement.",
+      "blocks": [
+        {
+          "label": "hrt_model_exec (sketch)",
+          "host": "x5: /tmp/course_2-05",
+          "lines": [
+            {
+              "text": "hrt_model_exec model_info --model_file \\",
+              "hl": false
+            },
+            {
+              "text": "  selftrain_…_featuremap.bin",
+              "hl": true
+            },
+            {
+              "text": "# infer: same float32 input → dump outputs",
+              "hl": false
+            }
+          ],
+          "note": {
+            "k": "Board",
+            "p": "input F32/DDR · infer 26.739 ms"
+          }
+        }
+      ],
+      "notes": "X5 on board. model_info should show input F32 from DDR; then one full infer—this lesson’s board measure is about twenty-six point seven milliseconds. If host ONNX↔quant cosine is unmeasured, mark pending board measurement."
+    },
+    {
+      "layout": "code",
+      "title": "S100-FM Compile",
+      "eyebrow": "Round 2 · S100",
+      "heading": "oe-s · ==featuremap== · nash-e",
+      "lead": "Same structure as X5, different tools and artifact extension; this page is the S100 compile log.",
+      "blocks": [
+        {
+          "label": "hb_compile",
+          "host": "oe-s: /workspace/course_2-05",
+          "lines": [
+            {
+              "text": "hb_compile \\",
+              "hl": false
+            },
+            {
+              "text": "  --config ptq_featuremap_s100.yaml",
+              "hl": true
+            }
+          ],
+          "note": {
+            "k": "Artifact",
+            "p": "…_nashe_640x640_featuremap.hbm"
+          }
+        }
+      ],
+      "notes": "Round two: S100 feature-map compile. March is nash-e; artifact is hbm."
+    },
+    {
+      "layout": "code",
+      "title": "S100-FM On Board",
+      "eyebrow": "Round 2 · S100",
+      "heading": "model_info + ==one-frame infer==",
+      "lead": "Verify with board-docs-locked hbm_runtime / equivalent—must finish a full infer.",
+      "blocks": [
+        {
+          "label": "On-board verify",
+          "host": "s100: /tmp/course_2-05",
+          "lines": [
+            {
+              "text": "# model_info: input F32 · march nash-e",
+              "hl": false
+            },
+            {
+              "text": "# infer: cal_featuremap_s100_npy → dump",
+              "hl": true
+            },
+            {
+              "text": "# board infer ≈ 32.193 ms",
+              "hl": false
+            }
+          ],
+          "note": {
+            "k": "Board",
+            "p": "featuremap.hbm · one frame OK"
+          }
+        }
+      ],
+      "notes": "S100 on board. Check model_info and one-frame infer; this lesson’s board measure is about thirty-two point two milliseconds. Host cosine likewise: write it only if measured, else pending board measurement."
+    },
+    {
+      "layout": "bullets",
+      "variant": "split",
+      "title": "When Accuracy Is Low",
+      "eyebrow": "Triage",
+      "heading": "If low, return to ==2-04==",
+      "lead": "This lesson focuses on input protocol and yaml; if accuracy is low, first check cal type and Softmax→int16",
+      "items": [
+        {
+          "mark": "info",
+          "text": "Try cal types max / kl first"
+        },
+        {
+          "mark": "info",
+          "text": "Softmax → int16 is a common triage direction"
+        },
+        {
+          "mark": "note",
+          "text": "Full triage ladder returns to lesson 4"
+        }
+      ],
+      "notes": "When accuracy is low: after feature map is green on both boards, if accuracy is still low, look at cal type and Softmax to int16 first; detailed triage returns to lesson 4. [Read] Softmax whole word; int16 by digits."
+    },
+    {
+      "layout": "section",
+      "num": "4",
+      "heading": "Then NV12",
+      "sub": "Full rebuild on both boards · one Sample frame",
+      "notes": "Part four: change three yaml fields to NV12, run full rounds again on X5 and S100, then drop back into Sample."
+    },
+    {
+      "layout": "diagram",
+      "title": "Three Fields → NV12",
+      "eyebrow": "NV12",
+      "heading": "From feature map ==change three==",
+      "height": 560,
+      "delay": 400,
+      "caption": "Swap cal, re-run OE; once green, remaining gaps should mostly be preprocess",
+      "scene": [
+        {
+          "type": "text",
+          "id": "ttl",
+          "x": 800,
+          "y": 32,
+          "text": "feature map → NV12: change three fields",
+          "size": 28,
+          "anchor": "middle",
+          "color": "ink",
+          "weight": 600
+        },
+        {
+          "type": "band",
+          "id": "fm",
+          "x": 40,
+          "y": 70,
+          "w": 700,
+          "h": 400,
+          "label": "feature map",
+          "label_at": [
+            390.0,
+            56
+          ],
+          "anchor": "middle",
+          "blue": true
+        },
+        {
+          "type": "band",
+          "id": "nv",
+          "x": 860,
+          "y": 70,
+          "w": 700,
+          "h": 400,
+          "label": "NV12",
+          "label_at": [
+            1210.0,
+            56
+          ],
+          "anchor": "middle"
+        },
+        {
+          "type": "box",
+          "id": "f1",
+          "x": 80,
+          "y": 120,
+          "w": 620,
+          "h": 70,
+          "label": "input_type_rt / train: featuremap",
+          "kind": "ok",
+          "size": 22,
+          "mono": true
+        },
+        {
+          "type": "box",
+          "id": "f2",
+          "x": 80,
+          "y": 220,
+          "w": 620,
+          "h": 70,
+          "label": "layout: NCHW · norm: no_preprocess",
+          "kind": "ok",
+          "size": 22
+        },
+        {
+          "type": "box",
+          "id": "f3",
+          "x": 80,
+          "y": 320,
+          "w": 620,
+          "h": 70,
+          "label": "cal: float32 tensor (per board)",
+          "kind": "ok",
+          "size": 22
+        },
+        {
+          "type": "box",
+          "id": "n1",
+          "x": 900,
+          "y": 120,
+          "w": 620,
+          "h": 70,
+          "label": "input_type_rt: nv12",
+          "kind": "bpu",
+          "size": 22,
+          "on": true
+        },
+        {
+          "type": "box",
+          "id": "n2",
+          "x": 900,
+          "y": 220,
+          "w": 620,
+          "h": 70,
+          "label": "input_type_train: rgb",
+          "kind": "cpu",
+          "size": 22,
+          "on": true
+        },
+        {
+          "type": "box",
+          "id": "n3",
+          "x": 900,
+          "y": 320,
+          "w": 620,
+          "h": 70,
+          "label": "norm: data_scale + swap cal images",
+          "kind": "neutral",
+          "size": 22,
+          "on": true
+        },
+        {
+          "type": "arrow",
+          "id": "c1",
+          "points": [
+            [
+              720,
+              155
+            ],
+            [
+              900,
+              155
+            ]
+          ],
+          "head": true,
+          "mode": "draw",
+          "color": "orange",
+          "label": "①"
+        },
+        {
+          "type": "arrow",
+          "id": "c2",
+          "points": [
+            [
+              720,
+              255
+            ],
+            [
+              900,
+              255
+            ]
+          ],
+          "head": true,
+          "mode": "draw",
+          "color": "orange",
+          "label": "②"
+        },
+        {
+          "type": "arrow",
+          "id": "c3",
+          "points": [
+            [
+              720,
+              355
+            ],
+            [
+              900,
+              355
+            ]
+          ],
+          "head": true,
+          "mode": "draw",
+          "color": "orange",
+          "label": "③"
+        },
+        {
+          "type": "text",
+          "id": "x5note",
+          "x": 1210,
+          "y": 420,
+          "text": "X5: packed NV12",
+          "size": 18,
+          "anchor": "middle",
+          "color": "ink2"
+        },
+        {
+          "type": "text",
+          "id": "s100note",
+          "x": 1210,
+          "y": 450,
+          "text": "S100: Y + UV split",
+          "size": 18,
+          "anchor": "middle",
+          "color": "ink2"
+        },
+        {
+          "type": "text",
+          "id": "foot",
+          "x": 800,
+          "y": 520,
+          "text": "Swap cal, re-run OE; gaps should mostly be preprocess",
+          "size": 20,
+          "anchor": "middle",
+          "color": "orange",
+          "weight": 600
+        }
+      ],
+      "steps": [
+        {
+          "at": 0,
+          "show": [
+            "ttl",
+            "fm",
+            "f1",
+            "f2",
+            "f3"
+          ],
+          "focus": [
+            "fm",
+            "f1",
+            "f2",
+            "f3",
+            "ttl"
+          ],
+          "caption": "Recall feature map: types, layout, no_preprocess, per-board float32 cal"
+        },
+        {
+          "at": 5000,
+          "show": [
+            "nv",
+            "n1",
+            "c1"
+          ],
+          "on": [
+            "n1"
+          ],
+          "focus": [
+            "n1",
+            "c1",
+            "f1",
+            "nv"
+          ],
+          "caption": "Field 1: input_type_rt → nv12"
+        },
+        {
+          "at": 10000,
+          "show": [
+            "n2",
+            "c2"
+          ],
+          "on": [
+            "n2"
+          ],
+          "focus": [
+            "n2",
+            "c2",
+            "nv"
+          ],
+          "caption": "Field 2: input_type_train → rgb"
+        },
+        {
+          "at": 15000,
+          "show": [
+            "n3",
+            "c3"
+          ],
+          "on": [
+            "n3"
+          ],
+          "focus": [
+            "n3",
+            "c3",
+            "nv"
+          ],
+          "caption": "Field 3: norm_type → scale preprocess, and swap the image cal pipeline"
+        },
+        {
+          "at": 20000,
+          "show": [
+            "x5note",
+            "s100note"
+          ],
+          "focus": [
+            "x5note",
+            "s100note",
+            "n1",
+            "nv"
+          ],
+          "caption": "On both boards: X5 is packed NV12; S100 is Y and UV split"
+        },
+        {
+          "at": 25000,
+          "show": [
+            "foot"
+          ],
+          "focus": [
+            "foot",
+            "nv",
+            "fm"
+          ],
+          "caption": "Swap cal, re-run OE; once green, remaining gaps should mostly be preprocess"
+        }
+      ],
+      "notes": "First recall feature map: types, layout, no preprocess, float32 calibration. Field 1: input_type_rt to nv12. Field 2: input_type_train to rgb. Field 3: norm to data_scale, and swap the calibration images. X5 is packed NV12; S100 is Y and UV split. After the change, swap calibration and re-run OE; once it works, remaining gaps should mostly be preprocess. YAML fields follow conversion/. [Read] NV12—never NVR; bayes-e / nash-e = arch + pause + letter."
+    },
+    {
+      "layout": "table",
+      "title": "YAML · NV12 Side-by-side",
+      "eyebrow": "data_scale",
+      "heading": "Use ==data_scale== ≈1/255 · cal per board",
+      "lead": "ptq_nv12_{x5,s100}.yaml; YAML lists data_scale≈1/255 (not mean+scale). On disk: X5 cal 0..255 .rgbchw, S100 /255 .npy—how the toolchain combines them is pending upstream; this lesson does not claim a proven /255-then-×scale loop.",
+      "head": [
+        "Item",
+        "X5 NV12",
+        "S100 NV12"
+      ],
+      "rows": [
+        [
+          "YAML",
+          "ptq_nv12_x5",
+          "ptq_nv12_s100"
+        ],
+        [
+          "rt / train",
+          "nv12 / rgb",
+          "nv12 / rgb"
+        ],
+        [
+          "norm · scale",
+          "data_scale · 1/255",
+          "data_scale · 1/255"
+        ],
+        [
+          "cal range",
+          "rgb_f32 0..255",
+          "s100_npy /255"
+        ],
+        [
+          "shape",
+          "packed NV12",
+          "Y + UV"
+        ]
+      ],
+      "notes": "NV12 side-by-side: rt to nv12, train to rgb; YAML lists data_scale about one over two-fifty-five—not data_mean_and_scale. On disk: X5 cal is zero-to-two-fifty-five rgbchw; S100 cal is divide-by-two-fifty-five npy, same file status as S100 FM. Keep disk range and YAML fields as separate facts; how OE/S consumes /255 files with data_scale is pending upstream—do not narrate a proven closed loop. X5 packed; S100 Y+UV. YAML follows conversion/. [Read] NV12—never NVR."
+    },
+    {
+      "layout": "code",
+      "title": "X5-NV12 Compile",
+      "eyebrow": "Round 3 · X5",
+      "heading": "Rebuild · name contains ==nv12==",
+      "lead": "X5 uses packed NV12; cal switches to the image pipeline.",
+      "blocks": [
+        {
+          "label": "hb_mapper makertbin",
+          "host": "oe-x5: /workspace/course_2-05",
+          "lines": [
+            {
+              "text": "hb_mapper makertbin \\",
+              "hl": false
+            },
+            {
+              "text": "  --config ptq_nv12_x5.yaml \\",
+              "hl": true
+            },
+            {
+              "text": "  --model-type onnx",
+              "hl": false
+            }
+          ],
+          "note": {
+            "k": "Artifact",
+            "p": "…_bayese_640x640_nv12.bin"
+          }
+        }
+      ],
+      "notes": "Round three: X5 NV12 compile. Three fields changed; prefix carries selftrain and nv12; X5 is packed single-stream NV12 input."
+    },
+    {
+      "layout": "code",
+      "title": "X5 Sample One Frame",
+      "eyebrow": "Round 3 · X5",
+      "heading": "Back into ==ultralytics_yolo==",
+      "lead": "model_info: input becomes NV12; head protocol should match FM. Then main.py one frame.",
+      "blocks": [
+        {
+          "label": "Sample main.py",
+          "host": "x5: ultralytics_yolo/runtime/python",
+          "lines": [
+            {
+              "text": "python main.py --model-path \\",
+              "hl": false
+            },
+            {
+              "text": "  /tmp/course_2-05/…_nv12.bin \\",
+              "hl": true
+            },
+            {
+              "text": "  --image bus.jpg  # board: 5 dets",
+              "hl": false
+            }
+          ],
+          "note": {
+            "k": "Board",
+            "p": "bus.jpg · 5 detections"
+          }
+        }
+      ],
+      "notes": "X5 back to Sample. Stock Sample accepts NV12 artifacts; this lesson’s board run on bus yields five detections. Sample pre/post changes are for later lessons—this lesson only needs one frame green."
+    },
+    {
+      "layout": "code",
+      "title": "S100-NV12 Compile",
+      "eyebrow": "Round 4 · S100",
+      "heading": "Y + UV ==split== · re-run OE",
+      "lead": "S100 NV12 shows as images_y and images_uv in model_info.",
+      "blocks": [
+        {
+          "label": "hb_compile",
+          "host": "oe-s: /workspace/course_2-05",
+          "lines": [
+            {
+              "text": "hb_compile \\",
+              "hl": false
+            },
+            {
+              "text": "  --config ptq_nv12_s100.yaml",
+              "hl": true
+            }
+          ],
+          "note": {
+            "k": "model_info",
+            "p": "images_y + images_uv · …_nv12.hbm"
+          }
+        }
+      ],
+      "notes": "Round four: S100 NV12 compile. Versus X5: S100 is two-stream Y and UV split, with a full recompile."
+    },
+    {
+      "layout": "code",
+      "title": "S100 Sample One Frame",
+      "eyebrow": "Round 4 · S100",
+      "heading": "Same ==main.py== green",
+      "lead": "Platform flag → s100; artifact → nashe nv12 hbm.",
+      "blocks": [
+        {
+          "label": "Sample main.py",
+          "host": "s100: ultralytics_yolo/runtime/python",
+          "lines": [
+            {
+              "text": "python main.py --model-path \\",
+              "hl": false
+            },
+            {
+              "text": "  /tmp/course_2-05/…_nashe_…_nv12.hbm \\",
+              "hl": true
+            },
+            {
+              "text": "  --image bus.jpg  # board: 5 dets",
+              "hl": false
+            }
+          ],
+          "note": {
+            "k": "Board",
+            "p": "bus.jpg · 5 detections"
+          }
+        }
+      ],
+      "notes": "S100 Sample. Mirror X5 for one green frame; this lesson’s board run also yields five detections. If accuracy is low, return to two-point-oh-four."
+    },
+    {
+      "layout": "compare",
+      "title": "Difference Narrative",
+      "eyebrow": "FM vs NV12",
+      "heading": "Once both green · gaps are ==preprocess==",
+      "vs": "VS",
+      "left": {
+        "badge": "feature map",
+        "title": "调通量化链路",
+        "good": false,
+        "items": [
+          "输入即 float32 张量",
+          "无颜色 / 归一化变量",
+          "用 hrt / hbm 工具验"
+        ]
+      },
+      "right": {
+        "badge": "NV12",
+        "title": "对接 Sample",
+        "good": true,
+        "items": [
+          "相机常用 NV12 输入",
+          "预处理进 yaml / 运行时",
+          "可放回 ultralytics_yolo"
+        ]
+      },
+      "notes": "Difference narrative, two cards. Left: feature map tunes the path first. Right: NV12 meets Sample and camera pipelines. Once both are green, remaining gaps should mostly be preprocess.",
+      "lead": "After both paths run, remaining gaps should mostly come from preprocess",
+      "cards": [
+        {
+          "num": "FM",
+          "title": "Tune the quant path",
+          "text": "float32 tensor in; no color/normalize vars; verify with hrt / hbm tools"
+        },
+        {
+          "num": "NV12",
+          "title": "Meet Sample",
+          "text": "Cameras often use NV12; preprocess lives in yaml; drop back into ultralytics_yolo"
+        }
+      ]
+    },
+    {
+      "layout": "bullets",
+      "variant": "numbered",
+      "title": "Self-check List",
+      "eyebrow": "Checklist",
+      "heading": "Tick against the ==intent==",
+      "items": [
+        "Can fine-tune YOLO11n and export ONNX at the cut point",
+        "Can explain why feature map first, then NV12",
+        "Can edit yaml and finish FM end-to-end on X5 and S100",
+        "Know FM artifacts need hrt_model_exec / hbm_runtime",
+        "Can change three fields to NV12, rebuild both boards, and run one Sample frame"
+      ],
+      "notes": "Five self-check items matching the lesson intent. Read by number; learners tick what they can already do."
+    },
+    {
+      "layout": "closing",
+      "title": "Next Lesson",
+      "eyebrow": "Next",
+      "heading": "Next · 2-06 inference APIs",
+      "lead": "This lesson lands self-train YOLO feature map → NV12; Python / C++ inference APIs wait for the next lesson.",
+      "cards": [
+        {
+          "icon": "grid",
+          "tone": "orange",
+          "k": "This lesson",
+          "d": "Self-train · FM · NV12"
+        },
+        {
+          "icon": "chip",
+          "tone": "blue",
+          "k": "Both boards",
+          "d": "X5 + S100 · four OE rounds"
+        },
+        {
+          "icon": "rocket",
+          "tone": "green",
+          "k": "Next",
+          "d": "2-06 inference APIs"
+        }
+      ],
+      "full_logo": true,
+      "notes": "Close. Preview next lesson: two-point-oh-six inference APIs. Three mini-cards recap this lesson versus the next split."
+    }
+  ]
+}

@@ -10,5 +10,6 @@
 | [认识 RDK Model Zoo](know-zoo-and-sample.md) | [GitHub 资料](https://github.com/D-Robotics/rdk-course-demos/tree/develop/02_modelzoo/02_know-zoo-and-sample) |
 | [ResNet 量化实操](quantize-resnet.md) | [GitHub 资料](https://github.com/D-Robotics/rdk-course-demos/tree/develop/02_modelzoo/03_quantize-resnet) |
 | [以 YOLO 为例讲量化](quantize-yolo.md) | [GitHub 资料](https://github.com/D-Robotics/rdk-course-demos/tree/develop/02_modelzoo/04_quantize-yolo) |
+| [自训 YOLO：先 feature map 再 NV12](train-yolo-featuremap-nv12.md) | [GitHub 资料](https://github.com/D-Robotics/rdk-course-demos/tree/develop/02_modelzoo/05_train-yolo-featuremap-nv12) |
 
 详细排期尚未发布。后续课程将覆盖模型选择、模型转换、运行参数配置、推理结果复现和 RoboGo 示例。

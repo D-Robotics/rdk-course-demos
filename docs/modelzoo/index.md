@@ -10,5 +10,6 @@ Select a course title to read its handbook. The supporting materials column link
 | [Meet RDK Model Zoo](know-zoo-and-sample.md) | [GitHub materials](https://github.com/D-Robotics/rdk-course-demos/tree/develop/02_modelzoo/02_know-zoo-and-sample) |
 | [ResNet Quantization Hands-on](quantize-resnet.md) | [GitHub materials](https://github.com/D-Robotics/rdk-course-demos/tree/develop/02_modelzoo/03_quantize-resnet) |
 | [YOLO Quantization by Example](quantize-yolo.md) | [GitHub materials](https://github.com/D-Robotics/rdk-course-demos/tree/develop/02_modelzoo/04_quantize-yolo) |
+| [Train YOLO: Feature Map Then NV12](train-yolo-featuremap-nv12.md) | [GitHub materials](https://github.com/D-Robotics/rdk-course-demos/tree/develop/02_modelzoo/05_train-yolo-featuremap-nv12) |
 
 The detailed lesson schedule has not been published yet. Future lessons will cover model selection, conversion, runtime configuration, reproducible inference, and RoboGo examples.
