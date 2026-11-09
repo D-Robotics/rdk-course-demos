@@ -8,7 +8,7 @@
 >
 > Learning format: concepts + PC train/export + OE (toolchain Docker) PTQ + on-board deploy/eval. Train on the host, not on the board. Board writes only under `/tmp/course_2-05/`
 >
-> Video: The cut is approved. The public link is not posted yet. <!-- TODO: add the link after the video page is up -->
+> Video: [YouTube](https://youtu.be/A4YgvsSGEuo) · [Watch on Bilibili (in Chinese)](https://www.bilibili.com/video/BV1WkWW6NEbo/)
 >
 > Slides: [Open English HTML slides on GitHub](https://github.com/D-Robotics/rdk-course-demos/blob/develop/02_modelzoo/05_train-yolo-featuremap-nv12/lesson-2-05.html) · [中文课件源码](https://github.com/D-Robotics/rdk-course-demos/blob/develop/02_modelzoo/05_train-yolo-featuremap-nv12/lesson-2-05.zh.html)
 
