@@ -8,7 +8,7 @@
 >
 > 学习方式：概念讲解 + PC 侧自训/导出 + OE（工具链 Docker）量化实操 + 板端部署与评估。训练在开发机完成，板端不装训练框架；板上只写 `/tmp/course_2-05/`
 >
-> 配套视频：成片已审定，公开链接尚未挂上。<!-- TODO: 视频页上线后补充链接 -->
+> 配套视频：[B 站观看「自训 YOLO：feature map 调通再改 NV12」](https://www.bilibili.com/video/BV1WkWW6NEbo/)
 >
 > 配套课件：[查看中文 HTML 课件源码](https://github.com/D-Robotics/rdk-course-demos/blob/develop/02_modelzoo/05_train-yolo-featuremap-nv12/lesson-2-05.zh.html) · [English slide source](https://github.com/D-Robotics/rdk-course-demos/blob/develop/02_modelzoo/05_train-yolo-featuremap-nv12/lesson-2-05.html)
 
